@@ -1,0 +1,3 @@
+alter table tiered_event rename to tier_event_restrictions;
+alter table tiered_event_vehicles rename to tier_event_restrictions_vehicles;
+alter table tier_event_restrictions_vehicles rename column tiered_event_id to tier_event_restrictions_id;

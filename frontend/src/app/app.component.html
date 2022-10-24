@@ -1,0 +1,11 @@
+<ng-container *ngIf="!isLoggedIn()">
+<button mat-stroked-button (click)="login()">Login</button>
+</ng-container>
+
+<div class="links">
+<button mat-stroked-button [routerLink]="['field_mappings']">Field Mappings</button>
+<button mat-stroked-button [routerLink]="['users']">Users</button>
+<button mat-stroked-button [routerLink]="['club_merge']">Club Merge</button>
+<button mat-stroked-button [routerLink]="['tiers/380718']">Tiers (GRF Special)</button>
+</div>
+<router-outlet></router-outlet>

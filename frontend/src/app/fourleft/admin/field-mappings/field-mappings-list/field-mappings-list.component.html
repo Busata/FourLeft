@@ -1,0 +1,16 @@
+<div>
+  <h2>Field Mappings</h2>
+  <h3>Unmapped</h3>
+  <ul class="field-mapping-list">
+    <li *ngFor="let mapping of getUnmapped()">
+      <app-field-mapping-edit [fieldMapping]="mapping" (save)="saveMapping(mapping.id, $event)"></app-field-mapping-edit>
+    </li>
+  </ul>
+
+  <h3>Mapped</h3>
+  <ul class="field-mapping-list">
+    <li *ngFor="let mapping of getMapped()">
+      <app-field-mapping-edit [fieldMapping]="mapping" (save)="saveMapping(mapping.id, $event)"></app-field-mapping-edit>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,11 @@
+<mat-card>
+  <mat-card-title>
+    Event configuration
+  </mat-card-title>
+  <mat-card-content>
+    Show a list of tiers & allow vehicle restrictions.
+      <div *ngFor="let tier of tiers">
+        <app-tier-vehicle-configuration [eventInfo]="eventInfo" [tier]="tier"></app-tier-vehicle-configuration>
+      </div>
+  </mat-card-content>
+</mat-card>

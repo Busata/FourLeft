@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: fourleft-server
+  jpa:
+  hibernate.ddl-auto: none
+  datasource:
+    driver-class-name: org.postgresql.Driver
+server:
+  port: 8081
+feign:
+  httpclient:
+    disable-ssl-validation: true

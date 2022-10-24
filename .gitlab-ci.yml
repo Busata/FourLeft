@@ -1,0 +1,16 @@
+before_script:
+  - mkdir -p ~/.ssh
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 700 ~/.ssh/id_rsa
+  - eval "$(ssh-agent -s)"
+  - ssh-add ~/.ssh/id_rsa
+
+deploy_staging:
+  type: deploy
+  environment:
+    name: production
+    url: veevi.org
+  script:
+    - ssh -o StrictHostKeyChecking=no -p 19870 busata@veevi.org "./deploy-fourleft-server.sh && exit"
+  only:
+    - master

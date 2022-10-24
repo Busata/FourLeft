@@ -1,0 +1,1 @@
+alter table auto_post_tracking add column last_posted_members text;

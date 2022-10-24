@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db.fourleft_discord_local:
+   container_name: db.fourleft.discord.local
+   image: postgres
+   ports:
+     - "16001:5432"
+   environment:
+     - POSTGRES_PASSWORD=fourleft_discord
+     - POSTGRES_USER=fourleft_discord
+     - POSTGRES_DB=fourleft_discord

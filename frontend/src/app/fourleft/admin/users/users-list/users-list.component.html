@@ -1,0 +1,15 @@
+<div>
+  <h2>Users</h2>
+  <ul>
+    <li *ngFor="let user of users">
+      {{user.nickName}} ({{user.alias}})
+      <button (click)="deleteUser(user)">Delete</button>
+    </li>
+  </ul>
+
+  <div class="user-create-form">
+    <input type="text" [(ngModel)]="nickName" placeholder="Nickname"/>
+    <input type="text" [(ngModel)]="alias" placeholder="Racenet Alias"/>
+    <button (click)="createUser(nickName, alias)">Create</button>
+  </div>
+</div>

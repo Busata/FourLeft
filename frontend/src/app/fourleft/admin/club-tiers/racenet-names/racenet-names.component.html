@@ -1,0 +1,9 @@
+<h2>Unassigned players</h2>
+<input name="racenet" placeholder="Racenet name" [(ngModel)]="racenet"><button (click)="createPlayer()" mat-stroked-button>Add player</button>
+<div class="example-list" cdkDropList [cdkDropListData]="players" (cdkDropListDropped)="doSomething($event)">
+  <div class="example-box" *ngFor="let item of players" cdkDrag>
+    {{item.racenet}}
+
+    <button mat-icon-button (click)="removePlayer(item)"><mat-icon>delete</mat-icon></button>
+  </div>
+</div>

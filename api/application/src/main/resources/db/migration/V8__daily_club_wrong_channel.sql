@@ -1,0 +1,1 @@
+update channel_configuration set channel_id='977962740234747954' where description='Dirt Dailies';

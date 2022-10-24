@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db.fourleft_local:
+   container_name: db.fourleft.local
+   image: postgres
+   ports:
+     - "16000:5432"
+   environment:
+     - POSTGRES_PASSWORD=fourleft
+     - POSTGRES_USER=fourleft
+     - POSTGRES_DB=fourleft
