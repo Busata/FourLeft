@@ -33,7 +33,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);
-        web.ignoring().antMatchers("/*");
+        web.ignoring().antMatchers("/*","/api/public/**");
     }
 
     @Override

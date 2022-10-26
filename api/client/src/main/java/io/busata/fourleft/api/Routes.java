@@ -4,6 +4,8 @@ public class Routes {
     /*
         Club routes
      */
+    public static final String CLUB_RESULTS_CURRENT_EXPORT = "/api/public/clubs/{clubId}/current/export";
+    public static final String CLUB_RESULTS_PREVIOUS_EXPORT = "/api/public/clubs/{clubId}/previous/export";
     public static final String CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID = "/api/views/{viewId}/results/current";
     public static final String CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID = "/api/views/{viewId}/results/previous";
 
