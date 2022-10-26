@@ -126,6 +126,8 @@ public class ClubEventResultMessageFactory {
                 builder.addField("**Event ending**", "<t:%s:R>".formatted(singleResultList.eventInfoTo().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
             }
 
+            builder.footer("*Total entries: %s*".formatted(singleResultList.totalEntries()), null);
+
             specs.add(builder.build());
             builder = createFullWidthBuilder();
         }

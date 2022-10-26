@@ -9,6 +9,7 @@ public record SingleResultListTo (
         EventInfoTo eventInfoTo,
 
         ResultRestrictionsTo restrictions,
+        int totalEntries,
         List<ResultEntryTo> results
 ) {
 }

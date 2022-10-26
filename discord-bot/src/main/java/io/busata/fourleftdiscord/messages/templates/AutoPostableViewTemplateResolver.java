@@ -3,9 +3,8 @@ package io.busata.fourleftdiscord.messages.templates;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.tiers.VehicleTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
-import io.busata.fourleft.api.models.views.NoResultRestrictionsTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
-import io.busata.fourleft.api.models.views.SingleResultListTo;
+import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostResultList;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostableView;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
 import io.busata.fourleftdiscord.messages.BadgeMapper;
@@ -32,7 +31,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
     public Map<String, String> buildValuesMap(MessageTemplate template, AutoPostableView value) {
         Map<String, String> valueMap = new HashMap<>();
 
-        final var eventInfos = value.getMultiListResults().stream().map(SingleResultListTo::eventInfoTo).collect(Collectors.toList());
+        final var eventInfos = value.getMultiListResults().stream().map(AutoPostResultList::eventInfoTo).collect(Collectors.toList());
 
         String country = eventInfos.stream().map(EventInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
         String vehicleClass = eventInfos.stream().map(EventInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
@@ -67,7 +66,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         return valueMap;
     }
 
-    private String buildMultiList(MessageTemplate template, SingleResultListTo list) {
+    private String buildMultiList(MessageTemplate template, AutoPostResultList list) {
         final var entriesTemplate = template.getRecurringTemplate("entries");
         final var groupedListTemplate = template.getRecurringTemplate("multiList");
 
@@ -88,7 +87,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         return StringSubstitutor.replace(groupedListTemplate, groupedListValueMap);
     }
 
-    public String buildEntry(SingleResultListTo listData, ResultEntryTo entry, String template) {
+    public String buildEntry(AutoPostResultList listData, ResultEntryTo entry, String template) {
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("rank", String.valueOf(entry.rank()));
         valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.rank(), entry.isDnf()));

@@ -1,6 +1,5 @@
 package io.busata.fourleftdiscord.autoposting.club_results.model;
 
-import io.busata.fourleft.api.models.views.SingleResultListTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,7 @@ public class AutoPostableFactory {
         return new AutoPostableView(
                 result.getViewPropertiesTo(),
                 result.getMultiListResults().stream().map(multiListResults -> {
-                    return new SingleResultListTo(
+                    return new AutoPostResultList(
                             multiListResults.name(),
                             multiListResults.eventInfoTo(),
                             multiListResults.restrictions(),

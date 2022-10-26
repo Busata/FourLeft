@@ -1,7 +1,5 @@
 package io.busata.fourleft.api.models.views;
 
-import io.busata.fourleft.api.models.ResultEntryTo;
-
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;

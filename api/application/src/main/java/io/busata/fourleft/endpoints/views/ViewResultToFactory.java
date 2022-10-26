@@ -80,6 +80,7 @@ public class ViewResultToFactory {
         if(view.getPlayerRestrictions() == PlayerRestrictions.EXCLUDE) {
             entries = filterEntries(entries, view.getPlayerNames());
         }
+        int totalEntries = entries.size();
 
         List<ResultEntryTo> results = resultEntryToFactory.create(entries);
 
@@ -91,12 +92,14 @@ public class ViewResultToFactory {
                 "",
                 createEventInfo(event),
                 new NoResultRestrictionsTo(),
+                totalEntries,
                 results
         );
     }
 
     public SingleResultListTo createSingleResultTo(Tier tier, TiersView view, Event event, ResultRestrictionsTo eventRestrictions){
         List<BoardEntry> entries = boardEntryFetcher.create(view, event);
+        int totalEntries = entries.size();
 
         entries = filterEntries(entries, tier.getPlayerNames());
 
@@ -104,6 +107,7 @@ public class ViewResultToFactory {
                 tier.getName(),
                 createEventInfo(event),
                 eventRestrictions,
+                totalEntries,
                 resultEntryToFactory.create(entries)
         );
     }
