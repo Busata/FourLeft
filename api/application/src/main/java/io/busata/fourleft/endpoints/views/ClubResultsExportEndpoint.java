@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @Slf4j
@@ -29,7 +32,7 @@ public class ClubResultsExportEndpoint {
         final var club = clubSyncService.getOrCreate(clubId);
 
         Event currentEvent = club.getCurrentEvent().orElseThrow();
-        writeResults(response, currentEvent);
+        writeResults(clubId, currentEvent, response);
 
     }
     @GetMapping(Routes.CLUB_RESULTS_PREVIOUS_EXPORT)
@@ -37,16 +40,18 @@ public class ClubResultsExportEndpoint {
         final var club = clubSyncService.getOrCreate(clubId);
 
         Event currentEvent = club.getPreviousEvent().orElseThrow();
-        writeResults(response, currentEvent);
+        writeResults(clubId, currentEvent, response);
 
     }
 
-    private void writeResults(HttpServletResponse response, Event event) throws IOException {
+    private void writeResults(Long clubId, Event event, HttpServletResponse response) throws IOException {
         final var result = clubResultToFactory.create(event);
+
+        String fileName = "%s - %s.csv".formatted(clubId, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddhhmmss")));
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"results.csv\"");
+                "attachment; filename=\"" + fileName + "\"");
 
 
         try(CSVWriter writer = new CSVWriter(response.getWriter())) {
