@@ -47,7 +47,7 @@ public class ClubResultsExportEndpoint {
     private void writeResults(Long clubId, Event event, HttpServletResponse response) throws IOException {
         final var result = clubResultToFactory.create(event);
 
-        String fileName = "%s - %s.csv".formatted(clubId, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddhhmmss")));
+        String fileName = "%s - %s.csv".formatted(clubId, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
