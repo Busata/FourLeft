@@ -15,6 +15,7 @@ import io.busata.fourleftdiscord.helpers.ListHelpers;
 import io.busata.fourleftdiscord.messages.templates.MessageTemplate;
 import io.busata.fourleftdiscord.messages.templates.ResultEntryTemplateResolver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import static io.busata.fourleftdiscord.messages.templates.MessageTemplate.messa
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ClubEventResultMessageFactory {
     private final DR2FieldMapper fieldMapper;
     private final ResultEntryTemplateResolver templateResolver;
@@ -37,7 +39,7 @@ public class ClubEventResultMessageFactory {
     MessageTemplate RANKED_BADGE_TEMPLATE =  messageTemplate(
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
-    public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
+    public List<EmbedCreateSpec>createDefault(ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
         return create(clubResultTo, template, false);
     }
@@ -115,6 +117,7 @@ public class ClubEventResultMessageFactory {
                 for (int groupIdx = 0; groupIdx < bound; groupIdx++) {
                     final var group = groupedEntries.get(groupIdx);
                     String collect = group.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"));
+                    log.info("Collect size: ", collect.length());
                     builder.addField(determineHeader(groupIdx), collect, false);
                 }
             }
