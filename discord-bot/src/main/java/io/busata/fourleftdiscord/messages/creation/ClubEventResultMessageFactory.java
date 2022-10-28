@@ -117,7 +117,7 @@ public class ClubEventResultMessageFactory {
                 for (int groupIdx = 0; groupIdx < bound; groupIdx++) {
                     final var group = groupedEntries.get(groupIdx);
                     String collect = group.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"));
-                    log.info("Collect size: ", collect.length());
+                    log.info("Collect size:  {}", collect.length());
                     builder.addField(determineHeader(groupIdx), collect, false);
                 }
             }
