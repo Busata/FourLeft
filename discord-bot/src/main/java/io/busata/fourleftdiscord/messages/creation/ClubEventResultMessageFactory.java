@@ -173,7 +173,7 @@ public class ClubEventResultMessageFactory {
     }
     private String determineHeader(int idx, int groupSize) {
         if (idx == 0) {
-            return "Top 10";
+            return "Top %s".formatted(groupSize);
         } else {
             var startBound = (idx * groupSize) + 1;
             var endBound = (idx * groupSize) + groupSize;
