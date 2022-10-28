@@ -112,20 +112,22 @@ public class ClubEventResultMessageFactory {
                 final var sortedEntries = singleResultList.results().stream().sorted(Comparator.comparing(ResultEntryTo::rank)).limit(50).collect(Collectors.toList());
 
 
-                var groupedEntries = ListHelpers.partitionInGroups(sortedEntries, 10);
+                int groupSize = 10;
+                var groupedEntries = ListHelpers.partitionInGroups(sortedEntries, groupSize);
 
                 //Temporary fix to avoid field sizes being too big
                 boolean reduceEntries = groupedEntries.stream().map(ge -> ge.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"))).map(String::length).anyMatch(entrySize -> entrySize >= 1024);
 
                 if(reduceEntries) {
-                    groupedEntries = ListHelpers.partitionInGroups(sortedEntries, 5);
+                    groupSize = 5;
+                    groupedEntries = ListHelpers.partitionInGroups(sortedEntries, groupSize);
                 }
 
                 int bound = groupedEntries.size();
                 for (int groupIdx = 0; groupIdx < bound; groupIdx++) {
                     final var group = groupedEntries.get(groupIdx);
                     String collect = group.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"));
-                    builder.addField(determineHeader(groupIdx), collect, false);
+                    builder.addField(determineHeader(groupIdx, groupSize), collect, false);
                 }
             }
 
@@ -169,12 +171,12 @@ public class ClubEventResultMessageFactory {
             builder.addField("Powerstage *(%s)*".formatted(clubResult.eventInfoTo().stageNames().get(clubResult.eventInfoTo().stageNames().size() - 1)), joiner.toString(), false);
         }
     }
-    private String determineHeader(int idx) {
+    private String determineHeader(int idx, int groupSize) {
         if (idx == 0) {
             return "Top 10";
         } else {
-            var startBound = (idx * 10) + 1;
-            var endBound = (idx * 10) + 10;
+            var startBound = (idx * groupSize) + 1;
+            var endBound = (idx * groupSize) + groupSize;
 
             return "Top %s - %s".formatted(startBound, endBound);
         }
