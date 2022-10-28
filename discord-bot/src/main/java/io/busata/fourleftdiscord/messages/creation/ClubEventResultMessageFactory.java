@@ -111,13 +111,20 @@ public class ClubEventResultMessageFactory {
             if (!powerstageOnly) {
                 final var sortedEntries = singleResultList.results().stream().sorted(Comparator.comparing(ResultEntryTo::rank)).limit(50).collect(Collectors.toList());
 
-                final var groupedEntries = ListHelpers.partitionInGroups(sortedEntries, 10);
+
+                var groupedEntries = ListHelpers.partitionInGroups(sortedEntries, 10);
+
+                //Temporary fix to avoid field sizes being too big
+                boolean reduceEntries = groupedEntries.stream().map(ge -> ge.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"))).map(String::length).anyMatch(entrySize -> entrySize >= 1024);
+
+                if(reduceEntries) {
+                    groupedEntries = ListHelpers.partitionInGroups(sortedEntries, 5);
+                }
 
                 int bound = groupedEntries.size();
                 for (int groupIdx = 0; groupIdx < bound; groupIdx++) {
                     final var group = groupedEntries.get(groupIdx);
                     String collect = group.stream().map(entry -> templateResolver.resolve(entryTemplate, entry)).collect(Collectors.joining("\n"));
-                    log.info("Collect size:  {}", collect.length());
                     builder.addField(determineHeader(groupIdx), collect, false);
                 }
             }
