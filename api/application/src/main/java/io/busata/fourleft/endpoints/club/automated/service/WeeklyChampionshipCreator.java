@@ -134,7 +134,7 @@ public class WeeklyChampionshipCreator {
     }
 
     private VehicleClass generateVehicle() {
-        return VehicleClass.NR4_R4;
+        return VehicleClass.GROUP_A;
     }
 
     private boolean requiresNewCountry(List<Event> previouslyGeneratedEvents) {
