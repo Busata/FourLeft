@@ -38,13 +38,11 @@ public class ClubResultsEndpoint {
     }
 
     @GetMapping(Routes.CLUB_EVENT_SUMMARY_BY_CLUB_ID)
-    public ChampionshipEventSummaryTo getEventSummary(@PathVariable UUID viewId) {
-        //final var club = clubSyncService.getOrCreate(clubId);
-        //return club.findActiveChampionship().or(club::findPreviousChampionship)
-        //        .map(clubResultToFactory::createEventSummary)
-        //        .orElseThrow();
-
-        return null;
+    public ChampionshipEventSummaryTo getEventSummary(@PathVariable Long clubId) {
+        final var club = clubSyncService.getOrCreate(clubId);
+        return club.findActiveChampionship().or(club::findPreviousChampionship)
+                .map(clubResultToFactory::createEventSummary)
+                .orElseThrow();
     }
 
     @GetMapping(Routes.CLUB_STANDINGS_BY_CLUB_ID)
