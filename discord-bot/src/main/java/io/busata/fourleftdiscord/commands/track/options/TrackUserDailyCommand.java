@@ -60,7 +60,7 @@ public class TrackUserDailyCommand implements BotCommandOptionHandler {
 
     @Override
     public List<Snowflake> getResponseChannels() {
-        return discordChannelConfigurationService.getConfigurations().stream().map(DiscordChannelConfigurationTo::channelId).map(Snowflake::of).toList();
+        return List.of(Snowflake.of(892369709780070410L));
     }
 
     @Override
