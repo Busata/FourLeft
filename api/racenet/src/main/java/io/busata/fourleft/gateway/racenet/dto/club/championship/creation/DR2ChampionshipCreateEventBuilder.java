@@ -41,8 +41,8 @@ public class DR2ChampionshipCreateEventBuilder {
     }
 
     private void validateStages(DR2ChampionshipCreateStageBuilder[] stages) {
-        if(stages.length > 11) {
-            throw new RuntimeException("Too many stages, max 11");
+        if(stages.length > 12) {
+            throw new RuntimeException("Too many stages, max 12");
         }
 
         for (DR2ChampionshipCreateStageBuilder stage : stages) {
