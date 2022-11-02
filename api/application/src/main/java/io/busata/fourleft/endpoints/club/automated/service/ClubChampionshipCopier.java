@@ -1,7 +1,6 @@
 package io.busata.fourleft.endpoints.club.automated.service;
 
 import io.busata.fourleft.domain.options.models.CountryOption;
-import io.busata.fourleft.domain.options.models.StageConditionOption;
 import io.busata.fourleft.domain.options.models.StageOption;
 import io.busata.fourleft.domain.options.models.VehicleClass;
 import io.busata.fourleft.gateway.racenet.RacenetGateway;
@@ -32,7 +31,9 @@ public class ClubChampionshipCopier {
         final var fromClub = clubSyncService.getOrCreate(fromClubId);
         final var fromChampionship = fromClub.findActiveChampionship().orElseThrow(() -> new RuntimeException("There is no active championship that we can copy."));
 
-        final var championshipRequest = championship().withEvents(fromChampionship.getEvents().stream().map(fromEvent ->
+        final var championshipRequest = championship()
+                .start(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(5).toString())
+                .withEvents(fromClub.getCurrentEvent().stream().map(fromEvent ->
                 event()
                         .country(CountryOption.findById(fromEvent.getCountry()))
                         .durationMins(60)
