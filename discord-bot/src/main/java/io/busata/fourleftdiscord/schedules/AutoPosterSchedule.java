@@ -26,7 +26,7 @@ public class AutoPosterSchedule {
         log.info("Club entries check complete.");
     }
 
-    @Scheduled(cron = "0 21 12 * * *", zone="Europe/Brussels")
+    @Scheduled(cron = "0 21 11 * * *", zone="Europe/Brussels")
     public void updateChallenges() {
         log.info("Checking community event results.");
         autoPostCommunityEventResultsService.update();
