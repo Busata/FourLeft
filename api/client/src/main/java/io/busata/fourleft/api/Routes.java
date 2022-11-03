@@ -74,7 +74,7 @@ public class Routes {
     public static final String TEST_DAILY_CREATION_BY_CLUB_ID = "/api/championships_creation/{clubId}/test_daily";
     public static final String TEST_MONTHLY_CREATION_BY_CLUB_ID = "/api/championships_creation/{clubId}/test_monthly";
 
-    public static final String COPY_CHAMPIONSHIP_TO_CLUB = "/api/public/championships_creation/{fromClubId}/copy_to/{toClubId}";
+    public static final String COPY_CHAMPIONSHIP_TO_CLUB = "/api/public/copy_event/{fromClubId}";
 
     /*
         Misc

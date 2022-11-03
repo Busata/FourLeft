@@ -6,6 +6,7 @@ import io.busata.fourleft.gateway.racenet.dto.club.championship.creation.DR2Cham
 import io.busata.fourleft.endpoints.club.automated.service.DailyChampionshipCreator;
 import io.busata.fourleft.endpoints.club.automated.service.WeeklyChampionshipCreator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,6 @@ public class ChampionshipCreatorEndpoint {
     private final DailyChampionshipCreator dailyCreator;
     private final WeeklyChampionshipCreator monthlyCreator;
 
-    private final ClubChampionshipCopier clubChampionshipCopier;
 
     @GetMapping(Routes.TEST_DAILY_CREATION_BY_CLUB_ID)
     public DR2ChampionshipCreateRequestTo testDailyCreation(@PathVariable long clubId) {
@@ -27,10 +27,7 @@ public class ChampionshipCreatorEndpoint {
     public DR2ChampionshipCreateRequestTo testMonthly(@PathVariable long clubId) {
         return monthlyCreator.createEvent(clubId);
     }
-    @PostMapping(Routes.COPY_CHAMPIONSHIP_TO_CLUB)
-    public void copyClub(@PathVariable long fromClubId, @PathVariable long toClubId) {
-        clubChampionshipCopier.copyTo(fromClubId, toClubId);
-    }
+
 
 
 }

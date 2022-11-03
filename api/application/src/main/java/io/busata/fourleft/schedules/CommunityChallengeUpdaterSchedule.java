@@ -28,7 +28,7 @@ public class CommunityChallengeUpdaterSchedule {
         updater.syncWithRacenet();
     }
 
-    @Scheduled(cron = "0 15 12 * * *", zone="Europe/Brussels")
+    @Scheduled(cron = "0 15 11 * * *", zone="Europe/Brussels")
     public void updateChallenges() {
         log.info("Updating community challenges");
         updater.syncWithRacenet();
