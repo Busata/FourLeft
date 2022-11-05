@@ -95,19 +95,17 @@ public class CommunityEventMessageFactory {
                 fieldMapper.createHumanReadable(communityChallenge.vehicleClass())
         ));
 
-        builder.description("**Fastest driver**:\n :first_place: • %s • **%s** • *%s*\n<:blank:894976571406966814>".formatted(
+        builder.description("**Fastest driver**:\n :first_place: • %s • **%s** • *%s*\n%s\n<:blank:894976571406966814>".formatted(
                 fieldMapper.createEmoticon(firstEntry.nationality()),
                 firstEntry.name(),
-                firstEntry.stageTime()
-        ));
-
-        builder.addField("Top 1% Target Time:", "<:Rank_S:971454722030600214> **%s** • **%s** • *(%s)*"
+                firstEntry.stageTime(),
+                "Top 1% Target Time:", "<:Rank_S:971454722030600214> **%s** • **%s** • *(%s)*"
                         .formatted(
                                 topOnePercentEntry.stageTime(),
                                 ordinal((int) topOnePercentEntry.rank()),
                                 topOnePercentEntry.stageDiff()
                         )
-                , false);
+        ));
 
         final var sortedEntries = communityChallenge.entries();
 

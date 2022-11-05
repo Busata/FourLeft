@@ -74,7 +74,7 @@ public class ClubEventResultMessageFactory {
 
         String countryImage = eventInfos.stream().map(EventInfoTo::country).findFirst().map(fieldMapper::createImage).orElse("");
 
-        builder.thumbnail(fieldMapper.createImage(countryImage));
+        builder.thumbnail(countryImage);
 
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
@@ -91,7 +91,7 @@ public class ClubEventResultMessageFactory {
         for (int i = 0; i < multiListResults.size(); i++) {
             SingleResultListTo singleResultList = multiListResults.get(i);
 
-            if(singleResultList.results().size() == 0) {
+            if(singleResultList.results().size() == 0 && multiListResults.size() > 1) {
                 builder.description("*No entries yet*");
             }
 
@@ -135,7 +135,9 @@ public class ClubEventResultMessageFactory {
 
             if(i == multiListResults.size() - 1) {
                 builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(singleResultList.eventInfoTo().lastUpdate())), true);
-                builder.addField("**Total entries**", "*%s*".formatted(singleResultList.totalEntries()), true);
+                if(singleResultList.totalEntries() > 0) {
+                    builder.addField("**Total entries**", "*%s*".formatted(singleResultList.totalEntries()), true);
+                }
                 builder.addField("**Event ending**", "<t:%s:R>".formatted(singleResultList.eventInfoTo().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
             }
 
