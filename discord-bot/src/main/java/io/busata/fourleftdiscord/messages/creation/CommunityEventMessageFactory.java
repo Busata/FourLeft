@@ -99,7 +99,7 @@ public class CommunityEventMessageFactory {
                 fieldMapper.createEmoticon(firstEntry.nationality()),
                 firstEntry.name(),
                 firstEntry.stageTime(),
-                "Top 1% Target Time:", "<:Rank_S:971454722030600214> **%s** • **%s** • *(%s)*"
+                "**Top 1%% Target Time:**\n<:Rank_S:971454722030600214> **%s** • **%s** • *(%s)*"
                         .formatted(
                                 topOnePercentEntry.stageTime(),
                                 ordinal((int) topOnePercentEntry.rank()),
