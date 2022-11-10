@@ -50,9 +50,29 @@ public class DiscordChannelConfigurationEndpoint {
         var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
 
 
-        createEnduranceViewScots(defaultPoints);
-    }
+        //createEnduranceViewScots(defaultPoints);
 
+        createEstonianClub(defaultPoints);
+    }
+    private void createEstonianClub(PointsCalculator pointsCalculator) {
+
+        final var view = new SingleClubView(440056L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+
+        ClubView clubView = new ClubView(
+                UUID.randomUUID(),
+                "Wreckfest",
+                view,
+                pointsCalculator
+        );
+
+        clubView = repository.save(clubView);
+
+        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
+                UUID.randomUUID(), 1039266428550905957L,"Wreckfest", clubView, of(clubView));
+
+        discordChannelConfigurationRepository.save(discordChannelConfiguration);
+
+    }
     private void createEnduranceViewScots(PointsCalculator pointsCalculator) {
         final var view = new SingleClubView(217020L, false, 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
                 "Busata",
