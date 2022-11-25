@@ -5,6 +5,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionFollowupCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
@@ -66,7 +67,10 @@ public class StandingsOverviewCommand implements BotCommandOptionHandler {
 
     public Mono<Message> createResults(ChatInputInteractionEvent event) {
         try {
-            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getChampionshipStandingsMessage(event.getInteraction().getChannelId())).build());
+            return Mono.just(event).flatMap(evt -> {
+                final var result = resultsFetcher.getChampionshipStandingsMessage(evt.getInteraction().getChannelId());
+                return evt.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(result).build());
+            });
         } catch (Exception ex) {
             log.error("Error while loading the results", ex);
             return event.createFollowup("*Something went wrong. Please try again later!*");
