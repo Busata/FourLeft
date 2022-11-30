@@ -65,7 +65,7 @@ public class Event {
     }
 
     public boolean hasEnded() {
-        return getEndTime().toLocalDateTime().isBefore(LocalDateTime.now());
+        return getEndTime().toLocalDateTime().isBefore(LocalDateTime.now().plusMinutes(5));
     }
     public boolean isPrevious() {
         return eventStatus.equals("Finished");
