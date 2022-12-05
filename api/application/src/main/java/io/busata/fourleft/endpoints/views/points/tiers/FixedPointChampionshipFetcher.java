@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ public class FixedPointChampionshipFetcher {
         if (calc.getOffsetChampionship() != null) {
 
             championships = championships.stream()
+                    .sorted(Comparator.comparing(Championship::getOrder))
                     .dropWhile(championship -> championship.getId() != calc.getOffsetChampionship())
                     .collect(Collectors.toList());
         }
