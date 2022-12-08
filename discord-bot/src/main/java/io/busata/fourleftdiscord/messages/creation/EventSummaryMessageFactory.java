@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,7 +26,9 @@ public class EventSummaryMessageFactory {
         builder.title("**%s**".formatted(summary.header()));
         builder.color(Color.of(75, 0, 244));
 
-        List<List<ViewEventEntryTo>> partitionInGroups = ListHelpers.partitionInGroups(summary.events(), 4);
+        final var averageStages = summary.events().stream().map(ViewEventEntryTo::stageNames).mapToInt(List::size).average().orElse(0);
+
+        List<List<ViewEventEntryTo>> partitionInGroups = ListHelpers.partitionInGroups(summary.events(), averageStages == 1 ? 12 : 1);
         for (int i = 0; i < partitionInGroups.size(); i++) {
             List<ViewEventEntryTo> events = partitionInGroups.get(i);
             builder.addField(i == 0 ? "Events" : "\u200B", "%s".formatted(createEntries(events)), false);
@@ -35,7 +38,7 @@ public class EventSummaryMessageFactory {
     }
 
     public String createEntries(List<ViewEventEntryTo> events) {
-       return events.stream().map(entry ->
+        return events.stream().map(entry ->
                String.format("**%s** • **%s**%s%s %s",
                        fieldMapper.createEmoticon(entry.countryId()),
                        fieldMapper.createHumanReadable(entry.vehicleClass()),
