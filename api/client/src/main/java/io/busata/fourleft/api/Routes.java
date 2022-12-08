@@ -12,6 +12,8 @@ public class Routes {
     public static final String CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID = "/api/views/{viewId}/standings/current";
     public static final String CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID = "/api/views/{viewId}/standings/previous";
 
+    public static final String CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID = "/api/views/{viewId}/event_summary";
+
     public static final String CLUB_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/championship_standings";
     public static final String CLUB_CUSTOM_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/custom_standings";
     public static final String CLUB_MEMBERS_BY_CLUB_ID = "/api/clubs/{clubId}/members";

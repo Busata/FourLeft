@@ -1,6 +1,7 @@
 package io.busata.fourleft.endpoints.views;
 
 import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.clubs.models.Club;
@@ -21,6 +22,7 @@ public class ViewResultsEndpoint {
 
     private final ViewPointsToFactory viewPointsToFactory;
 
+    private final ViewEventSummaryToFactory viewEventSummaryToFactory;
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     public ViewResultTo getCurrentResults(@PathVariable UUID viewId) {
         return viewResultToFactory.createViewResult(viewId, Club::getCurrentEvent);
@@ -41,6 +43,12 @@ public class ViewResultsEndpoint {
     public ViewPointsTo getPreviousPoints(@PathVariable UUID viewId) {
         final var clubView = repository.findById(viewId).orElseThrow();
         return viewPointsToFactory.create(clubView, PointsPeriod.PREVIOUS);
+    }
+
+    @GetMapping(Routes.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
+    public ViewEventSummaryTo getEventSummary(@PathVariable UUID viewId) {
+        final var clubView = repository.findById(viewId).orElseThrow();
+        return viewEventSummaryToFactory.create(clubView);
     }
 
 }
