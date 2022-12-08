@@ -25,11 +25,10 @@ public class EventSummaryMessageFactory {
         builder.title("**%s**".formatted(summary.header()));
         builder.color(Color.of(75, 0, 244));
 
-        List<List<ViewEventEntryTo>> partitionInGroups = ListHelpers.partitionInGroups(summary.events(), 5);
+        List<List<ViewEventEntryTo>> partitionInGroups = ListHelpers.partitionInGroups(summary.events(), 4);
         for (int i = 0; i < partitionInGroups.size(); i++) {
             List<ViewEventEntryTo> events = partitionInGroups.get(i);
             builder.addField(i == 0 ? "Events" : "\u200B", "%s".formatted(createEntries(events)), false);
-
         }
 
         return builder.build();
@@ -37,11 +36,11 @@ public class EventSummaryMessageFactory {
 
     public String createEntries(List<ViewEventEntryTo> events) {
        return events.stream().map(entry ->
-               String.format("%s • **%s** •%s %s",
-                fieldMapper.createEmoticon(entry.countryId()),
-                String.join(", ", entry.stageNames()),
-                entry.stageNames().size() > 1 ? " " + fieldMapper.createEmoticon(entry.stageCondition()) + " •" : "",
-                fieldMapper.createHumanReadable(entry.vehicleClass())
+               String.format("**%s** • **%s**\n%s %s",
+                       fieldMapper.createEmoticon(entry.countryId()),
+                       fieldMapper.createHumanReadable(entry.vehicleClass()),
+                       String.join(", ", entry.stageNames()),
+                       entry.stageNames().size() == 1 ? "• " + fieldMapper.createEmoticon(entry.stageCondition()) : ""
                 )
        ).collect(Collectors.joining("\n"));
     }

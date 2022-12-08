@@ -30,16 +30,16 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
 
 
-        deleteExistingCommands(applicationId);
+        //deleteExistingCommands(applicationId);
 
         List<ImmutableApplicationCommandRequest> commands = commandProviders.stream().map(CommandProvider::create).collect(Collectors.toList());
 
 //        List.of(DiscordGuilds.BUSATA_DISCORD).forEach(guild -> {
-            commands.forEach(commandRequest -> {
-                client.getRestClient().getApplicationService()
-                        .createGlobalApplicationCommand(applicationId, commandRequest)
-                        .subscribe();
-            });
+          //  commands.forEach(commandRequest -> {
+            //    client.getRestClient().getApplicationService()
+              //          .createGlobalApplicationCommand(applicationId, commandRequest)
+                //        .subscribe();
+            //});
 //        });
     }
 
