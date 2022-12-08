@@ -2,9 +2,9 @@ package io.busata.fourleftdiscord.messages;
 
 import discord4j.core.spec.EmbedCreateSpec;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
-import io.busata.fourleft.api.models.ChampionshipEventSummaryTo;
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
+import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostableView;
@@ -21,7 +21,7 @@ public class MessageTemplateFactory {
     private final ClubEventResultMessageFactory clubEventResultMessageFactory;
     private final ClubMembersMessageFactory clubMembersMessageFactory;
     private final UserOverviewMessageFactory userOverviewMessageFactory;
-    private final ChampionshipSummaryMessageFactory championshipSummaryMessageFactory;
+    private final EventSummaryMessageFactory eventSummaryMessageFactory;
     private final CommunityEventMessageFactory communityEventMessageFactory;
 
     private final AutoPostResultMessageFactory autoPostResultMessageFactory;
@@ -49,8 +49,8 @@ public class MessageTemplateFactory {
         return clubMembersMessageFactory.create(members);
     }
 
-    public EmbedCreateSpec createEmbedFromSummary(ChampionshipEventSummaryTo summary) {
-        return championshipSummaryMessageFactory.create(summary);
+    public EmbedCreateSpec createEmbedFromSummary(ViewEventSummaryTo summary) {
+        return eventSummaryMessageFactory.create(summary);
     }
 
     public EmbedCreateSpec createEmbedFromUserResultSummary(UserResultSummaryTo result, boolean useBadges) {

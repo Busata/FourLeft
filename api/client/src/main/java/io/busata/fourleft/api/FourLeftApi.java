@@ -11,6 +11,7 @@ import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo
 import io.busata.fourleft.api.models.messages.MessageEvent;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
+import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.discord.models.MessageType;
@@ -49,6 +50,8 @@ public interface FourLeftApi {
 
     @GetMapping(Routes.CLUB_EVENT_SUMMARY_BY_CLUB_ID)
     ChampionshipEventSummaryTo getEventSummary(@PathVariable UUID clubId);
+    @GetMapping(Routes.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
+    ViewEventSummaryTo getViewEventSummary(@PathVariable UUID viewId);
 
     @GetMapping(Routes.PREVIOUS_COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getCommunityResultsFromYesterday();

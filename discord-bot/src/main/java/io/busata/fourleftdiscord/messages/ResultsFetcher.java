@@ -52,10 +52,10 @@ public class ResultsFetcher {
         return messageTemplateFactory.createEmbedFromMembers(members);
     }
 
-    public EmbedCreateSpec getChampionshipSummary(Snowflake channelId) {
+    public EmbedCreateSpec getEventSummary(Snowflake channelId) {
         final var viewId = discordChannelConfigurationService.getViewId(channelId);
 
-        final var summary = api.getEventSummary(viewId);
+        final var summary = api.getViewEventSummary(viewId);
         return messageTemplateFactory.createEmbedFromSummary(summary);
     }
 

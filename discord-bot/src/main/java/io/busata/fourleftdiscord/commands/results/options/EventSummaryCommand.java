@@ -18,13 +18,12 @@ import io.busata.fourleft.domain.discord.models.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-//@Component
+@Component
 @Slf4j
 //@Order(4)
 @RequiredArgsConstructor
@@ -66,7 +65,7 @@ public class EventSummaryCommand implements BotCommandOptionHandler {
 
     public Mono<Message> createSummary(ChatInputInteractionEvent event) {
         try {
-            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getChampionshipSummary(event.getInteraction().getChannelId())).build());
+            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getEventSummary(event.getInteraction().getChannelId())).build());
         } catch (Exception ex) {
             log.error("Error while loading the results", ex);
             return event.createFollowup("*Something went wrong. Please try again later!*");
