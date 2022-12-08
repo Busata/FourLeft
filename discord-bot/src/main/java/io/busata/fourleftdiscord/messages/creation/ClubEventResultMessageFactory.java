@@ -78,7 +78,7 @@ public class ClubEventResultMessageFactory {
 
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
-        builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(",", stageNames), true);
+        builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
         builder.footer(EmbedCreateFields.Footer.of("\u2800".repeat(40), null));
 
         if(clubResult.getMultiListResults().size() > 1) {
