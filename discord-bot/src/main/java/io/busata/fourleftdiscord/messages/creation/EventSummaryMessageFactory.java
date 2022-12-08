@@ -7,6 +7,7 @@ import io.busata.fourleft.api.models.views.ViewEventEntryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
 import io.busata.fourleft.api.models.ChampionshipEventSummaryTo;
+import io.busata.fourleftdiscord.helpers.ListHelpers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,12 @@ public class EventSummaryMessageFactory {
         builder.title("**%s**".formatted(summary.header()));
         builder.color(Color.of(75, 0, 244));
 
-        builder.addField("Events", "%s".formatted(createEntries(summary.events())), false);
+        List<List<ViewEventEntryTo>> partitionInGroups = ListHelpers.partitionInGroups(summary.events(), 5);
+        for (int i = 0; i < partitionInGroups.size(); i++) {
+            List<ViewEventEntryTo> events = partitionInGroups.get(i);
+            builder.addField(i == 0 ? "Events" : "\u200B", "%s".formatted(createEntries(events)), false);
+
+        }
 
         return builder.build();
     }
