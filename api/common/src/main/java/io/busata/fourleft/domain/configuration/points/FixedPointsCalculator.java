@@ -17,7 +17,7 @@ import java.util.UUID;
 public class FixedPointsCalculator extends PointsCalculator {
 
     int joinChampionshipsCount;
-    UUID offsetChampionship;
+    String offsetChampionship;
 
     @OneToOne
     PointSystem pointSystem;
