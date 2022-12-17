@@ -52,7 +52,25 @@ public class DiscordChannelConfigurationEndpoint {
 
         //createEnduranceViewScots(defaultPoints);
 
-        createEstonianClub(defaultPoints);
+        createScandiDozerClub(defaultPoints);
+    }
+
+    private void createScandiDozerClub(PointsCalculator calculator) {
+        final var view = new SingleClubView(415178L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+
+        ClubView clubView = new ClubView(
+                UUID.randomUUID(),
+                "Gravel Trap",
+                view,
+                calculator
+        );
+
+        clubView = repository.save(clubView);
+
+        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
+                UUID.randomUUID(), 966718547533398106L,"Gravel Trap", clubView, of(clubView));
+
+        discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
     private void createEstonianClub(PointsCalculator pointsCalculator) {
 
