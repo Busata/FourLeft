@@ -19,6 +19,7 @@ public class FixedPointChampionshipFetcher {
         if (calc.getOffsetChampionship() != null) {
 
             championships = championships.stream()
+                    .filter(Championship::isInActive)
                     .sorted(Comparator.comparing(Championship::getOrder))
                     .dropWhile(championship -> !championship.getReferenceId().equals(calc.getOffsetChampionship()))
                     .collect(Collectors.toList());
