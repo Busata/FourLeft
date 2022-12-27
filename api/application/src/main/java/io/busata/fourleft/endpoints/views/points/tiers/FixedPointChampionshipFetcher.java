@@ -15,25 +15,32 @@ import java.util.stream.Collectors;
 @Component
 public class FixedPointChampionshipFetcher {
     public List<Championship> filterChampionships(List<Championship> championships, FixedPointsCalculator calc, PointsPeriod period) {
+        championships = new ArrayList<>(championships);
+
+        championships = championships.stream().filter(Championship::isInActive).sorted(Comparator.comparing(Championship::getOrder))
+                .collect(Collectors.toList());
 
         if (calc.getOffsetChampionship() != null) {
-
             championships = championships.stream()
-                    .filter(Championship::isInActive)
-                    .sorted(Comparator.comparing(Championship::getOrder))
                     .dropWhile(championship -> !championship.getReferenceId().equals(calc.getOffsetChampionship()))
                     .collect(Collectors.toList());
         }
 
-        championships = new ArrayList<>(championships);
+        var requiredChampionships = calculateRequiredChampionships(championships, calc);
 
         Collections.reverse(championships);
 
-        var skipChampionships = 0;
-        if (period == PointsPeriod.PREVIOUS) {
-            skipChampionships = calc.getJoinChampionshipsCount();
-        }
+        return championships.stream().limit(requiredChampionships).collect(Collectors.toList());
+    }
 
-        return championships.stream().skip(skipChampionships).limit(calc.getJoinChampionshipsCount()).collect(Collectors.toList());
+    private int calculateRequiredChampionships(List<Championship> championships, FixedPointsCalculator calc) {
+        var totalSize = championships.size();
+        int moduloChampionships = totalSize % calc.getJoinChampionshipsCount();
+
+        if(moduloChampionships == 0) {
+            return calc.getJoinChampionshipsCount();
+        } else {
+            return moduloChampionships;
+        }
     }
 }
