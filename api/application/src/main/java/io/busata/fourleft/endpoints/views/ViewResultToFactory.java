@@ -10,6 +10,7 @@ import io.busata.fourleft.api.models.views.SingleResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
+import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.models.Stage;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,40 +42,71 @@ public class ViewResultToFactory {
     private final ResultEntryToFactory resultEntryToFactory;
     private final BoardEntryFetcher boardEntryFetcher;
 
-    public ViewResultTo createViewResult(UUID viewId, ClubEventSupplier eventSupplier) {
+    public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplier eventSupplier) {
         final var clubView = repository.findById(viewId).orElseThrow();
 
         switch(clubView.getResultsView()) {
             case SingleClubView view -> {
-                final var club = clubSyncService.getOrCreate(view.getClubId());
-                SingleResultListTo singleResultListTo = eventSupplier.getEvent(club).map(event -> this.createSingleResultTo(view, event)).orElseThrow();
-                return new ViewResultTo(
-                        new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
-                        of(singleResultListTo)
-                );
+                return createSingleClubViewResult(eventSupplier, view);
             }
             case TiersView view -> {
-                final List<SingleResultListTo> allTierResults = view.getTiers().stream().map(tier -> {
-                    final var club = clubSyncService.getOrCreate(tier.getClubId());
-
-                    return eventSupplier.getEvent(club).map(event -> {
-                        final var restrictions = tierEventRestrictionsRepository.findByTierIdAndChallengeIdAndEventId(tier.getId(), event.getChallengeId(), event.getReferenceId());
-
-                        final ResultRestrictionsTo restrictionTo = restrictions.map(this::create).orElse(new NoResultRestrictionsTo());
-
-                        return this.createSingleResultTo(tier, view, event, restrictionTo);
-                    }).orElseThrow();
-
-                }).collect(Collectors.toList());
-
-                return new ViewResultTo(
-                        new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
-                        allTierResults
-                );
+                return createTiersViewResult(eventSupplier, view);
             }
             default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
         }
     }
+
+    private Optional<ViewResultTo> createSingleClubViewResult(ClubEventSupplier eventSupplier, SingleClubView view) {
+        final var club = clubSyncService.getOrCreate(view.getClubId());
+
+        if(eventSupplier.getEvent(club).isEmpty()) {
+            return Optional.empty();
+        }
+
+        SingleResultListTo singleResultListTo = eventSupplier.getEvent(club).map(event -> this.createSingleResultTo(view, event)).orElseThrow();
+
+        ViewResultTo result = new ViewResultTo(
+                new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
+                of(singleResultListTo)
+        );
+
+        return Optional.of(result);
+    }
+    private Optional<ViewResultTo> createTiersViewResult(ClubEventSupplier eventSupplier, TiersView view) {
+
+        boolean anyEventActive = view.getTiers().stream()
+                .map(Tier::getClubId)
+                .map(clubSyncService::getOrCreate)
+                .map(eventSupplier::getEvent)
+                .anyMatch(Optional::isPresent);
+
+        if(!anyEventActive) {
+            return Optional.empty();
+        }
+
+        final List<SingleResultListTo> allTierResults = view.getTiers().stream().map(tier -> {
+            final var club = clubSyncService.getOrCreate(tier.getClubId());
+
+            return eventSupplier.getEvent(club).map(event -> {
+                final var restrictions = tierEventRestrictionsRepository.findByTierIdAndChallengeIdAndEventId(tier.getId(), event.getChallengeId(), event.getReferenceId());
+
+                final ResultRestrictionsTo restrictionTo = restrictions.map(this::create).orElse(new NoResultRestrictionsTo());
+
+                return this.createSingleResultTo(tier, view, event, restrictionTo);
+            }).orElseThrow();
+
+        }).collect(Collectors.toList());
+
+
+        ViewResultTo result = new ViewResultTo(
+                new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
+                allTierResults
+        );
+
+        return Optional.of(result);
+    }
+
+
     public SingleResultListTo createSingleResultTo(SingleClubView view, Event event) {
         List<BoardEntry> entries = boardEntryFetcher.create(view, event);
 

@@ -8,9 +8,13 @@ import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.points.ViewPointsToFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -23,14 +27,19 @@ public class ViewResultsEndpoint {
     private final ViewPointsToFactory viewPointsToFactory;
 
     private final ViewEventSummaryToFactory viewEventSummaryToFactory;
+
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
-    public ViewResultTo getCurrentResults(@PathVariable UUID viewId) {
-        return viewResultToFactory.createViewResult(viewId, Club::getCurrentEvent);
+    public ResponseEntity<ViewResultTo> getCurrentResults(@PathVariable UUID viewId) {
+        return viewResultToFactory.createViewResult(viewId, Club::getCurrentEvent)
+                .map(results -> new ResponseEntity<>(results, HttpStatus.OK))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping(Routes.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
-    public ViewResultTo getPreviousResults(@PathVariable UUID viewId) {
-        return viewResultToFactory.createViewResult(viewId, Club::getPreviousEvent);
+    public ResponseEntity<ViewResultTo> getPreviousResults(@PathVariable UUID viewId) {
+        return viewResultToFactory.createViewResult(viewId, Club::getPreviousEvent)
+                .map(results -> new ResponseEntity<>(results, HttpStatus.OK))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID)
