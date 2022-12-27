@@ -1,6 +1,7 @@
 package io.busata.fourleftdiscord.autoposting.club_results;
 
 import discord4j.common.util.Snowflake;
+import feign.FeignException;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
@@ -39,7 +40,9 @@ public class AutoPostClubResultsService {
             configuration.autopostClubViews().forEach(clubViewTo -> {
                 tryPostingNewEntries(clubViewTo, Snowflake.of(configuration.channelId()));
             });
-
+        }
+        catch (FeignException.NotFound ex) {
+            log.warn("No results found");
         } catch (Exception ex) {
             log.warn("!! !! Something wrong while posting auto results, probably has no current event", ex);
         }
