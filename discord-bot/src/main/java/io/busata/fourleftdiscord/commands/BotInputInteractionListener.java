@@ -44,7 +44,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
                     Snowflake channelId = event.getInteraction().getChannelId();
                     Message messageById = client.getMessageById(channelId, messageId).block();
 
-                    User messageAuthor = messageById.getAuthor().orElseThrow();
+                    User messageAuthor = messageById.getInteraction().get().getUser();
 
                     User buttonUser = event.getInteraction().getUser();
 
