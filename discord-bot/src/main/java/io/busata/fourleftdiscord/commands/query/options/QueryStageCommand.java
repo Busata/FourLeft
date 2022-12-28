@@ -4,6 +4,8 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionFollowupCreateSpec;
@@ -67,7 +69,10 @@ public class QueryStageCommand implements BotCommandOptionHandler {
             try {
                 QueryTrackResultsTo queryTrackResultsTo = api.queryTrack(stageName);
                 EmbedCreateSpec embedCreateSpec = queryMessageFactory.create(queryTrackResultsTo);
-                return evt.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(embedCreateSpec).build().withEphemeral(true)).then();
+
+                Button removeButton = Button.danger("remove", "Remove");
+
+                return evt.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(embedCreateSpec).addComponent(ActionRow.of(removeButton)).build()).then();
             } catch (Exception ex) {
                 log.info("Something went wrong, input: {}", stageName, ex);
                 return evt.createFollowup("Could not find any stage with this query").withEphemeral(true).then();
