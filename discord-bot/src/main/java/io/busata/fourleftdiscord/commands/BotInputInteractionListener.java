@@ -1,9 +1,11 @@
 package io.busata.fourleftdiscord.commands;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
@@ -37,11 +39,25 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
         client.on(ButtonInteractionEvent.class, event -> {
             if(event.getCustomId().equals("remove")) {
-                event.getInteraction().getMessageId().ifPresent(messageId -> {
-                    discordMessageGateway.removeMessage(event.getInteraction().getChannelId(), messageId);
-                });
+                return event.getInteraction().getMessageId().map(messageId -> {
+
+                    Snowflake channelId = event.getInteraction().getChannelId();
+                    Message messageById = client.getMessageById(channelId, messageId).block();
+
+                    User messageAuthor = messageById.getAuthor().orElseThrow();
+
+                    User buttonUser = event.getInteraction().getUser();
+
+                    if(messageAuthor.getId().equals(buttonUser)) {
+                        discordMessageGateway.removeMessage(channelId, messageId);
+                        return Mono.empty();
+                    } else {
+                        return event.reply("Only the original poster can remove this.").withEphemeral(true).then();
+                    }
+                }).orElseThrow();
+            } else {
+                return Mono.empty();
             }
-            return Mono.empty();
         }).subscribe();
         long applicationId = client.getRestClient().getApplicationId().block();
 
