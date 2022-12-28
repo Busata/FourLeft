@@ -48,7 +48,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
                     User buttonUser = event.getInteraction().getUser();
 
-                    if(messageAuthor.getId().equals(buttonUser)) {
+                    if(messageAuthor.getId().equals(buttonUser.getId())) {
                         discordMessageGateway.removeMessage(channelId, messageId);
                         return Mono.empty();
                     } else {
