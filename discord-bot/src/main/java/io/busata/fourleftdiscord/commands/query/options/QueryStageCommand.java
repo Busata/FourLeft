@@ -55,7 +55,7 @@ public class QueryStageCommand implements BotCommandOptionHandler {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event, MessageChannel channel) {
-        return event.deferReply().withEphemeral(true).then(queryStage(event));
+        return event.deferReply().then(queryStage(event));
     }
 
     public Mono<Void> queryStage(ChatInputInteractionEvent event) {
