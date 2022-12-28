@@ -3,6 +3,8 @@ package io.busata.fourleftdiscord.commands.results.options;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.InteractionFollowupCreateSpec;
@@ -65,7 +67,8 @@ public class EventSummaryCommand implements BotCommandOptionHandler {
 
     public Mono<Message> createSummary(ChatInputInteractionEvent event) {
         try {
-            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getEventSummary(event.getInteraction().getChannelId())).build());
+            Button removeButton = Button.danger("remove", "Remove");
+            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getEventSummary(event.getInteraction().getChannelId())).addComponent(ActionRow.of(removeButton)).build());
         } catch (Exception ex) {
             log.error("Error while loading the results", ex);
             return event.createFollowup("*Something went wrong. Please try again later!*");

@@ -1,9 +1,13 @@
 package io.busata.fourleftdiscord.commands;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
+import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,7 +15,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,8 +30,19 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
     private final List<BotCommandOptionHandler> commandHandlers;
 
+    private final DiscordMessageGateway discordMessageGateway;
+
     @PostConstruct
     public void createCommand() {
+
+        client.on(ButtonInteractionEvent.class, event -> {
+            if(event.getCustomId().equals("remove")) {
+                event.getInteraction().getMessageId().ifPresent(messageId -> {
+                    discordMessageGateway.removeMessage(event.getInteraction().getChannelId(), messageId);
+                });
+            }
+            return Mono.empty();
+        }).subscribe();
         long applicationId = client.getRestClient().getApplicationId().block();
 
 
@@ -45,14 +62,14 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
     private void deleteExistingCommands(long applicationId) {
 //        List.of(DiscordGuilds.DIRTY_DISCORD, DiscordGuilds.BUSATA_DISCORD, DiscordGuilds.GRF_DISCORD, DiscordGuilds.SCOTTISH_RALLY_GROUP).forEach(guild -> {
-            List<String> discordCommands = client.getRestClient()
+            List<Id> discordCommands = client.getRestClient()
                     .getApplicationService()
                     .getGlobalApplicationCommands(applicationId)
                     .map(ApplicationCommandData::id)
                     .collectList().block();
 
             discordCommands.forEach(commandId -> {
-                client.getRestClient().getApplicationService().deleteGlobalApplicationCommand(applicationId, Long.parseLong(commandId)).subscribe();
+                client.getRestClient().getApplicationService().deleteGlobalApplicationCommand(applicationId, commandId.asLong()).subscribe();
             });
     }
 
