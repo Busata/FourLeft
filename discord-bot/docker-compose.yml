@@ -8,6 +8,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
     depends_on:
       - db.fourleft_discord
