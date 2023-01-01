@@ -14,6 +14,7 @@ import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -32,6 +33,8 @@ public class CommunityEventsEndpoint {
     private final CommunityLeaderboardTrackingRepository trackingRepository;
     private final CommunityChallengeRepository challengeRepository;
     private final LeaderboardRepository leaderboardRepository;
+
+    private final RabbitTemplate rabbitTemplate;
 
     @PostMapping(Routes.COMMUNITY_TRACK_USER)
     CommunityLeaderboardTracking trackUserRequest(@RequestBody TrackUserRequestTo userRequestTo) {
@@ -56,6 +59,7 @@ public class CommunityEventsEndpoint {
 
     @GetMapping(Routes.COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getResults() {
+        rabbitTemplate.convertAndSend("myQueue", "Requested community results");
         final var trackedUsers = trackingRepository.findAll();
         return challengeRepository.findBySyncedTrueAndEndedTrue().stream()
                 .filter(challenge -> challenge.getEndTime().toLocalDate().equals(LocalDate.now(ZoneId.systemDefault())))
