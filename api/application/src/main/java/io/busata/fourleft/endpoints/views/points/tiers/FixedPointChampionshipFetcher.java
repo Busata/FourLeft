@@ -1,7 +1,6 @@
 package io.busata.fourleft.endpoints.views.points.tiers;
 
 import io.busata.fourleft.domain.clubs.models.Championship;
-import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.endpoints.views.PointsPeriod;
 import org.springframework.stereotype.Component;

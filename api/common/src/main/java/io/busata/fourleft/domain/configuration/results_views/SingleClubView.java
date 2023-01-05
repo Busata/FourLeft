@@ -48,4 +48,9 @@ public class SingleClubView extends ResultsView implements ResultProperties {
     public PlayerRestrictions getPlayerRestrictions() {
         return this.playerRestriction;
     }
+
+    @Override
+    public List<Long> getAssociatedClubs() {
+        return List.of(clubId);
+    }
 }

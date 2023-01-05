@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -18,6 +19,14 @@ public class DiscordChannelConfigurationService {
     @Cacheable("channel_configurations")
     public List<DiscordChannelConfigurationTo> getConfigurations() {
         return this.api.getDiscordChannelConfigurations();
+    }
+
+    public List<DiscordChannelConfigurationTo> findConfigurationByClubId(Long clubId) {
+        return this.getConfigurations()
+                .stream()
+                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
+                .filter(configuration -> configuration.includesClub(clubId))
+                .collect(Collectors.toList());
     }
 
 

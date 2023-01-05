@@ -1,5 +1,7 @@
 package io.busata.fourleft.importer;
 
+import io.busata.fourleft.api.messages.ClubOperation;
+import io.busata.fourleft.api.messages.ClubUpdated;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.repository.ClubRepository;
@@ -9,11 +11,15 @@ import io.busata.fourleft.importer.updaters.RacenetClubSyncService;
 import io.busata.fourleft.importer.updaters.RacenetLeaderboardSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+import static io.busata.fourleft.api.messages.QueueNames.CLUB_EVENT_QUEUE;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class ClubSyncService {
     private final RacenetClubSyncService racenetClubSyncService;
     private final RacenetLeaderboardSyncService racenetLeaderboardSyncService;
     private final RacenetClubMemberSyncService racenetClubMemberSyncService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void updateClubs() {
@@ -38,12 +45,21 @@ public class ClubSyncService {
             if (event.hasEnded()) {
                 log.info("Club {} has active event that ended, updating.", club.getName());
                 fullRefreshClub(club);
+
+                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
+
+
+                club.getCurrentEvent().filter(Event::isCurrent).ifPresent(newEvent -> {
+                    applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
+                });
             }
 
             if(shouldUpdateLeaderboards(event)) {
                 log.info("Updating leaderboards for {}", club.getName());
                 refreshLeaderboards(club);
                 log.info("Update done.");
+
+                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.LEADERBOARDS_UPDATED, club.getReferenceId()));
             }
 
         }, () -> {
@@ -51,6 +67,10 @@ public class ClubSyncService {
                 log.info("Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 fullRefreshClub(club);
             }
+
+            club.getCurrentEvent().filter(Event::isCurrent).ifPresent(newEvent -> {
+                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
+            });
         });
     }
 

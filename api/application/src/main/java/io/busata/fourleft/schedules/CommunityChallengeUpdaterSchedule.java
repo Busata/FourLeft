@@ -3,11 +3,14 @@ package io.busata.fourleft.schedules;
 import io.busata.fourleft.importer.updaters.RacenetChallengesSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
+import static io.busata.fourleft.api.messages.QueueNames.COMMUNITY_UPDATED;
 
 @Component
 @Slf4j
@@ -16,6 +19,7 @@ import javax.annotation.PostConstruct;
 public class CommunityChallengeUpdaterSchedule {
 
     private final RacenetChallengesSyncService updater;
+    private final RabbitTemplate rabbitMQ;
 
     @PostConstruct
     public void init() {
@@ -32,5 +36,6 @@ public class CommunityChallengeUpdaterSchedule {
     public void updateChallenges() {
         log.info("Updating community challenges");
         updater.syncWithRacenet();
+        rabbitMQ.convertAndSend(COMMUNITY_UPDATED, "OK");
     }
 }

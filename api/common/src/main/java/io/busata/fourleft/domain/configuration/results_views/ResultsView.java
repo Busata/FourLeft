@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,4 +19,6 @@ public abstract class ResultsView {
     @GeneratedValue
     @Setter
     UUID id;
+
+    public abstract List<Long> getAssociatedClubs();
 }

@@ -12,6 +12,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -28,4 +29,8 @@ public class TiersView extends ResultsView {
     @OneToMany(mappedBy = "tiersView", cascade = CascadeType.ALL)
     List<Tier> tiers;
 
+    @Override
+    public List<Long> getAssociatedClubs() {
+        return tiers.stream().map(Tier::getClubId).collect(Collectors.toList());
+    }
 }

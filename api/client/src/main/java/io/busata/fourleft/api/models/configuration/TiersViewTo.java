@@ -12,4 +12,9 @@ public class TiersViewTo extends ResultsViewTo {
     boolean usePowerStage;
     int defaultPowerstageIndex;
     List<TierTo> tiers;
+
+    @Override
+    public boolean includesClub(long clubId) {
+        return this.tiers.stream().map(TierTo::clubId).anyMatch(id -> clubId == id);
+    }
 }

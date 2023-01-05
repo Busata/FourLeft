@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.util.List;
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         property = "type")
@@ -14,4 +16,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = CommunityChallengeViewTo.class, name = "communityChallengeView")
 })
 public abstract class ResultsViewTo {
+    public abstract boolean includesClub(long clubId);
 }

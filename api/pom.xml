@@ -9,12 +9,11 @@
         <java.version>17</java.version>
     </properties>
     <name>Fourleft API</name>
-    <description>Fourleft API (Server, Importer)</description>
+    <description>Fourleft API (Server)</description>
     <packaging>pom</packaging>
 
     <modules>
         <module>application</module>
-        <module>importer</module>
         <module>racenet</module>
         <module>client</module>
         <module>common</module>

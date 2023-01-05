@@ -17,4 +17,10 @@ public class CommunityChallengeViewTo extends ResultsViewTo {
         this.postMonthlies = postMonthlies;
         this.badgeType = badgeType;
     }
+
+
+    @Override
+    public boolean includesClub(long clubId) {
+        return false;
+    }
 }

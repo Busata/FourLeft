@@ -16,4 +16,8 @@ public class SingleClubViewTo extends ResultsViewTo {
     PlayerRestrictions playerRestrictions;
     List<String> players;
 
+    @Override
+    public boolean includesClub(long clubId) {
+        return this.clubId == clubId;
+    }
 }

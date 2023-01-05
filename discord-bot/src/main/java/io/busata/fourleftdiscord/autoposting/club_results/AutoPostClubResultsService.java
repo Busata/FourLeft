@@ -2,6 +2,9 @@ package io.busata.fourleftdiscord.autoposting.club_results;
 
 import discord4j.common.util.Snowflake;
 import feign.FeignException;
+import io.busata.fourleft.api.messages.ClubOperation;
+import io.busata.fourleft.api.messages.ClubUpdated;
+import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
@@ -11,6 +14,7 @@ import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurati
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,11 +31,18 @@ public class AutoPostClubResultsService {
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
     private final AutopostClubResultsMessageService autopostClubResultsMessageService;
 
-    public void update() {
-        discordChannelConfigurationService.getConfigurations()
-                .stream()
-                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                .forEach(this::tryPostingResults);
+
+    @RabbitListener(queues = QueueNames.CLUB_EVENT_QUEUE)
+    public void updateClub(ClubUpdated event) {
+        if(event.operation() == ClubOperation.LEADERBOARDS_UPDATED) {
+            log.info("-- Leaderboards for {} were updated", event.clubId());
+
+            discordChannelConfigurationService.getConfigurations()
+                    .stream()
+                    .filter(DiscordChannelConfigurationTo::hasAutopostViews)
+                    .filter(configuration -> configuration.includesClub(event.clubId()))
+                    .forEach(this::tryPostingResults);
+        }
     }
 
     private void tryPostingResults(DiscordChannelConfigurationTo configuration) {

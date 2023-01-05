@@ -9,4 +9,7 @@ public record ClubViewTo(
         PointsCalculatorTo pointsCalculator
 
 ) {
+    public boolean includesClub(long clubId) {
+        return resultsView.includesClub(clubId);
+    }
 }
