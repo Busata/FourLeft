@@ -69,8 +69,9 @@ public class AutoPostClubResultsService {
             return findUnposted(namedListResult.results(), postedEntries).stream();
         }).limit(10).collect(Collectors.toList());
 
-        if(unpostedEntries.size() == 0) {
-            log.debug("Nothing new to post");
+        log.info("-- -- Unposted entries: {}", unpostedEntries.size());
+
+        if(unpostedEntries.isEmpty()) {
             return;
         }
 
