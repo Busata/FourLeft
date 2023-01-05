@@ -51,7 +51,6 @@ public class ClubSyncService {
 
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
 
-                entityManager.refresh(club);
 
                 log.info("Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
@@ -72,7 +71,6 @@ public class ClubSyncService {
                 log.info("Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 fullRefreshClub(club);
             }
-            entityManager.refresh(club);
 
             club.getCurrentEvent().ifPresent(newEvent -> {
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
@@ -106,22 +104,35 @@ public class ClubSyncService {
         return club;
     }
 
-    public void fullRefreshClub(Club club) {
+        public void fullRefreshClub(Club club) {
         refreshClubDetails(club);
         refreshLeaderboards(club);
         refreshMembers(club);
+
+        clubRepository.saveAndFlush(club);
+        entityManager.refresh(club);
     }
 
     public void refreshClubDetails(Club club) {
         racenetClubSyncService.syncWithRacenet(club);
-        clubRepository.save(club);
+
+        clubRepository.saveAndFlush(club);
+        entityManager.refresh(club);
+
     }
 
     public void refreshLeaderboards(Club club) {
         racenetLeaderboardSyncService.syncWithRacenet(club);
+
+        clubRepository.saveAndFlush(club);
+        entityManager.refresh(club);
     }
     public void refreshMembers(Club club) {
         racenetClubMemberSyncService.syncWithRacenet(club);
+
+        clubRepository.saveAndFlush(club);
+        entityManager.refresh(club);
+
     }
 
 

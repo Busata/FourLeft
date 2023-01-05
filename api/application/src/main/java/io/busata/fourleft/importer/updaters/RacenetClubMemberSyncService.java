@@ -22,7 +22,6 @@ public class RacenetClubMemberSyncService {
 
     private final RacenetGateway client;
     private final ClubMemberFactory clubMemberFactory;
-    private final ClubRepository clubRepository;
 
     public void syncWithRacenet(Club club) {
         List<ClubMember> members = getAllMembers(club).stream().map(clubMemberFactory::create).map(member -> {
@@ -32,7 +31,6 @@ public class RacenetClubMemberSyncService {
 
         club.updateMembers(members);
 
-        clubRepository.save(club);
     }
 
     private List<DR2ClubMember> getAllMembers(Club club) {
