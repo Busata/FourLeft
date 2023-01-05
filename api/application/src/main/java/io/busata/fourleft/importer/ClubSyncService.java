@@ -15,6 +15,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -32,6 +33,8 @@ public class ClubSyncService {
     private final RacenetClubMemberSyncService racenetClubMemberSyncService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final EntityManager entityManager;
+
     @Transactional
     public void updateClubs() {
         eventCleanService.cleanArchived();
@@ -48,8 +51,10 @@ public class ClubSyncService {
 
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
 
+                entityManager.refresh(club);
 
-                club.getCurrentEvent().filter(Event::isCurrent).ifPresent(newEvent -> {
+                log.info("Club {} had active event that ended, checking if new one started", club.getName());
+                club.getCurrentEvent().ifPresent(newEvent -> {
                     applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
                 });
             }
@@ -67,8 +72,9 @@ public class ClubSyncService {
                 log.info("Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 fullRefreshClub(club);
             }
+            entityManager.refresh(club);
 
-            club.getCurrentEvent().filter(Event::isCurrent).ifPresent(newEvent -> {
+            club.getCurrentEvent().ifPresent(newEvent -> {
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
             });
         });

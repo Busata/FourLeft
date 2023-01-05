@@ -21,7 +21,7 @@ public class ClubUpdateEventsHandler {
     private final ClubConfigurationRepository clubConfigurationRepository;
     private final ChampionshipCreator championshipCreator;
 
-    @Value("${io.busata.fourleft.scheduling.automated:true}")
+    @Value("${io.busata.fourleft.scheduling.automated:cd true}")
     private boolean createChampionships;
 
     @EventListener
