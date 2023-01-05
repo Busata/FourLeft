@@ -51,6 +51,7 @@ public class ClubSyncService {
 
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
 
+                entityManager.refresh(club);
 
                 log.info("Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
@@ -71,6 +72,7 @@ public class ClubSyncService {
                 log.info("Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 fullRefreshClub(club);
             }
+            entityManager.refresh(club);
 
             club.getCurrentEvent().ifPresent(newEvent -> {
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
