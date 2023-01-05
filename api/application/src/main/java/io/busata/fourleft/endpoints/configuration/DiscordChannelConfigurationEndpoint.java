@@ -52,7 +52,29 @@ public class DiscordChannelConfigurationEndpoint {
 
         //createEnduranceViewScots(defaultPoints);
 
-        createScandiDozerClub(defaultPoints);
+        //createScandiDozerClub(defaultPoints);
+
+        createEstonianR5(defaultPoints);
+    }
+
+    private void createEstonianR5(PointsCalculator pointsCalculator) {
+
+        final var view = new SingleClubView(413952L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+
+        ClubView clubView = new ClubView(
+                UUID.randomUUID(),
+                "Dirt Estonia R5",
+                view,
+                pointsCalculator
+        );
+
+        clubView = repository.save(clubView);
+
+        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
+                UUID.randomUUID(), 1056967249421938750L,"Dirt Estonia R5", clubView, of(clubView));
+
+        discordChannelConfigurationRepository.save(discordChannelConfiguration);
+
     }
 
     private void createScandiDozerClub(PointsCalculator calculator) {
