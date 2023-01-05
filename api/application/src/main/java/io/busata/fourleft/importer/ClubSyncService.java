@@ -37,38 +37,40 @@ public class ClubSyncService {
 
     @Transactional
     public void updateClubs() {
+        log.info("Start updating clubs.");
         eventCleanService.cleanArchived();
 
         clubRepository.findAll()
                 .forEach(this::doUpdate);
+        log.info("End updating clubs.");
     }
 
     protected void doUpdate(Club club) {
         club.getCurrentEvent().ifPresentOrElse(event -> {
             if (event.hasEnded()) {
-                log.info("Club {} has active event that ended, updating.", club.getName());
+                log.info("-- Club {} has active event that ended, updating.", club.getName());
                 fullRefreshClub(club);
 
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
 
 
-                log.info("Club {} had active event that ended, checking if new one started", club.getName());
+                log.info("-- Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
                     applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
                 });
             }
 
             if(shouldUpdateLeaderboards(event)) {
-                log.info("Updating leaderboards for {}", club.getName());
+                log.info("-- Updating leaderboards for {}", club.getName());
                 refreshLeaderboards(club);
-                log.info("Update done.");
+                log.info("-- Update done.");
 
                 applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.LEADERBOARDS_UPDATED, club.getReferenceId()));
             }
 
         }, () -> {
             if(club.requiresRefresh()) {
-                log.info("Club {} has no active event, reached refresh threshold, updating.", club.getName());
+                log.info("-- Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 fullRefreshClub(club);
             }
 

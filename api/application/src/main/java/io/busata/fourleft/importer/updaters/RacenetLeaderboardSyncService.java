@@ -24,7 +24,7 @@ public class RacenetLeaderboardSyncService {
         try {
             club.getCurrentEvent().ifPresent(this::updateEventLeaderboards);
         } catch (Exception ex) {
-            log.error("-- Error while updating current leaderboards", ex);
+            log.error("-- -- Error while updating current leaderboards", ex);
         }
 
         try {
@@ -32,14 +32,14 @@ public class RacenetLeaderboardSyncService {
                     .filter(event -> event.getLastResultCheckedTime() == null)
                     .ifPresent(this::updateEventLeaderboards);
         } catch (Exception ex) {
-            log.error("-- Error while updating previous leaderboard", ex);
+            log.error("-- -- Error while updating previous leaderboard", ex);
         }
     }
 
     private void updateEventLeaderboards(Event event) {
         ImmutableList.copyOf(event.getStages()).forEach(stage -> {
             try {
-                log.info("-- Updating for event {}, stage {}", event.getName(), stage.getName());
+                log.info("-- -- Updating for event {}, stage {}", event.getName(), stage.getName());
                 leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()));
                 event.setLastResultCheckedTime(LocalDateTime.now());
                 eventRepository.save(event);
@@ -52,7 +52,7 @@ public class RacenetLeaderboardSyncService {
                     throw ex;
                 }
             } catch (Exception ex) {
-                log.error("Couldn't update event {} {} {}", event.getName(), event.getCountry(), ex);
+                log.error("-- -- -- Couldn't update event {} {} {}", event.getName(), event.getCountry(), ex);
                 event.setLastResultCheckedTime(LocalDateTime.now());
                 eventRepository.save(event);
             }
