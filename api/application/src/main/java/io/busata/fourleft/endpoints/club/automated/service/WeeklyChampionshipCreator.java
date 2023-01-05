@@ -17,6 +17,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -38,7 +39,6 @@ public class WeeklyChampionshipCreator {
     private final Random random = new Random(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
     private final ClubRepository clubRepository;
     private final CycleOptionsSelector cycleOptionsSelector;
-    private final int durationChampionshipInMinutes = 10075;
     private final int COUNTRY_CYCLE_LENGTH = 4;
 
     @Transactional
@@ -56,13 +56,20 @@ public class WeeklyChampionshipCreator {
                 .start(LocalDateTime.now(ZoneOffset.UTC).toString())
                 .withEvents(
                         event().country(countryOption)
-                                .durationMins(durationChampionshipInMinutes)// 24 hours - 10 minutes, gives the bot some time to post results
+                                .durationMins(calculateDuration())
                                 .vehicle(vehicleClass)
                                 .withStages(
                                         stages.stream().toArray(DR2ChampionshipCreateStageBuilder[]::new)
                                 )
                 )
                 .build();
+    }
+
+    private static long calculateDuration() {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime desired = LocalDateTime.now().plusWeeks(1).withHour(7).withMinute(50).withSecond(0);
+
+        return Duration.between(now, desired).toMinutes();
     }
 
     private List<DR2ChampionshipCreateStageBuilder> generateStages(long clubId, CountryOption countryOption) {

@@ -1,8 +1,9 @@
-package io.busata.fourleftdiscord.messaging;
+package io.busata.fourleftdiscord.listeners;
 
 import discord4j.common.util.Snowflake;
 import io.busata.fourleft.api.messages.MessageEvent;
 import io.busata.fourleft.api.messages.MessageOperation;
+import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.domain.discord.models.MessageType;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Component;
 public class ManualMessagesListener {
     private final DiscordMessageGateway facade;
 
-    @RabbitListener(queues="q.messages")
+    @RabbitListener(queues= QueueNames.MESSAGES_QUEUE)
     public void listen(MessageEvent event) {
-
+        log.info("Received message event: {}.", event.operation());
         if (event.operation() == MessageOperation.CREATE) {
             facade.postMessage(Snowflake.of(event.channelId()), event.content(), MessageType.RESULTS_POST);
         } else if (event.operation() == MessageOperation.DELETE) {

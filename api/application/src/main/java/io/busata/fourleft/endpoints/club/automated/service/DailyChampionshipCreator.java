@@ -16,6 +16,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -36,7 +37,6 @@ public class DailyChampionshipCreator {
 
     private final ClubRepository clubRepository;
     private final CycleOptionsSelector cycleOptionsSelector;
-    private final int durationChampionshipInMinutes = 1430;
 
     private final List<VehicleClassGroups> vehicleClassGroupSelection =
             ListUtils.union(
@@ -58,7 +58,6 @@ public class DailyChampionshipCreator {
         final var surfaceDegradation = generateSurfaceDegradation();
         final var stageCondition = generateStageCondition(countryConfiguration.getCountry());
 
-
         return championship()
                 .useHardcoreDamage(true)
                 .allowAssists(true)
@@ -67,7 +66,7 @@ public class DailyChampionshipCreator {
                 .start(LocalDateTime.now(ZoneOffset.UTC).toString())
                 .withEvents(
                         event().country(countryConfiguration.getCountry())
-                                .durationMins(durationChampionshipInMinutes)// 24 hours - 10 minutes, gives the bot some time to post results
+                                .durationMins(calculateDuration())// 24 hours - 10 minutes, gives the bot some time to post results
                                 .vehicle(generateWeightedVehicleOption(clubId))
                                 .withStages(
                                         stage()
@@ -78,6 +77,13 @@ public class DailyChampionshipCreator {
                                 )
                 )
                 .build();
+    }
+
+    private static long calculateDuration() {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime desired = LocalDateTime.now().plusDays(1).withHour(9).withMinute(50).withSecond(0);
+
+        return Duration.between(now, desired).toMinutes();
     }
 
     public CountryConfiguration generatedWeightedCountryConfiguration(long clubId) {

@@ -14,7 +14,6 @@ import javax.annotation.PostConstruct;
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "io.busata.fourleft.scheduling", name="clubs", havingValue="true", matchIfMissing = true)
 public class ClubUpdateSchedule {
-
     private final ClubSyncService clubSyncService;
 
     @PostConstruct
@@ -22,7 +21,7 @@ public class ClubUpdateSchedule {
         log.info("CLUB UPDATE SCHEDULE -- ACTIVE");
     }
 
-    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Brussels")
+    @Scheduled(cron = "0 */1 * * * *", zone = "UTC")
     public void updateLeaderboards() {
         clubSyncService.updateClubs();
     }
