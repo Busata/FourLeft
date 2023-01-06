@@ -2,8 +2,7 @@ package io.busata.fourleftdiscord.autoposting.club_results;
 
 import discord4j.common.util.Snowflake;
 import feign.FeignException;
-import io.busata.fourleft.api.messages.ClubOperation;
-import io.busata.fourleft.api.messages.ClubUpdated;
+import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
@@ -18,7 +17,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -32,17 +30,15 @@ public class AutoPostClubResultsService {
     private final AutopostClubResultsMessageService autopostClubResultsMessageService;
 
 
-    @RabbitListener(queues = QueueNames.CLUB_EVENT_QUEUE)
-    public void updateClub(ClubUpdated event) {
-        if(event.operation() == ClubOperation.LEADERBOARDS_UPDATED) {
-            log.info("-- Leaderboards for {} were updated", event.clubId());
+    @RabbitListener(queues = QueueNames.LEADERBOARD_UPDATE)
+    public void updateClub(LeaderboardUpdated event) {
+        log.info("-- Leaderboards for {} were updated", event.clubId());
 
-            discordChannelConfigurationService.getConfigurations()
-                    .stream()
-                    .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                    .filter(configuration -> configuration.includesClub(event.clubId()))
-                    .forEach(this::tryPostingResults);
-        }
+        discordChannelConfigurationService.getConfigurations()
+                .stream()
+                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
+                .filter(configuration -> configuration.includesClub(event.clubId()))
+                .forEach(this::tryPostingResults);
     }
 
     private void tryPostingResults(DiscordChannelConfigurationTo configuration) {

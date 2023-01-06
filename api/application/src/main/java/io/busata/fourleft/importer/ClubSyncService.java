@@ -1,7 +1,8 @@
 package io.busata.fourleft.importer;
 
-import io.busata.fourleft.api.messages.ClubOperation;
-import io.busata.fourleft.api.messages.ClubUpdated;
+import io.busata.fourleft.api.messages.ClubEventEnded;
+import io.busata.fourleft.api.messages.ClubEventStarted;
+import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.repository.ClubRepository;
@@ -11,7 +12,6 @@ import io.busata.fourleft.importer.updaters.RacenetClubSyncService;
 import io.busata.fourleft.importer.updaters.RacenetLeaderboardSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +19,6 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
-
-import static io.busata.fourleft.api.messages.QueueNames.CLUB_EVENT_QUEUE;
 
 @Component
 @RequiredArgsConstructor
@@ -51,12 +49,11 @@ public class ClubSyncService {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
                 fullRefreshClub(club);
 
-                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_ENDED, club.getReferenceId()));
-
+                applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
                 log.info("-- Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
-                    applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
+                    applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));
                 });
             }
 
@@ -65,7 +62,7 @@ public class ClubSyncService {
                 refreshLeaderboards(club);
                 log.info("-- Update done.");
 
-                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.LEADERBOARDS_UPDATED, club.getReferenceId()));
+                applicationEventPublisher.publishEvent(new LeaderboardUpdated(club.getReferenceId()));
             }
 
         }, () -> {
@@ -75,7 +72,7 @@ public class ClubSyncService {
             }
 
             club.getCurrentEvent().ifPresent(newEvent -> {
-                applicationEventPublisher.publishEvent(new ClubUpdated(ClubOperation.EVENT_STARTED, club.getReferenceId()));
+                applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));
             });
         });
     }

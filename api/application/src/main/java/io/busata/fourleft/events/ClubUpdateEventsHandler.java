@@ -1,8 +1,9 @@
 package io.busata.fourleft.events;
 
 
-import io.busata.fourleft.api.messages.ClubOperation;
-import io.busata.fourleft.api.messages.ClubUpdated;
+import io.busata.fourleft.api.messages.ClubEventEnded;
+import io.busata.fourleft.api.messages.ClubEventStarted;
+import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.domain.configuration.repository.ClubConfigurationRepository;
 import io.busata.fourleft.endpoints.club.automated.service.ChampionshipCreator;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Queue;
 
 
 @Component
@@ -25,24 +27,34 @@ public class ClubUpdateEventsHandler {
     private boolean createChampionships;
 
     @EventListener
-    public void handle(ClubUpdated clubUpdated) {
-        rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_QUEUE, clubUpdated);
+    public void handleLeaderboardUpdate(LeaderboardUpdated updated) {
+        rabbitMQ.convertAndSend(QueueNames.LEADERBOARD_UPDATE, updated);
+    }
 
-        if(clubUpdated.operation() == ClubOperation.EVENT_ENDED && createChampionships) {
+    @EventListener
+    public void handleEventEnded(ClubEventEnded event) {
+        rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_ENDED, event);
 
-            clubConfigurationRepository.findAll().stream()
-                    .filter(clubConfiguration -> clubConfiguration.getClubId() == clubUpdated.clubId())
-                    .findFirst()
-                    .ifPresent(clubConfiguration -> {
-                        switch (clubConfiguration.getAutomatedGenerationType()) {
-                            case DAILY -> championshipCreator.createDailyChampionship(clubConfiguration.getClubId());
-                            case MONTHLY -> championshipCreator.createWeeklyChampionship(clubConfiguration.getClubId());
-                        }
-
-                        rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_QUEUE, new ClubUpdated(ClubOperation.EVENT_STARTED, clubUpdated.clubId()));
-                    });
+        if(!createChampionships) {
+            return;
         }
 
+        clubConfigurationRepository.findAll().stream()
+                .filter(clubConfiguration -> clubConfiguration.getClubId() == event.clubId())
+                .findFirst()
+                .ifPresent(clubConfiguration -> {
+                    switch (clubConfiguration.getAutomatedGenerationType()) {
+                        case DAILY -> championshipCreator.createDailyChampionship(clubConfiguration.getClubId());
+                        case MONTHLY -> championshipCreator.createWeeklyChampionship(clubConfiguration.getClubId());
+                    }
+
+                    rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, new ClubEventStarted(event.clubId()));
+                });
+    }
+
+    @EventListener
+    public void handleClubUpdate(ClubEventStarted clubEventStarted) {
+        rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, clubEventStarted);
     }
 
 }

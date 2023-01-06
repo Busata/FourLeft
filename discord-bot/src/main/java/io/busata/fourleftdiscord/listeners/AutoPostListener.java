@@ -1,8 +1,8 @@
 package io.busata.fourleftdiscord.listeners;
 
 import discord4j.common.util.Snowflake;
-import io.busata.fourleft.api.messages.ClubOperation;
-import io.busata.fourleft.api.messages.ClubUpdated;
+import io.busata.fourleft.api.messages.ClubEventEnded;
+import io.busata.fourleft.api.messages.ClubEventStarted;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.autoposting.community_challenges.AutoPostCommunityEventResultsService;
@@ -29,24 +29,22 @@ public class AutoPostListener {
         autoPostCommunityEventResultsService.update();
     }
 
-    @RabbitListener(queues = QueueNames.CLUB_EVENT_QUEUE)
-    public void postPreviousEventResults(ClubUpdated event) {
-        if(event.operation() == ClubOperation.EVENT_ENDED) {
-            log.info("Received club updated event: {}, event ended.", event.clubId());
-            discordChannelConfigurationService.findConfigurationByClubId(event.clubId())
+    @RabbitListener(queues = QueueNames.CLUB_EVENT_ENDED)
+    public void postPreviousEventResults(ClubEventEnded event) {
+        log.info("Received club updated event: {}, event ended.", event.clubId());
+        discordChannelConfigurationService.findConfigurationByClubId(event.clubId())
                 .forEach(configuration -> {
                     final var channelId = Snowflake.of(configuration.channelId());
                     autoPosterAutomatedDailyClubService.postResults(channelId);
                     autoPosterAutomatedDailyClubService.postChampionship(channelId);
                 });
-        }
-
-        if(event.operation() == ClubOperation.EVENT_STARTED) {
-            log.info("Received club updated event: {}, event started.", event.clubId());
-            discordChannelConfigurationService.findConfigurationByClubId(event.clubId()).stream()
-                    .map(DiscordChannelConfigurationTo::channelId)
-                    .map(Snowflake::of)
-                    .forEach(autoPosterAutomatedDailyClubService::postNewStage);
-        }
+    }
+    @RabbitListener(queues = QueueNames.CLUB_EVENT_STARTED)
+    public void postNewEventInfo(ClubEventStarted event) {
+        log.info("Received club updated event: {}, event started.", event.clubId());
+        discordChannelConfigurationService.findConfigurationByClubId(event.clubId()).stream()
+                .map(DiscordChannelConfigurationTo::channelId)
+                .map(Snowflake::of)
+                .forEach(autoPosterAutomatedDailyClubService::postNewStage);
     }
 }
