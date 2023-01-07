@@ -7,7 +7,7 @@ import javax.transaction.Transactional;
 @Component
 public class TransactionHandler {
 
-    @Transactional
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public void runInTransaction(Runnable runnable) {
         runnable.run();
     }

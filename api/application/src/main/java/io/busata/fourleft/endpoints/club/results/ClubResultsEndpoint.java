@@ -11,6 +11,7 @@ import io.busata.fourleft.endpoints.club.results.service.CustomChampionshipStand
 import io.busata.fourleft.importer.ClubSyncService;
 import io.busata.fourleft.domain.clubs.models.Championship;
 import io.busata.fourleft.domain.clubs.models.Club;
+import io.busata.fourleft.importer.updaters.RacenetSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ClubResultsEndpoint {
     private final ClubSyncService clubSyncService;
+
+    private final RacenetSyncService racenetSyncService;
     private final ClubResultToFactory clubResultToFactory;
     private final CustomChampionshipStandingsService championshipStandingsService;
 
@@ -34,7 +37,7 @@ public class ClubResultsEndpoint {
     public void forceRefresh(@PathVariable Long clubId) {
         Club club = clubSyncService.getOrCreate(clubId);
 
-        clubSyncService.fullRefreshClub(club);
+        racenetSyncService.fullRefreshClub(club);
     }
 
     @GetMapping(Routes.CLUB_EVENT_SUMMARY_BY_CLUB_ID)

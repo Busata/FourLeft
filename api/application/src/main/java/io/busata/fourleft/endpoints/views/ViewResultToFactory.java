@@ -122,7 +122,7 @@ public class ViewResultToFactory {
         }
 
         return new SingleResultListTo(
-                "",
+                event.getChampionship().getClub().getName(),
                 createEventInfo(event),
                 new NoResultRestrictionsTo(),
                 totalEntries,

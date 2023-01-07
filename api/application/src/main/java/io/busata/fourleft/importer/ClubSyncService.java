@@ -6,16 +6,12 @@ import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.repository.ClubRepository;
-import io.busata.fourleft.importer.updaters.EventCleanService;
-import io.busata.fourleft.importer.updaters.RacenetClubMemberSyncService;
-import io.busata.fourleft.importer.updaters.RacenetClubSyncService;
-import io.busata.fourleft.importer.updaters.RacenetLeaderboardSyncService;
+import io.busata.fourleft.importer.updaters.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,55 +22,61 @@ import java.time.LocalDateTime;
 public class ClubSyncService {
     private final EventCleanService eventCleanService;
     private final ClubRepository clubRepository;
-    private final RacenetClubSyncService racenetClubSyncService;
-    private final RacenetLeaderboardSyncService racenetLeaderboardSyncService;
-    private final RacenetClubMemberSyncService racenetClubMemberSyncService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    private final EntityManager entityManager;
+    private final RacenetSyncService racenetSyncService;
 
     @Transactional
-    public void updateClubs() {
-        log.info("Start updating clubs.");
+    public void cleanArchived() {
         eventCleanService.cleanArchived();
-
-        clubRepository.findAll()
-                .forEach(this::doUpdate);
-        log.info("End updating clubs.");
+    }
+    @Transactional
+    public void updateClubDetails() {
+        clubRepository.findAll().forEach(this::updateClubDetails);
     }
 
-    protected void doUpdate(Club club) {
+    @Transactional
+    public void updateLeaderboards() {
+        clubRepository.findAll().forEach(this::updateClubLeaderboards);
+    }
+
+    protected void updateClubDetails(Club club) {
          club.getCurrentEvent().ifPresentOrElse(event -> {
             if (event.hasEnded()) {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
-                fullRefreshClub(club);
+                racenetSyncService.fullRefreshClub(club);
 
                 applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
-                //TODO for automated clubs this is tricky as it depends on the event handled synchronously
                 log.info("-- Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
                     applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));
                 });
             }
 
-            if(shouldUpdateLeaderboards(event)) {
-                log.info("-- Updating leaderboards for {}", club.getName());
-                refreshLeaderboards(club);
-                log.info("-- Update done.");
-
-                applicationEventPublisher.publishEvent(new LeaderboardUpdated(club.getReferenceId()));
-            }
-
         }, () -> {
             if(club.requiresRefresh()) {
                 log.info("-- Club {} has no active event, reached refresh threshold, updating.", club.getName());
-                fullRefreshClub(club);
+                racenetSyncService.fullRefreshClub(club);
             }
 
             club.getCurrentEvent().ifPresent(newEvent -> {
                 applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));
             });
+        });
+
+         clubRepository.save(club);
+    }
+
+    public void updateClubLeaderboards(Club club) {
+        club.getCurrentEvent().ifPresent(event -> {
+            if(shouldUpdateLeaderboards(event)) {
+                log.info("-- Updating leaderboards for {}", club.getName());
+                racenetSyncService.refreshLeaderboards(club);
+                log.info("-- Update done.");
+
+                applicationEventPublisher.publishEvent(new LeaderboardUpdated(club.getReferenceId()));
+            }
         });
     }
 
@@ -99,40 +101,9 @@ public class ClubSyncService {
         Club club = new Club();
         club.setReferenceId(clubId);
 
-        fullRefreshClub(club);
+        racenetSyncService.fullRefreshClub(club);
 
         return club;
-    }
-
-        public void fullRefreshClub(Club club) {
-        refreshClubDetails(club);
-        refreshLeaderboards(club);
-        refreshMembers(club);
-
-        clubRepository.saveAndFlush(club);
-        entityManager.refresh(club);
-    }
-
-    public void refreshClubDetails(Club club) {
-        racenetClubSyncService.syncWithRacenet(club);
-
-        clubRepository.saveAndFlush(club);
-        entityManager.refresh(club);
-
-    }
-
-    public void refreshLeaderboards(Club club) {
-        racenetLeaderboardSyncService.syncWithRacenet(club);
-
-        clubRepository.saveAndFlush(club);
-        entityManager.refresh(club);
-    }
-    public void refreshMembers(Club club) {
-        racenetClubMemberSyncService.syncWithRacenet(club);
-
-        clubRepository.saveAndFlush(club);
-        entityManager.refresh(club);
-
     }
 
 

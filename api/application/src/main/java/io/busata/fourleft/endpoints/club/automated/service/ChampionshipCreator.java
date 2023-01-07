@@ -4,6 +4,7 @@ import io.busata.fourleft.domain.clubs.repository.ClubRepository;
 import io.busata.fourleft.importer.ClubSyncService;
 import io.busata.fourleft.common.TransactionHandler;
 import io.busata.fourleft.gateway.racenet.RacenetGateway;
+import io.busata.fourleft.importer.updaters.RacenetSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class ChampionshipCreator {
 
     private final ClubRepository clubRepository;
 
-    private final ClubSyncService clubSyncService;
+    private final RacenetSyncService clubSyncService;
 
     public void createDailyChampionship(long clubId) {
         log.info("Creating daily championship");

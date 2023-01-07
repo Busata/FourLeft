@@ -23,6 +23,10 @@ public class ClubUpdateSchedule {
 
     @Scheduled(cron = "0 */1 * * * *", zone = "UTC")
     public void updateLeaderboards() {
-        clubSyncService.updateClubs();
+        clubSyncService.cleanArchived();
+
+        clubSyncService.updateClubDetails();
+
+        clubSyncService.updateLeaderboards();
     }
 }

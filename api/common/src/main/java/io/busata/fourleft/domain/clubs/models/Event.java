@@ -46,7 +46,7 @@ public class Event {
 
     private boolean archived;
 
-    @ManyToOne(fetch= FetchType.LAZY)
+    @ManyToOne(fetch= FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "championship_id")
     private Championship championship;
 
