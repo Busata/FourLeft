@@ -44,13 +44,14 @@ public class ClubSyncService {
     }
 
     protected void doUpdate(Club club) {
-        club.getCurrentEvent().ifPresentOrElse(event -> {
+         club.getCurrentEvent().ifPresentOrElse(event -> {
             if (event.hasEnded()) {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
                 fullRefreshClub(club);
 
                 applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
+                //TODO for automated clubs this is tricky as it depends on the event handled synchronously
                 log.info("-- Club {} had active event that ended, checking if new one started", club.getName());
                 club.getCurrentEvent().ifPresent(newEvent -> {
                     applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));

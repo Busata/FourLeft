@@ -30,7 +30,7 @@ public class ChampionshipCreator {
         log.info("Championship created!");
 
         transactionHandler.runInTransaction(() -> {
-            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::refreshClubDetails);
+            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
         });
     }
 
@@ -42,27 +42,7 @@ public class ChampionshipCreator {
         log.info("Championship created");
 
         transactionHandler.runInTransaction(() -> {
-            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::refreshClubDetails);
-        });
-    }
-
-
-    public void refreshDaily(long clubId) {
-        log.info("Refreshing daily championship");
-
-        transactionHandler.runInTransaction(() -> {
-            clubRepository
-                    .findByReferenceId(clubId)
-                    .ifPresent(clubSyncService::fullRefreshClub);
-        });
-    }
-    public void refreshWeekly(long clubId) {
-        log.info("Refreshing weekly championship");
-
-        transactionHandler.runInTransaction(() -> {
-            clubRepository
-                    .findByReferenceId(clubId)
-                    .ifPresent(clubSyncService::fullRefreshClub);
+            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
         });
     }
 }

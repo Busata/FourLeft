@@ -48,7 +48,7 @@ public class ClubUpdateEventsHandler {
                         case MONTHLY -> championshipCreator.createWeeklyChampionship(clubConfiguration.getClubId());
                     }
 
-                    rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, new ClubEventStarted(event.clubId()));
+                    //rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, new ClubEventStarted(event.clubId()));
                 });
     }
 
