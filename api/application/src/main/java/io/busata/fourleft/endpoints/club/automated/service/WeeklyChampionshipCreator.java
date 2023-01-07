@@ -67,7 +67,7 @@ public class WeeklyChampionshipCreator {
 
     private static long calculateDuration() {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime desired = LocalDateTime.now().plusWeeks(1).withHour(7).withMinute(50).withSecond(0);
+        LocalDateTime desired = LocalDateTime.now(ZoneOffset.UTC).plusWeeks(1).withHour(6).withMinute(50).withSecond(0);
 
         return Duration.between(now, desired).toMinutes();
     }

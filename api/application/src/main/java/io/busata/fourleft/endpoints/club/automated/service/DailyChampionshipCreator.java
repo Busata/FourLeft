@@ -81,7 +81,7 @@ public class DailyChampionshipCreator {
 
     private static long calculateDuration() {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime desired = LocalDateTime.now().plusDays(1).withHour(9).withMinute(50).withSecond(0);
+        LocalDateTime desired = LocalDateTime.now(ZoneOffset.UTC).plusDays(1).withHour(8).withMinute(50).withSecond(1);
 
         return Duration.between(now, desired).toMinutes();
     }
