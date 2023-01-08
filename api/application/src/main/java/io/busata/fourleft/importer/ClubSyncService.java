@@ -83,7 +83,7 @@ public class ClubSyncService {
                 Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 10;
     }
 
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Club getOrCreate(long clubId) {
         return clubRepository.findByReferenceId(clubId)
                 .orElseGet(
