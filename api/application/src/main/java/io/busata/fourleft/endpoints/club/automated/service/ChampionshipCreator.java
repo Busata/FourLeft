@@ -1,8 +1,6 @@
 package io.busata.fourleft.endpoints.club.automated.service;
 
 import io.busata.fourleft.domain.clubs.repository.ClubRepository;
-import io.busata.fourleft.importer.ClubSyncService;
-import io.busata.fourleft.common.TransactionHandler;
 import io.busata.fourleft.gateway.racenet.RacenetGateway;
 import io.busata.fourleft.importer.updaters.RacenetSyncService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,6 @@ public class ChampionshipCreator {
     private final RacenetGateway client;
     private final DailyChampionshipCreator dailyChampionshipCreator;
     private final WeeklyChampionshipCreator weeklyChampionshipCreator;
-    private final TransactionHandler transactionHandler;
 
     private final ClubRepository clubRepository;
 
@@ -30,9 +27,7 @@ public class ChampionshipCreator {
 
         log.info("Championship created!");
 
-        transactionHandler.runInTransaction(() -> {
-            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
-        });
+        clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
     }
 
     public void createWeeklyChampionship(long clubId) {
@@ -42,8 +37,6 @@ public class ChampionshipCreator {
 
         log.info("Championship created");
 
-        transactionHandler.runInTransaction(() -> {
-            clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
-        });
+        clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
     }
 }

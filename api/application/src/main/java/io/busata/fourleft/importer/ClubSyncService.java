@@ -2,6 +2,7 @@ package io.busata.fourleft.importer;
 
 import io.busata.fourleft.api.messages.ClubEventEnded;
 import io.busata.fourleft.api.messages.ClubEventStarted;
+import io.busata.fourleft.api.messages.ClubInactive;
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,7 +26,10 @@ public class ClubSyncService {
     private final ClubRepository clubRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final EntityManager entityManager;
     private final RacenetSyncService racenetSyncService;
+
+
 
     @Transactional
     public void cleanArchived() {
@@ -45,6 +50,7 @@ public class ClubSyncService {
             if (event.hasEnded()) {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
                 racenetSyncService.fullRefreshClub(club);
+                entityManager.merge(club);
 
                 applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
@@ -58,10 +64,14 @@ public class ClubSyncService {
             if(club.requiresRefresh()) {
                 log.info("-- Club {} has no active event, reached refresh threshold, updating.", club.getName());
                 racenetSyncService.fullRefreshClub(club);
+                entityManager.merge(club);
+
             }
 
-            club.getCurrentEvent().ifPresent(newEvent -> {
+            club.getCurrentEvent().ifPresentOrElse(newEvent -> {
                 applicationEventPublisher.publishEvent(new ClubEventStarted(club.getReferenceId()));
+            }, () -> {
+                applicationEventPublisher.publishEvent(new ClubInactive(club.getReferenceId()));
             });
         });
 
@@ -73,6 +83,8 @@ public class ClubSyncService {
             if(shouldUpdateLeaderboards(event)) {
                 log.info("-- Updating leaderboards for {}", club.getName());
                 racenetSyncService.refreshLeaderboards(club);
+                entityManager.merge(club);
+
                 log.info("-- Update done.");
 
                 applicationEventPublisher.publishEvent(new LeaderboardUpdated(club.getReferenceId()));
