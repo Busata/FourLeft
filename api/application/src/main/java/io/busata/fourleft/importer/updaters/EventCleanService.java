@@ -8,6 +8,7 @@ import io.busata.fourleft.domain.clubs.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -18,6 +19,7 @@ public class EventCleanService {
 
     private final ClubRepository clubRepository;
 
+    @Transactional
     public void cleanArchived() {
        List<Championship> championships = eventRepository.findByArchived(true).stream().map(Event::getChampionship).toList();;
 

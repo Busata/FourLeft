@@ -31,7 +31,6 @@ public class ClubSyncService {
 
 
 
-    @Transactional
     public void cleanArchived() {
         eventCleanService.cleanArchived();
     }
@@ -74,8 +73,6 @@ public class ClubSyncService {
                 applicationEventPublisher.publishEvent(new ClubInactive(club.getReferenceId()));
             });
         });
-
-         clubRepository.save(club);
     }
 
     public void updateClubLeaderboards(Club club) {
