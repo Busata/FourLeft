@@ -52,8 +52,8 @@ public class ChampionshipStandingsMessageFactory {
                 final var header = determineStandingsHeader(groupIdx, singlePointListTo);
 
                 builder.addField(header, formattedEntries, false);
-                builder.addField("**Total entries**", String.valueOf(totalScoringEntries), false);
             });
+            builder.addField("**Total entries**", "*%s*".formatted(totalScoringEntries), false);
         });
 
         return builder.build();
