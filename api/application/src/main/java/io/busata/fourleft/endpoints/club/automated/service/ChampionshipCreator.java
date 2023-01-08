@@ -16,8 +16,6 @@ public class ChampionshipCreator {
     private final DailyChampionshipCreator dailyChampionshipCreator;
     private final WeeklyChampionshipCreator weeklyChampionshipCreator;
 
-    private final ClubRepository clubRepository;
-
     private final RacenetSyncService clubSyncService;
 
     public void createDailyChampionship(long clubId) {
@@ -27,7 +25,7 @@ public class ChampionshipCreator {
 
         log.info("Championship created!");
 
-        clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
+        clubSyncService.fullRefreshClub(clubId);
     }
 
     public void createWeeklyChampionship(long clubId) {
@@ -37,6 +35,6 @@ public class ChampionshipCreator {
 
         log.info("Championship created");
 
-        clubRepository.findByReferenceId(clubId).ifPresent(clubSyncService::fullRefreshClub);
+        clubSyncService.fullRefreshClub(clubId);
     }
 }

@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -25,31 +26,22 @@ public class ClubSyncService {
     private final EventCleanService eventCleanService;
     private final ClubRepository clubRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-
-    private final EntityManager entityManager;
     private final RacenetSyncService racenetSyncService;
 
-
+    @Transactional
+    public List<Club> findClubs() {
+        return clubRepository.findAll();
+    }
 
     public void cleanArchived() {
         eventCleanService.cleanArchived();
     }
-    @Transactional
-    public void updateClubDetails() {
-        clubRepository.findAll().forEach(this::updateClubDetails);
-    }
 
-    @Transactional
-    public void updateLeaderboards() {
-        clubRepository.findAll().forEach(this::updateClubLeaderboards);
-    }
-
-    protected void updateClubDetails(Club club) {
+    public void updateClubDetails(Club club) {
          club.getCurrentEvent().ifPresentOrElse(event -> {
             if (event.hasEnded()) {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
-                racenetSyncService.fullRefreshClub(club);
-                entityManager.merge(club);
+                racenetSyncService.fullRefreshClub(club.getReferenceId());
 
                 applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
@@ -62,9 +54,7 @@ public class ClubSyncService {
         }, () -> {
             if(club.requiresRefresh()) {
                 log.info("-- Club {} has no active event, reached refresh threshold, updating.", club.getName());
-                racenetSyncService.fullRefreshClub(club);
-                entityManager.merge(club);
-
+                racenetSyncService.fullRefreshClub(club.getReferenceId());
             }
 
             club.getCurrentEvent().ifPresentOrElse(newEvent -> {
@@ -79,8 +69,7 @@ public class ClubSyncService {
         club.getCurrentEvent().ifPresent(event -> {
             if(shouldUpdateLeaderboards(event)) {
                 log.info("-- Updating leaderboards for {}", club.getName());
-                racenetSyncService.refreshLeaderboards(club);
-                entityManager.merge(club);
+                racenetSyncService.refreshLeaderboards(club.getReferenceId());
 
                 log.info("-- Update done.");
 
@@ -110,7 +99,7 @@ public class ClubSyncService {
         Club club = new Club();
         club.setReferenceId(clubId);
 
-        racenetSyncService.fullRefreshClub(club);
+        racenetSyncService.fullRefreshClub(clubId);
 
         return club;
     }

@@ -24,7 +24,6 @@ public class RacenetClubMemberSyncService {
     private final RacenetGateway client;
     private final ClubMemberFactory clubMemberFactory;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public void syncWithRacenet(Club club) {
         List<ClubMember> members = getAllMembers(club).stream().map(clubMemberFactory::create).map(member -> {
             member.setClub(club);

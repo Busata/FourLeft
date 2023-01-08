@@ -29,7 +29,6 @@ public class RacenetClubSyncService {
 
     private final ClubRepository clubRepository;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public void syncWithRacenet(Club club) {
         syncDetails(club);
         syncChampionships(club);

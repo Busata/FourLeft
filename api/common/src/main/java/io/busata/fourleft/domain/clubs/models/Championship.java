@@ -55,7 +55,7 @@ public class Championship {
     private Club club;
 
 
-    @OneToMany(mappedBy="championship", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy="championship", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("referenceId asc")
     private List<Event> events = new ArrayList<>();
 

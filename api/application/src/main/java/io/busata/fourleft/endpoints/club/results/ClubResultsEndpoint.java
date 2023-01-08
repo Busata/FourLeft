@@ -37,7 +37,7 @@ public class ClubResultsEndpoint {
     public void forceRefresh(@PathVariable Long clubId) {
         Club club = clubSyncService.getOrCreate(clubId);
 
-        racenetSyncService.fullRefreshClub(club);
+        racenetSyncService.fullRefreshClub(club.getReferenceId());
     }
 
     @GetMapping(Routes.CLUB_EVENT_SUMMARY_BY_CLUB_ID)

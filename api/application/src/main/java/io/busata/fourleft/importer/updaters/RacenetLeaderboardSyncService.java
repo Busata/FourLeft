@@ -21,7 +21,6 @@ public class RacenetLeaderboardSyncService {
     private final EventRepository eventRepository;
     private final LeaderboardFetcher leaderboardFetcher;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public void syncWithRacenet(Club club) {
         try {
             club.getCurrentEvent().ifPresent(this::updateEventLeaderboards);

@@ -1,5 +1,6 @@
 package io.busata.fourleft.schedules;
 
+import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,9 @@ public class ClubUpdateSchedule {
     public void updateLeaderboards() {
         clubSyncService.cleanArchived();
 
-        clubSyncService.updateClubDetails();
-
-        clubSyncService.updateLeaderboards();
+        clubSyncService.findClubs().forEach(club -> {
+            clubSyncService.updateClubDetails(club);
+            clubSyncService.updateClubLeaderboards(club);
+        });
     }
 }
