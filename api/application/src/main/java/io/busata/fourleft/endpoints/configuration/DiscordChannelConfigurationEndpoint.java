@@ -7,9 +7,7 @@ import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
-import io.busata.fourleft.domain.configuration.points.PointSystemRepository;
-import io.busata.fourleft.domain.configuration.points.PointsCalculator;
-import io.busata.fourleft.domain.configuration.points.PointsCalculatorRepository;
+import io.busata.fourleft.domain.configuration.points.*;
 import io.busata.fourleft.domain.configuration.results_views.BadgeType;
 import io.busata.fourleft.domain.configuration.results_views.CommunityChallengeView;
 import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,15 +41,76 @@ public class DiscordChannelConfigurationEndpoint {
 
     @PostMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     public void setup() {
+        PointSystem grfHistoryExpertPointSystem = new PointSystem(
+                UUID.randomUUID(),
+                "GRF Expert Historic",
+                2,
+                0,
+                of(
+                        new PointPair(1, 40 ),
+                        new PointPair(2, 36),
+                        new PointPair(3, 33),
+                        new PointPair(4, 30),
+                        new PointPair(5, 28),
+                        new PointPair(6, 26),
+                        new PointPair(7, 24),
+                        new PointPair(8, 22),
+                        new PointPair(9, 20),
+                        new PointPair(10, 18),
+                        new PointPair(11, 17),
+                        new PointPair(12, 16),
+                        new PointPair(13, 15),
+                        new PointPair(14, 14),
+                        new PointPair(15, 13),
+                        new PointPair(16, 12),
+                        new PointPair(17, 11),
+                        new PointPair(18, 10),
+                        new PointPair(19, 9),
+                        new PointPair(21, 8),
+                        new PointPair(21, 7),
+                        new PointPair(22, 6),
+                        new PointPair(23, 5),
+                        new PointPair(24, 4),
+                        new PointPair(25, 3),
+                        new PointPair(26, 2)
+                ),
+                of(
+                        new PointPair(1, 5),
+                        new PointPair(2, 4),
+                        new PointPair(3, 3),
+                        new PointPair(4, 2),
+                        new PointPair(5, 1)
+                )
+        );
 
-        var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
+        grfHistoryExpertPointSystem = pointSystemRepository.save(grfHistoryExpertPointSystem);
 
 
-        //createEnduranceViewScots(defaultPoints);
+        FixedPointsCalculator fixedPointsCalculator = new FixedPointsCalculator(1, null, grfHistoryExpertPointSystem);
 
-        //createScandiDozerClub(defaultPoints);
+        fixedPointsCalculator = pointsCalculatorRepository.save(fixedPointsCalculator);
 
-        createEstonianR5(defaultPoints);
+        createGRFHistoryExpert(fixedPointsCalculator);
+    }
+
+    private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
+
+        final var view = new SingleClubView(314967L, true, -1, BadgeType.NONE, PlayerRestrictions.NONE, of());
+
+        ClubView clubView = new ClubView(
+                UUID.randomUUID(),
+                "GRF Expert Historic",
+                view,
+                pointsCalculator
+        );
+
+        clubView = repository.save(clubView);
+
+        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
+                UUID.randomUUID(), 1055617663436599356L,"GRF Expert Historic", clubView, of(clubView));
+
+        discordChannelConfigurationRepository.save(discordChannelConfiguration);
+
     }
 
     private void createEstonianR5(PointsCalculator pointsCalculator) {
