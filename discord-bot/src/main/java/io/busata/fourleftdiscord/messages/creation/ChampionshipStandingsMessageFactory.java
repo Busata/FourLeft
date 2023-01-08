@@ -27,6 +27,7 @@ public class ChampionshipStandingsMessageFactory {
         builder.color(Color.of(244, 0, 75));
 
         result.getPoints().forEach(singlePointListTo -> {
+            final var totalScoringEntries = singlePointListTo.points().stream().filter(entry -> entry.points() > 1).count();
             final var sortedEntries = singlePointListTo.points().stream()
                     .sorted(Comparator.comparing(PointPairTo::points).reversed())
                     .filter(entry -> entry.points() > 0)
@@ -51,6 +52,7 @@ public class ChampionshipStandingsMessageFactory {
                 final var header = determineStandingsHeader(groupIdx, singlePointListTo);
 
                 builder.addField(header, formattedEntries, false);
+                builder.addField("**Total entries**", String.valueOf(totalScoringEntries), false);
             });
         });
 
