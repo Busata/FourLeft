@@ -83,26 +83,15 @@ public class ClubSyncService {
                 Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 10;
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Club getOrCreate(long clubId) {
         return clubRepository.findByReferenceId(clubId)
                 .orElseGet(
                         () -> {
                             log.info("Unknown club {}, fetching from API", clubId);
-                            Club club = createClub(clubId);
-                            return clubRepository.save(club);
+                            racenetSyncService.createClub(clubId);
+                            racenetSyncService.fullRefreshClub(clubId);
+                            return clubRepository.getByReferenceId(clubId);
                         }
                 );
     }
-
-    private Club createClub(long clubId) {
-        Club club = new Club();
-        club.setReferenceId(clubId);
-
-        racenetSyncService.fullRefreshClub(clubId);
-
-        return club;
-    }
-
-
 }

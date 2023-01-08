@@ -1,5 +1,6 @@
 package io.busata.fourleft.importer.updaters;
 
+import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,15 @@ public class RacenetSyncService {
 
     private final RacenetLeaderboardSyncService racenetLeaderboardSyncService;
     private final RacenetClubMemberSyncService racenetClubMemberSyncService;
+
+
+    @Transactional
+    public Club createClub(long clubId) {
+        Club club = new Club();
+        club.setReferenceId(clubId);
+
+        return clubRepository.save(club);
+    }
 
     @Transactional
     public void fullRefreshClub(long clubId) {
