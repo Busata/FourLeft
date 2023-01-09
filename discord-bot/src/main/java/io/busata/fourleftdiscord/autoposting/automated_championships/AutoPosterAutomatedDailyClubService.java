@@ -38,7 +38,7 @@ public class AutoPosterAutomatedDailyClubService {
         try {
             discordUtils.postMessage(
                     channelId,
-                    message.withTitle("Daily Championship standings"),
+                    message.withTitle("Championship standings"),
                     MessageType.AUTOMATED_CLUB_POST
             );
         } catch (Exception ex) {
