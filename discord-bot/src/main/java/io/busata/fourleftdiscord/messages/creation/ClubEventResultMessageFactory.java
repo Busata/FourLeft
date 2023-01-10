@@ -74,8 +74,6 @@ public class ClubEventResultMessageFactory {
 
         String countryImage = eventInfos.stream().map(EventInfoTo::country).findFirst().map(fieldMapper::createImage).orElse("");
 
-        builder.thumbnail("");
-
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
         builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
