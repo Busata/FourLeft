@@ -16,6 +16,17 @@ public class FixedPointChampionshipFetcher {
     public List<Championship> filterChampionships(List<Championship> championships, FixedPointsCalculator calc, PointsPeriod period) {
         championships = new ArrayList<>(championships);
 
+        if(calc.getJoinChampionshipsCount() == 1) {
+
+            championships = championships.stream().sorted(Comparator.comparing(Championship::getOrder)).collect(Collectors.toList());
+            Collections.reverse(championships);
+
+            return championships.stream().limit(1).collect(Collectors.toList());
+        }
+
+
+
+
         championships = championships.stream().filter(Championship::isInActive).sorted(Comparator.comparing(Championship::getOrder))
                 .collect(Collectors.toList());
 
