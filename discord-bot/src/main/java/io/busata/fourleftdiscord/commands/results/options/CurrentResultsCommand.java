@@ -114,7 +114,8 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                     return event.createFollowup(InteractionFollowupCreateSpec.builder()
                             .ephemeral(true)
                             .content("Which view?")
-                            .addComponent(ActionRow.of(menu, removeButton))
+                            .addComponent(ActionRow.of(menu))
+                            .addComponent(ActionRow.of(removeButton))
                             .build());
                 }
 
