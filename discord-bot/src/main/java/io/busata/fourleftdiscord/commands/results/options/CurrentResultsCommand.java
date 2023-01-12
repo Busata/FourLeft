@@ -63,7 +63,10 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                 String id = menuEvent.getValues().get(0);
                 List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResults(UUID.fromString(id));
 
-                return menuEvent.createFollowup(InteractionFollowupCreateSpec.builder().addAllEmbeds(results).build());
+                Snowflake channelId = menuEvent.getInteraction().getChannelId();
+                discordMessageGateway.postMessage(channelId,results, MessageType.RESULTS_POST);
+                discordMessageGateway.removeMessage(channelId, menuEvent.getInteraction().getMessageId().orElseThrow());
+                return Mono.empty();
             } else {
                 return Mono.empty();
             }
