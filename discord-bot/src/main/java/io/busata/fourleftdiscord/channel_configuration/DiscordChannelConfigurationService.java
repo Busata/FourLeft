@@ -29,7 +29,6 @@ public class DiscordChannelConfigurationService {
                 .collect(Collectors.toList());
     }
 
-
     public DiscordChannelConfigurationTo findConfigurationByChannelId(Long channelId) {
         return this.getConfigurations().stream().filter(channelConfigurationTo -> channelConfigurationTo.channelId().equals(channelId)).findFirst().orElseThrow();
     }
@@ -40,6 +39,6 @@ public class DiscordChannelConfigurationService {
 
     public UUID getViewId(Snowflake channelId) {
         final var configuration = this.findConfigurationByChannelId(channelId);
-        return configuration.clubViewTo().id();
+        return configuration.commandClubViews().get(0).id();
     }
 }

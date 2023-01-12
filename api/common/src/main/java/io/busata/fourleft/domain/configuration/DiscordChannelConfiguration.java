@@ -3,6 +3,7 @@ package io.busata.fourleft.domain.configuration;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,12 +27,18 @@ public class DiscordChannelConfiguration {
 
     Long channelId;
 
+    @Setter
     String description;
 
     @ManyToOne
     @JoinColumn(name = "club_view_configuration_id")
     ClubView commandsClubView;
 
+    @ManyToMany
+    @JoinTable(name = "discord_channel_club_view_configurations",
+            joinColumns = {@JoinColumn(name = "discord_channel_configuration_id")},
+            inverseJoinColumns = {@JoinColumn(name = "commands_club_view_configuration_id")})
+    List<ClubView> commandsClubViews;
 
     @ManyToMany
     @JoinTable(name = "discord_channel_autopost_configurations",

@@ -22,6 +22,10 @@ public class ResultsFetcher {
 
     public List<EmbedCreateSpec> getCurrentEventResults(Snowflake channelId) {
         final UUID viewId = discordChannelConfigurationService.getViewId(channelId);
+        return this.getCurrentEventResults(viewId);
+    }
+
+    public List<EmbedCreateSpec> getCurrentEventResults(UUID viewId) {
         final var clubResult = api.getViewCurrentResults(viewId);
         return messageTemplateFactory.createEmbedFromClubResult(clubResult);
     }

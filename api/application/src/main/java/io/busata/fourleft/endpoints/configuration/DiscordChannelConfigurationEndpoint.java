@@ -41,59 +41,12 @@ public class DiscordChannelConfigurationEndpoint {
 
     @PostMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     public void setup() {
-        PointSystem grfHistoryExpertPointSystem = new PointSystem(
-                UUID.randomUUID(),
-                "GRF Expert Historic",
-                2,
-                0,
-                of(
-                        new PointPair(1, 40 ),
-                        new PointPair(2, 36),
-                        new PointPair(3, 33),
-                        new PointPair(4, 30),
-                        new PointPair(5, 28),
-                        new PointPair(6, 26),
-                        new PointPair(7, 24),
-                        new PointPair(8, 22),
-                        new PointPair(9, 20),
-                        new PointPair(10, 18),
-                        new PointPair(11, 17),
-                        new PointPair(12, 16),
-                        new PointPair(13, 15),
-                        new PointPair(14, 14),
-                        new PointPair(15, 13),
-                        new PointPair(16, 12),
-                        new PointPair(17, 11),
-                        new PointPair(18, 10),
-                        new PointPair(19, 9),
-                        new PointPair(21, 8),
-                        new PointPair(21, 7),
-                        new PointPair(22, 6),
-                        new PointPair(23, 5),
-                        new PointPair(24, 4),
-                        new PointPair(25, 3),
-                        new PointPair(26, 2)
-                ),
-                of(
-                        new PointPair(1, 5),
-                        new PointPair(2, 4),
-                        new PointPair(3, 3),
-                        new PointPair(4, 2),
-                        new PointPair(5, 1)
-                )
-        );
 
-        grfHistoryExpertPointSystem = pointSystemRepository.save(grfHistoryExpertPointSystem);
-
-
-        FixedPointsCalculator fixedPointsCalculator = new FixedPointsCalculator(1, null, grfHistoryExpertPointSystem);
-
-        fixedPointsCalculator = pointsCalculatorRepository.save(fixedPointsCalculator);
-
-        createGRFHistoryExpert(fixedPointsCalculator);
+        var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
+        createEnduranceViewScots(defaultPoints);
     }
 
-    private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
+    /*private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
 
         final var view = new SingleClubView(314967L, true, -1, BadgeType.NONE, PlayerRestrictions.NONE, of());
 
@@ -169,8 +122,10 @@ public class DiscordChannelConfigurationEndpoint {
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
 
     }
+
+     */
     private void createEnduranceViewScots(PointsCalculator pointsCalculator) {
-        final var view = new SingleClubView(217020L, false, 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
+        final var view = new SingleClubView(349480L, false, 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
                 "Busata",
                 "Hello There",
                 "Boring Damo",
@@ -184,7 +139,7 @@ public class DiscordChannelConfigurationEndpoint {
 
         ClubView clubView = new ClubView(
                 UUID.randomUUID(),
-                "View on endurance club for scottish discord",
+                "View on endurance club (H2 RWD) for scottish discord",
                 view,
                 pointsCalculator
         );
@@ -192,9 +147,11 @@ public class DiscordChannelConfigurationEndpoint {
 
         clubView = repository.save(clubView);
 
+        DiscordChannelConfiguration discordChannelConfiguration = discordChannelConfigurationRepository.findByChannelId(1034062257983864842L).orElseThrow();
+        discordChannelConfiguration.setDescription("Scottish Endurance view");
+        discordChannelConfiguration.getCommandsClubViews().add(clubView);
+        discordChannelConfiguration.getAutopostClubViews().add(clubView);
 
-        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
-                UUID.randomUUID(), 1034062257983864842L,"GRF Championship", clubView, of(clubView));
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
@@ -207,7 +164,7 @@ public class DiscordChannelConfigurationEndpoint {
                     configuration.getId(),
                     configuration.getChannelId(),
                     configuration.getDescription(),
-                    getClubViewTo(configuration.getCommandsClubView()),
+                    configuration.getCommandsClubViews().stream().map(this::getClubViewTo).collect(Collectors.toList()),
                     configuration.getAutopostClubViews().stream().map(this::getClubViewTo).collect(Collectors.toList())
             );
         }).collect(Collectors.toList());
@@ -221,7 +178,7 @@ public class DiscordChannelConfigurationEndpoint {
                 configurationToFactory.create(configuration.getPointsCalculator())
         );
     }
-
+/*
     private void createGRFSpecial(PointsCalculator pointsCalculator) {
         final var tiersView = tiersViewRepository.getById(UUID.fromString("7961e20d-6719-43d1-bc9b-00835d6df589"));
 
@@ -434,7 +391,7 @@ public class DiscordChannelConfigurationEndpoint {
                 UUID.randomUUID(), 1022546826836066334L, "GRF One Shot", clubView, of(clubView));
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
-    }
+    }*/
 
 
 }

@@ -7,12 +7,12 @@ public record DiscordChannelConfigurationTo(
         UUID id,
         Long channelId,
         String description,
-        ClubViewTo clubViewTo,
+        List<ClubViewTo> commandClubViews,
         List<ClubViewTo> autopostClubViews
 ) {
 
     public boolean hasAutopostViews() {
-        return this.autopostClubViews.size() > 0;
+        return !this.autopostClubViews.isEmpty();
     }
 
     public boolean includesClub(long clubId) {
