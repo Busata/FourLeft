@@ -47,9 +47,10 @@ public class AutoPosterAutomatedDailyClubService {
     }
 
     public void postNewStage(Snowflake channelId) {
-        List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResults(channelId);
+        try {
 
-            try {
+            List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResults(channelId);
+
                 discordUtils.postMessage(
                         channelId,
                         messages,
