@@ -19,13 +19,18 @@ public class ManualMessagesListener {
 
     @RabbitListener(queues= QueueNames.MESSAGES_QUEUE)
     public void listen(MessageEvent event) {
-        log.info("Received message event: {}.", event.operation());
-        if (event.operation() == MessageOperation.CREATE) {
-            facade.postMessage(Snowflake.of(event.channelId()), event.content(), MessageType.RESULTS_POST);
-        } else if (event.operation() == MessageOperation.DELETE) {
-            facade.removeMessage(Snowflake.of(event.channelId()), Snowflake.of(event.messageId()));
-        } else if (event.operation() == MessageOperation.UPDATE) {
-            facade.editMessage(Snowflake.of(event.channelId()), Snowflake.of(event.messageId()), event.content());
+        try {
+            log.info("Received message event: {}.", event.operation());
+            if (event.operation() == MessageOperation.CREATE) {
+                facade.postMessage(Snowflake.of(event.channelId()), event.content(), MessageType.RESULTS_POST);
+            } else if (event.operation() == MessageOperation.DELETE) {
+                facade.removeMessage(Snowflake.of(event.channelId()), Snowflake.of(event.messageId()));
+            } else if (event.operation() == MessageOperation.UPDATE) {
+                facade.editMessage(Snowflake.of(event.channelId()), Snowflake.of(event.messageId()), event.content());
+            }
+        }
+        catch (Exception ex) {
+            log.error("Something went wrong handling the message event", ex);
         }
     }
 }
