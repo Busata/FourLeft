@@ -6,6 +6,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -107,10 +108,13 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                             }).collect(Collectors.toList())
                     );
 
+                    Button removeButton = Button.danger("remove", "Remove");
+
+
                     return event.createFollowup(InteractionFollowupCreateSpec.builder()
                             .ephemeral(true)
                             .content("Which view?")
-                            .addComponent(ActionRow.of(menu))
+                            .addComponent(ActionRow.of(menu, removeButton))
                             .build());
                 }
 
