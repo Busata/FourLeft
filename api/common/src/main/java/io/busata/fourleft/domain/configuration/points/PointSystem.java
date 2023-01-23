@@ -34,7 +34,7 @@ public class PointSystem {
 
     public Integer getPoints(int rank) {
         if(rank > rankingPoints.size()) {
-            return defaultPowerstagePoint;
+            return defaultRankingPoint;
         } else {
             return rankingPoints.get(rank - 1).getPoints();
         }
