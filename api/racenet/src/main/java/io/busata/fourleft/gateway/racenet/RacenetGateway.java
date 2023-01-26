@@ -33,8 +33,8 @@ public class RacenetGateway {
         authorization.refreshLogin();
     }
 
-    public DR2ChampionshipStandings getClubChampionshipStandings(long clubId) {
-        return doAuthorizedCall(() -> api.getStandings(authorization.getHeaders(), clubId));
+    public DR2ChampionshipStandings getClubChampionshipStandings(long clubId, int page) {
+        return doAuthorizedCall(() -> api.getStandings(authorization.getHeaders(), clubId, page, 100));
     }
 
     public DR2LeaderboardResults getLeaderboard(DR2LeaderboardRequest request) {

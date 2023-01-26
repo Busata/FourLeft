@@ -55,8 +55,12 @@ interface RacenetApi {
     @DeleteMapping("api/Club/{clubId}/activeChampionship")
     DR2ChampionshipDeleteStatus deleteActiveChampionship(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
 
-    @GetMapping("api/Club/{clubId}/standings/current/?page=1&pageLength=100")
-    DR2ChampionshipStandings getStandings(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
+    @GetMapping("api/Club/{clubId}/standings/current")
+    DR2ChampionshipStandings getStandings(@RequestHeader HttpHeaders headers,
+                                          @PathVariable long clubId,
+                                          @RequestParam long page,
+                                          @RequestParam long pageLength
+                                          );
 
     @GetMapping("api/Challenge/Community")
     List<DR2CommunityEvent> getCommunity(@RequestHeader HttpHeaders headers);

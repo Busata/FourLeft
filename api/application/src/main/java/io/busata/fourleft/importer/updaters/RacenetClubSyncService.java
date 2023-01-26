@@ -7,6 +7,7 @@ import io.busata.fourleft.domain.clubs.repository.ClubRepository;
 import io.busata.fourleft.gateway.racenet.RacenetGateway;
 import io.busata.fourleft.gateway.racenet.dto.club.DR2ClubChampionships;
 import io.busata.fourleft.gateway.racenet.dto.club.DR2ClubRecentResults;
+import io.busata.fourleft.gateway.racenet.dto.club.championship.standings.DR2ChampionshipStandingEntry;
 import io.busata.fourleft.gateway.racenet.dto.club.championship.standings.DR2ChampionshipStandings;
 import io.busata.fourleft.gateway.racenet.factory.ChampionshipFactory;
 import io.busata.fourleft.gateway.racenet.factory.StandingEntryFactory;
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,14 +75,37 @@ public class RacenetClubSyncService {
     }
 
     private void syncStandings(Club club) {
-        DR2ChampionshipStandings standings = racenetGateway.getClubChampionshipStandings(club.getReferenceId());
+        List<DR2ChampionshipStandingEntry> entries = getStandingEntries(club);
+
         club.findActiveChampionship().or(club::findPreviousChampionship).ifPresent(championship -> {
             championship.updateEntries(
-                    standings.standings().stream()
+                    entries.stream()
                             .map(standingEntryFactory::create)
                             .peek(standingEntry -> standingEntry.setChampionship(championship))
                             .collect(Collectors.toList())
             );
         });
+    }
+
+    private List<DR2ChampionshipStandingEntry> getStandingEntries(Club club) {
+        List<DR2ChampionshipStandingEntry> entries = new ArrayList<>();
+        boolean keepFetching = true;
+        int currentPage = 1;
+
+        while(keepFetching) {
+            DR2ChampionshipStandings standings = racenetGateway.getClubChampionshipStandings(club.getReferenceId(), currentPage);
+            entries.addAll(standings.standings());
+
+            if(currentPage >= standings.pageCount() || containsEntryWithZeroPoints(standings.standings())) {
+                keepFetching = false;
+            }
+
+            currentPage += 1;
+        }
+        return entries;
+    }
+
+    private boolean containsEntryWithZeroPoints(List<DR2ChampionshipStandingEntry> standings) {
+        return standings.stream().map(DR2ChampionshipStandingEntry::totalPoints).anyMatch(totalPoints -> totalPoints == 0);
     }
 }

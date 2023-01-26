@@ -4,9 +4,7 @@ import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
-import io.busata.fourleft.domain.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.endpoints.views.PointsPeriod;
 import io.busata.fourleft.endpoints.views.ViewResultToFactory;
@@ -19,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
