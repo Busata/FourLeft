@@ -8,8 +8,8 @@ import {ClubMergerService} from "../club-merger.service";
 })
 export class ClubMergeResultsComponent implements OnInit {
 
-  public firstClubId: string = "361787";
-  public secondClubId: string = "361788";
+  public firstClubId: string = "361785";
+  public secondClubId: string = "361786";
 
   public firstEvent: any = {};
   public secondEvent: any = {};
