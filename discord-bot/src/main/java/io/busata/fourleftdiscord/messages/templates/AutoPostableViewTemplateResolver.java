@@ -103,12 +103,14 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
 
         valueMap.put("platformInfo", "");
 
+        /*
         if(entry.platform() != Platform.UNKNOWN && entry.controllerType() != ControllerType.UNKNOWN) {
             valueMap.put("platformInfo", " %s • %s •".formatted(
                     fieldMapper.createEmoticon(entry.platform().name()),
                     fieldMapper.createEmoticon(entry.controllerType().name())
             ));
         }
+         */
 
         valueMap.put("validVehicle", "");
 
