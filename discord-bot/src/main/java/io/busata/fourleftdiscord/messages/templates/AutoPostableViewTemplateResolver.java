@@ -4,6 +4,8 @@ import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.tiers.VehicleTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
+import io.busata.fourleft.domain.players.ControllerType;
+import io.busata.fourleft.domain.players.Platform;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostResultList;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostableView;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
@@ -99,8 +101,14 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("powerStageBadge", determinePowerstageBadge(entry));
         valueMap.put("tierName", listData.name());
 
-        valueMap.put("platform", fieldMapper.createEmoticon(entry.platform().name()));
-        valueMap.put("controllerType", fieldMapper.createEmoticon(entry.controllerType().name()));
+        valueMap.put("platformInfo", "");
+
+        if(entry.platform() != Platform.UNKNOWN && entry.controllerType() != ControllerType.UNKNOWN) {
+            valueMap.put("platformInfo", " %s %s •".formatted(
+                    fieldMapper.createEmoticon(entry.platform().name()),
+                    fieldMapper.createEmoticon(entry.controllerType().name())
+            ));
+        }
 
         valueMap.put("validVehicle", "");
 

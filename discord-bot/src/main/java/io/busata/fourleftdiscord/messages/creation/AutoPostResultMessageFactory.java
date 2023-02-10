@@ -28,22 +28,22 @@ public class AutoPostResultMessageFactory {
     MessageTemplate NORMAL_TEMPLATE = BASE.copy()
             .withRecurringTemplate(
                     "entries",
-                    "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+                    "**${rank}** • **${nationalityEmoticon}** • **${name}** •${platformInfo} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
     MessageTemplate POWERSTAGE_TEMPLATE = BASE.copy()
             .withRecurringTemplate(
                     "entries",
-                    "${powerStageBadge}**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+                    "${powerStageBadge}**${rank}** • **${nationalityEmoticon}** • **${name}** •${platformInfo} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
     MessageTemplate RANKED_BADGE_TEMPLATE = BASE.copy()
             .withRecurringTemplate(
                     "entries",
-                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platformInfo} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
     MessageTemplate POWERSTAGE_AND_RANKED_BADGE_TEMPLATE = BASE.copy()
             .withRecurringTemplate(
                     "entries",
-                    "${powerStageBadge}*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+                    "${powerStageBadge}*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platformInfo} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
 
     public String createAutopostMessage(AutoPostableView view) {
