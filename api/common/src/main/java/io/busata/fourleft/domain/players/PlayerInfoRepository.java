@@ -13,4 +13,5 @@ public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
     List<PlayerInfo> findBySyncedPlatformIsTrue();
 
     List<PlayerInfo> findByRacenetIn(List<String> names);
+    Optional<PlayerInfo> findByRacenet(String name);
 }

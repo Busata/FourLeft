@@ -13,7 +13,9 @@ public interface BoardEntryRepository extends JpaRepository<BoardEntry, UUID> {
     @Query("select distinct name from BoardEntry")
     List<String> findDistinctNames();
 
-    @Query("select distinct be.name from BoardEntry be where be.name not in (select pi.racenet from PlayerInfo pi) ")
+    List<BoardEntry> findByName(String name);
+
+    @Query("select distinct be.name from BoardEntry be where be.name not in (select pi.racenet from PlayerInfo pi)")
     List<String> findNamesWithoutPlayerInfo();
 
     @Query("select distinct be.name from BoardEntry be where be.name in (select pi.racenet from PlayerInfo pi where pi.syncedPlatform=false) and be.leaderboard.id=:leaderboardId ")

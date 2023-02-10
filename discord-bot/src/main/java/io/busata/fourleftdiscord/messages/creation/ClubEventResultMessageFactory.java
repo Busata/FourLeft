@@ -34,12 +34,12 @@ public class ClubEventResultMessageFactory {
     private final ResultEntryTemplateResolver templateResolver;
 
     MessageTemplate NORMAL_TEMPLATE = messageTemplate(
-                    "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
+                    "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})*");
 
     MessageTemplate RANKED_BADGE_TEMPLATE =  messageTemplate(
-                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
+                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} ${controllerType} • ${totalTime} *(${totalDiff})*");
 
-    public List<EmbedCreateSpec>createDefault(ViewResultTo clubResultTo) {
+    public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
         return create(clubResultTo, template, false);
     }

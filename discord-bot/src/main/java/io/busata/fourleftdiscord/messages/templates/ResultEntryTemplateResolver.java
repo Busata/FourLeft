@@ -30,6 +30,8 @@ public class ResultEntryTemplateResolver implements TemplateResolver<ResultEntry
         valueMap.put("name",entry.name());
         valueMap.put("totalTime",entry.totalTime());
         valueMap.put("totalDiff",entry.totalDiff());
+        valueMap.put("platform", fieldMapper.createEmoticon(entry.platform().name()));
+        valueMap.put("controllerType", fieldMapper.createEmoticon(entry.controllerType().name()));
 
         return valueMap;
     }

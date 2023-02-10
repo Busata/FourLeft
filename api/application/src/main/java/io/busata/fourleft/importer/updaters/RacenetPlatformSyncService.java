@@ -1,5 +1,6 @@
 package io.busata.fourleft.importer.updaters;
 
+import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import io.busata.fourleft.domain.clubs.models.Leaderboard;
 import io.busata.fourleft.domain.clubs.models.PlatformInfo;
 import io.busata.fourleft.domain.clubs.repository.BoardEntryRepository;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Component
 @Slf4j
@@ -26,55 +25,32 @@ public class RacenetPlatformSyncService {
 
     private final LeaderboardFetcher leaderboardFetcher;
 
-    private final LeaderboardRepository leaderboardRepository;
 
     @Transactional
-    public void syncPlayers(long participations) {
-        log.info("Syncing platforms for players. Participations required: {}", participations);
+    public void syncPlayers(String racenet) {
         findNewPlayers();
 
-        List<PlayerInfo> bySyncedPlatformIsFalse = playerInfoRepository.findBySyncedPlatformIsFalse();
-        log.info("Platform sync - unsynced players: {}", bySyncedPlatformIsFalse.size());
+        log.info("Syncing platforms for player {}", racenet);
 
-        List<PlayerInfo> bySyncedPlatformIsTrue = playerInfoRepository.findBySyncedPlatformIsTrue();
-        log.info("Platform sync - synced players: {}", bySyncedPlatformIsTrue.size());
+        List<BoardEntry> entries = boardEntryRepository.findByName(racenet);
 
-        List<UUID> frequentParticipants = boardEntryRepository.findUnsyncedLeaderboardsByParticipations(participations);
+        Leaderboard leaderboard = entries.get(0).getLeaderboard();
 
-        log.info("Unsynced (participations: {}): {}", frequentParticipants.size());
+        HashMap<String, PlatformInfo> platformInfoPerPlayer = leaderboardFetcher.getPlatformInfo(leaderboard);
 
-        frequentParticipants.stream().limit(1).forEach(leaderboardId -> {
-            log.info("Syncing board: {}", leaderboardId);
-            Leaderboard leaderboard = leaderboardRepository.getById(leaderboardId);
+        log.info("Saving data");
 
-            HashMap<String, PlatformInfo> platformInfoPerPlayer = leaderboardFetcher.getPlatformInfo(leaderboard);
+        List<PlayerInfo> playerInfos = playerInfoRepository.findByRacenetIn(platformInfoPerPlayer.keySet().stream().toList()).stream().map(playerInfo -> {
 
-            log.info("Saving data");
+            final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
 
-            List<PlayerInfo> playerInfos = playerInfoRepository.findByRacenetIn(platformInfoPerPlayer.keySet().stream().toList()).stream().map(playerInfo -> {
+            playerInfo.setPlatform(platformInfo.getPlatform());
+            playerInfo.setController(platformInfo.getControllerType());
+            playerInfo.setSyncedPlatform(true);
+            return playerInfo;
+        }).toList();
 
-                final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
-
-                playerInfo.setPlatform(platformInfo.getPlatform());
-                playerInfo.setController(platformInfo.getControllerType());
-                playerInfo.setSyncedPlatform(true);
-                return playerInfo;
-            }).toList();
-
-
-            playerInfoRepository.saveAll(playerInfos);
-
-
-            List<String> strings = boardEntryRepository.findUnsyncedNamesForLeaderboard(leaderboardId).stream().toList();
-            List<PlayerInfo> outdatedPlayerInfos = playerInfoRepository.findByRacenetIn(strings).stream().map(playerInfo -> {
-
-                playerInfo.setSyncedPlatform(true);
-                playerInfo.setOutdated(true);
-                return playerInfo;
-            }).toList();
-
-            playerInfoRepository.saveAll(outdatedPlayerInfos);
-        });
+        playerInfoRepository.saveAll(playerInfos);
 
         log.info("Sync done");
 

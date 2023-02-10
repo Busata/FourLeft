@@ -1,8 +1,10 @@
 package io.busata.fourleft.api.models;
 
+import io.busata.fourleft.domain.players.ControllerType;
+import io.busata.fourleft.domain.players.Platform;
 import lombok.Getter;
 
-public final record ResultEntryTo(Long rank,
+public record ResultEntryTo(Long rank,
                                   String name,
                                   String nationality,
                                   String vehicle,
@@ -11,7 +13,10 @@ public final record ResultEntryTo(Long rank,
                                   String stageTime,
                                   String stageDiff,
                                   long stageRank,
-                                  Boolean isDnf
+                                  Boolean isDnf,
+
+                                  Platform platform,
+                                  ControllerType controllerType
 ) {
     public static ResultEntryToBuilder resultEntryTo() {
         return new ResultEntryToBuilder();
@@ -29,6 +34,9 @@ public final record ResultEntryTo(Long rank,
         private String stageDiff;
         private long stageRank;
         private Boolean isDnf;
+
+        private Platform platform = Platform.UNKNOWN;
+        private ControllerType controllerType = ControllerType.UNKNOWN;
 
         ResultEntryToBuilder() {
         }
@@ -83,8 +91,18 @@ public final record ResultEntryTo(Long rank,
             return this;
         }
 
+        public ResultEntryToBuilder platform(Platform platform) {
+            this.platform = platform;
+            return this;
+        }
+
+        public ResultEntryToBuilder controllerType(ControllerType controllerType) {
+            this.controllerType = controllerType;
+            return this;
+        }
+
         public ResultEntryTo build() {
-            return new ResultEntryTo(rank, name, nationality, vehicle, totalTime, totalDiff, stageTime, stageDiff, stageRank, isDnf);
+            return new ResultEntryTo(rank, name, nationality, vehicle, totalTime, totalDiff, stageTime, stageDiff, stageRank, isDnf, platform, controllerType);
         }
     }
 }
