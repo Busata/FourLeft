@@ -99,6 +99,9 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("powerStageBadge", determinePowerstageBadge(entry));
         valueMap.put("tierName", listData.name());
 
+        valueMap.put("platform", fieldMapper.createEmoticon(entry.platform().name()));
+        valueMap.put("controllerType", fieldMapper.createEmoticon(entry.controllerType().name()));
+
         valueMap.put("validVehicle", "");
 
         if (listData.restrictions() instanceof ResultListRestrictionsTo restrictions) {
