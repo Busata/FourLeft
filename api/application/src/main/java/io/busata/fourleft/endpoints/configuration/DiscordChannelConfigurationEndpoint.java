@@ -9,7 +9,6 @@ import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.configuration.points.*;
 import io.busata.fourleft.domain.configuration.results_views.BadgeType;
-import io.busata.fourleft.domain.configuration.results_views.CommunityChallengeView;
 import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.results_views.TiersViewRepository;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,7 +41,7 @@ public class DiscordChannelConfigurationEndpoint {
     public void setup() {
 
         var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
-        createEnduranceViewScots(defaultPoints);
+        createEstonianChampion(defaultPoints);
     }
 
     /*private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
@@ -65,10 +63,11 @@ public class DiscordChannelConfigurationEndpoint {
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
 
     }
+    */
 
-    private void createEstonianR5(PointsCalculator pointsCalculator) {
+    private void createEstonianChampion(PointsCalculator pointsCalculator) {
 
-        final var view = new SingleClubView(413952L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+        final var view = new SingleClubView(418638L, true, -1, BadgeType.NONE, PlayerRestrictions.NONE, of());
 
         ClubView clubView = new ClubView(
                 UUID.randomUUID(),
@@ -80,11 +79,12 @@ public class DiscordChannelConfigurationEndpoint {
         clubView = repository.save(clubView);
 
         DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
-                UUID.randomUUID(), 1056967249421938750L,"Dirt Estonia R5", clubView, of(clubView));
+                UUID.randomUUID(), 1064449104006090762L, "Estonia Champion", clubView, of(clubView), of(clubView));
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
-
     }
+
+    /*
 
     private void createScandiDozerClub(PointsCalculator calculator) {
         final var view = new SingleClubView(415178L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());

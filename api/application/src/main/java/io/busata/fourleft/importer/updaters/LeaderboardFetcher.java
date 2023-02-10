@@ -7,6 +7,7 @@ import io.busata.fourleft.gateway.racenet.RacenetGateway;
 import io.busata.fourleft.gateway.racenet.dto.leaderboard.DR2LeaderboardRequest;
 import io.busata.fourleft.gateway.racenet.dto.leaderboard.DR2LeaderboardResults;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
+import io.busata.fourleft.gateway.racenet.dto.leaderboard.PlatformFilter;
 import io.busata.fourleft.gateway.racenet.factory.BoardEntryFactory;
 import io.busata.fourleft.domain.clubs.models.Leaderboard;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +83,7 @@ public class LeaderboardFetcher {
                 true,
                 page,
                 100,
-                "None",
+                PlatformFilter.NONE.getFilterValue(),
                 "Everyone",
                 0,
                 stageId);
