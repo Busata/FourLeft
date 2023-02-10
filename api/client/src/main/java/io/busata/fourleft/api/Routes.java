@@ -84,6 +84,6 @@ public class Routes {
     public static final String MERGE_CLUB = "/api/merge";
     public static final String USER_PROGRESS_DAILY = "/api/stats/progress/daily";
     public static final String USER_OVERVIEW = "/api/users/overview";
-
-        public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channel_configurations";
+    public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channel_configurations";
+    public static final String SECRET_SYNC_PLATFORM = "/api/secret/sync_platform/{participations}";
 }

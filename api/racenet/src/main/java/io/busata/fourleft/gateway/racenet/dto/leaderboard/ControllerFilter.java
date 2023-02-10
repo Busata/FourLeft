@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum PlatformFilter {
-    NONE("None"),
-    STEAM("Steam"),
-    PLAYSTATION("PlaystationNetwork"),
-    XBOX("MicrosoftLive");
+public enum ControllerFilter {
+    ALL("Unspecified"),
+    CONTROLLER("Off"),
+    WHEEL("On");
 
     @Getter()
     private final String value;

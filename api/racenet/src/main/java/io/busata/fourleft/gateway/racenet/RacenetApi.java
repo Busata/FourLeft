@@ -35,13 +35,13 @@ interface RacenetApi {
     DR2InitialState getInitialState(@RequestHeader HttpHeaders headers);
 
     @GetMapping("api/Club/{clubId}")
-    DR2ClubDetails getClubDetails(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
+    DR2ClubDetails getClubDetails(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId);
 
     @GetMapping("api/Club/{clubId}/championships")
-    List<DR2ClubChampionships> getClubChampionships(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
+    List<DR2ClubChampionships> getClubChampionships(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId);
 
     @GetMapping("api/Club/{clubId}/recentResults")
-    DR2ClubRecentResults getClubRecentResults(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
+    DR2ClubRecentResults getClubRecentResults(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId);
 
     @PostMapping("api/Leaderboard")
     DR2LeaderboardResults getLeaderboard(@RequestHeader HttpHeaders headers, @RequestBody DR2LeaderboardRequest request);
@@ -50,14 +50,14 @@ interface RacenetApi {
     DR2ChampionshipOptions getOptions(@RequestHeader HttpHeaders headers);
 
     @PostMapping("api/Club/{clubId}/championship")
-    DR2ChampionshipCreationStatus createChampionship(@RequestHeader HttpHeaders headers, @PathVariable long clubId, @RequestBody DR2ChampionshipCreateRequestTo championshipCreateTo);
+    DR2ChampionshipCreationStatus createChampionship(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId, @RequestBody DR2ChampionshipCreateRequestTo championshipCreateTo);
 
     @DeleteMapping("api/Club/{clubId}/activeChampionship")
-    DR2ChampionshipDeleteStatus deleteActiveChampionship(@RequestHeader HttpHeaders headers, @PathVariable long clubId);
+    DR2ChampionshipDeleteStatus deleteActiveChampionship(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId);
 
     @GetMapping("api/Club/{clubId}/standings/current")
     DR2ChampionshipStandings getStandings(@RequestHeader HttpHeaders headers,
-                                          @PathVariable long clubId,
+                                          @PathVariable("clubId") long clubId,
                                           @RequestParam long page,
                                           @RequestParam long pageLength
                                           );
@@ -66,5 +66,5 @@ interface RacenetApi {
     List<DR2CommunityEvent> getCommunity(@RequestHeader HttpHeaders headers);
 
     @GetMapping("api/Club/{clubId}/members")
-    DR2ClubMembers getMembers(@RequestHeader HttpHeaders headers, @PathVariable long clubId, @RequestParam int pageSize, @RequestParam int page);
+    DR2ClubMembers getMembers(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId, @RequestParam int pageSize, @RequestParam int page);
 }

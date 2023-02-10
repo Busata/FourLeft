@@ -1,0 +1,1 @@
+CREATE INDEX idx_player_info_name ON player_info(racenet);
