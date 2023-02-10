@@ -14,8 +14,6 @@ public class SecretEndpoint {
 
     private final RacenetPlatformSyncService racenetPlatformSyncService;
 
-
-
     @PostMapping(Routes.SECRET_SYNC_PLATFORM)
     @Async
     public void sync(@PathVariable Long participations) {

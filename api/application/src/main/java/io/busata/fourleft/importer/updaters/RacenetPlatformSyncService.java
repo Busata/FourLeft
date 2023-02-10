@@ -30,6 +30,7 @@ public class RacenetPlatformSyncService {
 
     @Transactional
     public void syncPlayers(long participations) {
+        log.info("Syncing platforms for players. Participations required: {}", participations);
         findNewPlayers();
 
         List<PlayerInfo> bySyncedPlatformIsFalse = playerInfoRepository.findBySyncedPlatformIsFalse();
