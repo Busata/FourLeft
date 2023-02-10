@@ -37,7 +37,7 @@ public class ClubEventResultMessageFactory {
                     "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
     MessageTemplate RANKED_BADGE_TEMPLATE =  messageTemplate(
-                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • ${totalTime} *(${totalDiff})*");
+                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
     public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
