@@ -82,7 +82,7 @@ public class RacenetChallengesSyncService {
         String eventId = lastEvent.getEventId();
         String stageId = lastStage.getStageId();
 
-        leaderboardFetcher.upsertBoard(challengeId, eventId, stageId);
+        leaderboardFetcher.upsertBoard(challengeId, eventId, stageId, false);
     }
 
 }

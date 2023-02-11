@@ -101,16 +101,20 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("powerStageBadge", determinePowerstageBadge(entry));
         valueMap.put("tierName", listData.name());
 
-        valueMap.put("platformInfo", "");
+        valueMap.put("platform", "");
+        valueMap.put("controllerType", "");
 
-        /*
-        if(entry.platform() != Platform.UNKNOWN && entry.controllerType() != ControllerType.UNKNOWN) {
-            valueMap.put("platformInfo", " %s • %s •".formatted(
-                    fieldMapper.createEmoticon(entry.platform().name()),
+        if(entry.platform() != Platform.UNKNOWN) {
+            valueMap.put("platform", " %s •".formatted(
+                    fieldMapper.createEmoticon(entry.platform().name())
+            ));
+        }
+
+        if(entry.controllerType() != ControllerType.UNKNOWN) {
+            valueMap.put("controllerType", " %s •".formatted(
                     fieldMapper.createEmoticon(entry.controllerType().name())
             ));
         }
-         */
 
         valueMap.put("validVehicle", "");
 

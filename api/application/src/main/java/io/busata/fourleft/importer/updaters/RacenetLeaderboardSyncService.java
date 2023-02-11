@@ -41,7 +41,7 @@ public class RacenetLeaderboardSyncService {
         ImmutableList.copyOf(event.getStages()).forEach(stage -> {
             try {
                 log.info("-- -- Updating for event {}, stage {}", event.getName(), stage.getName());
-                leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()));
+                leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()), true);
                 event.setLastResultCheckedTime(LocalDateTime.now());
                 eventRepository.save(event);
             } catch (FeignException.InternalServerError | RetryableException ex) {

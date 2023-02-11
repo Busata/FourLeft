@@ -3,9 +3,12 @@ package io.busata.fourleft.importer.updaters;
 
 import io.busata.fourleft.domain.clubs.models.LeaderboardKey;
 import io.busata.fourleft.domain.clubs.models.PlatformInfo;
+import io.busata.fourleft.domain.clubs.repository.BoardEntryRepository;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.players.ControllerType;
 import io.busata.fourleft.domain.players.Platform;
+import io.busata.fourleft.domain.players.PlayerInfo;
+import io.busata.fourleft.domain.players.PlayerInfoRepository;
 import io.busata.fourleft.gateway.racenet.RacenetGateway;
 import io.busata.fourleft.gateway.racenet.dto.leaderboard.ControllerFilter;
 import io.busata.fourleft.gateway.racenet.dto.leaderboard.DR2LeaderboardRequest;
@@ -29,13 +32,15 @@ import java.util.stream.Collectors;
 public class LeaderboardFetcher {
     private final LeaderboardRepository leaderboardRepository;
     private final BoardEntryFactory boardEntryFactory;
+    private final PlayerInfoRepository playerInfoRepository;
     private final RacenetGateway client;
 
+
     public void upsertBoard(LeaderboardKey key) {
-        upsertBoard(key.challengeId(), key.eventId(), String.valueOf(key.stageId()));
+        upsertBoard(key.challengeId(), key.eventId(), String.valueOf(key.stageId()), true);
     }
 
-    public void upsertBoard(String challengeId, String eventId, String stageId) {
+    public void upsertBoard(String challengeId, String eventId, String stageId, boolean syncPlatform) {
         Leaderboard board = leaderboardRepository.findLeaderboardByChallengeIdAndEventIdAndStageId(challengeId, eventId, stageId)
                 .orElseGet(Leaderboard::new);
 
@@ -45,8 +50,49 @@ public class LeaderboardFetcher {
 
         List<BoardEntry> entries = getBoardEntries(board);
 
+        if(syncPlatform) {
+            updatePlatform(board, entries);
+        }
+
         board.updateEntries(entries);
         leaderboardRepository.save(board);
+    }
+
+    private void updatePlatform(Leaderboard board, List<BoardEntry> entries) {
+        List<String> names = entries.stream().map(BoardEntry::getName).collect(Collectors.toList());
+
+        List<String> existingNames = playerInfoRepository.findByRacenetIn(names).stream().map(PlayerInfo::getRacenet).toList();
+
+        if(names.size() != existingNames.size()) {
+            List<String> controlList = new ArrayList<>(names);
+            controlList.removeAll(existingNames);
+
+            List<PlayerInfo> playerInfos = controlList.stream().map(PlayerInfo::new).toList();
+            log.info("New players added: {}", playerInfos.size());
+
+            playerInfoRepository.saveAllAndFlush(playerInfos);
+        }
+
+        List<PlayerInfo> unsyncedEntries = playerInfoRepository.findBySyncedPlatformIsFalseAndRacenetIn(names);
+
+        if(unsyncedEntries.isEmpty()) {
+            return;
+        }
+
+        HashMap<String, PlatformInfo> platformInfoPerPlayer = getPlatformInfo(board);
+
+        List<PlayerInfo> playerInfos = playerInfoRepository.findByRacenetIn(platformInfoPerPlayer.keySet().stream().toList()).stream().map(playerInfo -> {
+            final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
+
+            playerInfo.setPlatform(platformInfo.getPlatform());
+            playerInfo.setController(platformInfo.getControllerType());
+            playerInfo.setSyncedPlatform(true);
+            return playerInfo;
+        }).toList();
+
+        log.info("Synced platforms for {} players.", playerInfos.size());
+
+        playerInfoRepository.saveAll(playerInfos);
     }
 
     private List<BoardEntry> getBoardEntries(Leaderboard board) {
