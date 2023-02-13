@@ -72,10 +72,10 @@ public class UserOverviewMessageFactory {
             builder.addField("Community challenges (yesterday)", previousCommunityEvent, false);
         }
         if(StringUtils.isNotBlank(activeClubEvent)) {
-            builder.addField("Club events", activeClubEvent, false);
+            builder.addField("Club Challenges", activeClubEvent, false);
         }
         if(StringUtils.isNotBlank(previousClubEvent)) {
-            builder.addField("Previous club events", previousClubEvent, false);
+            builder.addField("Previous club challenges", previousClubEvent, false);
         }
 
         return builder.build();

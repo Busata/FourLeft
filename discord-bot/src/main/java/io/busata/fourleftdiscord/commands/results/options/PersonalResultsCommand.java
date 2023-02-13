@@ -26,9 +26,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-//@Component
+@Component
 @Slf4j
-//@Order(0)
 @RequiredArgsConstructor
 public class PersonalResultsCommand implements BotCommandOptionHandler {
     @Override
