@@ -79,26 +79,32 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
     }
 
     private Mono<Message> getPersonalResults(ChatInputInteractionEvent event) {
-        String username = event.getOption(getOption())
-                .flatMap(subCommand -> subCommand.getOption("racenet"))
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
+        try {
+            String username = event.getOption(getOption())
+                    .flatMap(subCommand -> subCommand.getOption("racenet"))
+                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                    .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
-        return Mono.just(event).flatMap((evt) -> {
-            boolean useBadges = event.getInteraction().getGuildId().map(Snowflake::asLong).map(id -> id == 892050958723469332L).orElse(false);
+            return Mono.just(event).flatMap((evt) -> {
+                boolean useBadges = event.getInteraction().getGuildId().map(Snowflake::asLong).map(id -> id == 892050958723469332L).orElse(false);
 
-            final var result = api.getUserResultSummary(username);
-            List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(result, useBadges));
+                final var result = api.getUserResultSummary(username);
+                List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(result, useBadges));
 
-            Button removeButton = Button.danger("remove", "Remove");
+                Button removeButton = Button.danger("remove", "Remove");
 
-            InteractionFollowupCreateSpec build = InteractionFollowupCreateSpec.builder()
-                    .embeds(embedFromUserResultSummary)
-                    .addComponent(ActionRow.of(removeButton))
-                    .build();
+                InteractionFollowupCreateSpec build = InteractionFollowupCreateSpec.builder()
+                        .embeds(embedFromUserResultSummary)
+                        .addComponent(ActionRow.of(removeButton))
+                        .build();
 
-            return event.createFollowup(build);
+                return event.createFollowup(build);
 
-        });
+            });
+        }
+        catch (Exception ex) {
+            log.error("Something went wrong fetching personal results", ex);
+            return event.createFollowup("*Something went wrong!*");
+        }
     }
 }
