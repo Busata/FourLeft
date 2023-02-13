@@ -53,8 +53,8 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
                 .description("Personal results")
                 .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("racenet")
-                        .description("Racenet")
+                        .name("username")
+                        .description("User")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
@@ -81,7 +81,7 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
     private Mono<Message> getPersonalResults(ChatInputInteractionEvent event) {
         try {
             String username = event.getOption(getOption())
-                    .flatMap(subCommand -> subCommand.getOption("racenet"))
+                    .flatMap(subCommand -> subCommand.getOption("username"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
@@ -104,7 +104,7 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
         }
         catch (Exception ex) {
             log.error("Something went wrong fetching personal results", ex);
-            return event.createFollowup("*Something went wrong!*");
+            return event.createFollowup("*Something went wrong!*").withEphemeral(true);
         }
     }
 }
