@@ -66,6 +66,10 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
         return discordChannelConfigurationService.getConfigurations().stream().map(DiscordChannelConfigurationTo::channelId).map(Snowflake::of).toList();
    }
 
+    @Override
+    public boolean canRespond(Snowflake channelId) {
+        return true;
+    }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event, MessageChannel channel) {
