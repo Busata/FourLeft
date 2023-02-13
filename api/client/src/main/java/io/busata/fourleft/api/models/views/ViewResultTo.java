@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ViewResultTo {
 
+    private String description;
+
     private ViewPropertiesTo viewPropertiesTo;
     private List<SingleResultListTo> multiListResults;
 

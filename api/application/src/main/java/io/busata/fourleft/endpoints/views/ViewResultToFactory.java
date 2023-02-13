@@ -10,9 +10,9 @@ import io.busata.fourleft.api.models.views.SingleResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.models.Stage;
+import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
@@ -47,16 +47,16 @@ public class ViewResultToFactory {
 
         switch(clubView.getResultsView()) {
             case SingleClubView view -> {
-                return createSingleClubViewResult(eventSupplier, view);
+                return createSingleClubViewResult(eventSupplier, clubView, view);
             }
             case TiersView view -> {
-                return createTiersViewResult(eventSupplier, view);
+                return createTiersViewResult(eventSupplier, clubView, view);
             }
             default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
         }
     }
 
-    private Optional<ViewResultTo> createSingleClubViewResult(ClubEventSupplier eventSupplier, SingleClubView view) {
+    private Optional<ViewResultTo> createSingleClubViewResult(ClubEventSupplier eventSupplier, ClubView clubView, SingleClubView view) {
         final var club = clubSyncService.getOrCreate(view.getClubId());
 
         if(eventSupplier.getEvent(club).isEmpty()) {
@@ -66,13 +66,14 @@ public class ViewResultToFactory {
         SingleResultListTo singleResultListTo = eventSupplier.getEvent(club).map(event -> this.createSingleResultTo(view, event)).orElseThrow();
 
         ViewResultTo result = new ViewResultTo(
+                clubView.getDescription(),
                 new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
                 of(singleResultListTo)
         );
 
         return Optional.of(result);
     }
-    private Optional<ViewResultTo> createTiersViewResult(ClubEventSupplier eventSupplier, TiersView view) {
+    private Optional<ViewResultTo> createTiersViewResult(ClubEventSupplier eventSupplier, ClubView clubView, TiersView view) {
 
         boolean anyEventActive = view.getTiers().stream()
                 .map(Tier::getClubId)
@@ -99,6 +100,7 @@ public class ViewResultToFactory {
 
 
         ViewResultTo result = new ViewResultTo(
+                clubView.getDescription(),
                 new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
                 allTierResults
         );
