@@ -120,6 +120,8 @@ public class UserProgressEndpoint {
                     .findFirst().stream().map(entry -> {
                         EventInfoTo eventInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
 
+                        final var resultList = viewResult.getMultiListResults().stream().findFirst().orElseThrow();
+
                         return new ClubResultSummaryTo(
                                 viewResult.getDescription(),
                                 eventInfoTo.country(),
@@ -128,8 +130,8 @@ public class UserProgressEndpoint {
                                 entry.nationality(),
                                 entry.vehicle(),
                                 entry.rank(),
-                                resultEntries.size(),
-                                ((float) entry.rank() / (float) resultEntries.size()) * 100f,
+                                resultList.totalEntries(),
+                                ((float) entry.rank() / (float) resultList.totalEntries()) * 100f,
                                 entry.isDnf(),
                                 entry.totalTime(),
                                 entry.totalDiff()
