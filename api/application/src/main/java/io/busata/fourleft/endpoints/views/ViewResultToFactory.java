@@ -26,6 +26,7 @@ import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,6 +43,7 @@ public class ViewResultToFactory {
     private final ResultEntryToFactory resultEntryToFactory;
     private final BoardEntryFetcher boardEntryFetcher;
 
+    @Transactional
     public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplier eventSupplier) {
         final var clubView = repository.findById(viewId).orElseThrow();
 

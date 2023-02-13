@@ -8,6 +8,7 @@ import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
+import io.busata.fourleft.common.TransactionHandler;
 import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.challenges.repository.CommunityChallengeRepository;
@@ -42,6 +43,7 @@ public class UserProgressEndpoint {
     private final ClubViewRepository clubViewRepository;
 
 
+
     @GetMapping(Routes.USER_OVERVIEW)
     public UserResultSummaryTo getUserOverview(@RequestParam String query) {
 
@@ -74,8 +76,8 @@ public class UserProgressEndpoint {
     }
 
     private List<ViewResultTo> getViewResults(ClubEventSupplier supplier) {
-        return clubViewRepository.findAll().stream().
-                flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplier).stream())
+        return clubViewRepository.findAll().stream().parallel()
+                .flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplier).stream())
                 .collect(Collectors.toList());
     }
 
