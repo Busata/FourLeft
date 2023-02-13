@@ -5,6 +5,8 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -68,7 +70,7 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event, MessageChannel channel) {
         return Mono.just(event).flatMap(evt -> {
-            return evt.deferReply().withEphemeral(true).then(getPersonalResults(event));
+            return evt.deferReply().then(getPersonalResults(event));
         }).then();
     }
 
@@ -83,8 +85,12 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
 
             final var result = api.getUserResultSummary(username);
             List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(result, useBadges));
+
+            Button removeButton = Button.danger("remove", "Remove");
+
             InteractionFollowupCreateSpec build = InteractionFollowupCreateSpec.builder()
                     .embeds(embedFromUserResultSummary)
+                    .addComponent(ActionRow.of(removeButton))
                     .build();
 
             return event.createFollowup(build);
