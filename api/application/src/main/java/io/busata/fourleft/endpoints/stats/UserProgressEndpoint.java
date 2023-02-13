@@ -74,7 +74,7 @@ public class UserProgressEndpoint {
     }
 
     private List<ViewResultTo> getViewResults(ClubEventSupplier supplier) {
-        return clubViewRepository.findAll().stream().
+        return clubViewRepository.findAll().stream().parallel().
                 flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplier).stream())
                 .collect(Collectors.toList());
     }

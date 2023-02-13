@@ -53,8 +53,8 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
                 .description("Personal results")
                 .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("username")
-                        .description("User")
+                        .name("racenet")
+                        .description("Racenet")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
@@ -80,7 +80,7 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
 
     private Mono<Message> getPersonalResults(ChatInputInteractionEvent event) {
         String username = event.getOption(getOption())
-                .flatMap(subCommand -> subCommand.getOption("username"))
+                .flatMap(subCommand -> subCommand.getOption("racenet"))
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
