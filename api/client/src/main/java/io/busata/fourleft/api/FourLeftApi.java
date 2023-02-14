@@ -39,8 +39,8 @@ public interface FourLeftApi {
     List<ChampionshipStandingEntryTo> getCustomStandings(@PathVariable long clubId, @RequestParam int lastXChampionships, @RequestParam boolean powerStageSystem);
 
 
-    @GetMapping(Routes.CLUB_MEMBERS_BY_CLUB_ID)
-    List<ClubMemberTo> getMembers(@PathVariable UUID clubId);
+    @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
+    List<ClubMemberTo> getMembers(@PathVariable UUID viewId);
 
     @PostMapping(Routes.COMMUNITY_TRACK_USER)
     void trackUser(@RequestBody TrackUserRequestTo request);

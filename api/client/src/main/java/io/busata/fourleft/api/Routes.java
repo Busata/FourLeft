@@ -16,7 +16,7 @@ public class Routes {
 
     public static final String CLUB_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/championship_standings";
     public static final String CLUB_CUSTOM_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/custom_standings";
-    public static final String CLUB_MEMBERS_BY_CLUB_ID = "/api/clubs/{clubId}/members";
+    public static final String CLUB_MEMBERS_BY_VIEW_ID = "/api/clubs/{viewId}/members";
     public static final String CLUB_EVENT_SUMMARY_BY_CLUB_ID = "/api/clubs/{clubId}/event_summary";
     public static final String CLUB_TIERS_BY_CLUB_ID = "/api/clubs/{clubId}/tiers";
     public static final String CLUB_ACTIVE_EVENT_BY_CLUB_ID = "/api/clubs/{clubId}/active_event";

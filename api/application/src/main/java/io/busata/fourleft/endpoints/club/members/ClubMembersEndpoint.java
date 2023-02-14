@@ -26,7 +26,7 @@ public class ClubMembersEndpoint {
     private final ClubViewRepository clubViewRepository;
 
 
-    @GetMapping(Routes.CLUB_MEMBERS_BY_CLUB_ID)
+    @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
     public List<ClubMemberTo> getClubMembers(@PathVariable UUID viewId) {
 
         ClubView clubView = clubViewRepository.findById(viewId).orElseThrow();
