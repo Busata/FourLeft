@@ -3,6 +3,8 @@ package io.busata.fourleft.endpoints.club.members;
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.api.models.ClubMemberTo;
+import io.busata.fourleft.domain.configuration.ClubView;
+import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.gateway.racenet.factory.ClubMemberFactory;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +23,18 @@ import java.util.stream.Collectors;
 public class ClubMembersEndpoint {
     private final ClubSyncService clubSyncService;
     private final ClubMemberFactory clubMemberToFactory;
+    private final ClubViewRepository clubViewRepository;
 
 
     @GetMapping(Routes.CLUB_MEMBERS_BY_CLUB_ID)
     public List<ClubMemberTo> getClubMembers(@PathVariable UUID viewId) {
-        //Club club = clubSyncService.getOrCreate(clubId);
 
-        //return club.getClubMembers().stream().map(clubMemberToFactory::create).collect(Collectors.toList());
+        ClubView clubView = clubViewRepository.findById(viewId).orElseThrow();
 
-        return List.of();
+        Long clubId = clubView.getResultsView().getAssociatedClubs().stream().findFirst().orElseThrow();
+        Club club = clubSyncService.getOrCreate(clubId);
+
+        return club.getClubMembers().stream().map(clubMemberToFactory::create).collect(Collectors.toList());
+
     }
 }

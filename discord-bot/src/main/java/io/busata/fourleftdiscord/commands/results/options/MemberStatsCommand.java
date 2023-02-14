@@ -24,8 +24,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-//@Component
-//@Order(3)
+@Component
+@Order(3)
 @Slf4j
 @RequiredArgsConstructor
 public class MemberStatsCommand implements BotCommandOptionHandler {
