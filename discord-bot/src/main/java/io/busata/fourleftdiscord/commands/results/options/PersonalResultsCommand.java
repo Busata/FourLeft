@@ -92,7 +92,7 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
                 final var result = api.getUserResultSummary(username);
                 List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(username, result, useBadges));
 
-                Button removeButton = Button.secondary("remove", ReactionEmoji.unicode("\u1F5D1"));
+                Button removeButton = Button.secondary("remove", "Remove");
 
                 InteractionFollowupCreateSpec build = InteractionFollowupCreateSpec.builder()
                         .embeds(embedFromUserResultSummary)
