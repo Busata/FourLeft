@@ -22,9 +22,9 @@ public class UserOverviewMessageFactory {
     private final CommunitySummaryResultTemplateResolver communitySummaryResultTemplateResolver;
 
     MessageTemplate COMMUNITY_ENTRY = messageTemplate("**${countryEmoticon}** • **${rank} / ${totalEntries}** • **${vehicleClass}** • ${totalTime} *(${totalDiff})*");
-    MessageTemplate COMMUNITY_ENTRY_BADGE = messageTemplate("**${countryEmoticon}** • ${badgeRank} **${rank}** • **${vehicleClass}** • ${totalTime} *(${totalDiff})*");
+    MessageTemplate COMMUNITY_ENTRY_BADGE = messageTemplate("**${countryEmoticon}** • ${badgeRank} • **${rank}** • **${vehicleClass}** • ${totalTime} *(${totalDiff})*");
     MessageTemplate CLUB_ENTRY = messageTemplate("${eventCountry} • **${rank}/${totalEntries}** • **${clubName}** • ${eventStage} • ${totalTime} *(${totalDiff})*");
-    MessageTemplate CLUB_ENTRY_BADGE = messageTemplate("${eventCountry} • ${badgeRank} **${rank}** • **${clubName}** • ${eventStage} • ${totalTime} *(${totalDiff})*");
+    MessageTemplate CLUB_ENTRY_BADGE = messageTemplate("${eventCountry} • ${badgeRank} • **${rank}** • **${clubName}** • ${eventStage} • ${totalTime} *(${totalDiff})*");
 
 
     MessageTemplate getCommunityEntryTemplate(boolean useBadges) {
@@ -41,13 +41,13 @@ public class UserOverviewMessageFactory {
             return CLUB_ENTRY;
         }
     }
-    public EmbedCreateSpec create(UserResultSummaryTo userResultSummaryTo, boolean useBadges) {
+    public EmbedCreateSpec create(String username, UserResultSummaryTo userResultSummaryTo, boolean useBadges) {
 
         final var communityEntryTemplate = getCommunityEntryTemplate(useBadges);
         final var clubEntryTemplate = getClubEntryTemplate(useBadges);
 
         final var builder = EmbedCreateSpec.builder();
-        builder.title("**Personal results**");
+        builder.title("**Personal results • " + username + "**");
         builder.color(Color.of(244, 0, 75));
 
         String activeCommunityEvent =

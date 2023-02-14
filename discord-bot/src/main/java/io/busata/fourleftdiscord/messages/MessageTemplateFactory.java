@@ -53,7 +53,7 @@ public class MessageTemplateFactory {
         return eventSummaryMessageFactory.create(summary);
     }
 
-    public EmbedCreateSpec createEmbedFromUserResultSummary(UserResultSummaryTo result, boolean useBadges) {
-        return userOverviewMessageFactory.create(result, useBadges);
+    public EmbedCreateSpec createEmbedFromUserResultSummary(String username, UserResultSummaryTo result, boolean useBadges) {
+        return userOverviewMessageFactory.create(username, result, useBadges);
     }
 }

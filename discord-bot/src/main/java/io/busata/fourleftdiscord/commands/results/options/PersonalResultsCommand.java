@@ -9,6 +9,7 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionFollowupCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -89,9 +90,9 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
                 boolean useBadges = event.getInteraction().getGuildId().map(Snowflake::asLong).map(id -> id == 892050958723469332L).orElse(false);
 
                 final var result = api.getUserResultSummary(username);
-                List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(result, useBadges));
+                List<EmbedCreateSpec> embedFromUserResultSummary = List.of(messageTemplateFactory.createEmbedFromUserResultSummary(username, result, useBadges));
 
-                Button removeButton = Button.danger("remove", "Remove");
+                Button removeButton = Button.secondary("remove", ReactionEmoji.unicode("\u1F5D1"));
 
                 InteractionFollowupCreateSpec build = InteractionFollowupCreateSpec.builder()
                         .embeds(embedFromUserResultSummary)
