@@ -50,7 +50,7 @@ public class LeaderboardFetcher {
 
         List<BoardEntry> entries = getBoardEntries(board);
 
-        if(syncPlatform) {
+        if (syncPlatform) {
             updatePlatform(board, entries);
         }
 
@@ -63,7 +63,7 @@ public class LeaderboardFetcher {
 
         List<String> existingNames = playerInfoRepository.findByRacenetIn(names).stream().map(PlayerInfo::getRacenet).toList();
 
-        if(names.size() != existingNames.size()) {
+        if (existingNames.size() != names.size()) {
             List<String> controlList = new ArrayList<>(names);
             controlList.removeAll(existingNames);
 
@@ -75,20 +75,22 @@ public class LeaderboardFetcher {
 
         List<PlayerInfo> unsyncedEntries = playerInfoRepository.findBySyncedPlatformIsFalseAndRacenetIn(names);
 
-        if(unsyncedEntries.isEmpty()) {
+        if (unsyncedEntries.isEmpty()) {
             return;
         }
 
         HashMap<String, PlatformInfo> platformInfoPerPlayer = getPlatformInfo(board);
 
-        List<PlayerInfo> playerInfos = playerInfoRepository.findByRacenetIn(platformInfoPerPlayer.keySet().stream().toList()).stream().map(playerInfo -> {
-            final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
+        List<PlayerInfo> playerInfos = playerInfoRepository.findBySyncedPlatformIsFalseAndRacenetIn(platformInfoPerPlayer.keySet().stream().toList())
+                .stream()
+                .map(playerInfo -> {
+                    final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
 
-            playerInfo.setPlatform(platformInfo.getPlatform());
-            playerInfo.setController(platformInfo.getControllerType());
-            playerInfo.setSyncedPlatform(true);
-            return playerInfo;
-        }).toList();
+                    playerInfo.setPlatform(platformInfo.getPlatform());
+                    playerInfo.setController(platformInfo.getControllerType());
+                    playerInfo.setSyncedPlatform(true);
+                    return playerInfo;
+                }).toList();
 
         log.info("Synced platforms for {} players.", playerInfos.size());
 
@@ -128,7 +130,7 @@ public class LeaderboardFetcher {
 
         HashMap<String, PlatformInfo> platformInfo = new HashMap<>();
 
-        List.of(PlatformFilter.STEAM, PlatformFilter.PLAYSTATION, PlatformFilter.XBOX).forEach(platformFilter ->  {
+        List.of(PlatformFilter.STEAM, PlatformFilter.PLAYSTATION, PlatformFilter.XBOX).forEach(platformFilter -> {
 
             boolean done = false;
             int page = 1;
@@ -167,7 +169,7 @@ public class LeaderboardFetcher {
             }
         });
 
-        List.of(ControllerFilter.WHEEL, ControllerFilter.CONTROLLER).forEach(controllerFilter ->  {
+        List.of(ControllerFilter.WHEEL, ControllerFilter.CONTROLLER).forEach(controllerFilter -> {
 
             boolean done = false;
             int page = 1;
@@ -210,7 +212,7 @@ public class LeaderboardFetcher {
     }
 
     private ControllerType createControllerTypeFromFilter(ControllerFilter controllerFilter) {
-        return switch(controllerFilter) {
+        return switch (controllerFilter) {
             case ALL -> ControllerType.UNKNOWN;
             case CONTROLLER -> ControllerType.CONTROLLER;
             case WHEEL -> ControllerType.WHEEL;
@@ -218,7 +220,7 @@ public class LeaderboardFetcher {
     }
 
     private Platform createPlatformFromFilter(PlatformFilter platformFilter) {
-        return switch(platformFilter) {
+        return switch (platformFilter) {
 
             case NONE -> Platform.UNKNOWN;
             case STEAM -> Platform.PC;
