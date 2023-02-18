@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   fourleft-reverse-proxy:
-    build: nginx
+    build: reverse-proxy
     container_name: fourleft-reverse-proxy
     restart: always
     environment:
