@@ -7,3 +7,6 @@ services:
     environment:
       - VIRTUAL_HOST=fourleft.busata.io
       - LETSENCRYPT_HOST=fourleft.busata.io
+networks:
+  default:
+    name: veevi
