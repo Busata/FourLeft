@@ -30,8 +30,6 @@ import java.util.UUID;
 
 public interface FourLeftApi {
 
-
-
     @GetMapping(value=Routes.CLUB_STANDINGS_BY_CLUB_ID)
     List<ChampionshipStandingEntryTo> getStandings(@PathVariable long clubId);
 

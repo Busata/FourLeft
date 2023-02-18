@@ -1,0 +1,9 @@
+version: '3.5'
+services:
+  fourleft-reverse-proxy:
+    build: nginx
+    container_name: fourleft-reverse-proxy
+    restart: always
+    environment:
+      - VIRTUAL_HOST=fourleft.busata.io
+      - LETSENCRYPT_HOST=fourleft.busata.io

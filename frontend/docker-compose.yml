@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  fourleft_frontend:
+    build: .
+    restart: always
+    container_name: fourleft_frontend
+
+networks:
+  default:
+    name: veevi
+
