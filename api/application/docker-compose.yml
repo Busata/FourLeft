@@ -25,7 +25,7 @@ services:
       - db.fourleft
   db.fourleft:
     container_name: db.fourleft
-    image: postgres
+    image: postgres:15
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
