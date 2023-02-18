@@ -25,4 +25,4 @@ FROM nginx:latest
 COPY --from=build /usr/local/app/dist/fourleft-frontend /usr/share/nginx/html
 
 # Expose port 80
-EXPOSE 9080
+EXPOSE 80
