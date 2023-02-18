@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>io.busata.fourleft</groupId>
-            <artifactId>dr2-client</artifactId>
+            <artifactId>racenet</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

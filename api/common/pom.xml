@@ -10,6 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.busata.fourleft</groupId>
+    <name>Fourleft Common</name>
     <artifactId>common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 

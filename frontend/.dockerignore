@@ -1,0 +1,4 @@
+node_modules/
+.angular/
+pom.xml
+package-lock.json

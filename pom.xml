@@ -15,7 +15,7 @@
 
     <modules>
         <module>api</module>
-        <module>discord-bot</module>
+        <module>discord-client</module>
         <module>frontend</module>
     </modules>
 

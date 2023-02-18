@@ -1,14 +1,5 @@
 version: '3.5'
 services:
-  fourleft-web:
-    build: nginx
-    container_name: fourleft-proxy
-    restart: always
-    depends_on:
-      - fourleft
-    environment:
-      - VIRTUAL_HOST=fourleft.busata.io
-      - LETSENCRYPT_HOST=fourleft.busata.io
   fourleft:
     build: .
     container_name: fourleft

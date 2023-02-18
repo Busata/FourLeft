@@ -5,6 +5,6 @@
   <groupId>io.busata.fourleft</groupId>
   <artifactId>Frontend</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>Fourleft UI</name>
+  <name>Fourleft Frontend</name>
   <description>fourleft</description>
 </project>
