@@ -74,29 +74,33 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
         }).subscribe();
 
         discordClient.on(ButtonInteractionEvent.class, buttonEvent -> {
-            if (buttonEvent.getCustomId().equals(CYCLE_RESULTS_BUTTON_ID)) {
-                final var messageId = buttonEvent.getMessageId();
-                final var channelId = buttonEvent.getInteraction().getChannelId();
-
-                final var messageDetails = discordMessageGateway.getMessageDetails(messageId);
-
-                final var nextViewType = messageDetails.viewType().next();
-
-                List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResultsByChannelId(channelId, nextViewType);
-
-                MessageEditSpec messageEditSpec = MessageEditSpec.builder()
-                        .embeds(results)
-                        .addComponent(ActionRow.of(
-                                Button.secondary(CYCLE_RESULTS_BUTTON_ID, nextViewType.getButtonLabel())
-                        ))
-                        .build();
-
-                Message message = discordMessageGateway.updateMessageEmbeds(channelId, messageId, messageEditSpec);
-                discordMessageGateway.logMessage(message, MessageType.CURRENT_RESULTS_POST, nextViewType);
-            }
-
-            return Mono.empty();
+            return buttonEvent.deferReply().then(Mono.just(cycleResultView(buttonEvent)));
         }).subscribe();
+    }
+
+    private Mono<Void> cycleResultView(ButtonInteractionEvent buttonEvent) {
+        if (buttonEvent.getCustomId().equals(CYCLE_RESULTS_BUTTON_ID)) {
+            final var messageId = buttonEvent.getMessageId();
+            final var channelId = buttonEvent.getInteraction().getChannelId();
+
+            final var messageDetails = discordMessageGateway.getMessageDetails(messageId);
+
+            final var nextViewType = messageDetails.viewType().next();
+
+            List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResultsByChannelId(channelId, nextViewType);
+
+            MessageEditSpec messageEditSpec = MessageEditSpec.builder()
+                    .embeds(results)
+                    .addComponent(ActionRow.of(
+                            Button.secondary(CYCLE_RESULTS_BUTTON_ID, nextViewType.getButtonLabel())
+                    ))
+                    .build();
+
+            Message message = discordMessageGateway.updateMessageEmbeds(channelId, messageId, messageEditSpec);
+            discordMessageGateway.logMessage(message, MessageType.CURRENT_RESULTS_POST, nextViewType);
+        }
+
+        return Mono.empty();
     }
 
     @Override
