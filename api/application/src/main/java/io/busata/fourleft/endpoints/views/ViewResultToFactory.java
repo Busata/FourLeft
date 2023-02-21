@@ -24,6 +24,7 @@ import io.busata.fourleft.domain.tiers.repository.TierEventRestrictionsRepositor
 import io.busata.fourleft.endpoints.club.results.service.ResultEntryToFactory;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -44,15 +45,16 @@ public class ViewResultToFactory {
     private final BoardEntryFetcher boardEntryFetcher;
 
     @Transactional
-    public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplier eventSupplier) {
+    @Cacheable("view_results")
+    public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplierType type) {
         final var clubView = repository.findById(viewId).orElseThrow();
 
         switch(clubView.getResultsView()) {
             case SingleClubView view -> {
-                return createSingleClubViewResult(eventSupplier, clubView, view);
+                return createSingleClubViewResult(type.getSupplier(), clubView, view);
             }
             case TiersView view -> {
-                return createTiersViewResult(eventSupplier, clubView, view);
+                return createTiersViewResult(type.getSupplier(), clubView, view);
             }
             default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
         }

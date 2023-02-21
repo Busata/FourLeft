@@ -17,6 +17,7 @@ import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.ClubEventSupplier;
+import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
 import io.busata.fourleft.endpoints.views.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +48,8 @@ public class UserProgressEndpoint {
     @GetMapping(Routes.USER_OVERVIEW)
     public UserResultSummaryTo getUserOverview(@RequestParam String query) {
 
-        List<ViewResultTo> currentViewResults = getViewResults(Club::getCurrentEvent);
-        List<ViewResultTo> previousViewResults = getViewResults(Club::getPreviousEvent);
+        List<ViewResultTo> currentViewResults = getViewResults(ClubEventSupplierType.CURRENT);
+        List<ViewResultTo> previousViewResults = getViewResults(ClubEventSupplierType.PREVIOUS);
 
 
         final var activeClubResults = getClubResults(query, currentViewResults);
@@ -75,9 +76,9 @@ public class UserProgressEndpoint {
         );
     }
 
-    private List<ViewResultTo> getViewResults(ClubEventSupplier supplier) {
+    private List<ViewResultTo> getViewResults(ClubEventSupplierType supplierType) {
         return clubViewRepository.findAll().stream().parallel()
-                .flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplier).stream())
+                .flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplierType).stream())
                 .collect(Collectors.toList());
     }
 

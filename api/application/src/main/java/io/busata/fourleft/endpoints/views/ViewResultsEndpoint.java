@@ -30,14 +30,14 @@ public class ViewResultsEndpoint {
 
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     public ResponseEntity<ViewResultTo> getCurrentResults(@PathVariable UUID viewId) {
-        return viewResultToFactory.createViewResult(viewId, Club::getCurrentEvent)
+        return viewResultToFactory.createViewResult(viewId, ClubEventSupplierType.CURRENT)
                 .map(results -> new ResponseEntity<>(results, HttpStatus.OK))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping(Routes.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
     public ResponseEntity<ViewResultTo> getPreviousResults(@PathVariable UUID viewId) {
-        return viewResultToFactory.createViewResult(viewId, Club::getPreviousEvent)
+        return viewResultToFactory.createViewResult(viewId, ClubEventSupplierType.PREVIOUS)
                 .map(results -> new ResponseEntity<>(results, HttpStatus.OK))
                 .orElse(ResponseEntity.notFound().build());
     }
