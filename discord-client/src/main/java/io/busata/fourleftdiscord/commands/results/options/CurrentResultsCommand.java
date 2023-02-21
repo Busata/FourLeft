@@ -74,7 +74,7 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
         }).subscribe();
 
         discordClient.on(ButtonInteractionEvent.class, buttonEvent -> {
-            return buttonEvent.deferReply().then(cycleResultView(buttonEvent)).then();
+            return buttonEvent.deferEdit().then(cycleResultView(buttonEvent)).then();
         }).subscribe();
     }
 
