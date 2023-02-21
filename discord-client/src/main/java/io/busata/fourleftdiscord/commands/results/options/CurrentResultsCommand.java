@@ -93,7 +93,7 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                 MessageEditSpec messageEditSpec = MessageEditSpec.builder()
                         .embeds(results)
                         .addComponent(ActionRow.of(
-                                Button.secondary(CYCLE_RESULTS_BUTTON_ID, nextViewType.getButtonLabel())
+                                Button.secondary(CYCLE_RESULTS_BUTTON_ID, "Cycle view")
                         ))
                         .build();
 
@@ -150,7 +150,7 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                             .build());
                 }
 
-                Button cycleView = Button.secondary(CYCLE_RESULTS_BUTTON_ID, ViewType.STANDARD.next().getButtonLabel());
+                Button cycleView = Button.secondary(CYCLE_RESULTS_BUTTON_ID, "Cycle view");
 
                 List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResultsByChannelId(channelId, ViewType.STANDARD);
 
