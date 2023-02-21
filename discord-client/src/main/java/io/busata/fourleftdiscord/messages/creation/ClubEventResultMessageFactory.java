@@ -40,7 +40,7 @@ public class ClubEventResultMessageFactory {
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
     MessageTemplate META_NORMAL_TEMPLATE =  messageTemplate(
-                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
+                    "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
 
 
     MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
