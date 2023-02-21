@@ -2,6 +2,7 @@ package io.busata.fourleftdiscord.messages;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
+import io.busata.fourleft.domain.discord.models.ViewType;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
 import io.busata.fourleftdiscord.client.FourLeftClient;
@@ -20,14 +21,17 @@ public class ResultsFetcher {
     private final FourLeftClient api;
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
 
-    public List<EmbedCreateSpec> getCurrentEventResults(Snowflake channelId) {
+    public List<EmbedCreateSpec> getCurrentEventResultsByChannelId(Snowflake channelId, ViewType viewType) {
         final UUID viewId = discordChannelConfigurationService.getViewId(channelId);
-        return this.getCurrentEventResults(viewId);
+        return this.getCurrentEventResultsByViewId(viewId, viewType);
     }
 
-    public List<EmbedCreateSpec> getCurrentEventResults(UUID viewId) {
+    public List<EmbedCreateSpec> getCurrentEventResultsByViewId(UUID viewId, ViewType viewType) {
         final var clubResult = api.getViewCurrentResults(viewId);
-        return messageTemplateFactory.createEmbedFromClubResult(clubResult);
+        return switch (viewType) {
+            case STANDARD -> messageTemplateFactory.createEmbedFromClubResult(clubResult);
+            case EXTRA -> messageTemplateFactory.createExtraEmbedFromClubResult(clubResult);
+        };
     }
 
     public List<EmbedCreateSpec> getPreviousEventResults(Snowflake channelId) {

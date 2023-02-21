@@ -39,8 +39,19 @@ public class ClubEventResultMessageFactory {
     MessageTemplate RANKED_BADGE_TEMPLATE =  messageTemplate(
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
+    MessageTemplate META_NORMAL_TEMPLATE =  messageTemplate(
+                    "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
+
+
+    MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
+            "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
+
     public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
+        return create(clubResultTo, template, false);
+    }
+    public List<EmbedCreateSpec> createMetadata(ViewResultTo clubResultTo) {
+        final var template = getMetaDataTemplate(clubResultTo.getViewPropertiesTo());
         return create(clubResultTo, template, false);
     }
 
@@ -54,6 +65,13 @@ public class ClubEventResultMessageFactory {
             case NONE -> NORMAL_TEMPLATE;
             case PERCENTAGE -> throw new UnsupportedOperationException();
             case RANKED -> RANKED_BADGE_TEMPLATE;
+        };
+    }
+    private MessageTemplate getMetaDataTemplate(ViewPropertiesTo properties) {
+        return switch (properties.badgeType()) {
+            case NONE -> META_NORMAL_TEMPLATE;
+            case PERCENTAGE -> throw new UnsupportedOperationException();
+            case RANKED -> META_RANKED_BADGE_TEMPLATE;
         };
     }
 

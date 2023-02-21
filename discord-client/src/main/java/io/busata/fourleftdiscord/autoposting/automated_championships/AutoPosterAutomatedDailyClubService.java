@@ -2,6 +2,7 @@ package io.busata.fourleftdiscord.autoposting.automated_championships;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
+import io.busata.fourleft.domain.discord.models.ViewType;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import io.busata.fourleft.domain.discord.models.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
@@ -49,7 +50,7 @@ public class AutoPosterAutomatedDailyClubService {
     public void postNewStage(Snowflake channelId) {
         try {
 
-            List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResults(channelId);
+            List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResultsByChannelId(channelId, ViewType.STANDARD);
 
                 discordUtils.postMessage(
                         channelId,

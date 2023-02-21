@@ -9,11 +9,7 @@ import io.busata.fourleft.domain.discord.models.MessageLog;
 import io.busata.fourleft.domain.discord.repository.MessageLogRepository;
 import io.busata.fourleft.endpoints.discord.messages.logs.service.MessageLogFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,8 +24,18 @@ public class MessageLogEndpoint {
     @PostMapping(Routes.DISCORD_ALL_MESSAGES)
     public void postMessage(@RequestBody MessageLogTo request) {
         transactionHandler.runInTransaction(() -> {
-            messageLogRepository.save(factory.create(request));
+            messageLogRepository.findByMessageId(request.messageId()).ifPresentOrElse(messageLog -> {
+                factory.update(messageLog, request);
+                messageLogRepository.save(messageLog);
+            }, () -> {
+                messageLogRepository.save(factory.create(request));
+            });
         });
+    }
+
+    @GetMapping(Routes.DISCORD_MESSAGE_DETAILS)
+    public MessageLogTo getMessage(@PathVariable long messageId) {
+        return messageLogRepository.findByMessageId(messageId).map(factory::create).orElseThrow();
     }
 
     @GetMapping(Routes.DISCORD_ALL_MESSAGES)
