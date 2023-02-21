@@ -1,7 +1,7 @@
 package io.busata.fourleft.endpoints.discord.messages.logs.service;
 
 import io.busata.fourleft.api.models.messages.MessageLogTo;
-import io.busata.fourleft.domain.discord.models.MessageLog;
+import io.busata.fourleft.domain.discord.bot.models.MessageLog;
 import org.springframework.stereotype.Component;
 
 @Component

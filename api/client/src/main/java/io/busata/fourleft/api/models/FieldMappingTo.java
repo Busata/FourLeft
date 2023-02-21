@@ -1,6 +1,6 @@
 package io.busata.fourleft.api.models;
 
-import io.busata.fourleft.domain.discord.models.FieldMappingType;
+import io.busata.fourleft.domain.discord.bot.models.FieldMappingType;
 
 import java.util.UUID;
 

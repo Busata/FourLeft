@@ -1,5 +1,6 @@
 package io.busata.fourleft.gateway.racenet;
 
+import feign.RequestInterceptor;
 import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,11 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @Slf4j
 public class FeignConfiguration {
+
+    @Bean
+    public RequestInterceptor defaultRequestInterceptor() {
+        return requestTemplate -> { };
+    }
 
     @Bean()
     public ErrorDecoder errorDecoder() {

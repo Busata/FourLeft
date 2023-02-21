@@ -3,7 +3,7 @@ package io.busata.fourleftdiscord.messages;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
-import io.busata.fourleft.domain.discord.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.MessageType;
 
 import java.util.List;
 import java.util.Optional;

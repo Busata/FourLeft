@@ -26,6 +26,10 @@ import { ClubEventConfigurationComponent } from './fourleft/admin/club-tiers/clu
 import { TierVehicleConfigurationComponent } from './fourleft/admin/club-tiers/tier-vehicle-configuration/tier-vehicle-configuration.component';
 import {AuthConfig, OAuthModule} from 'angular-oauth2-oidc';
 import {Oauth2Interceptor} from './oauth2-interceptor.service';
+import { DiscordIntegrationContainerComponent } from './fourleft/admin/discord-integration/discord-integration-container/discord-integration-container.component';
+import { DiscordCallbackComponent } from './fourleft/admin/discord-integration/discord-callback/discord-callback.component';
+import {DiscordIntegrationService} from "./fourleft/admin/discord-integration/discord-integration.service";
+import { AppContainerComponent } from './fourleft/app-container/app-container.component';
 
 const authConfig: AuthConfig = {
   issuer: 'https://heimdall.busata.io/realms/FourLeft',
@@ -49,7 +53,10 @@ const authConfig: AuthConfig = {
     TierConfigurationComponent,
     RacenetNamesComponent,
     ClubEventConfigurationComponent,
-    TierVehicleConfigurationComponent
+    TierVehicleConfigurationComponent,
+    DiscordIntegrationContainerComponent,
+    DiscordCallbackComponent,
+    AppContainerComponent
   ],
   imports: [
     HttpClientModule,
@@ -71,7 +78,8 @@ const authConfig: AuthConfig = {
       multi: true
     },
     { provide: AuthConfig, useValue: authConfig },
-    UsersService, FieldMappingsService, ClubMergerService,ClubTiersService,FieldMappingQueryService],
+    UsersService, FieldMappingsService, ClubMergerService,ClubTiersService,FieldMappingQueryService,
+    DiscordIntegrationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

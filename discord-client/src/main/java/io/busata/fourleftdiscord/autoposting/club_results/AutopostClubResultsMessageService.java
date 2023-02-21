@@ -6,7 +6,7 @@ import discord4j.core.spec.MessageEditSpec;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.domain.discord.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntryRepository;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostableView;

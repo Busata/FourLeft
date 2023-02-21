@@ -1,4 +1,4 @@
-package io.busata.fourleft.domain.discord.models;
+package io.busata.fourleft.domain.discord.bot.models;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -8,7 +8,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
-import io.busata.fourleft.domain.discord.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

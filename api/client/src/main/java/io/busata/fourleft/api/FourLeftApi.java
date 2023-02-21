@@ -14,7 +14,7 @@ import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.domain.discord.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleft.api.models.QueryTrackResultsTo;
 import io.busata.fourleft.api.models.TrackUserRequestTo;
 import io.busata.fourleft.api.models.tiers.TierResultTo;

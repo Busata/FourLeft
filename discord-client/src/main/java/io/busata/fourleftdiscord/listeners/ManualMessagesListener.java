@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake;
 import io.busata.fourleft.api.messages.MessageEvent;
 import io.busata.fourleft.api.messages.MessageOperation;
 import io.busata.fourleft.api.messages.QueueNames;
-import io.busata.fourleft.domain.discord.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
