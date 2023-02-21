@@ -10,19 +10,25 @@ public class MessageLogFactory {
     public MessageLog create(MessageLogTo request) {
         MessageLog log = new MessageLog();
         log.setMessageId(request.messageId());
-        log.setContent(request.content());
-        log.setAuthor(request.author());
+        log.setViewType(request.viewType());
         log.setChannelId(request.channelId());
         log.setMessageType(request.messageType());
         return log;
     }
 
+
+    public void update(MessageLog log, MessageLogTo request) {
+        log.setMessageId(request.messageId());
+        log.setViewType(request.viewType());
+        log.setChannelId(request.channelId());
+        log.setMessageType(request.messageType());
+    }
+
     public MessageLogTo create(MessageLog messageLog) {
         return new MessageLogTo(
                 messageLog.getMessageType(),
+                messageLog.getViewType(),
                 messageLog.getMessageId(),
-                messageLog.getAuthor(),
-                messageLog.getContent(),
                 messageLog.getChannelId()
         );
     }

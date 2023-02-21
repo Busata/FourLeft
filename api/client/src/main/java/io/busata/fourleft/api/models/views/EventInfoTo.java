@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public record EventInfoTo(
+public record   EventInfoTo(
         String eventId,
         String eventChallengeId,
         String eventName,

@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {FieldMapping} from "../field-mapping";
 
 @Component({
@@ -8,7 +8,7 @@ import {FieldMapping} from "../field-mapping";
   styleUrls: ['./field-mapping-edit.component.scss']
 })
 export class FieldMappingEditComponent implements OnInit {
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   @Input()
   public set fieldMapping(value: FieldMapping) {
@@ -22,7 +22,7 @@ export class FieldMappingEditComponent implements OnInit {
   @Output()
   public save = new EventEmitter();
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: UntypedFormBuilder) {
     this.form = this.fb.group({
       name: [{value: "", disabled: true}],
       value: [{value:"", disabled: false}],

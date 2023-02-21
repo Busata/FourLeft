@@ -71,6 +71,9 @@ public interface FourLeftApi {
     @PostMapping(Routes.DISCORD_ALL_MESSAGES)
     void postMessage(@RequestBody MessageLogTo messageLog);
 
+    @GetMapping(Routes.DISCORD_MESSAGE_DETAILS)
+    MessageLogTo getMessageDetails(@RequestParam long messageId);
+
     @GetMapping(Routes.DISCORD_MESSAGE)
     boolean hasMessage(@RequestParam long messageId, @RequestParam MessageType messageType);
 

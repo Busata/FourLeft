@@ -24,8 +24,9 @@ public class MessageLog {
     @Enumerated(EnumType.STRING)
     MessageType messageType;
 
-    String author;
+    @Enumerated(EnumType.STRING)
+    ViewType viewType;
+
     Long messageId;
     Long channelId;
-    String content;
 }
