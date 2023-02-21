@@ -11,7 +11,7 @@ public enum ViewType {
             return ViewType.EXTRA;
         }
     },
-    EXTRA("Show extra data") {
+    EXTRA("Show cars/platforms") {
         @Override
         public ViewType next() {
             return ViewType.STANDARD;

@@ -41,8 +41,6 @@ public class ClubEventResultMessageFactory {
 
     MessageTemplate META_NORMAL_TEMPLATE =  messageTemplate(
                     "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
-
-
     MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
             "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
 
