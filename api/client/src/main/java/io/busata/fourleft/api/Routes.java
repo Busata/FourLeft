@@ -52,6 +52,7 @@ public class Routes {
      */
 
     public static final String DISCORD_ALL_MESSAGES = "/api/discord/messages";
+    public static final String DISCORD_MESSAGE_DETAILS = "/api/discord/messages/{messageId}";
     public static final String DISCORD_MESSAGE = "/api/discord/message";
     public static final String MESSAGE_EVENTS = "/api/events/messages";
     public static final String MESSAGE_EVENT_BY_EVENT_ID = "/api/events/messages/{eventId}";

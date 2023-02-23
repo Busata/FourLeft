@@ -1,6 +1,7 @@
 package io.busata.fourleftdiscord.autoposting.automated_championships;
 
 import discord4j.core.spec.EmbedCreateSpec;
+import io.busata.fourleft.domain.discord.bot.models.ViewType;
 import io.busata.fourleftdiscord.commands.DiscordChannels;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
@@ -47,7 +48,7 @@ public class AutoPosterAutomatedMonthlyClubService {
     }
 
     public void postNewStage() {
-        List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResults(DiscordChannels.DIRTY_MONTHLIES);
+        List<EmbedCreateSpec> messages = resultsFetcher.getCurrentEventResultsByChannelId(DiscordChannels.DIRTY_MONTHLIES, ViewType.STANDARD);
 
             try {
                 discordUtils.postMessage(

@@ -3,7 +3,10 @@ package io.busata.fourleftdiscord.messages;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageEditSpec;
+import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.ViewType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,12 +37,22 @@ public class DiscordMessageGatewayMock implements DiscordMessageGateway {
     }
 
     @Override
+    public Message updateMessageEmbeds(Snowflake channelId, Snowflake messageId, MessageEditSpec messageEditSpec) {
+        return null;
+    }
+
+    @Override
     public void postMessage(Snowflake channelId, EmbedCreateSpec embed, MessageType messageType) {
 
     }
 
     @Override
     public void postMessage(Snowflake channelId, List<EmbedCreateSpec> embed, MessageType messageType) {
+
+    }
+
+    @Override
+    public void logMessage(Message message, MessageType messageType, ViewType type) {
 
     }
 
@@ -51,5 +64,10 @@ public class DiscordMessageGatewayMock implements DiscordMessageGateway {
     @Override
     public Optional<Message> getLastMessage(Snowflake channelId) {
         return Optional.empty();
+    }
+
+    @Override
+    public MessageLogTo getMessageDetails(Snowflake messageId) {
+        return null;
     }
 }

@@ -9,6 +9,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
+import io.busata.fourleft.domain.discord.bot.models.ViewType;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,15 @@ public class DiscordMessageGatewayDefault implements DiscordMessageGateway {
             });
         }).block();
     }
+    @Override
+    public Message updateMessageEmbeds(Snowflake channelId, Snowflake messageId, MessageEditSpec messageEditSpec)
+    {
+        return client.getChannelById(channelId).ofType(MessageChannel.class).flatMap(channel -> {
+            return channel.getMessageById(messageId).flatMap(message -> {
+                return message.edit(messageEditSpec);
+            });
+        }).block();
+    }
 
     @Override
     public void postMessage(Snowflake channelId, EmbedCreateSpec embed, MessageType messageType) {
@@ -73,13 +83,18 @@ public class DiscordMessageGatewayDefault implements DiscordMessageGateway {
     }
 
     @Override
-    public void logMessage(Message message, MessageType messageType) {
+    public void logMessage(Message message, MessageType messageType, ViewType viewType) {
         api.postMessage(new MessageLogTo(
                 messageType,
+                viewType,
                 message.getId().asLong(),
-                message.getAuthor().map(User::getUsername).orElse(""),
-                message.getContent(),
-                message.getChannelId().asLong()));
+                message.getChannelId().asLong())
+        );
+    }
+
+    @Override
+    public void logMessage(Message message, MessageType messageType) {
+        this.logMessage(message, messageType, ViewType.STANDARD);
     }
 
     @Override
@@ -90,5 +105,10 @@ public class DiscordMessageGatewayDefault implements DiscordMessageGateway {
             log.error("Something went wrong while getting last message");
             return Optional.empty();
         }
+    }
+
+    @Override
+    public MessageLogTo getMessageDetails(Snowflake messageId) {
+        return api.getMessageDetails(messageId.asLong());
     }
 }

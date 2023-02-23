@@ -33,6 +33,9 @@ public class MessageTemplateFactory {
     public List<EmbedCreateSpec> createEmbedFromClubResult(ViewResultTo result) {
         return clubEventResultMessageFactory.createDefault(result);
     }
+    public List<EmbedCreateSpec> createExtraEmbedFromClubResult(ViewResultTo result) {
+        return clubEventResultMessageFactory.createMetadata(result);
+    }
 
     public EmbedCreateSpec createEmbedFromStandingEntries(ViewPointsTo result) {
         return championshipStandingsMessageFactory.create(result);

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class CachingConfig {
     @Bean
     public CacheManager cacheManager() {
-        final var cacheManager = new CaffeineCacheManager("field_mappings", "channel_configurations");
+        final var cacheManager = new CaffeineCacheManager("field_mappings", "channel_configurations", "view_results");
         cacheManager.setCaffeine(caffeineCacheBuilder());
         return cacheManager;
     }
@@ -22,6 +22,6 @@ public class CachingConfig {
     private Caffeine< Object, Object > caffeineCacheBuilder() {
         return Caffeine.newBuilder()
                 .initialCapacity(100)
-                .expireAfterAccess(10, TimeUnit.MINUTES);
+                .expireAfterAccess(1, TimeUnit.MINUTES);
     }
 }
