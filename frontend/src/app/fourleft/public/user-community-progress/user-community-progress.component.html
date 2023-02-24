@@ -1,0 +1,42 @@
+<mat-card class="user-community-progress">
+  <mat-card-title>
+    Generate community progress image
+  </mat-card-title>
+  <mat-card-content>
+
+    <div class="url-generate-form">
+      <mat-form-field>
+        <mat-label>Racenet nickname</mat-label>
+        <input matInput [(ngModel)]="racenet" placeholder="Racenet nickname">
+      </mat-form-field>
+
+      <mat-slide-toggle (change)="updateSetNickname($event)">Include nickname in image?</mat-slide-toggle>
+
+      <mat-slide-toggle (change)="updateBefore($event)" >Only include events before?</mat-slide-toggle>
+      <mat-form-field appearance="fill" *ngIf="filterByBefore">
+        <input matInput type="date" [(ngModel)]="beforeDate" placeholder="Choose a date">
+      </mat-form-field>
+
+      <mat-slide-toggle (change)="updateAfter($event)">Only include events after?</mat-slide-toggle>
+      <mat-form-field appearance="fill" *ngIf="filterByAfter">
+        <input matInput type="date" [(ngModel)]="afterDate" placeholder="Choose a date">
+      </mat-form-field>
+
+      <button color="primary" mat-raised-button (click)="generateUrl()" [disabled]="!racenet">Generate URL</button>
+
+    </div>
+
+    <div class="generated-url" *ngIf="generatedUrl">
+      {{generatedUrl}}
+      <button mat-icon-button
+              (click)="copyToClipboard()"
+              [cdkCopyToClipboard]="generatedUrl">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+    </div>
+
+    <div class="image-result" *ngIf="generatedUrl">
+      <img alt="Image not loaded correctly? Check if racenet is correct" [src]="generatedUrl" class="progression-image"/>
+    </div>
+  </mat-card-content>
+</mat-card>

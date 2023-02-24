@@ -3,9 +3,7 @@ import {NullValidationHandler, OAuthErrorEvent, OAuthService} from "angular-oaut
 import {Router} from "@angular/router";
 import {Location} from "@angular/common";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class AuthenticationService {
   private readonly targetUrl: string;
 
@@ -28,9 +26,7 @@ export class AuthenticationService {
             this.router.navigateByUrl(this.targetUrl);
           } else {
             this.router.navigateByUrl("/");
-
           }
-
         }
       })
 

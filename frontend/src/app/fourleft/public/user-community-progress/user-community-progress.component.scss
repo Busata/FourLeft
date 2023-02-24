@@ -1,0 +1,36 @@
+.url-generate-form {
+  display: flex;
+  flex-direction: column;
+
+  * {
+    margin-bottom: 5px;
+  }
+}
+
+.progression-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.generated-url {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: block;
+  padding: 5px;
+  text-align: center;
+
+  border: 1px solid black;
+  border-radius: 3px;
+  color: white;
+  background-color: #3e3b3b;
+
+}
+
+.user-community-progress {
+  min-width: 66vw;
+}
+
+.image-result {
+  margin-top: 10px;
+  text-align: center;
+}
