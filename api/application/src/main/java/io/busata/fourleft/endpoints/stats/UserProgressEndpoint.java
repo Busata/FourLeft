@@ -8,15 +8,13 @@ import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.common.TransactionHandler;
 import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.challenges.repository.CommunityChallengeRepository;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.clubs.models.Club;
+import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryTo;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.endpoints.views.ClubEventSupplier;
 import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
 import io.busata.fourleft.endpoints.views.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -43,6 +43,47 @@ public class UserProgressEndpoint {
 
     private final ClubViewRepository clubViewRepository;
 
+
+    @GetMapping(value = Routes.USER_COMMUNITY_PROGRESSION, produces = "image/png")
+    public BufferedImage calculateUser(@RequestParam String query) {
+
+        List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query);
+
+        int totalSize = communityChallengeSummary.size();
+
+        int imageHeight = 50;
+        BufferedImage imageOut = new BufferedImage(totalSize*2, imageHeight, BufferedImage.TYPE_INT_RGB);
+
+        for (int x = 0; x < communityChallengeSummary.size()*2; x++) {
+            CommunityChallengeSummaryTo summaryEntry = communityChallengeSummary.get((int)x/2);
+
+            final var percentageRank = ((float) summaryEntry.getRank() / (float) summaryEntry.getTotal()) * 100f;
+            final var color = getPixelColour(percentageRank, summaryEntry.getIsDnf());
+
+            for(int y = 0; y < imageHeight; y++) {
+                imageOut.setRGB(x, y, color);
+            }
+        }
+
+        return imageOut;
+
+    }
+
+    private static int getPixelColour(float percentageRank, boolean isDnf) {
+        if (isDnf) {
+            return Color.decode("#212529").getRGB();
+        } else if (percentageRank <= 1) {
+            return Color.decode("#ffc107").getRGB();
+        } else if (percentageRank <= 10) {
+            return Color.decode("#dc3545").getRGB();
+        } else if (percentageRank <= 35) {
+            return Color.decode("#198754").getRGB();
+        } else if (percentageRank <= 75) {
+            return Color.decode("#0d6efd").getRGB();
+        } else {
+            return Color.decode("#6c757d").getRGB();
+        }
+    }
 
 
     @GetMapping(Routes.USER_OVERVIEW)
@@ -85,33 +126,33 @@ public class UserProgressEndpoint {
     private List<CommunityResultSummaryTo> createCommunityResults(String query, List<CommunityChallenge> whatsthis) {
         return whatsthis.stream().flatMap(communityChallenge ->
                 communityChallenge.getLeaderboardKey().stream()
-                .map(leaderboardRepository::findLeaderboard)
-                .flatMap(Optional::stream)
-                .flatMap(board -> {
-                    List<BoardEntry> entries = board.getEntries();
-                    return entries.stream().filter(entry -> entry.getName().equalsIgnoreCase(query))
-                            .findFirst().stream().map(entry -> {
+                        .map(leaderboardRepository::findLeaderboard)
+                        .flatMap(Optional::stream)
+                        .flatMap(board -> {
+                            List<BoardEntry> entries = board.getEntries();
+                            return entries.stream().filter(entry -> entry.getName().equalsIgnoreCase(query))
+                                    .findFirst().stream().map(entry -> {
 
-                                final var vehicleClass = communityChallenge.getVehicleClass();
-                                final var stageName = communityChallenge.getLastEvent().map(CommunityEvent::getName).orElse("");
-                                final var endTime = communityChallenge.getEndTime();
+                                        final var vehicleClass = communityChallenge.getVehicleClass();
+                                        final var stageName = communityChallenge.getLastEvent().map(CommunityEvent::getName).orElse("");
+                                        final var endTime = communityChallenge.getEndTime();
 
-                                return new CommunityResultSummaryTo(
-                                        stageName,
-                                        vehicleClass,
-                                        endTime,
-                                        entry.getNationality(),
-                                        entry.getVehicleName(),
-                                        entry.getRank(),
-                                        entries.size(),
-                                        ((float) entry.getRank() / (float) entries.size()) * 100f,
-                                        entry.isDnf(),
-                                        entry.getTotalTime(),
-                                        entry.getTotalDiff()
-                                );
-                            });
+                                        return new CommunityResultSummaryTo(
+                                                stageName,
+                                                vehicleClass,
+                                                endTime,
+                                                entry.getNationality(),
+                                                entry.getVehicleName(),
+                                                entry.getRank(),
+                                                entries.size(),
+                                                ((float) entry.getRank() / (float) entries.size()) * 100f,
+                                                entry.isDnf(),
+                                                entry.getTotalTime(),
+                                                entry.getTotalDiff()
+                                        );
+                                    });
 
-                })).collect(Collectors.toList());
+                        })).collect(Collectors.toList());
     }
 
     private List<ClubResultSummaryTo> getClubResults(String query, List<ViewResultTo> viewResults) {
