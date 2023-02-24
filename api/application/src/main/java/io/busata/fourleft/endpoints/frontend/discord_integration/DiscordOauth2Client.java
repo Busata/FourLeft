@@ -11,5 +11,6 @@ public interface DiscordOauth2Client {
 
     @PostMapping(path="/oauth2/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @Headers("Content-Type: application/x-www-form-urlencoded")
-    DiscordTokenTo getToken(@RequestBody String tokenData);
+    DiscordTokenTo requestToken(@RequestBody String tokenData);
+
 }

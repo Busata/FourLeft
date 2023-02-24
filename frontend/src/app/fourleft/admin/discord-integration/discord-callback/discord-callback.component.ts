@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {DiscordIntegrationService} from "../discord-integration.service";
+import {DiscordIntegrationApiService} from "../discord-integration-api.service";
 
 @Component({
   selector: 'app-discord-callback',
@@ -9,7 +9,7 @@ import {DiscordIntegrationService} from "../discord-integration.service";
 })
 export class DiscordCallbackComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private router: Router, private discordIntegrationService: DiscordIntegrationService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private discordIntegrationService: DiscordIntegrationApiService) { }
 
   ngOnInit(): void {
     const token = <string> this.route.snapshot.queryParamMap.get('code');

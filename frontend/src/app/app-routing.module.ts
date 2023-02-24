@@ -27,7 +27,7 @@ const routes: Routes = [
         redirectTo: '/'
       },
       {
-        path:'discord_integration',
+        path:'discord',
         component: DiscordIntegrationContainerComponent
       },
       {

@@ -28,8 +28,9 @@ import {AuthConfig, OAuthModule} from 'angular-oauth2-oidc';
 import {Oauth2Interceptor} from './oauth2-interceptor.service';
 import { DiscordIntegrationContainerComponent } from './fourleft/admin/discord-integration/discord-integration-container/discord-integration-container.component';
 import { DiscordCallbackComponent } from './fourleft/admin/discord-integration/discord-callback/discord-callback.component';
-import {DiscordIntegrationService} from "./fourleft/admin/discord-integration/discord-integration.service";
+import {DiscordIntegrationApiService} from "./fourleft/admin/discord-integration/discord-integration-api.service";
 import { AppContainerComponent } from './fourleft/app-container/app-container.component';
+import {DiscordIntegrationModule} from "./fourleft/admin/discord-integration/discord-integration.module";
 
 const authConfig: AuthConfig = {
   issuer: 'https://heimdall.busata.io/realms/FourLeft',
@@ -69,7 +70,8 @@ const authConfig: AuthConfig = {
     BrowserAnimationsModule,
     MatButtonModule,
     MatIconModule,
-    DragDropModule
+    DragDropModule,
+    DiscordIntegrationModule
   ],
   providers: [
     {
@@ -79,7 +81,7 @@ const authConfig: AuthConfig = {
     },
     { provide: AuthConfig, useValue: authConfig },
     UsersService, FieldMappingsService, ClubMergerService,ClubTiersService,FieldMappingQueryService,
-    DiscordIntegrationService],
+    DiscordIntegrationApiService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
