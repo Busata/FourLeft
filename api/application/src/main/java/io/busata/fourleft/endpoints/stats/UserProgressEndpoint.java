@@ -48,8 +48,9 @@ public class UserProgressEndpoint {
 
     @GetMapping(value = Routes.USER_COMMUNITY_PROGRESSION, produces = "image/png")
     public BufferedImage calculateUser(@RequestParam String query,
+                                       @RequestParam(required = false, defaultValue = "false") boolean includeName,
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> before,
-                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) Optional<LocalDate> after) {
+                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)  Optional<LocalDate> after) {
 
         List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
                 .stream().filter(summary -> {
@@ -73,6 +74,15 @@ public class UserProgressEndpoint {
             for(int y = 0; y < imageHeight; y++) {
                 imageOut.setRGB(x, y, color);
             }
+        }
+
+        if(includeName) {
+            final var graphics = imageOut.getGraphics();
+            graphics.setColor(Color.WHITE);
+            graphics.setFont(new Font("Arial", Font.BOLD, 10));
+            int i = graphics.getFontMetrics().stringWidth(query) + 5;
+            graphics.drawString(query, totalSize * 2 - i, 47);
+            graphics.dispose();
         }
 
         return imageOut;
