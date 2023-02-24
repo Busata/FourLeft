@@ -20,11 +20,11 @@ public interface LeaderboardRepository extends JpaRepository<Leaderboard, UUID> 
     }
 
     @Query(value = """
-                     select be.rank, be.is_dnf as isDnf, be.name, lo.count as total, cc.type from board_entry be
+                     select be.rank, be.is_dnf as isDnf, be.name, cc.end_time as challengeDate, lo.count as total, cc.type from board_entry be
                               join leaderboard l on be.leaderboard_id = l.id
                               right outer join community_challenge cc on l.challenge_id = cc.challenge_id
                             join (select count(*) as count, l.id as id from board_entry be join leaderboard l on be.leaderboard_id = l.id group by l.id) as LO on LO.id = l.id
-                             where be.name=:name
+                             where lower(be.name)=lower(:name)
                      order by cc.end_time desc;
             """, nativeQuery = true)
     List<CommunityChallengeSummaryTo> findCommunityChallengeSummary(@Param("name") String name);

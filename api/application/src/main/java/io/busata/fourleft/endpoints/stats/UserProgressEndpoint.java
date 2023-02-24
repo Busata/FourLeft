@@ -19,7 +19,9 @@ import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
 import io.busata.fourleft.endpoints.views.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,9 +47,17 @@ public class UserProgressEndpoint {
 
 
     @GetMapping(value = Routes.USER_COMMUNITY_PROGRESSION, produces = "image/png")
-    public BufferedImage calculateUser(@RequestParam String query) {
+    public BufferedImage calculateUser(@RequestParam String query,
+                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> before,
+                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) Optional<LocalDate> after) {
 
-        List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query);
+        List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
+                .stream().filter(summary -> {
+                    LocalDate challengeDate = summary.getChallengeDate();
+                    boolean isBefore = before.map(challengeDate::isBefore).orElse(true);
+                    boolean isAfter = after.map(challengeDate::isAfter).orElse(true);
+                    return isBefore && isAfter;
+                }).toList();
 
         int totalSize = communityChallengeSummary.size();
 
