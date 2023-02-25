@@ -21,14 +21,6 @@ public class DiscordIntegrationEndpoint {
     private final DiscordIntegrationService discordIntegrationService;
     private final DiscordApiClient discordApiClient;
 
-
-    @GetMapping(Routes.DISCORD_CALLBACK)
-    @ResponseStatus(HttpStatus.FOUND)
-    //Utility function to redirect to an url with # in it.
-    public void discordCallback(@RequestParam String code, HttpServletResponse response) {
-        response.setHeader("Location", "/#/discord_callback?code=%s".formatted(code));
-    }
-
     @GetMapping(Routes.DISCORD_AUTHENTICATION_STATUS)
     public DiscordAuthenticationStatusTo getAuthenticationStatus() {
         return new DiscordAuthenticationStatusTo(
@@ -36,12 +28,10 @@ public class DiscordIntegrationEndpoint {
         );
     }
 
-
     @PostMapping(Routes.DISCORD_INTEGRATION_AUTH)
     public void authenticate(@RequestBody String code) {
         this.discordIntegrationService.fetchAndStoreAccessToken(code);
     }
-
 
     @GetMapping(Routes.DISCORD_GUILDS)
     @DiscordAuthenticated
