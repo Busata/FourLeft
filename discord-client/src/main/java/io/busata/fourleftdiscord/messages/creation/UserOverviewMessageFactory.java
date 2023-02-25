@@ -100,7 +100,7 @@ public class UserOverviewMessageFactory {
                 ).toList();
 
         for (int i = 0; i < previousClubEvent.size(); i++) {
-            String title = i == 0 ? "\"Previous club challenges\"" : "\u200b";
+            String title = i == 0 ? "Previous club challenges" : "\u200b";
             String event = previousClubEvent.get(i);
             builder.addField(title, event, false);
         }
