@@ -4,6 +4,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.ChannelConfigurationTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
+import io.busata.fourleftdiscord.helpers.ListHelpers;
 import io.busata.fourleftdiscord.messages.templates.ClubSummaryResultTemplateResolver;
 import io.busata.fourleftdiscord.messages.templates.CommunitySummaryResultTemplateResolver;
 import io.busata.fourleftdiscord.messages.templates.MessageTemplate;
@@ -11,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.busata.fourleftdiscord.messages.templates.MessageTemplate.messageTemplate;
 
@@ -50,33 +53,58 @@ public class UserOverviewMessageFactory {
         builder.title("**Personal results • " + username + "**");
         builder.color(Color.of(244, 0, 75));
 
-        String activeCommunityEvent =
-                userResultSummaryTo.communityActiveEventSummaries().stream()
-                        .map(communityResultSummaryTo -> communitySummaryResultTemplateResolver.resolve(communityEntryTemplate, communityResultSummaryTo)).collect(Collectors.joining("\n"));
+        List<String> activeCommunityEvent = ListHelpers.partitionInGroups(userResultSummaryTo.communityActiveEventSummaries(), 4)
+                .stream()
+                .map(eventSummaries -> {
+                    return eventSummaries.stream()
+                            .map(communityResultSummaryTo -> communitySummaryResultTemplateResolver.resolve(communityEntryTemplate, communityResultSummaryTo))
+                            .filter(StringUtils::isNotBlank)
+                            .collect(Collectors.joining("\n"));
 
-        String previousCommunityEvent =
-                userResultSummaryTo.communityPreviousEventSummaries().stream()
-                        .map(communityResultSummaryTo -> communitySummaryResultTemplateResolver.resolve(communityEntryTemplate, communityResultSummaryTo)).collect(Collectors.joining("\n"));
+                }).toList();
 
-        String activeClubEvent =
-                userResultSummaryTo.clubActiveEventSummaries().stream()
-                        .map(clubResultSummaryTo ->  clubSummaryResultTemplateResolver.resolve(clubEntryTemplate, clubResultSummaryTo)).collect(Collectors.joining("\n"));
+        for (int i = 0; i < activeCommunityEvent.size(); i++) {
+            String title = i == 0 ? "Community challenges" : "\u200b";
+            String event = activeCommunityEvent.get(i);
+            builder.addField(title, event, false);
+        }
 
-        String previousClubEvent = userResultSummaryTo.clubPreviousEventSummaries().stream()
-                        .map(clubResultSummaryTo ->  clubSummaryResultTemplateResolver.resolve(clubEntryTemplate, clubResultSummaryTo)).collect(Collectors.joining("\n"));
+        List<String> previousCommunityEvents = ListHelpers.partitionInGroups(userResultSummaryTo.communityPreviousEventSummaries(), 4)
+                .stream()
+                .map(eventSummaries -> {
+                    return eventSummaries.stream()
+                            .map(communityResultSummaryTo -> communitySummaryResultTemplateResolver.resolve(communityEntryTemplate, communityResultSummaryTo)).collect(Collectors.joining("\n"));
+                }).toList();
 
-        if(StringUtils.isNotBlank(activeCommunityEvent)) {
-            builder.addField("Community challenges", activeCommunityEvent, false);
+        for (int i = 0; i < previousCommunityEvents.size(); i++) {
+            String title = i == 0 ? "Community challenges (yesterday)" : "\u200b";
+            String event = previousCommunityEvents.get(i);
+            builder.addField(title, event, false);
         }
-        if(StringUtils.isNotBlank(previousCommunityEvent)) {
-            builder.addField("Community challenges (yesterday)", previousCommunityEvent, false);
+
+        List<String> activeClubEvents = ListHelpers.partitionInGroups(userResultSummaryTo.clubActiveEventSummaries(), 4)
+                .stream()
+                .map(eventSummaries ->
+                        eventSummaries.stream().map(clubResultSummaryTo -> clubSummaryResultTemplateResolver.resolve(clubEntryTemplate, clubResultSummaryTo)).collect(Collectors.joining("\n"))
+                ).toList();
+
+        for (int i = 0; i < activeClubEvents.size(); i++) {
+            String title = i == 0 ? "Club Challenges" : "\u200b";
+            String event = activeClubEvents.get(i);
+            builder.addField(title, event, false);
         }
-        if(StringUtils.isNotBlank(activeClubEvent)) {
-            builder.addField("Club Challenges", activeClubEvent, false);
+
+        List<String> previousClubEvent = ListHelpers.partitionInGroups(userResultSummaryTo.clubPreviousEventSummaries(), 4)
+                .stream()
+                .map(eventSummaries -> eventSummaries.stream().map(clubResultSummaryTo ->  clubSummaryResultTemplateResolver.resolve(clubEntryTemplate, clubResultSummaryTo)).collect(Collectors.joining("\n"))
+                ).toList();
+
+        for (int i = 0; i < previousClubEvent.size(); i++) {
+            String title = i == 0 ? "\"Previous club challenges\"" : "\u200b";
+            String event = previousClubEvent.get(i);
+            builder.addField(title, event, false);
         }
-        if(StringUtils.isNotBlank(previousClubEvent)) {
-            builder.addField("Previous club challenges", previousClubEvent, false);
-        }
+
 
         return builder.build();
     }
