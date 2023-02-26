@@ -1,10 +1,6 @@
 import {NgModule} from "@angular/core";
 import {RouterModule, Routes} from "@angular/router";
-import {DiscordCallbackComponent} from "./admin/discord-integration/discord-callback/discord-callback.component";
 import {FourleftPrivateContainerComponent} from "./fourleft-private-container/fourleft-private-container.component";
-import {
-  DiscordIntegrationContainerComponent
-} from "./admin/discord-integration/discord-integration-container/discord-integration-container.component";
 import {UsersListComponent} from "./admin/users/users-list/users-list.component";
 import {FieldMappingsListComponent} from "./admin/field-mappings/field-mappings-list/field-mappings-list.component";
 import {ClubMergeResultsComponent} from "./admin/club-merger/club-merge-results/club-merge-results.component";
@@ -12,16 +8,12 @@ import {ClubTiersContainerComponent} from "./admin/club-tiers/club-tiers-contain
 
 export const routes: Routes = [
   {
-    path: 'discord_callback',
-    component: DiscordCallbackComponent
-  },
-  {
     path: '',
     component: FourleftPrivateContainerComponent,
     children: [
       {
-        path:'discord',
-        component: DiscordIntegrationContainerComponent
+        path: 'discord',
+        loadChildren: () => import('./admin/discord/discord.module').then(m => m.DiscordModule)
       },
       {
         path: 'users',
@@ -46,4 +38,5 @@ export const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class FourleftPrivateRoutingModule {}
+export class FourleftPrivateRoutingModule {
+}

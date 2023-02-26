@@ -6,4 +6,8 @@ public record DiscordGuildTo(
     String icon,
     boolean owner,
     int permissions) {
+
+    public boolean canManageServer() {
+        return (permissions() & 0x20) == 0x20;
+    }
 }

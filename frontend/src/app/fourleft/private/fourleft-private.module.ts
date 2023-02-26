@@ -1,5 +1,5 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {AppComponent} from "../../app.component";
 import {UsersListComponent} from "./admin/users/users-list/users-list.component";
 import {FieldMappingsListComponent} from "./admin/field-mappings/field-mappings-list/field-mappings-list.component";
@@ -14,27 +14,18 @@ import {
 import {
   TierVehicleConfigurationComponent
 } from "./admin/club-tiers/tier-vehicle-configuration/tier-vehicle-configuration.component";
-import {
-  DiscordIntegrationContainerComponent
-} from "./admin/discord-integration/discord-integration-container/discord-integration-container.component";
-import {DiscordCallbackComponent} from "./admin/discord-integration/discord-callback/discord-callback.component";
 import {FourleftPrivateContainerComponent} from "./fourleft-private-container/fourleft-private-container.component";
-import {HTTP_INTERCEPTORS} from "@angular/common/http";
-import {AuthConfig} from "angular-oauth2-oidc";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatCardModule} from "@angular/material/card";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {DragDropModule} from "@angular/cdk/drag-drop";
-import {DiscordIntegrationModule} from "./admin/discord-integration/discord-integration.module";
-import {Oauth2Interceptor} from "./services/oauth2-interceptor.service";
+import {DiscordModule} from "./admin/discord/discord.module";
 import {UsersService} from "./admin/users/users.service";
 import {FieldMappingsService} from "./admin/field-mappings/field-mappings.service";
 import {ClubMergerService} from "./admin/club-merger/club-merger.service";
 import {ClubTiersService} from "./admin/club-tiers/club-tiers.service";
 import {FieldMappingQueryService} from "./admin/field-mappings/field-mapping-query.service";
-import {DiscordIntegrationApiService} from "./admin/discord-integration/discord-integration-api.service";
 import {FourleftPrivateRoutingModule} from "./fourleft-private-routing.module";
 import {AuthenticationService} from "./services/authentication.service";
 
@@ -50,8 +41,6 @@ import {AuthenticationService} from "./services/authentication.service";
     RacenetNamesComponent,
     ClubEventConfigurationComponent,
     TierVehicleConfigurationComponent,
-    DiscordIntegrationContainerComponent,
-    DiscordCallbackComponent,
     FourleftPrivateContainerComponent],
   imports: [
     FourleftPrivateRoutingModule,
@@ -62,11 +51,11 @@ import {AuthenticationService} from "./services/authentication.service";
     MatButtonModule,
     MatIconModule,
     DragDropModule,
-    DiscordIntegrationModule
+    DiscordModule
   ],
-  providers:[
+  providers: [
     AuthenticationService,
-    UsersService, FieldMappingsService, ClubMergerService,ClubTiersService,FieldMappingQueryService,
-    DiscordIntegrationApiService]
+    UsersService, FieldMappingsService, ClubMergerService, ClubTiersService, FieldMappingQueryService]
 })
-export class FourleftPrivateModule { }
+export class FourleftPrivateModule {
+}

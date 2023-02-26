@@ -92,4 +92,6 @@ public class Routes {
 
     public static final String DISCORD_GUILDS = "/api/discord/integration/guilds";
     public static final String DISCORD_AUTHENTICATION_STATUS = "/api/discord/integration/authentication_status";
+    public static final String DISCORD_REDIRECT = "/api/public/discord/redirect";
+    public static final String DISCORD_INVITE_BOT = "/api/public/discord/invite_bot";
 }

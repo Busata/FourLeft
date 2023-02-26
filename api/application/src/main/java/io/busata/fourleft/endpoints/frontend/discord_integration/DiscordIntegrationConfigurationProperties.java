@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 public class DiscordIntegrationConfigurationProperties {
+    private String botInviteUrl;
+    private String botToken;
+    private String authUrl;
     private String clientId;
     private String clientSecret;
     private String redirectUri;

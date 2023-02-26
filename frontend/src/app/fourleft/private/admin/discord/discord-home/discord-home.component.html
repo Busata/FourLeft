@@ -1,0 +1,23 @@
+<div class="guilds" >
+  <div class="flex" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
+    <img [src]="getGuildIcon(guild)"/>
+    <div class="ml-4">
+    <div class="font-bold">{{guild.name}}</div>
+    <div>
+      <div class="italic color-red-100" *ngIf="guild.botJoined">
+        Bot present
+      </div>
+      <div class="italic text-red-500" *ngIf="!guild.botJoined">
+        Bot not present yet
+      </div>
+      <div *ngIf="guild.botJoined">
+        <button mat-stroked-button>Manage server</button>
+
+      </div>
+      <div *ngIf="!guild.botJoined">
+        <button mat-stroked-button (click)="inviteBot(guild)">Invite bot</button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>

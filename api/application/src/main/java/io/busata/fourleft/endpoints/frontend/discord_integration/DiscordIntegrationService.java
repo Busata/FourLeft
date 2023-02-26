@@ -2,16 +2,22 @@ package io.busata.fourleft.endpoints.frontend.discord_integration;
 
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
+import io.busata.fourleft.endpoints.frontend.discord_integration.feign.bot.DiscordBotClient;
+import io.busata.fourleft.endpoints.frontend.discord_integration.feign.auth.DiscordOauth2Client;
+import io.busata.fourleft.endpoints.frontend.discord_integration.feign.user.DiscordUserClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +30,25 @@ public class DiscordIntegrationService {
     private final DiscordOauth2Client discordOauth2Client;
     private final DiscordIntegrationConfigurationProperties discordIntegrationConfigurationProperties;
 
+    private final DiscordBotClient discordBotClient;
+    private final DiscordUserClient discordUserClient;
+
+    public List<DiscordGuildSummaryTo> getGuildSummaries() {
+        List<String> botGuildIds = this.discordBotClient.getGuilds().stream().map(DiscordGuildTo::id).toList();
+
+        return this.discordUserClient.getGuilds().stream()
+                .filter(DiscordGuildTo::canManageServer)
+                .map(guild -> {
+                    boolean botJoined = botGuildIds.contains(guild.id());
+                    return new DiscordGuildSummaryTo(
+                            guild.id(),
+                            guild.name(),
+                            guild.icon(),
+                            botJoined
+                    );
+                })
+                .toList();
+    }
 
     public boolean isAuthenticated() {
        return Optional.ofNullable(SecurityContextHolder.getContext())
@@ -90,6 +115,20 @@ public class DiscordIntegrationService {
 
         return this.discordOauth2Client.requestToken(body);
     }
+
+    public DiscordTokenTo getBotToken() {
+        String body = Map.of(
+                            "client_id", discordIntegrationConfigurationProperties.getClientId(),
+                        "client_secret", discordIntegrationConfigurationProperties.getClientSecret(),
+                        "grant_type", "client_credentials",
+                        "scope", "identify guilds"
+                ).entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                .reduce((s, s2) -> s + "&" + s2).orElseThrow();
+
+        return this.discordOauth2Client.requestToken(body);
+    }
     private DiscordTokenTo refreshToken(String refreshToken) {
         String body = Map.of(
                             "client_id", discordIntegrationConfigurationProperties.getClientId(),
@@ -104,7 +143,5 @@ public class DiscordIntegrationService {
         return this.discordOauth2Client.requestToken(body);
     }
 
-    public Optional<DiscordIntegrationAccessToken> getToken(String username) {
-        return this.discordIntegrationAccessTokensRepository.findByUserName(username);
-    }
+
 }

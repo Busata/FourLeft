@@ -1,6 +1,7 @@
-package io.busata.fourleft.endpoints.frontend.discord_integration;
+package io.busata.fourleft.endpoints.frontend.discord_integration.feign.auth;
 
 import feign.Headers;
+import io.busata.fourleft.endpoints.frontend.discord_integration.DiscordTokenTo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

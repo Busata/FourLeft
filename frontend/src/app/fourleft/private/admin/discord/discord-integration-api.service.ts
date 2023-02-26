@@ -7,13 +7,15 @@ export class DiscordIntegrationApiService {
   constructor(private httpClient: HttpClient) {
   }
 
+  public isAuthenticated() {
+    return this.httpClient.get('/api/discord/integration/authentication_status')
+  }
+
   public postDiscordToken(token: string) {
     return this.httpClient.post("/api/discord/integration/auth", token);
   }
 
   public getDiscordGuilds() {
-    this.httpClient.get("/api/discord/integration/guilds").subscribe(response => {
-      console.log(response);
-    });
+    return this.httpClient.get("/api/discord/integration/guilds");
   }
 }
