@@ -41,7 +41,7 @@ public class DiscordChannelConfigurationEndpoint {
     public void setup() {
 
         var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
-        createEstonianChampion(defaultPoints);
+        createWeepyAdminWeekly(defaultPoints);
     }
 
     /*private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
@@ -65,7 +65,7 @@ public class DiscordChannelConfigurationEndpoint {
     }
     */
 
-    private void createEstonianChampion(PointsCalculator pointsCalculator) {
+    /*private void createEstonianChampion(PointsCalculator pointsCalculator) {
 
         final var view = new SingleClubView(418638L, true, -1, BadgeType.NONE, PlayerRestrictions.NONE, of());
 
@@ -80,6 +80,24 @@ public class DiscordChannelConfigurationEndpoint {
 
         DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
                 UUID.randomUUID(), 1064449104006090762L, "Estonia Champion", clubView, of(clubView), of(clubView));
+
+        discordChannelConfigurationRepository.save(discordChannelConfiguration);
+    }*/
+    private void createWeepyAdminWeekly(PointsCalculator pointsCalculator) {
+
+        final var view = new SingleClubView(445546L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+
+        ClubView clubView = new ClubView(
+                UUID.randomUUID(),
+                "MM Admin Weekly",
+                view,
+                pointsCalculator
+        );
+
+        clubView = repository.save(clubView);
+
+        DiscordChannelConfiguration discordChannelConfiguration = new DiscordChannelConfiguration(
+                UUID.randomUUID(), 1075516812051099668L, "MM Admin Weekly", clubView, of(clubView), of(clubView));
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
