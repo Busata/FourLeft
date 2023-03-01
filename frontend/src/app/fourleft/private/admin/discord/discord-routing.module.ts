@@ -7,6 +7,11 @@ import {
 import {discordAuthenticationGuard} from "./discord-callback/discord-authentication.guard";
 import {DiscordAuthenticationComponent} from "./discord-authentication/discord-authentication.component";
 import {DiscordHomeComponent} from "./discord-home/discord-home.component";
+import {ManageDiscordServerComponent} from "./manage-server/manage-discord-server/manage-discord-server.component";
+import {discordManageServerGuard} from "./manage-server/discord-manage-server.guard";
+import {
+  ManageDiscordServerContainerComponent
+} from "./manage-server/manage-discord-server-container/manage-discord-server-container.component";
 
 const routes: Routes = [
   {
@@ -27,6 +32,11 @@ const routes: Routes = [
       {
         path: 'authenticate',
         component: DiscordAuthenticationComponent
+      },
+      {
+        path: 'manage/:guildId',
+        canActivate: [discordManageServerGuard],
+        component: ManageDiscordServerContainerComponent
       }
     ]
   }

@@ -94,4 +94,9 @@ public class Routes {
     public static final String DISCORD_AUTHENTICATION_STATUS = "/api/discord/integration/authentication_status";
     public static final String DISCORD_REDIRECT = "/api/public/discord/redirect";
     public static final String DISCORD_INVITE_BOT = "/api/public/discord/invite_bot";
+
+    public static final String DISCORD_MANAGE_SERVER = "/api/discord/integration/guilds/{guildId}/can_manage";
+    public static final String DISCORD_GUILD = "/api/discord/integration/guilds/{guildId}";
+
+    public static final String DISCORD_GUILD_CHANNELS = "/api/discord/integration/guilds/{guildId}/channels";
 }

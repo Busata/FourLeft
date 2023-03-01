@@ -11,6 +11,18 @@ export class DiscordIntegrationApiService {
     return this.httpClient.get('/api/discord/integration/authentication_status')
   }
 
+  public getDiscordGuild(guildId: string) {
+    return this.httpClient.get(`/api/discord/integration/guilds/${guildId}`);
+  }
+
+  public getDiscordChannels(guildId: string) {
+    return this.httpClient.get(`/api/discord/integration/guilds/${guildId}/channels`);
+  }
+
+  public canManageServer(guildId: string) {
+    return this.httpClient.get(`/api/discord/integration/guilds/${guildId}/can_manage`);
+  }
+
   public postDiscordToken(token: string) {
     return this.httpClient.post("/api/discord/integration/auth", token);
   }

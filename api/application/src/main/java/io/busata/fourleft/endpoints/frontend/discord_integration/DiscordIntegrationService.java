@@ -144,4 +144,11 @@ public class DiscordIntegrationService {
     }
 
 
+    public DiscordGuildTo getGuild(String guildId) {
+        return this.discordBotClient.getGuild(guildId);
+    }
+
+    public List<DiscordChannelTo> getGuildChannels(String guildId) {
+        return this.discordBotClient.getChannels(guildId);
+    }
 }

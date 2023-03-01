@@ -1,5 +1,6 @@
 package io.busata.fourleft.endpoints.frontend.discord_integration.feign;
 
+import io.busata.fourleft.endpoints.frontend.discord_integration.DiscordChannelTo;
 import io.busata.fourleft.endpoints.frontend.discord_integration.DiscordGuildTo;
 import io.busata.fourleft.endpoints.frontend.discord_integration.GuildMemberTo;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,4 +15,10 @@ public interface DiscordApi {
 
     @GetMapping("/guilds/{guildId}/members/{userId}")
     GuildMemberTo getGuildMember(@PathVariable(name="guildId") String guildId, @PathVariable(name = "userId") String userId);
+
+    @GetMapping("/guilds/{guildId}")
+    DiscordGuildTo getGuild(@PathVariable(name="guildId") String guildId);
+
+    @GetMapping("/guilds/{guildId}/channels")
+    List<DiscordChannelTo> getChannels(@PathVariable(name="guildId") String guildId);
 }

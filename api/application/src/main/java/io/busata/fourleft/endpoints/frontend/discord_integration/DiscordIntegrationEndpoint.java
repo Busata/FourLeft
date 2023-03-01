@@ -18,6 +18,12 @@ public class DiscordIntegrationEndpoint {
     private final DiscordIntegrationConfigurationProperties discordProperties;
 
 
+    @GetMapping(Routes.DISCORD_MANAGE_SERVER)
+    @DiscordAuthenticated
+    public DiscordGuildPermissionTo canManage(@PathVariable(name="guildId") String guildId) {
+        return new DiscordGuildPermissionTo(true);
+    }
+
     @GetMapping(Routes.DISCORD_INVITE_BOT)
     @ResponseStatus(HttpStatus.FOUND)
     public void inviteBot(@RequestParam(name="guild_id") String guildId, HttpServletResponse response) {
@@ -57,5 +63,15 @@ public class DiscordIntegrationEndpoint {
         return this.discordIntegrationService.getGuildSummaries();
     }
 
+    @GetMapping(Routes.DISCORD_GUILD)
+    @DiscordAuthenticated
+    public DiscordGuildTo getGuild(@PathVariable(name="guildId") String guildId) {
+        return this.discordIntegrationService.getGuild(guildId);
+    }
+    @GetMapping(Routes.DISCORD_GUILD_CHANNELS)
+    @DiscordAuthenticated
+    public List<DiscordChannelTo> getChannels(@PathVariable(name="guildId") String guildId) {
+        return this.discordIntegrationService.getGuildChannels(guildId);
+    }
 
 }

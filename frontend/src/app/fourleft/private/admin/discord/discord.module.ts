@@ -9,6 +9,8 @@ import { DiscordAuthenticationComponent } from './discord-authentication/discord
 import { DiscordHomeComponent } from './discord-home/discord-home.component';
 import {DiscordStateService} from "./discord-state.service";
 import {MatButtonModule} from "@angular/material/button";
+import { ManageDiscordServerComponent } from './manage-server/manage-discord-server/manage-discord-server.component';
+import { ManageDiscordServerContainerComponent } from './manage-server/manage-discord-server-container/manage-discord-server-container.component';
 
 
 
@@ -17,6 +19,8 @@ import {MatButtonModule} from "@angular/material/button";
     DiscordPageComponent,
     DiscordAuthenticationComponent,
     DiscordHomeComponent,
+    ManageDiscordServerComponent,
+    ManageDiscordServerContainerComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
   imports: [
