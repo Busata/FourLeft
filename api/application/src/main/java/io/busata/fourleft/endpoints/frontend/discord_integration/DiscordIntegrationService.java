@@ -2,6 +2,7 @@ package io.busata.fourleft.endpoints.frontend.discord_integration;
 
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
+import io.busata.fourleft.endpoints.frontend.discord_integration.feign.DiscordMemberTo;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.bot.DiscordBotClient;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.auth.DiscordOauth2Client;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.user.DiscordUserClient;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -149,6 +152,8 @@ public class DiscordIntegrationService {
     }
 
     public List<DiscordChannelTo> getGuildChannels(String guildId) {
-        return this.discordBotClient.getChannels(guildId);
+        return this.discordBotClient.getChannels(guildId).stream()
+                .filter(channel -> channel.type() == DisordChannelType.TEXT.getType())
+                .toList();
     }
 }

@@ -12,6 +12,9 @@ import {discordManageServerGuard} from "./manage-server/discord-manage-server.gu
 import {
   ManageDiscordServerContainerComponent
 } from "./manage-server/manage-discord-server-container/manage-discord-server-container.component";
+import {
+  ConfigureChannelContainerComponent
+} from "./configure-channel/configure-channel-container/configure-channel-container.component";
 
 const routes: Routes = [
   {
@@ -34,9 +37,14 @@ const routes: Routes = [
         component: DiscordAuthenticationComponent
       },
       {
-        path: 'manage/:guildId',
+        path: 'configure/:guildId',
         canActivate: [discordManageServerGuard],
         component: ManageDiscordServerContainerComponent
+      },
+      {
+        path: 'configure/:guildId/channels/:channelId',
+        canActivate: [discordManageServerGuard],
+        component: ConfigureChannelContainerComponent
       }
     ]
   }

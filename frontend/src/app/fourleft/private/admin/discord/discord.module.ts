@@ -11,6 +11,8 @@ import {DiscordStateService} from "./discord-state.service";
 import {MatButtonModule} from "@angular/material/button";
 import { ManageDiscordServerComponent } from './manage-server/manage-discord-server/manage-discord-server.component';
 import { ManageDiscordServerContainerComponent } from './manage-server/manage-discord-server-container/manage-discord-server-container.component';
+import { ConfigureChannelContainerComponent } from './configure-channel/configure-channel-container/configure-channel-container.component';
+import {MatCardModule} from "@angular/material/card";
 
 
 
@@ -21,12 +23,14 @@ import { ManageDiscordServerContainerComponent } from './manage-server/manage-di
     DiscordHomeComponent,
     ManageDiscordServerComponent,
     ManageDiscordServerContainerComponent,
+    ConfigureChannelContainerComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
-  imports: [
-    DiscordRoutingModule,
-    CommonModule,
-    MatButtonModule,
-  ]
+    imports: [
+        DiscordRoutingModule,
+        CommonModule,
+        MatButtonModule,
+        MatCardModule,
+    ]
 })
 export class DiscordModule { }

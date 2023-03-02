@@ -11,7 +11,7 @@
         Bot not present yet
       </div>
       <div *ngIf="guild.botJoined">
-        <button mat-stroked-button [routerLink]="'manage/'+guild.id">Manage server</button>
+        <button mat-stroked-button [routerLink]="'configure/'+guild.id">Manage server</button>
 
       </div>
       <div *ngIf="!guild.botJoined">

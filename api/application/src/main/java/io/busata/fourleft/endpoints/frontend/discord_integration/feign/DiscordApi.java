@@ -21,4 +21,7 @@ public interface DiscordApi {
 
     @GetMapping("/guilds/{guildId}/channels")
     List<DiscordChannelTo> getChannels(@PathVariable(name="guildId") String guildId);
+
+    @GetMapping("/guilds/{guildId}/members")
+    List<DiscordMemberTo> getMembers(@PathVariable(name="guildId") String guildId);
 }

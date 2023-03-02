@@ -1,9 +1,19 @@
 <div>
 <h1>{{guild.name}}</h1>
 
-  <ul>
-    <li *ngFor="let channel of channels">
-      #{{channel.name}}
-    </li>
-  </ul>
+  <mat-card>
+    <mat-card-title>Channels</mat-card-title>
+    <mat-card-content>
+      <ul>
+        <li *ngFor="let channel of channels" class="channel-item">
+          <span class="channel-name">#{{channel.name}}</span>
+          <button
+            mat-button mat-raised-button
+            [routerLink]="['channels', channel.id]"
+          >Manage configuration</button>
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
 </div>
