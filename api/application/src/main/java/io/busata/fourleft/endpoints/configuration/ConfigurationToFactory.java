@@ -15,8 +15,7 @@ import io.busata.fourleft.domain.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.CommunityChallengeView;
 import io.busata.fourleft.domain.configuration.results_views.ResultsView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.domain.configuration.results_views.TiersView;
-import io.busata.fourleft.endpoints.club.tiers.service.TierFactory;
+import io.busata.fourleft.domain.configuration.results_views.TieredView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ConfigurationToFactory {
 
-    private final TierFactory tierFactory;
 
     public ResultsViewTo create(ResultsView resultsView) {
         if(resultsView == null) {
@@ -34,8 +32,8 @@ public class ConfigurationToFactory {
         }
         if (resultsView instanceof SingleClubView) {
             return createSingleClubViewTo((SingleClubView) resultsView);
-        } else if (resultsView instanceof TiersView) {
-            return createTiersViewTo((TiersView) resultsView);
+        } else if (resultsView instanceof TieredView) {
+            return createTiersViewTo((TieredView) resultsView);
         } else if (resultsView instanceof CommunityChallengeView) {
             return createCommunityChallegeViewTo((CommunityChallengeView) resultsView);
         } else {
@@ -46,11 +44,11 @@ public class ConfigurationToFactory {
     private SingleClubViewTo createSingleClubViewTo(SingleClubView resultsView) {
         return new SingleClubViewTo(resultsView.getClubId(), resultsView.getBadgeType(), resultsView.getPlayerRestriction(), resultsView.getPlayers());
     }
-    private TiersViewTo createTiersViewTo(TiersView resultsView) {
+    private TiersViewTo createTiersViewTo(TieredView resultsView) {
         return new TiersViewTo(
                 resultsView.isUsePowerStage(),
                 resultsView.getDefaultPowerstageIndex(),
-                resultsView.getTiers().stream().map(tierFactory::create).collect(Collectors.toList()));
+                resultsView.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList()));
     }
     private CommunityChallengeViewTo createCommunityChallegeViewTo(CommunityChallengeView resultsView) {
         return new CommunityChallengeViewTo(

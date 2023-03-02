@@ -1,5 +1,6 @@
-package io.busata.fourleft.domain.tiers.models;
+package io.busata.fourleft.domain.configuration.event_restrictions.models;
 
+import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,9 +26,9 @@ public class Player {
     @ManyToMany
     @JoinTable(name = "player_tiers",
             joinColumns = @JoinColumn(name = "player_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "tier_id", referencedColumnName = "id")
+            inverseJoinColumns = @JoinColumn(name = "single_club_view", referencedColumnName = "id")
     )
-    List<Tier> tiers = new ArrayList<>();
+    List<SingleClubView> tiers = new ArrayList<>();
 
     @Getter
     String racenet;
@@ -37,7 +37,7 @@ public class Player {
         this.racenet = racenet;
     }
 
-    public void setTier(Tier tier) {
+    public void setTier(SingleClubView tier) {
         this.clearTiers();
         this.tiers.add(tier);
     }

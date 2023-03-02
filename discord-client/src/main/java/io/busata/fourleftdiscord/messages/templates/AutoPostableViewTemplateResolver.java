@@ -1,7 +1,7 @@
 package io.busata.fourleftdiscord.messages.templates;
 
 import io.busata.fourleft.api.models.ResultEntryTo;
-import io.busata.fourleft.api.models.tiers.VehicleTo;
+import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
 import io.busata.fourleft.domain.players.ControllerType;

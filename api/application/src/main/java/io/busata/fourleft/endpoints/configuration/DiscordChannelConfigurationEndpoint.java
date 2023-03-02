@@ -11,7 +11,7 @@ import io.busata.fourleft.domain.configuration.points.*;
 import io.busata.fourleft.domain.configuration.results_views.BadgeType;
 import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.domain.configuration.results_views.TiersViewRepository;
+import io.busata.fourleft.domain.configuration.repository.TieredViewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +31,7 @@ public class DiscordChannelConfigurationEndpoint {
 
     private final ClubViewRepository repository;
 
-    private final TiersViewRepository tiersViewRepository;
+    private final TieredViewRepository tieredViewRepository;
     private final PointSystemRepository pointSystemRepository;
     private final PointsCalculatorRepository pointsCalculatorRepository;
 
@@ -85,7 +85,7 @@ public class DiscordChannelConfigurationEndpoint {
     }*/
     private void createWeepyAdminWeekly(PointsCalculator pointsCalculator) {
 
-        final var view = new SingleClubView(445546L, false, 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+        final var view = new SingleClubView(445546L, false,"name", 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
 
         ClubView clubView = new ClubView(
                 UUID.randomUUID(),
@@ -143,7 +143,7 @@ public class DiscordChannelConfigurationEndpoint {
 
      */
     private void createEnduranceViewScots(PointsCalculator pointsCalculator) {
-        final var view = new SingleClubView(349480L, false, 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
+        final var view = new SingleClubView(349480L, false,"name", 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
                 "Busata",
                 "Hello There",
                 "Boring Damo",

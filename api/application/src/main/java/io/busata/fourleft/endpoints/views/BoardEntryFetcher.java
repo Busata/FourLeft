@@ -5,8 +5,7 @@ import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.models.Stage;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.domain.configuration.results_views.TiersView;
-import io.busata.fourleft.domain.tiers.models.Tier;
+import io.busata.fourleft.domain.configuration.results_views.TieredView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,7 @@ public class BoardEntryFetcher {
         }
         return lastStageEntries;
     }
-    public List<BoardEntry> create(TiersView view, Event event) {
+    public List<BoardEntry> create(TieredView view, Event event) {
         var lastStageEntries = getEntries(event, event.getLastStage());
         if (view.isUsePowerStage() && view.getDefaultPowerstageIndex() != -1) {
             var powerStageEntries = getPowerStageEntries(view, event);
@@ -69,7 +68,7 @@ public class BoardEntryFetcher {
             return of();
         }
     }
-    private List<BoardEntry> getPowerStageEntries(TiersView view, Event event) {
+    private List<BoardEntry> getPowerStageEntries(TieredView view, Event event) {
         if(view.isUsePowerStage()) {
             var stages = event.getStages();
             var powerStage = view.getDefaultPowerstageIndex() < 0 ? stages.get(stages.size() + view.getDefaultPowerstageIndex()) : stages.get(view.getDefaultPowerstageIndex());

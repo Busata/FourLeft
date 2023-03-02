@@ -1,5 +1,7 @@
 package io.busata.fourleft.api.models.tiers;
 
+import io.busata.fourleft.api.models.views.VehicleTo;
+
 import java.util.List;
 
 public record TierActiveInfoTo(

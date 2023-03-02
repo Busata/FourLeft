@@ -4,7 +4,7 @@ import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.ResultEntryTo;
-import io.busata.fourleft.api.models.tiers.VehicleTo;
+import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
 import io.busata.fourleft.api.models.views.SingleResultListTo;

@@ -18,6 +18,8 @@ public class SingleClubView extends ResultsView implements ResultProperties {
 
     long clubId;
     boolean usePowerStage;
+    String name;
+
     int defaultPowerstageIndex; // -1 for last.
 
     @Enumerated(EnumType.STRING)

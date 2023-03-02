@@ -1,4 +1,4 @@
-package io.busata.fourleft.api.models.tiers;
+package io.busata.fourleft.api.models.views;
 
 public record VehicleTo(
         String id,

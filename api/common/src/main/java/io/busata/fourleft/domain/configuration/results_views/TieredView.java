@@ -1,7 +1,6 @@
 package io.busata.fourleft.domain.configuration.results_views;
 
 
-import io.busata.fourleft.domain.tiers.models.Tier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,19 +17,21 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class TiersView extends ResultsView {
+public class TieredView extends ResultsView {
 
     boolean usePowerStage;
     int defaultPowerstageIndex; // -1 for last.
 
+    String name;
+
     @Enumerated(EnumType.STRING)
     BadgeType badgeType;
 
-    @OneToMany(mappedBy = "tiersView", cascade = CascadeType.ALL)
-    List<Tier> tiers;
+    @OneToMany(cascade = CascadeType.ALL)
+    List<SingleClubView> resultViews;
 
     @Override
     public List<Long> getAssociatedClubs() {
-        return tiers.stream().map(Tier::getClubId).collect(Collectors.toList());
+        return resultViews.stream().map(SingleClubView::getClubId).collect(Collectors.toList());
     }
 }

@@ -1,6 +1,6 @@
-package io.busata.fourleft.domain.tiers.repository;
+package io.busata.fourleft.domain.configuration.event_restrictions.repository;
 
-import io.busata.fourleft.domain.tiers.models.Player;
+import io.busata.fourleft.domain.configuration.event_restrictions.models.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

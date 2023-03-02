@@ -1,6 +1,7 @@
 package io.busata.fourleft.domain.configuration.results_views;
 
 
+import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ public abstract class ResultsView {
     @Id
     @GeneratedValue
     @Setter
+    @Getter
     UUID id;
 
     public abstract List<Long> getAssociatedClubs();

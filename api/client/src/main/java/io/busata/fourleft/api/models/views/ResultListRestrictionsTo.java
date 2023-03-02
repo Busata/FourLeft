@@ -1,6 +1,5 @@
 package io.busata.fourleft.api.models.views;
 
-import io.busata.fourleft.api.models.tiers.VehicleTo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

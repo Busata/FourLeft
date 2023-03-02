@@ -8,8 +8,7 @@ import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.clubs.models.Stage;
 import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.domain.configuration.results_views.TiersView;
-import io.busata.fourleft.domain.tiers.models.Tier;
+import io.busata.fourleft.domain.configuration.results_views.TieredView;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,12 +25,12 @@ public class ViewEventSummaryToFactory {
     public ViewEventSummaryTo create(ClubView view) {
         return switch (view.getResultsView()) {
             case SingleClubView resultsView -> createSingleClub(resultsView.getClubId());
-            case TiersView resultsView -> createTiersClub(resultsView.getTiers());
+            case TieredView resultsView -> createTiersClub(resultsView.getResultViews());
             default -> throw new UnsupportedOperationException("View not supported");
         };
     }
 
-    private ViewEventSummaryTo createTiersClub(List<Tier> tiers) {
+    private ViewEventSummaryTo createTiersClub(List<SingleClubView> tiers) {
         return createSingleClub(tiers.get(0).getClubId()); //TODO
     }
 

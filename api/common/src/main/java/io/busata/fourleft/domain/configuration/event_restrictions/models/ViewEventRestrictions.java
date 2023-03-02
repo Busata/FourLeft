@@ -1,5 +1,6 @@
-package io.busata.fourleft.domain.tiers.models;
+package io.busata.fourleft.domain.configuration.event_restrictions.models;
 
+import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.options.models.Vehicle;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,15 +19,15 @@ import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
-public class TierEventRestrictions {
+public class ViewEventRestrictions {
 
     @Id
     @GeneratedValue
     UUID id;
 
     @ManyToOne()
-    @JoinColumn(name="tier_id")
-    Tier tier;
+    @JoinColumn(name="single_club_view_id")
+    SingleClubView resultsView;
 
     String challengeId;
     String eventId;
@@ -36,8 +37,8 @@ public class TierEventRestrictions {
     @Getter
     List<Vehicle> vehicles = new ArrayList<>();
 
-    public TierEventRestrictions(Tier tier, String challengeId, String eventId) {
-        this.tier = tier;
+    public ViewEventRestrictions(SingleClubView resultsView, String challengeId, String eventId) {
+        this.resultsView = resultsView;
         this.challengeId = challengeId;
         this.eventId = eventId;
     }
