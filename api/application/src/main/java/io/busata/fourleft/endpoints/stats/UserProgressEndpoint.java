@@ -16,12 +16,11 @@ import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryTo;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
-import io.busata.fourleft.endpoints.views.ViewResultToFactory;
+import io.busata.fourleft.endpoints.views.results.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

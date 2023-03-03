@@ -1,18 +1,14 @@
-package io.busata.fourleft.endpoints.views.points.tiers;
+package io.busata.fourleft.endpoints.views.points.tiers.helpers;
 
-import io.busata.fourleft.api.models.views.NoResultRestrictionsTo;
 import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
-import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.results_views.TieredView;
-import io.busata.fourleft.domain.configuration.event_restrictions.repository.ViewEventRestrictionsRepository;
-import io.busata.fourleft.endpoints.views.PointsPeriod;
-import io.busata.fourleft.endpoints.views.ViewResultToFactory;
+import io.busata.fourleft.endpoints.views.results.SingleListResultToFactory;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,29 +21,24 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TiersViewFixedPointsFactory {
-    private final ViewResultToFactory viewResultToFactory;
+    private final SingleListResultToFactory singleListResultToFactory;
     private final ClubSyncService clubSyncService;
     private final FixedPointChampionshipFetcher fixedPointChampionshipFetcher;
-    private final ViewEventRestrictionsRepository viewEventRestrictionsRepository;
 
-    public ViewPointsTo createFixedPoints(PointsPeriod period, TieredView resultsView, FixedPointsCalculator calc) {
+    public ViewPointsTo createFixedPoints(TieredView resultsView, FixedPointsCalculator calc) {
         return new ViewPointsTo(resultsView.getResultViews().stream().map(tier -> {
-            return createPointsList(period, resultsView, calc, tier);
+            return createPointsList(resultsView, calc, tier);
         }).collect(Collectors.toList()));
     }
 
-    private SinglePointListTo createPointsList(PointsPeriod period, TieredView resultsView, FixedPointsCalculator calc, SingleClubView singleClubView) {
+    private SinglePointListTo createPointsList(TieredView resultsView, FixedPointsCalculator calc, SingleClubView singleClubView) {
         final var club = clubSyncService.getOrCreate(singleClubView.getClubId());
-        final var resultList = fixedPointChampionshipFetcher.filterChampionships(club.getChampionships(), calc, period)
+        final var resultList = fixedPointChampionshipFetcher.filterChampionships(club.getChampionships(), calc)
                 .stream()
                 .flatMap(championship -> championship.getEvents().stream())
                 .filter(Event::isPrevious)
                 .map(evt -> {
-                    final var restrictions = viewEventRestrictionsRepository.findByResultViewIdAndChallengeIdAndEventId(singleClubView.getId(), evt.getChallengeId(), evt.getReferenceId());
-
-                    final ResultRestrictionsTo restrictionTo = restrictions.map(viewResultToFactory::create).orElse(new NoResultRestrictionsTo());
-
-                    return viewResultToFactory.createSingleResultTo(singleClubView, evt, restrictionTo);
+                    return singleListResultToFactory.createSingleResultList(singleClubView, evt);
                 })
                 .toList();
 

@@ -1,8 +1,7 @@
-package io.busata.fourleft.endpoints.views.points.tiers;
+package io.busata.fourleft.endpoints.views.points.tiers.helpers;
 
 import io.busata.fourleft.domain.clubs.models.Championship;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
-import io.busata.fourleft.endpoints.views.PointsPeriod;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class FixedPointChampionshipFetcher {
-    public List<Championship> filterChampionships(List<Championship> championships, FixedPointsCalculator calc, PointsPeriod period) {
+    public List<Championship> filterChampionships(List<Championship> championships, FixedPointsCalculator calc) {
         championships = new ArrayList<>(championships);
 
         if(calc.getJoinChampionshipsCount() == 1) {

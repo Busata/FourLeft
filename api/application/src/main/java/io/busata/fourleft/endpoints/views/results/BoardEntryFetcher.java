@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.views;
+package io.busata.fourleft.endpoints.views.results;
 
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import io.busata.fourleft.domain.clubs.models.Event;
