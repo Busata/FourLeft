@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.views.results;
+package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.views.EventInfoTo;
 import io.busata.fourleft.domain.clubs.models.Event;

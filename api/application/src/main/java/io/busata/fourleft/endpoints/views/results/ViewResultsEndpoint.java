@@ -1,12 +1,9 @@
-package io.busata.fourleft.endpoints.views;
+package io.busata.fourleft.endpoints.views.results;
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
-import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.endpoints.views.points.ViewPointsToFactory;
-import io.busata.fourleft.endpoints.views.results.ViewResultToFactory;
+import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
+import io.busata.fourleft.endpoints.views.results.factory.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +16,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class ViewResultsEndpoint {
-    private final ClubViewRepository repository;
     private final ViewResultToFactory viewResultToFactory;
-
-    private final ViewPointsToFactory viewPointsToFactory;
-
-    private final ViewEventSummaryToFactory viewEventSummaryToFactory;
 
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     public ResponseEntity<ViewResultTo> getCurrentResults(@PathVariable UUID viewId) {
@@ -39,18 +31,4 @@ public class ViewResultsEndpoint {
                 .map(results -> new ResponseEntity<>(results, HttpStatus.OK))
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    @GetMapping(Routes.CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID)
-    public ViewPointsTo getCurrentPoints(@PathVariable UUID viewId) {
-        final var clubView = repository.findById(viewId).orElseThrow();
-        return viewPointsToFactory.create(clubView);
-    }
-
-
-    @GetMapping(Routes.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
-    public ViewEventSummaryTo getEventSummary(@PathVariable UUID viewId) {
-        final var clubView = repository.findById(viewId).orElseThrow();
-        return viewEventSummaryToFactory.create(clubView);
-    }
-
 }

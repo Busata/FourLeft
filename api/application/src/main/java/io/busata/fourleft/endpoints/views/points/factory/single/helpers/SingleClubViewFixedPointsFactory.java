@@ -1,11 +1,11 @@
-package io.busata.fourleft.endpoints.views.points.single.helpers;
+package io.busata.fourleft.endpoints.views.points.factory.single.helpers;
 
 import io.busata.fourleft.api.models.views.*;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.endpoints.views.results.SingleListResultToFactory;
-import io.busata.fourleft.endpoints.views.points.tiers.helpers.FixedPointChampionshipFetcher;
+import io.busata.fourleft.endpoints.views.results.factory.SingleListResultToFactory;
+import io.busata.fourleft.endpoints.views.points.factory.tiers.helpers.FixedPointChampionshipFetcher;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,11 +1,11 @@
-package io.busata.fourleft.endpoints.views.points;
+package io.busata.fourleft.endpoints.views.points.factory;
 
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.results_views.TieredView;
-import io.busata.fourleft.endpoints.views.points.single.SingleClubViewPointsFactory;
-import io.busata.fourleft.endpoints.views.points.tiers.TieredViewPointsFactory;
+import io.busata.fourleft.endpoints.views.points.factory.single.SingleClubViewPointsFactory;
+import io.busata.fourleft.endpoints.views.points.factory.tiers.TieredViewPointsFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

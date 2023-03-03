@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.views.points.tiers.helpers;
+package io.busata.fourleft.endpoints.views.points.factory.tiers.helpers;
 
 import io.busata.fourleft.domain.clubs.models.Championship;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;

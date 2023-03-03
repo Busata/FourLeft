@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.views.points.single.helpers;
+package io.busata.fourleft.endpoints.views.points.factory.single.helpers;
 
 import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;

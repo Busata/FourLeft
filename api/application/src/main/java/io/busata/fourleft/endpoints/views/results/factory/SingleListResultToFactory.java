@@ -1,9 +1,10 @@
-package io.busata.fourleft.endpoints.views.results;
+package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.*;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import io.busata.fourleft.domain.clubs.models.Event;
+import io.busata.fourleft.domain.clubs.services.BoardEntryFetcher;
 import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.endpoints.club.results.service.ResultEntryToFactory;

@@ -1,10 +1,10 @@
-package io.busata.fourleft.endpoints.views.points.tiers;
+package io.busata.fourleft.endpoints.views.points.factory.tiers;
 
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.TieredView;
-import io.busata.fourleft.endpoints.views.points.tiers.helpers.TiersViewFixedPointsFactory;
+import io.busata.fourleft.endpoints.views.points.factory.tiers.helpers.TiersViewFixedPointsFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

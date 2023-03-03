@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.views;
+package io.busata.fourleft.endpoints.views.summary.factory;
 
 import io.busata.fourleft.api.models.views.ViewEventEntryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
