@@ -15,13 +15,13 @@ import java.util.List;
 
 @Factory
 @RequiredArgsConstructor
-public class SingleListResultToFactory {
+public class ResultListToFactory {
     private final EventToFactory eventToFactory;
     private final ResultEntryToFactory resultEntryToFactory;
     private final BoardEntryFetcher boardEntryFetcher;
     private final ResultRestrictionToFactory resultRestrictionToFactory;
 
-    public SingleResultListTo createSingleResultList(SingleClubView view, Event event) {
+    public ResultListTo createResultList(SingleClubView view, Event event) {
         List<BoardEntry> entries = boardEntryFetcher.create(view, event);
 
         if(view.getPlayerRestrictions() == PlayerRestrictions.EXCLUDE) {
@@ -38,13 +38,19 @@ public class SingleListResultToFactory {
 
         final var restrictions = resultRestrictionToFactory.create(view.getId(), event.getChallengeId(), event.getReferenceId());
 
-        return new SingleResultListTo(
+        return new ResultListTo(
                 event.getChampionship().getClub().getName(),
-                eventToFactory.create(event),
-                restrictions,
+                List.of(eventToFactory.create(event, restrictions)),
                 totalEntries,
                 results
         );
+    }
+
+    public ResultListTo mergeResultLists(List<ResultListTo> results) {
+
+
+
+        return null;
     }
 
     private List<BoardEntry> filterEntries(List<BoardEntry> entries, List<String> players) {

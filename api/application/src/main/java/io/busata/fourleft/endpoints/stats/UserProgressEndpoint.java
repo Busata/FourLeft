@@ -6,7 +6,7 @@ import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.challenges.models.CommunityEvent;
@@ -181,15 +181,15 @@ public class UserProgressEndpoint {
 
             return resultEntries.stream().filter(entry -> entry.name().equalsIgnoreCase(query))
                     .findFirst().stream().map(entry -> {
-                        EventInfoTo eventInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
+                        ActivityInfoTo activityInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
 
                         final var resultList = viewResult.getMultiListResults().stream().findFirst().orElseThrow();
 
                         return new ClubResultSummaryTo(
                                 viewResult.getDescription(),
-                                eventInfoTo.country(),
-                                eventInfoTo.stageNames().get(eventInfoTo.stageNames().size() - 1),
-                                eventInfoTo.endTime(),
+                                activityInfoTo.country(),
+                                activityInfoTo.stageNames().get(activityInfoTo.stageNames().size() - 1),
+                                activityInfoTo.endTime(),
                                 entry.nationality(),
                                 entry.vehicle(),
                                 entry.rank(),

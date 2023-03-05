@@ -8,7 +8,7 @@ import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.results_views.TieredView;
-import io.busata.fourleft.endpoints.views.results.factory.SingleListResultToFactory;
+import io.busata.fourleft.endpoints.views.results.factory.ResultListToFactory;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TiersViewFixedPointsFactory {
-    private final SingleListResultToFactory singleListResultToFactory;
+    private final ResultListToFactory resultListToFactory;
     private final ClubSyncService clubSyncService;
     private final FixedPointChampionshipFetcher fixedPointChampionshipFetcher;
 
@@ -38,16 +38,17 @@ public class TiersViewFixedPointsFactory {
                 .flatMap(championship -> championship.getEvents().stream())
                 .filter(Event::isPrevious)
                 .map(evt -> {
-                    return singleListResultToFactory.createSingleResultList(singleClubView, evt);
+                    return resultListToFactory.createResultList(singleClubView, evt);
                 })
                 .toList();
 
         Map<String, Integer> entries = new HashMap<>();
         Map<String, String> nationalities = new HashMap<>();
 
-        resultList.forEach(singleResultList -> {
-            singleResultList.results().forEach(entry -> {
-                if(singleResultList.restrictions() instanceof ResultListRestrictionsTo to) {
+        resultList.forEach(list -> {
+            list.results().forEach(entry -> {
+
+                if(list.restrictions() instanceof ResultListRestrictionsTo to) {
                     if(!to.isValidVehicle(entry.vehicle())) {
                         return;
                     }

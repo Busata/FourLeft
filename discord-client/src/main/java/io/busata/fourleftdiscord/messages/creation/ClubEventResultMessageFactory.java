@@ -5,9 +5,9 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
-import io.busata.fourleft.api.models.views.SingleResultListTo;
+import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
@@ -78,17 +78,15 @@ public class ClubEventResultMessageFactory {
 
         var builder = EmbedCreateSpec.builder();
 
-        final var eventInfos = clubResult.getMultiListResults().stream().map(SingleResultListTo::eventInfoTo).collect(Collectors.toList());
+        final var eventInfos = clubResult.getMultiListResults().stream().map(ResultListTo::activityInfoTo).collect(Collectors.toList());
 
-        String country = eventInfos.stream().map(EventInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
-        String vehicleClass = eventInfos.stream().map(EventInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
+        String country = eventInfos.stream().map(ActivityInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
+        String vehicleClass = eventInfos.stream().map(ActivityInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
 
         List<String> stageNames = eventInfos.stream().findFirst().stream().flatMap(eventInfoTo -> eventInfoTo.stageNames().stream()).collect(Collectors.toList());
 
         builder.title("**Results**");
         builder.color(Color.of(244, 0, 75));
-
-        String countryImage = eventInfos.stream().map(EventInfoTo::country).findFirst().map(fieldMapper::createImage).orElse("");
 
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
@@ -101,29 +99,29 @@ public class ClubEventResultMessageFactory {
         }
 
 
-        List<SingleResultListTo> multiListResults = clubResult.getMultiListResults();
+        List<ResultListTo> multiListResults = clubResult.getMultiListResults();
         for (int i = 0; i < multiListResults.size(); i++) {
-            SingleResultListTo singleResultList = multiListResults.get(i);
+            ResultListTo resultList = multiListResults.get(i);
 
-            if(singleResultList.results().size() == 0 && multiListResults.size() > 1) {
+            if(resultList.results().size() == 0 && multiListResults.size() > 1) {
                 builder.description("*No entries yet*");
             }
 
             String vehicleRestrictions = "\u200B";
-            if (singleResultList.restrictions() instanceof ResultListRestrictionsTo restrictions) {
+            if (resultList.restrictions() instanceof ResultListRestrictionsTo restrictions) {
                 vehicleRestrictions = "*(%s)*".formatted(restrictions.getAllowedVehicles().stream().map(VehicleTo::displayName).collect(Collectors.joining(" • ")));
             }
 
-            if (StringUtils.isNotBlank(singleResultList.name())) {
-                builder.addField("**%s**".formatted(singleResultList.name()), "%s".formatted(vehicleRestrictions), false);
+            if (StringUtils.isNotBlank(resultList.name())) {
+                builder.addField("**%s**".formatted(resultList.name()), "%s".formatted(vehicleRestrictions), false);
             }
 
             if (clubResult.getViewPropertiesTo().powerStage()) {
-                addPowerStageField(singleResultList, builder);
+                addPowerStageField(resultList, builder);
             }
 
             if (!powerstageOnly) {
-                final var sortedEntries = singleResultList.results().stream().sorted(Comparator.comparing(ResultEntryTo::rank)).limit(50).collect(Collectors.toList());
+                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(ResultEntryTo::rank)).limit(50).collect(Collectors.toList());
 
 
                 int groupSize = 10;
@@ -148,11 +146,11 @@ public class ClubEventResultMessageFactory {
 
 
             if(i == multiListResults.size() - 1) {
-                builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(singleResultList.eventInfoTo().lastUpdate())), true);
-                if(singleResultList.totalEntries() > 0) {
-                    builder.addField("**Total entries**", "*%s*".formatted(singleResultList.totalEntries()), true);
+                builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().lastUpdate())), true);
+                if(resultList.totalEntries() > 0) {
+                    builder.addField("**Total entries**", "*%s*".formatted(resultList.totalEntries()), true);
                 }
-                builder.addField("**Event ending**", "<t:%s:R>".formatted(singleResultList.eventInfoTo().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
+                builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
             }
 
             specs.add(builder.build());
@@ -167,7 +165,7 @@ public class ClubEventResultMessageFactory {
                 .color(Color.of(new Random().nextFloat(),new Random().nextFloat(),new Random().nextFloat()));
     }
 
-    private void addPowerStageField(SingleResultListTo clubResult, EmbedCreateSpec.Builder builder) {
+    private void addPowerStageField(ResultListTo clubResult, EmbedCreateSpec.Builder builder) {
         final var powerstageEntries = clubResult.results().stream().sorted(Comparator.comparing(ResultEntryTo::stageTime)).limit(5).collect(Collectors.toList());
 
         if(powerstageEntries.size() > 0) {
@@ -184,7 +182,7 @@ public class ClubEventResultMessageFactory {
                 );
                 joiner.add(format);
             }
-            builder.addField("Powerstage *(%s)*".formatted(clubResult.eventInfoTo().stageNames().get(clubResult.eventInfoTo().stageNames().size() - 1)), joiner.toString(), false);
+            builder.addField("Powerstage *(%s)*".formatted(clubResult.activityInfoTo().stageNames().get(clubResult.activityInfoTo().stageNames().size() - 1)), joiner.toString(), false);
         }
     }
     private String determineHeader(int idx, int groupSize) {

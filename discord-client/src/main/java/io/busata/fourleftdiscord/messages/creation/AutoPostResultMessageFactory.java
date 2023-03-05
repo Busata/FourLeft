@@ -54,10 +54,10 @@ public class AutoPostResultMessageFactory {
     }
 
     private MessageTemplate determineTemplate(AutoPostableView view) {
-        return createSingleResultTemplate(view.getViewProperties());
+        return createResultListTemplate(view.getViewProperties());
     }
 
-    private MessageTemplate createSingleResultTemplate(ViewPropertiesTo properties) {
+    private MessageTemplate createResultListTemplate(ViewPropertiesTo properties) {
         if (properties.powerStage()) {
             return switch (properties.badgeType()) {
                 case NONE -> POWERSTAGE_TEMPLATE;

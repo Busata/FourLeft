@@ -4,7 +4,7 @@ import io.busata.fourleft.api.models.views.*;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.endpoints.views.results.factory.SingleListResultToFactory;
+import io.busata.fourleft.endpoints.views.results.factory.ResultListToFactory;
 import io.busata.fourleft.endpoints.views.points.factory.tiers.helpers.FixedPointChampionshipFetcher;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class SingleClubViewFixedPointsFactory {
-    private final SingleListResultToFactory singleListResultToFactory;
+    private final ResultListToFactory resultListToFactory;
     private final ClubSyncService clubSyncService;
     private final FixedPointChampionshipFetcher fixedPointChampionshipFetcher;
 
@@ -31,15 +31,15 @@ public class SingleClubViewFixedPointsFactory {
                 .filter(Event::isPrevious)
                 .map(evt -> {
 
-                    return singleListResultToFactory.createSingleResultList(resultsView, evt);
+                    return resultListToFactory.createResultList(resultsView, evt);
                 })
                 .toList();
 
 
         Map<String, Integer> entries = new HashMap<>();
         Map<String, String> nationalities = new HashMap<>();
-         resultList.forEach(singleResultList -> {
-            singleResultList.results().forEach(entry -> {
+         resultList.forEach(list -> {
+            list.results().forEach(entry -> {
 
                 entries.putIfAbsent(entry.name(), 0);
                 nationalities.putIfAbsent(entry.name(), entry.nationality());

@@ -16,7 +16,7 @@ public class AutoPostableFactory {
                 result.getMultiListResults().stream().map(multiListResults -> {
                     return new AutoPostResultList(
                             multiListResults.name(),
-                            multiListResults.eventInfoTo(),
+                            multiListResults.activityInfoTo(),
                             multiListResults.restrictions(),
                             multiListResults.results().stream().filter(resultEntryTo -> entries.contains(resultEntryTo.name())).collect(Collectors.toList())
                     );

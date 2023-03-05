@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageEditSpec;
 import io.busata.fourleft.api.models.ResultEntryTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
@@ -104,7 +104,7 @@ public class AutopostClubResultsMessageService {
         multiView.getMultiListResults().stream().flatMap(multiList -> {
             return multiList.results().stream().map(entry -> {
                     final var autoPostEntry = new AutoPostEntry();
-                createAutopostEntry(autoPostEntry, entry, messageId, multiList.eventInfoTo());
+                createAutopostEntry(autoPostEntry, entry, messageId, multiList.activityInfoTo());
 
                 return autoPostEntry;
             });
@@ -112,7 +112,7 @@ public class AutopostClubResultsMessageService {
     }
 
 
-    private static void createAutopostEntry(AutoPostEntry autoPostEntry, ResultEntryTo entry, Long messageId, EventInfoTo singleView) {
+    private static void createAutopostEntry(AutoPostEntry autoPostEntry, ResultEntryTo entry, Long messageId, ActivityInfoTo singleView) {
         autoPostEntry.setName(entry.name());
         autoPostEntry.setTotalTime(entry.totalTime());
         autoPostEntry.setNationality(entry.nationality());
@@ -126,7 +126,7 @@ public class AutopostClubResultsMessageService {
         return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getEventInfo()));
     }
 
-    boolean canBeReused(Message lastMessage, List<EventInfoTo> eventInfoList) {
+    boolean canBeReused(Message lastMessage, List<ActivityInfoTo> eventInfoList) {
         boolean isAutopost = api.hasMessage(lastMessage.getId().asLong(), MessageType.AUTO_POST);
         if(!isAutopost) {
             return false;

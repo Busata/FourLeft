@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 
 import static io.busata.fourleft.api.models.ResultEntryTo.resultEntryTo;
 
+
 @Component
 @RequiredArgsConstructor
 public class ResultEntryToFactory {

@@ -2,7 +2,7 @@ package io.busata.fourleftdiscord.messages.templates;
 
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
 import io.busata.fourleft.domain.players.ControllerType;
 import io.busata.fourleft.domain.players.Platform;
@@ -33,12 +33,12 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
     public Map<String, String> buildValuesMap(MessageTemplate template, AutoPostableView value) {
         Map<String, String> valueMap = new HashMap<>();
 
-        final var eventInfos = value.getMultiListResults().stream().map(AutoPostResultList::eventInfoTo).collect(Collectors.toList());
+        final var eventInfos = value.getMultiListResults().stream().map(AutoPostResultList::activityInfoTo).collect(Collectors.toList());
 
-        String country = eventInfos.stream().map(EventInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
-        String vehicleClass = eventInfos.stream().map(EventInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
+        String country = eventInfos.stream().map(ActivityInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
+        String vehicleClass = eventInfos.stream().map(ActivityInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
 
-        String stageName = eventInfos.stream().flatMap((EventInfoTo eventInfoTo) -> eventInfoTo.stageNames().stream()).distinct().sorted(Comparator.reverseOrder()).limit(1).collect(Collectors.joining(" • "));
+        String stageName = eventInfos.stream().flatMap((ActivityInfoTo eventInfoTo) -> eventInfoTo.stageNames().stream()).distinct().sorted(Comparator.reverseOrder()).limit(1).collect(Collectors.joining(" • "));
 
         valueMap.put("countryEmoticon", country);
         valueMap.put("stageNames", stageName);
