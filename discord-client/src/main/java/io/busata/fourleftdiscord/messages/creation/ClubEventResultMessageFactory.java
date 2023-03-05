@@ -40,9 +40,9 @@ public class ClubEventResultMessageFactory {
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
     MessageTemplate META_NORMAL_TEMPLATE =  messageTemplate(
-                    "**${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
+                    "**${rank}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
     MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
-            "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
+            "*${badgeRank}* **${rank}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
 
     public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
