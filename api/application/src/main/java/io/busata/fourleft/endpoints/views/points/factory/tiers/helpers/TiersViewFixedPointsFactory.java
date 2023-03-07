@@ -1,7 +1,6 @@
 package io.busata.fourleft.endpoints.views.points.factory.tiers.helpers;
 
 import io.busata.fourleft.api.models.views.PointPairTo;
-import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.clubs.models.Event;
@@ -48,22 +47,23 @@ public class TiersViewFixedPointsFactory {
         resultList.forEach(list -> {
             list.results().forEach(entry -> {
 
-                if(list.restrictions() instanceof ResultListRestrictionsTo to) {
+                // TODO
+               /* if(list.restrictions() instanceof ResultListRestrictionsTo to) {
                     if(!to.isValidVehicle(entry.vehicle())) {
                         return;
                     }
-                }
+                }*/
 
-                entries.putIfAbsent(entry.name(), 0);
-                nationalities.putIfAbsent(entry.name(), entry.nationality());
+                entries.putIfAbsent(entry.racenet(), 0);
+                nationalities.putIfAbsent(entry.racenet(), entry.nationality());
 
                 if (entry.isDnf()) {
                     return;
                 }
 
-                entries.computeIfPresent(entry.name(), (key, value) -> {
-                    return value + calc.getPointSystem().getPoints(entry.rank().intValue()) +
-                            calc.getPointSystem().getPowerStagePoints((int) entry.stageRank());
+                entries.computeIfPresent(entry.racenet(), (key, value) -> {
+                    return value + calc.getPointSystem().getPoints(entry.activityRank().intValue()) +
+                            calc.getPointSystem().getPowerStagePoints(entry.powerstageRank().intValue());
 
                 });
             });

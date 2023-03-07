@@ -41,16 +41,16 @@ public class SingleClubViewFixedPointsFactory {
          resultList.forEach(list -> {
             list.results().forEach(entry -> {
 
-                entries.putIfAbsent(entry.name(), 0);
-                nationalities.putIfAbsent(entry.name(), entry.nationality());
+                entries.putIfAbsent(entry.racenet(), 0);
+                nationalities.putIfAbsent(entry.racenet(), entry.nationality());
 
                 if (entry.isDnf()) {
                     return;
                 }
 
-                entries.computeIfPresent(entry.name(), (key, value) -> {
-                    return value + calc.getPointSystem().getPoints(entry.rank().intValue()) +
-                            calc.getPointSystem().getPowerStagePoints((int) entry.stageRank());
+                entries.computeIfPresent(entry.racenet(), (key, value) -> {
+                    return value + calc.getPointSystem().getPoints(entry.activityRank().intValue()) +
+                            calc.getPointSystem().getPowerStagePoints(entry.powerstageRank().intValue());
 
                 });
             });

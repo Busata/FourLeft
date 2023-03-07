@@ -5,9 +5,8 @@ import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.models.ChampionshipEventSummaryTo;
 import io.busata.fourleft.api.models.ChampionshipStageSummaryTo;
 import io.busata.fourleft.api.models.ChampionshipStandingEntryTo;
-import io.busata.fourleft.api.models.ClubResultTo;
 import io.busata.fourleft.api.models.CustomChampionshipStandingEntryTo;
-import io.busata.fourleft.endpoints.club.results.service.ClubResultToFactory;
+import io.busata.fourleft.endpoints.club.results.service.ClubSummaryFactoryTo;
 import io.busata.fourleft.endpoints.club.results.service.CustomChampionshipStandingsService;
 import io.busata.fourleft.importer.ClubSyncService;
 import io.busata.fourleft.domain.clubs.models.Championship;
@@ -31,7 +30,7 @@ public class ClubResultsEndpoint {
     private final ClubSyncService clubSyncService;
 
     private final RacenetSyncService racenetSyncService;
-    private final ClubResultToFactory clubResultToFactory;
+    private final ClubSummaryFactoryTo clubSummaryFactoryto;
     private final CustomChampionshipStandingsService championshipStandingsService;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -49,32 +48,8 @@ public class ClubResultsEndpoint {
     public ChampionshipEventSummaryTo getEventSummary(@PathVariable Long clubId) {
         final var club = clubSyncService.getOrCreate(clubId);
         return club.findActiveChampionship().or(club::findPreviousChampionship)
-                .map(clubResultToFactory::createEventSummary)
+                .map(clubSummaryFactoryto::createEventSummary)
                 .orElseThrow();
     }
 
-    @GetMapping(Routes.CLUB_STANDINGS_BY_CLUB_ID)
-    public List<ChampionshipStandingEntryTo> getChampionshipStandings(@PathVariable Long clubId) {
-        Club club = clubSyncService.getOrCreate(clubId);
-        return club.findActiveChampionship()
-                .or(club::findPreviousChampionship)
-                .map(Championship::getEntries)
-                .map(clubResultToFactory::createStandingsSummary)
-                .orElseThrow();
-    }
-
-    @GetMapping(Routes.CLUB_CUSTOM_STANDINGS_BY_CLUB_ID)
-    public List<CustomChampionshipStandingEntryTo> getCustomStandings(@PathVariable Long clubId, @RequestParam(defaultValue = "4") int lastXChampionships, @RequestParam(defaultValue="true") boolean powerStageSystem) {
-        return championshipStandingsService.getEntries(clubId, lastXChampionships, powerStageSystem);
-    }
-
-
-    @GetMapping(Routes.STAGE_SUMMARY_BY_CLUB_ID)
-    public ChampionshipStageSummaryTo getStageSummary(@PathVariable Long clubId) {
-        return clubSyncService.getOrCreate(clubId).getChampionships().stream()
-                .filter(Championship::isActive)
-                .findFirst()
-                .map(clubResultToFactory::createStageSummary)
-                .orElseThrow();
-    }
 }

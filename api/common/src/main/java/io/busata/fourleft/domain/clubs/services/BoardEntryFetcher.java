@@ -30,7 +30,7 @@ public class BoardEntryFetcher {
 
     public List<BoardEntry> create(TieredView view, Event event) {
         var lastStageEntries = getEntries(event, event.getLastStage());
-        if (view.isUsePowerStage() && view.getDefaultPowerstageIndex() != -1) {
+        if (view.isPowerStage() && view.getDefaultPowerstageIndex() != -1) {
             var powerStageEntries = getPowerStageEntries(view, event);
             return mergeEntries(lastStageEntries, powerStageEntries);
         }
@@ -71,7 +71,7 @@ public class BoardEntryFetcher {
     }
 
     private List<BoardEntry> getPowerStageEntries(TieredView view, Event event) {
-        if (view.isUsePowerStage()) {
+        if (view.isPowerStage()) {
             var stages = event.getStages();
             var powerStage = view.getDefaultPowerstageIndex() < 0 ? stages.get(stages.size() + view.getDefaultPowerstageIndex()) : stages.get(view.getDefaultPowerstageIndex());
             return getEntries(event, powerStage);

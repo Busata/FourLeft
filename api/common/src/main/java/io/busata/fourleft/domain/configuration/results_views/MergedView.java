@@ -12,10 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MergedView extends ResultsView {
+public class MergedView extends ResultsView implements MultipleClubsView {
     private String name;
 
-    boolean usePowerStage;
+    boolean powerStage;
     int defaultPowerstageIndex; // -1 for last.
 
 

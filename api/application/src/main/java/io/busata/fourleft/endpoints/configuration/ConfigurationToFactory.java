@@ -46,7 +46,7 @@ public class ConfigurationToFactory {
     }
     private TiersViewTo createTiersViewTo(TieredView resultsView) {
         return new TiersViewTo(
-                resultsView.isUsePowerStage(),
+                resultsView.isPowerStage(),
                 resultsView.getDefaultPowerstageIndex(),
                 resultsView.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList()));
     }

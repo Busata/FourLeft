@@ -1,9 +1,11 @@
 package io.busata.fourleft.endpoints.views.results.factory;
 
+import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.domain.configuration.results_views.MergedView;
+import io.busata.fourleft.domain.configuration.results_views.MultipleClubsView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.results_views.TieredView;
 import io.busata.fourleft.endpoints.views.ClubEventSupplier;
@@ -32,13 +34,12 @@ public class ViewResultToFactory {
         return clubViewRepository.findById(viewId).flatMap(clubView -> {
             return switch (clubView.getResultsView()) {
                 case SingleClubView view -> createSingleClubViewResult(view, type.getSupplier());
-                case TieredView view -> createdTieredViewResult(view, type.getSupplier());
+                case TieredView view -> createTieredViewResult(view, type.getSupplier());
                 case MergedView view -> createMergedViewResult(view, type.getSupplier());
                 default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
             };
         });
     }
-
 
     public Optional<ViewResultTo> createSingleClubViewResult(SingleClubView view, ClubEventSupplier eventSupplier) {
         final var club = clubSyncService.getOrCreate(view.getClubId());
@@ -57,7 +58,20 @@ public class ViewResultToFactory {
         return Optional.of(viewResult);
     }
 
-    private Optional<ViewResultTo> createdTieredViewResult(TieredView tieredView, ClubEventSupplier eventSupplier) {
+    private Optional<ViewResultTo> createTieredViewResult(TieredView view, ClubEventSupplier supplier) {
+        return createConcatenation(view, supplier);
+    }
+    private Optional<ViewResultTo> createMergedViewResult(MergedView view, ClubEventSupplier eventSupplier) {
+        return createConcatenation(view, eventSupplier).map(viewResultTo -> {
+
+            return new ViewResultTo(
+                    view.getName(),
+                    new ViewPropertiesTo(view.isPowerStage(), view.getBadgeType()),
+                    resultListToFactory.mergeResultLists(viewResultTo.getMultiListResults())
+            );
+        });
+    }
+    private Optional<ViewResultTo> createConcatenation(MultipleClubsView tieredView, ClubEventSupplier eventSupplier) {
 
         if (!hasActiveEvent(eventSupplier, tieredView.getResultViews())) {
             return Optional.empty();
@@ -75,7 +89,7 @@ public class ViewResultToFactory {
 
         ViewResultTo viewResult = new ViewResultTo(
                 tieredView.getName(),
-                new ViewPropertiesTo(tieredView.isUsePowerStage(), tieredView.getBadgeType()),
+                new ViewPropertiesTo(tieredView.isPowerStage(), tieredView.getBadgeType()),
                 results
         );
 
@@ -83,33 +97,6 @@ public class ViewResultToFactory {
     }
 
 
-    private Optional<ViewResultTo> createMergedViewResult(MergedView view, ClubEventSupplier eventSupplier) {
-
-        if (!hasActiveEvent(eventSupplier, view.getResultViews())) {
-            return Optional.empty();
-        }
-
-        final var results = view.getResultViews().stream()
-                .map(resultViews -> {
-                    final var club = clubSyncService.getOrCreate(resultViews.getClubId());
-
-                    return eventSupplier.getEvent(club)
-                            .map(event -> resultListToFactory.createResultList(resultViews, event))
-                            .orElseThrow();
-                }).toList();
-
-        final var merged = resultListToFactory.mergeResultLists(results);
-
-
-
-        ViewResultTo viewResult = new ViewResultTo(
-                view.getName(),
-                new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
-                results
-        );
-
-        return Optional.of(viewResult);
-    }
 
     private boolean hasActiveEvent(ClubEventSupplier eventSupplier, List<SingleClubView> views) {
         return views.stream()

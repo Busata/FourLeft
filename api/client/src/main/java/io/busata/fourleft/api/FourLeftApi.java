@@ -30,13 +30,6 @@ import java.util.UUID;
 
 public interface FourLeftApi {
 
-    @GetMapping(value=Routes.CLUB_STANDINGS_BY_CLUB_ID)
-    List<ChampionshipStandingEntryTo> getStandings(@PathVariable long clubId);
-
-    @GetMapping(value=Routes.CLUB_CUSTOM_STANDINGS_BY_CLUB_ID)
-    List<ChampionshipStandingEntryTo> getCustomStandings(@PathVariable long clubId, @RequestParam int lastXChampionships, @RequestParam boolean powerStageSystem);
-
-
     @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
     List<ClubMemberTo> getMembers(@PathVariable UUID viewId);
 

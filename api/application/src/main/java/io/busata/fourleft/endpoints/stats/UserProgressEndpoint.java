@@ -2,7 +2,7 @@ package io.busata.fourleft.endpoints.stats;
 
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.ResultEntryTo;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
@@ -177,9 +177,9 @@ public class UserProgressEndpoint {
     private List<ClubResultSummaryTo> getClubResults(String query, List<ViewResultTo> viewResults) {
 
         return viewResults.stream().flatMap(viewResult -> {
-            List<ResultEntryTo> resultEntries = viewResult.getResultEntries();
+            List<DriverEntryTo> resultEntries = viewResult.getResultEntries();
 
-            return resultEntries.stream().filter(entry -> entry.name().equalsIgnoreCase(query))
+            return resultEntries.stream().filter(entry -> entry.racenet().equalsIgnoreCase(query))
                     .findFirst().stream().map(entry -> {
                         ActivityInfoTo activityInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
 
@@ -191,13 +191,13 @@ public class UserProgressEndpoint {
                                 activityInfoTo.stageNames().get(activityInfoTo.stageNames().size() - 1),
                                 activityInfoTo.endTime(),
                                 entry.nationality(),
-                                entry.vehicle(),
-                                entry.rank(),
-                                resultList.totalEntries(),
-                                ((float) entry.rank() / (float) resultList.totalEntries()) * 100f,
+                                entry.vehicles().get(0),
+                                entry.activityRank(),
+                                resultList.totalUniqueEntries(),
+                                ((float) entry.activityRank() / (float) resultList.totalUniqueEntries()) * 100f,
                                 entry.isDnf(),
-                                entry.totalTime(),
-                                entry.totalDiff()
+                                entry.activityTotalTime(),
+                                entry.activityTotalDiff()
                         );
                     });
         }).collect(Collectors.toList());

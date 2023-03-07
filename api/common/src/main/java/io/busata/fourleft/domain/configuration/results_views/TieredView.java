@@ -16,9 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class TieredView extends ResultsView {
+public class TieredView extends ResultsView implements MultipleClubsView {
 
-    boolean usePowerStage;
+    boolean powerStage;
     int defaultPowerstageIndex; // -1 for last.
 
     String name;
@@ -33,4 +33,5 @@ public class TieredView extends ResultsView {
     public List<Long> getAssociatedClubs() {
         return resultViews.stream().map(SingleClubView::getClubId).toList();
     }
+
 }

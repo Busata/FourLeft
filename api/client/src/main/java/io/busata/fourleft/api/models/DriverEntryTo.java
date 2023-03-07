@@ -1,12 +1,22 @@
 package io.busata.fourleft.api.models;
 
+
 import java.util.List;
 
-public record DriverEntryTo(
-        String name,
-        String totalTime,
-        String totalDiff,
+public record DriverEntryTo (
+        String racenet,
+        String nationality,
         PlatformTo platform,
-        List<ActivityEntryTo> activities
-        ) {
-}
+
+        Long activityRank,
+        String activityTotalTime,
+        String activityTotalDiff,
+
+        Long powerstageRank,
+        String powerstageTotalTime,
+        String powerstageTotalDiff,
+
+        Boolean isDnf,
+
+        List<String> vehicles
+) {}

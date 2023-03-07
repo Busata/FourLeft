@@ -1,5 +1,6 @@
 package io.busata.fourleft.helpers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
