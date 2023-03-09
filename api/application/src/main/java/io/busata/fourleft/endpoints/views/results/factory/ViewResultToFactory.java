@@ -1,6 +1,5 @@
 package io.busata.fourleft.endpoints.views.results.factory;
 
-import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
@@ -31,6 +30,19 @@ public class ViewResultToFactory {
     @Transactional
     @Cacheable("view_results")
     public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplierType type) {
+        /*
+           CREST
+           2 clubs
+           2 events
+
+           Tiers + Merge: how?
+
+           Single club view per tier x 2?
+
+
+
+
+         */
         return clubViewRepository.findById(viewId).flatMap(clubView -> {
             return switch (clubView.getResultsView()) {
                 case SingleClubView view -> createSingleClubViewResult(view, type.getSupplier());
@@ -51,7 +63,7 @@ public class ViewResultToFactory {
 
         ViewResultTo viewResult = new ViewResultTo(
                 view.getName(),
-                new ViewPropertiesTo(view.isUsePowerStage(), view.getBadgeType()),
+                new ViewPropertiesTo(view.isPowerStage(), view.getBadgeType()),
                 results
         );
 

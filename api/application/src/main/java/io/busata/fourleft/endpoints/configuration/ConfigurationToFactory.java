@@ -1,13 +1,6 @@
 package io.busata.fourleft.endpoints.configuration;
 
-import io.busata.fourleft.api.models.configuration.CommunityChallengeViewTo;
-import io.busata.fourleft.api.models.configuration.DefaultPointsCalculatorTo;
-import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
-import io.busata.fourleft.api.models.configuration.PointSystemTo;
-import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
-import io.busata.fourleft.api.models.configuration.ResultsViewTo;
-import io.busata.fourleft.api.models.configuration.SingleClubViewTo;
-import io.busata.fourleft.api.models.configuration.TiersViewTo;
+import io.busata.fourleft.api.models.configuration.*;
 import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.PointSystem;
@@ -42,7 +35,7 @@ public class ConfigurationToFactory {
     }
 
     private SingleClubViewTo createSingleClubViewTo(SingleClubView resultsView) {
-        return new SingleClubViewTo(resultsView.getClubId(), resultsView.getBadgeType(), resultsView.getPlayerRestriction(), resultsView.getPlayers());
+        return new SingleClubViewTo(resultsView.getClubId(), resultsView.getBadgeType(), new PlayerRestrictionsTo());
     }
     private TiersViewTo createTiersViewTo(TieredView resultsView) {
         return new TiersViewTo(

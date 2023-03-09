@@ -9,7 +9,7 @@ import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.configuration.points.*;
 import io.busata.fourleft.domain.configuration.results_views.BadgeType;
-import io.busata.fourleft.domain.configuration.results_views.PlayerRestrictions;
+import io.busata.fourleft.domain.configuration.player_restrictions.PlayerRestrictionFilterType;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.configuration.repository.TieredViewRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,8 @@ public class DiscordChannelConfigurationEndpoint {
     public void setup() {
 
         var defaultPoints = pointsCalculatorRepository.findById(UUID.fromString("ecc898ea-9b2a-456d-92a0-1105c12acf46")).orElseThrow();
-        createWeepyAdminWeekly(defaultPoints);
+
+        //createWeepyAdminWeekly(defaultPoints);
     }
 
     /*private void createGRFHistoryExpert(PointsCalculator pointsCalculator) {
@@ -82,10 +83,10 @@ public class DiscordChannelConfigurationEndpoint {
                 UUID.randomUUID(), 1064449104006090762L, "Estonia Champion", clubView, of(clubView), of(clubView));
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
-    }*/
+    }
     private void createWeepyAdminWeekly(PointsCalculator pointsCalculator) {
 
-        final var view = new SingleClubView(445546L, false,"name", 0, BadgeType.NONE, PlayerRestrictions.NONE, of());
+        final var view = new SingleClubView(445546L, false,"name", 0, BadgeType.NONE, PlayerRestrictionFilterType.NONE, of());
 
         ClubView clubView = new ClubView(
                 UUID.randomUUID(),
@@ -101,7 +102,7 @@ public class DiscordChannelConfigurationEndpoint {
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
-
+*/
     /*
 
     private void createScandiDozerClub(PointsCalculator calculator) {
@@ -141,9 +142,9 @@ public class DiscordChannelConfigurationEndpoint {
 
     }
 
-     */
+
     private void createEnduranceViewScots(PointsCalculator pointsCalculator) {
-        final var view = new SingleClubView(349480L, false,"name", 0, BadgeType.NONE, PlayerRestrictions.FILTER, of(
+        final var view = new SingleClubView(349480L, false,"name", 0, BadgeType.NONE, PlayerRestrictionFilterType.FILTER, of(
                 "Busata",
                 "Hello There",
                 "Boring Damo",
@@ -173,7 +174,7 @@ public class DiscordChannelConfigurationEndpoint {
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
-
+ */
     @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     public List<DiscordChannelConfigurationTo> getConfigurations() {
 
