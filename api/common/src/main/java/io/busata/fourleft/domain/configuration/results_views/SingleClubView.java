@@ -16,13 +16,13 @@ import java.util.List;
 public class SingleClubView extends ResultsView  {
 
     long clubId;
-    boolean powerStage;
-    String name;
-
-    int powerStageIndex; // -1 for last.
-
-    @Enumerated(EnumType.STRING)
-    BadgeType badgeType;
+//    boolean powerStage;
+//    String name;
+//
+//    int powerStageIndex; // -1 for last.
+//
+//    @Enumerated(EnumType.STRING)
+//    BadgeType badgeType;
 
     @ManyToOne
     @JoinColumn(name="player_restrictions_id")

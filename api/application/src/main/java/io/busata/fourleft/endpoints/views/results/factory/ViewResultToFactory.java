@@ -37,6 +37,25 @@ public class ViewResultToFactory {
 
            Tiers + Merge: how?
 
+
+           create Player restrictions (CA 1, CA 2, CA 3, CA 4 with type INCLUDE)
+
+
+            Create Single club view for club A
+            Create single club view for club B
+
+            create MergedView, with the two single club views.
+
+
+            A view should be able to take any* view as input.
+
+
+
+
+
+
+
+
            Single club view per tier x 2?
 
 

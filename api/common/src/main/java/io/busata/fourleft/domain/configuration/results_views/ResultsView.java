@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -22,5 +23,5 @@ public abstract class ResultsView {
     @Getter
     UUID id;
 
-    public abstract List<Long> getAssociatedClubs();
+    public abstract Set<Long> getAssociatedClubs();
 }

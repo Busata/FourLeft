@@ -6,25 +6,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MergedView extends ResultsView implements MultipleClubsView {
+public class MergedView extends ResultsView {
     private String name;
 
-    boolean powerStage;
-    int defaultPowerstageIndex; // -1 for last.
-
-
     @Enumerated(EnumType.STRING)
-    BadgeType badgeType;
+    MergeViewStrategy mergeViewStrategy;
+
+//    boolean powerStage;
+//    int defaultPowerstageIndex; // -1 for last.
+//
+//
+//    @Enumerated(EnumType.STRING)
+//    BadgeType badgeType;
     @OneToMany(cascade = CascadeType.ALL)
-    List<SingleClubView> resultViews;
+    List<ResultsView> resultViews;
     @Override
-    public List<Long> getAssociatedClubs() {
-        return resultViews.stream().map(SingleClubView::getClubId).toList();
+    public Set<Long> getAssociatedClubs() {
+        return resultViews.stream().map(ResultsView::getAssociatedClubs).flatMap(Collection::stream).collect(Collectors.toSet());
     }
 }

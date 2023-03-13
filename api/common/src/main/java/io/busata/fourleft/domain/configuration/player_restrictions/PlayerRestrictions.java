@@ -15,6 +15,8 @@ public class PlayerRestrictions {
     @GeneratedValue
     UUID id;
 
+    String name;
+
     @Enumerated(EnumType.STRING)
     PlayerRestrictionFilterType filterType;
 
