@@ -2,7 +2,7 @@ package io.busata.fourleft.endpoints.stats;
 
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.DriverEntryTo;
+import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
@@ -15,7 +15,7 @@ import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryTo;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
+import io.busata.fourleft.endpoints.views.ClubEventSupplier;
 import io.busata.fourleft.endpoints.views.results.factory.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,8 +108,8 @@ public class UserProgressEndpoint {
     @GetMapping(Routes.USER_OVERVIEW)
     public UserResultSummaryTo getUserOverview(@RequestParam String query) {
 
-        List<ViewResultTo> currentViewResults = getViewResults(ClubEventSupplierType.CURRENT);
-        List<ViewResultTo> previousViewResults = getViewResults(ClubEventSupplierType.PREVIOUS);
+        List<ViewResultTo> currentViewResults = getViewResults(ClubEventSupplier.CURRENT);
+        List<ViewResultTo> previousViewResults = getViewResults(ClubEventSupplier.PREVIOUS);
 
 
         final var activeClubResults = getClubResults(query, currentViewResults);
@@ -136,7 +136,7 @@ public class UserProgressEndpoint {
         );
     }
 
-    private List<ViewResultTo> getViewResults(ClubEventSupplierType supplierType) {
+    private List<ViewResultTo> getViewResults(ClubEventSupplier supplierType) {
         return clubViewRepository.findAll().stream().parallel()
                 .flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplierType).stream())
                 .collect(Collectors.toList());
@@ -177,7 +177,7 @@ public class UserProgressEndpoint {
     private List<ClubResultSummaryTo> getClubResults(String query, List<ViewResultTo> viewResults) {
 
         return viewResults.stream().flatMap(viewResult -> {
-            List<DriverEntryTo> resultEntries = viewResult.getResultEntries();
+            List<DriverResultTo> resultEntries = viewResult.getResultEntries();
 
             return resultEntries.stream().filter(entry -> entry.racenet().equalsIgnoreCase(query))
                     .findFirst().stream().map(entry -> {

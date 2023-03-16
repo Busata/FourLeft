@@ -5,6 +5,8 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -19,12 +21,29 @@ public class StageTimeParser {
             return "--";
         }
 
+        return formatStageDiff(difference);
+    }
+
+    public String formatStageDiff(Duration difference) {
         if(difference.toHours() > 1) {
             return DurationFormatUtils.formatDuration(difference.toMillis(), "+HH:mm:ss.SSS", true);
         } else {
 
             return DurationFormatUtils.formatDuration(difference.toMillis(), "+mm:ss.SSS", true);
         }
+    }
+
+    public String formatStageTime(Duration stageTime) {
+        if(stageTime.toHours() > 1) {
+            return DurationFormatUtils.formatDuration(stageTime.toMillis(), "HH:mm:ss.SSS", true);
+        } else {
+
+            return DurationFormatUtils.formatDuration(stageTime.toMillis(), "mm:ss.SSS", true);
+        }
+    }
+
+    public <T> List<T> sortedByTime(List<T> entries, TimeSupplier<T> timeSupplier) {
+        return entries.stream().sorted(Comparator.comparing(boardEntry -> createDuration(timeSupplier.getTime(boardEntry)))).toList();
     }
     public Duration createDuration(String stageTime) {
 

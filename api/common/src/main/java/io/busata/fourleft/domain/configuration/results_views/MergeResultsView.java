@@ -15,20 +15,10 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MergedView extends ResultsView {
+public class MergeResultsView extends ResultsView {
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    MergeViewStrategy mergeViewStrategy;
-
-//    boolean powerStage;
-//    int defaultPowerstageIndex; // -1 for last.
-//
-//
-//    @Enumerated(EnumType.STRING)
-//    BadgeType badgeType;
     @OneToMany(cascade = CascadeType.ALL)
-    List<ResultsView> resultViews;
+    List<SingleClubView> resultViews;
     @Override
     public Set<Long> getAssociatedClubs() {
         return resultViews.stream().map(ResultsView::getAssociatedClubs).flatMap(Collection::stream).collect(Collectors.toSet());

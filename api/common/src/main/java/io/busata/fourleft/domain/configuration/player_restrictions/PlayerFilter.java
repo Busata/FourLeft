@@ -1,6 +1,5 @@
 package io.busata.fourleft.domain.configuration.player_restrictions;
 
-import io.busata.fourleft.domain.clubs.models.BoardEntry;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -9,7 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-public class PlayerRestrictions {
+public class PlayerFilter {
 
     @Id
     @GeneratedValue
@@ -18,7 +17,7 @@ public class PlayerRestrictions {
     String name;
 
     @Enumerated(EnumType.STRING)
-    PlayerRestrictionFilterType filterType;
+    PlayerFilterType filterType;
 
 
     @ElementCollection

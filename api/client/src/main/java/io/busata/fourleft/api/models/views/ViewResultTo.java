@@ -1,8 +1,7 @@
 package io.busata.fourleft.api.models.views;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.ResultEntryTo;
+import io.busata.fourleft.api.models.DriverResultTo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,7 +23,7 @@ public class ViewResultTo {
         return this.multiListResults.stream().flatMap(result -> getEventInfo().stream()).collect(Collectors.toList());
     }
     @JsonIgnore
-    public List<DriverEntryTo> getResultEntries() {
+    public List<DriverResultTo> getResultEntries() {
         return multiListResults.stream().flatMap(multiList -> multiList.results().stream()).collect(Collectors.toList());
     }
 }

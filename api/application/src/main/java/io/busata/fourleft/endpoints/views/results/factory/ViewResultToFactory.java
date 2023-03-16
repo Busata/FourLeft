@@ -1,14 +1,12 @@
 package io.busata.fourleft.endpoints.views.results.factory;
 
+import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
+import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.domain.configuration.results_views.MergedView;
-import io.busata.fourleft.domain.configuration.results_views.MultipleClubsView;
-import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.domain.configuration.results_views.TieredView;
+import io.busata.fourleft.domain.configuration.results_views.*;
 import io.busata.fourleft.endpoints.views.ClubEventSupplier;
-import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,88 +25,69 @@ public class ViewResultToFactory {
     private final ClubViewRepository clubViewRepository;
     private final ResultListToFactory resultListToFactory;
 
+    private final ResultListMerger resultListMerger;
+
+    private final ResultListPartitioner resultListPartitioner;
+
     @Transactional
     @Cacheable("view_results")
-    public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplierType type) {
-        /*
-           CREST
-           2 clubs
-           2 events
-
-           Tiers + Merge: how?
-
-
-           create Player restrictions (CA 1, CA 2, CA 3, CA 4 with type INCLUDE)
-
-
-            Create Single club view for club A
-            Create single club view for club B
-
-            create MergedView, with the two single club views.
-
-
-            A view should be able to take any* view as input.
-
-
-
-
-
-
-
-
-           Single club view per tier x 2?
-
-
-
-
-         */
+    public Optional<ViewResultTo> createViewResult(UUID viewId, ClubEventSupplier type) {
         return clubViewRepository.findById(viewId).flatMap(clubView -> {
-            return switch (clubView.getResultsView()) {
-                case SingleClubView view -> createSingleClubViewResult(view, type.getSupplier());
-                case TieredView view -> createTieredViewResult(view, type.getSupplier());
-                case MergedView view -> createMergedViewResult(view, type.getSupplier());
-                default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
-            };
+            return createViewResultFromResultsView(clubView, clubView.getResultsView(), type);
         });
     }
 
-    public Optional<ViewResultTo> createSingleClubViewResult(SingleClubView view, ClubEventSupplier eventSupplier) {
-        final var club = clubSyncService.getOrCreate(view.getClubId());
+    private Optional<ViewResultTo> createViewResultFromResultsView(ClubView clubView, ResultsView resultsView, ClubEventSupplier type) {
+        return switch (resultsView) {
+            case SingleClubView typedResultsView -> createSingleClubViewResult(clubView, typedResultsView, type);
+            case PartitionView typedResultsView -> createPartitionedView(clubView, typedResultsView, type);
+            case MergeResultsView typedResultsView -> createMergedView(clubView, typedResultsView, type);
+            default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
+        };
+    }
+
+    public Optional<ViewResultTo> createSingleClubViewResult(ClubView clubView, SingleClubView resultsView, ClubEventSupplier eventSupplier) {
+        final var club = clubSyncService.getOrCreate(resultsView.getClubId());
 
         final var results = eventSupplier.getEvent(club)
-                .map(event -> resultListToFactory.createResultList(view, event))
+                .map(event -> resultListToFactory.createResultList(resultsView, event))
                 .stream()
                 .toList();
 
         ViewResultTo viewResult = new ViewResultTo(
-                view.getName(),
-                new ViewPropertiesTo(view.isPowerStage(), view.getBadgeType()),
+                resultsView.getName(),
+                new ViewPropertiesTo(resultsView.hasPowerStage(), clubView.getBadgeType()),
                 results
         );
 
         return Optional.of(viewResult);
     }
 
-    private Optional<ViewResultTo> createTieredViewResult(TieredView view, ClubEventSupplier supplier) {
-        return createConcatenation(view, supplier);
-    }
-    private Optional<ViewResultTo> createMergedViewResult(MergedView view, ClubEventSupplier eventSupplier) {
-        return createConcatenation(view, eventSupplier).map(viewResultTo -> {
+    private Optional<ViewResultTo> createPartitionedView(ClubView clubView, PartitionView typedResultsView, ClubEventSupplier eventSupplier) {
+
+        return createViewResultFromResultsView(clubView,typedResultsView.getResultsView(), eventSupplier).map(resultsView -> {
+            if(resultsView.getMultiListResults().size() != 1) {
+                throw new IllegalStateException("Not expecting multiple lists for this view");
+            }
+
+            final var resultList = resultsView.getMultiListResults().get(0);
 
             return new ViewResultTo(
-                    view.getName(),
-                    new ViewPropertiesTo(view.isPowerStage(), view.getBadgeType()),
-                    resultListToFactory.mergeResultLists(viewResultTo.getMultiListResults())
+                    resultsView.getDescription(),
+                    resultsView.getViewPropertiesTo(),
+                    resultListPartitioner.partitionResults(typedResultsView.getPartitionElements(), resultList)
             );
         });
-    }
-    private Optional<ViewResultTo> createConcatenation(MultipleClubsView tieredView, ClubEventSupplier eventSupplier) {
 
-        if (!hasActiveEvent(eventSupplier, tieredView.getResultViews())) {
+    }
+
+    private Optional<ViewResultTo> createMergedView(ClubView clubView, MergeResultsView typedResultsView, ClubEventSupplier eventSupplier) {
+
+        if(!hasActiveEvent(eventSupplier, typedResultsView.getResultViews())) {
             return Optional.empty();
         }
 
-        final var results = tieredView.getResultViews().stream()
+        final var results = typedResultsView.getResultViews().stream()
                 .map(resultViews -> {
                     final var club = clubSyncService.getOrCreate(resultViews.getClubId());
 
@@ -118,16 +97,17 @@ public class ViewResultToFactory {
                 }).collect(Collectors.toList());
 
 
+        ResultListTo mergedResultList = resultListMerger.mergeResults(results);
+
         ViewResultTo viewResult = new ViewResultTo(
-                tieredView.getName(),
-                new ViewPropertiesTo(tieredView.isPowerStage(), tieredView.getBadgeType()),
-                results
+                typedResultsView.getName(),
+                new ViewPropertiesTo(hasPowerStage(typedResultsView.getResultViews()), clubView.getBadgeType()),
+                List.of(mergedResultList)
         );
 
         return Optional.of(viewResult);
+
     }
-
-
 
     private boolean hasActiveEvent(ClubEventSupplier eventSupplier, List<SingleClubView> views) {
         return views.stream()
@@ -135,5 +115,8 @@ public class ViewResultToFactory {
                 .map(clubSyncService::getOrCreate)
                 .map(eventSupplier::getEvent)
                 .anyMatch(Optional::isPresent);
+    }
+    private boolean hasPowerStage(List<SingleClubView> views) {
+        return views.stream().anyMatch(SingleClubView::hasPowerStage);
     }
 }
