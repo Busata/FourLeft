@@ -4,6 +4,7 @@ import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +23,7 @@ public class PartitionElement {
 
     int order;
 
-    @ManyToOne
-    PlayerFilter filter;
+    @ElementCollection
+    List<String> racenetNames;
 
 }

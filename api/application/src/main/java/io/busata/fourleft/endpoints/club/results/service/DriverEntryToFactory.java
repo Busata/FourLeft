@@ -42,51 +42,14 @@ public class DriverEntryToFactory {
 
         int totalEntries = driverResults.size();
 
+        List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
+
         if(view.getPlayerFilter().getFilterType() == PlayerFilterType.FILTER) {
-            driverResults = filterNames(driverResults, view.getPlayerFilter().getPlayerNames());
+            driverEntryTos = filterNames(driverEntryTos, view.getPlayerFilter().getPlayerNames());
         }
 
-        return new FilteredEntryList<>(calculateRelativeData(driverResults), totalEntries);
+        return new FilteredEntryList<>(driverEntryTos, totalEntries);
     }
-
-    private List<DriverResultTo> mergePowerStageEntries(List<DriverResultTo> entries, SingleClubView view, Event event) {
-
-        final var powerStageEntries = getPowerStageEntries(view, event);
-
-        return entries.stream().map(entry -> {
-            var stageTime = Duration.ZERO;
-
-            final var filteredPowerStageEntries = powerStageEntries.stream().filter(powerStageEntry -> powerStageEntry.racenet().equalsIgnoreCase(entry.racenet())).toList();
-
-            for (DriverResultTo filteredPowerStageEntry : filteredPowerStageEntries) {
-                stageTime = stageTime.plus(stageTimeParser.createDuration(filteredPowerStageEntry.activityTotalTime()));
-            }
-
-            return new DriverResultTo(
-                    entry.racenet(),
-                    entry.nationality(),
-                    entry.platform(),
-                    entry.activityTotalTime(),
-                    stageTimeParser.formatStageDiff(stageTime),
-                    entry.isDnf(),
-                    entry.vehicles()
-            );
-
-        }).collect(Collectors.toList());
-    }
-
-    private DriverResultTo createDriverResult(BoardEntry entry) {
-        return new DriverResultTo(
-                entry.getName(),
-                entry.getNationality(),
-                platformToFactory.createFromRacenet(entry.getName()),
-                entry.getTotalTime(),
-                entry.getStageTime(),
-                entry.isDnf(),
-                List.of(entry.getVehicleName())
-        );
-    }
-
 
     public List<DriverEntryTo> calculateRelativeData(List<DriverResultTo> entries) {
         if (entries.isEmpty()) {
@@ -117,6 +80,44 @@ public class DriverEntryToFactory {
         ).toList();
     }
 
+    private List<DriverResultTo> mergePowerStageEntries(List<DriverResultTo> entries, SingleClubView view, Event event) {
+        final var powerStageEntries = getPowerStageEntries(view, event);
+
+        return entries.stream().map(entry -> {
+            var stageTime = Duration.ZERO;
+
+            final var userPowerStageEntries = powerStageEntries.stream().filter(powerStageEntry -> powerStageEntry.racenet().equalsIgnoreCase(entry.racenet())).toList();
+
+            for (DriverResultTo userPowerStageEntry : userPowerStageEntries) {
+                stageTime = stageTime.plus(stageTimeParser.createDuration(userPowerStageEntry.powerStageTotalTime()));
+            }
+
+            return new DriverResultTo(
+                    entry.racenet(),
+                    entry.nationality(),
+                    entry.platform(),
+                    entry.activityTotalTime(),
+                    stageTimeParser.formatStageDiff(stageTime),
+                    entry.isDnf(),
+                    entry.vehicles()
+            );
+
+        }).collect(Collectors.toList());
+    }
+
+    private DriverResultTo createDriverResult(BoardEntry entry) {
+        return new DriverResultTo(
+                entry.getName(),
+                entry.getNationality(),
+                platformToFactory.createFromRacenet(entry.getName()),
+                entry.getTotalTime(),
+                entry.getStageTime(),
+                entry.isDnf(),
+                List.of(entry.getVehicleName())
+        );
+    }
+
+
     private List<DriverResultTo> getPowerStageEntries(SingleClubView view, Event event) {
         var stages = event.getStages();
         return view.getPowerStageIndices().stream()
@@ -134,13 +135,12 @@ public class DriverEntryToFactory {
                 .toList();
     }
 
-
     private List<DriverResultTo> includeNames(List<DriverResultTo> entries, List<String> players) {
         List<String> sanitized = players.stream().map(String::toLowerCase).toList();
 
         return entries.stream().filter(entry -> sanitized.contains(entry.racenet().toLowerCase())).toList();
     }
-    private List<DriverResultTo> filterNames(List<DriverResultTo> entries, List<String> players) {
+    private List<DriverEntryTo> filterNames(List<DriverEntryTo> entries, List<String> players) {
         List<String> sanitized = players.stream().map(String::toLowerCase).toList();
 
         return entries.stream().filter(entry -> sanitized.contains(entry.racenet().toLowerCase())).toList();

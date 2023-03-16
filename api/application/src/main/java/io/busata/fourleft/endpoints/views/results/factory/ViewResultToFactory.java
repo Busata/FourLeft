@@ -24,9 +24,7 @@ public class ViewResultToFactory {
     private final ClubSyncService clubSyncService;
     private final ClubViewRepository clubViewRepository;
     private final ResultListToFactory resultListToFactory;
-
     private final ResultListMerger resultListMerger;
-
     private final ResultListPartitioner resultListPartitioner;
 
     @Transactional

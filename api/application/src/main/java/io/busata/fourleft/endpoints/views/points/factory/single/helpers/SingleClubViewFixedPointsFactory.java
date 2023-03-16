@@ -50,7 +50,7 @@ public class SingleClubViewFixedPointsFactory {
 
                 entries.computeIfPresent(entry.racenet(), (key, value) -> {
                     return value + calc.getPointSystem().getPoints(entry.activityRank().intValue()) +
-                            calc.getPointSystem().getPowerStagePoints(entry.powerstageRank().intValue());
+                            calc.getPointSystem().getPowerStagePoints(entry.powerStageRank().intValue());
 
                 });
             });

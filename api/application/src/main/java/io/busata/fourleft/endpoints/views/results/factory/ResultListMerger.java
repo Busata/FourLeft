@@ -43,12 +43,11 @@ public class ResultListMerger {
         return new ResultListTo("", mergedActivities, results.size(), driverResultTos);
     }
     public DriverResultTo mergeEntries(DriverResultTo entryA, DriverResultTo entryB) {
-
         Duration activityTotalTime = parser.createDuration(entryA.activityTotalTime()).plus(parser.createDuration(entryB.activityTotalTime()));
-        String activityTotalMerged = DurationFormatUtils.formatDuration(activityTotalTime.toMillis(), "+HH:mm:ss.SSS", true);
+        String activityTotalMerged = parser.formatStageTime(activityTotalTime);
 
         Duration powerStageTotalTime = parser.createDuration(entryA.powerStageTotalTime()).plus(parser.createDuration(entryB.powerStageTotalTime()));
-        String powerStageMerged = DurationFormatUtils.formatDuration(powerStageTotalTime.toMillis(), "+HH:mm:ss.SSS", true);
+        String powerStageMerged = parser.formatStageTime(activityTotalTime);
 
         return new DriverResultTo(
                 entryA.racenet(),

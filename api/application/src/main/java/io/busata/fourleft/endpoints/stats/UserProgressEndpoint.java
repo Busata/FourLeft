@@ -2,6 +2,7 @@ package io.busata.fourleft.endpoints.stats;
 
 
 import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
@@ -177,7 +178,7 @@ public class UserProgressEndpoint {
     private List<ClubResultSummaryTo> getClubResults(String query, List<ViewResultTo> viewResults) {
 
         return viewResults.stream().flatMap(viewResult -> {
-            List<DriverResultTo> resultEntries = viewResult.getResultEntries();
+            List<DriverEntryTo> resultEntries = viewResult.getResultEntries();
 
             return resultEntries.stream().filter(entry -> entry.racenet().equalsIgnoreCase(query))
                     .findFirst().stream().map(entry -> {

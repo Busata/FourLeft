@@ -1,15 +1,10 @@
 package io.busata.fourleft.endpoints.configuration;
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.configuration.ClubViewTo;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
-import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.configuration.points.*;
-import io.busata.fourleft.domain.configuration.repository.TieredViewRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,11 +22,9 @@ public class DiscordChannelConfigurationEndpoint {
 
     private final ClubViewRepository repository;
 
-    private final TieredViewRepository tieredViewRepository;
     private final PointSystemRepository pointSystemRepository;
     private final PointsCalculatorRepository pointsCalculatorRepository;
 
-    private final ConfigurationToFactory configurationToFactory;
 
     @PostMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     public void setup() {
@@ -170,7 +163,7 @@ public class DiscordChannelConfigurationEndpoint {
 
         discordChannelConfigurationRepository.save(discordChannelConfiguration);
     }
- */
+
     @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     public List<DiscordChannelConfigurationTo> getConfigurations() {
 
@@ -193,7 +186,7 @@ public class DiscordChannelConfigurationEndpoint {
                 configurationToFactory.create(configuration.getPointsCalculator())
         );
     }
-/*
+
     private void createGRFSpecial(PointsCalculator pointsCalculator) {
         final var tiersView = tiersViewRepository.getById(UUID.fromString("7961e20d-6719-43d1-bc9b-00835d6df589"));
 
