@@ -3,6 +3,7 @@ package io.busata.fourleftdiscord.autoposting.club_results;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageEditSpec;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
@@ -88,10 +89,10 @@ public class AutopostClubResultsMessageService {
         final var updatedEntries = postedEntries.stream()
                 .flatMap(autoPostEntry ->
                         clubResult.getResultEntries().stream()
-                                .filter(clubEntry -> clubEntry.name().equals(autoPostEntry.getName()))
+                                .filter(clubEntry -> clubEntry.racenet().equals(autoPostEntry.getName()))
                                 .findFirst()
                                 .stream()
-                ).map(ResultEntryTo::name).toList();
+                ).map(DriverEntryTo::racenet).toList();
 
         return Stream.concat(updatedEntries.stream(), newEntries.stream()).collect(Collectors.toList());
     }
@@ -104,7 +105,7 @@ public class AutopostClubResultsMessageService {
         multiView.getMultiListResults().stream().flatMap(multiList -> {
             return multiList.results().stream().map(entry -> {
                     final var autoPostEntry = new AutoPostEntry();
-                createAutopostEntry(autoPostEntry, entry, messageId, multiList.activityInfoTo());
+                createAutopostEntry(autoPostEntry, entry, messageId, multiList.activityInfoTo().get(0));
 
                 return autoPostEntry;
             });
@@ -112,11 +113,11 @@ public class AutopostClubResultsMessageService {
     }
 
 
-    private static void createAutopostEntry(AutoPostEntry autoPostEntry, ResultEntryTo entry, Long messageId, ActivityInfoTo singleView) {
-        autoPostEntry.setName(entry.name());
-        autoPostEntry.setTotalTime(entry.totalTime());
+    private static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, ActivityInfoTo singleView) {
+        autoPostEntry.setName(entry.racenet());
+        autoPostEntry.setTotalTime(entry.activityTotalTime());
         autoPostEntry.setNationality(entry.nationality());
-        autoPostEntry.setVehicle(entry.vehicle());
+        autoPostEntry.setVehicle(entry.vehicles().get(0));
         autoPostEntry.setMessageId(messageId);
 
         autoPostEntry.setEventId(singleView.eventId());

@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake;
 import feign.FeignException;
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
@@ -84,7 +85,7 @@ public class AutoPostClubResultsService {
         return autoPostEntryRepository.findByEventIdAndChallengeId(eventId, eventChallengeId);
     }
 
-    private List<String> findUnposted(List<ResultEntryTo> entries, List<AutoPostEntry> postedEntries) {
+    private List<String> findUnposted(List<DriverEntryTo> entries, List<AutoPostEntry> postedEntries) {
         final var unpostedByName = findUnpostedEntries(entries, postedEntries, (newEntry, postedEntry) -> postedEntry.hasEqualName(newEntry));
         final var unpostedByTimeVehicleAndNationality = findUnpostedEntries(entries , postedEntries, (newEntry, postedEntry) -> postedEntry.hasEqualTimeVehicleAndNationality(newEntry));
 
@@ -96,10 +97,10 @@ public class AutoPostClubResultsService {
     }
 
 
-    private List<String> findUnpostedEntries(List<ResultEntryTo> entries, List<AutoPostEntry> postedEntries, BiPredicate<ResultEntryTo, AutoPostEntry> entryFilter) {
+    private List<String> findUnpostedEntries(List<DriverEntryTo> entries, List<AutoPostEntry> postedEntries, BiPredicate<DriverEntryTo, AutoPostEntry> entryFilter) {
         return entries.stream()
                 .filter(newEntry -> postedEntries.stream().noneMatch(postedEntry -> entryFilter.test(newEntry, postedEntry)))
-                .map(ResultEntryTo::name)
+                .map(DriverEntryTo::racenet)
                 .collect(Collectors.toList());
 
     }

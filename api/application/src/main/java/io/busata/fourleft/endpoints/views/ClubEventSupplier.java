@@ -4,24 +4,20 @@ import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.domain.clubs.models.Event;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public enum ClubEventSupplier {
+public enum ClubEventSupplier implements EventSupplier {
 
     CURRENT {
         @Override
-        public Optional<Event> getEvent(Club club) {
-            return club.getCurrentEvent();
+        public Stream<Event> getEvents(Club club) {
+            return club.getCurrentEvent().stream();
         }
     },
     PREVIOUS {
         @Override
-        public Optional<Event> getEvent(Club club) {
-            return club.getPreviousEvent();
+        public Stream<Event> getEvents(Club club) {
+            return club.getPreviousEvent().stream();
         }
     };
-
-
-
-
-    public abstract Optional<Event> getEvent(Club club);
 }

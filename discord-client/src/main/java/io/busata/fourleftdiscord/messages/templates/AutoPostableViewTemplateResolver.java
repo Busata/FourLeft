@@ -1,5 +1,6 @@
 package io.busata.fourleftdiscord.messages.templates;
 
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
@@ -33,7 +34,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
     public Map<String, String> buildValuesMap(MessageTemplate template, AutoPostableView value) {
         Map<String, String> valueMap = new HashMap<>();
 
-        final var eventInfos = value.getMultiListResults().stream().map(AutoPostResultList::activityInfoTo).collect(Collectors.toList());
+        final var eventInfos = value.getMultiListResults().stream().map(AutoPostResultList::activityInfoTo).collect(Collectors.toList()).get(0);
 
         String country = eventInfos.stream().map(ActivityInfoTo::country).distinct().map(fieldMapper::createEmoticon).collect(Collectors.joining(" "));
         String vehicleClass = eventInfos.stream().map(ActivityInfoTo::vehicleClass).distinct().map(fieldMapper::createHumanReadable).collect(Collectors.joining(" "));
@@ -80,58 +81,64 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         groupedListValueMap.put("entries", listEntries);
 
         groupedListValueMap.put("vehicleRestrictions", "");
+        //TODO
+        /*
         if (list.restrictions() instanceof ResultListRestrictionsTo restrictions) {
             String vehicleRestrictions = restrictions.getAllowedVehicles().stream().map(VehicleTo::displayName).collect(Collectors.joining(" • "));
             groupedListValueMap.put("vehicleRestrictions", "*(%s)*".formatted(vehicleRestrictions));
         }
+         */
         groupedListValueMap.put("tierName", list.name());
 
         return StringSubstitutor.replace(groupedListTemplate, groupedListValueMap);
     }
 
-    public String buildEntry(AutoPostResultList listData, ResultEntryTo entry, String template) {
+    public String buildEntry(AutoPostResultList listData, DriverEntryTo entry, String template) {
         Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("rank", String.valueOf(entry.rank()));
-        valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.rank(), entry.isDnf()));
+        valueMap.put("rank", String.valueOf(entry.activityRank()));
+        valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.activityRank(), entry.isDnf()));
         valueMap.put("nationalityEmoticon", fieldMapper.createEmoticon(entry.nationality()));
-        valueMap.put("name", entry.name());
-        valueMap.put("totalTime", entry.totalTime());
-        valueMap.put("totalDiff", entry.totalDiff());
-        valueMap.put("vehicleName", entry.vehicle());
+        valueMap.put("name", entry.racenet());
+        valueMap.put("totalTime", entry.activityTotalTime());
+        valueMap.put("totalDiff", entry.activityTotalDiff());
+        valueMap.put("vehicleName", entry.vehicles().get(0));
         valueMap.put("powerStageBadge", determinePowerstageBadge(entry));
         valueMap.put("tierName", listData.name());
 
         valueMap.put("platform", "");
         valueMap.put("controllerType", "");
 
-        if(entry.platform() != Platform.UNKNOWN) {
+        if(entry.platform().platform() != Platform.UNKNOWN) {
             valueMap.put("platform", " %s •".formatted(
-                    fieldMapper.createEmoticon(entry.platform().name())
+                    fieldMapper.createEmoticon(entry.platform().platform().name())
             ));
         }
 
-        if(entry.controllerType() != ControllerType.UNKNOWN) {
+        if(entry.platform().controller() != ControllerType.UNKNOWN) {
             valueMap.put("controllerType", " %s •".formatted(
-                    fieldMapper.createEmoticon(entry.controllerType().name())
+                    fieldMapper.createEmoticon(entry.platform().controller().name())
             ));
         }
 
         valueMap.put("validVehicle", "");
 
+        //TODO
+        /*
         if (listData.restrictions() instanceof ResultListRestrictionsTo restrictions) {
             boolean useValidVehicle = restrictions.isValidVehicle(entry.vehicle());
             valueMap.put("validVehicle", useValidVehicle ? "" : ":pineapple:");
         }
+         */
 
         return StringSubstitutor.replace(template, valueMap);
     }
 
-    private String determinePowerstageBadge(ResultEntryTo entry) {
-        if (entry.stageRank() > 5) {
+    private String determinePowerstageBadge(DriverEntryTo entry) {
+        if (entry.powerStageRank() > 5) {
             return "";
         }
 
-        return ":rocket: (*%s*) • ".formatted(entry.stageRank());
+        return ":rocket: (*%s*) • ".formatted(entry.powerStageRank());
 
     }
 }
