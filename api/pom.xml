@@ -13,10 +13,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>application</module>
+        <module>game-server</module>
         <module>racenet</module>
-        <module>client</module>
+        <module>game-server-client</module>
         <module>common</module>
+        <module>wrc-server</module>
     </modules>
 
 </project>
