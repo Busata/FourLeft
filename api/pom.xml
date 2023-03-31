@@ -15,7 +15,7 @@
     <modules>
         <module>application</module>
         <module>racenet</module>
-        <module>game-server-client</module>
+        <module>client</module>
         <module>common</module>
         <module>wrc-server</module>
     </modules>
