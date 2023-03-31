@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db.wrc_local:
+   container_name: db.wrc.local
+   image: postgres
+   ports:
+     - "16001:5432"
+   environment:
+     - POSTGRES_PASSWORD=wrc
+     - POSTGRES_USER=wrc
+     - POSTGRES_DB=wrc
