@@ -1,8 +1,9 @@
 package io.busata.fourleft.endpoints.frontend.discord_integration.feign;
 
-import io.busata.fourleft.endpoints.frontend.discord_integration.DiscordChannelTo;
-import io.busata.fourleft.endpoints.frontend.discord_integration.DiscordGuildTo;
-import io.busata.fourleft.endpoints.frontend.discord_integration.GuildMemberTo;
+import io.busata.fourleft.api.models.discord.DiscordChannelTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildTo;
+import io.busata.fourleft.api.models.discord.DiscordMemberTo;
+import io.busata.fourleft.api.models.discord.GuildMemberTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 

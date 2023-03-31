@@ -31,7 +31,7 @@ public class ResultListMerger {
                 forEach(entries -> {
                     entries.stream().map(DriverEntryTo::result).forEach(entry -> {
                         driverEntries.putIfAbsent(entry.racenet(), entry);
-                        driverEntries.computeIfPresent(entry.racenet(), ((key, existingDriverEntry) -> mergeEntries(entry, existingDriverEntry)));
+                        driverEntries.computeIfPresent(entry.racenet(), (key, existingDriverEntry) -> mergeEntries(entry, existingDriverEntry));
                     });
                 });
 
@@ -47,7 +47,7 @@ public class ResultListMerger {
         String activityTotalMerged = parser.formatStageTime(activityTotalTime);
 
         Duration powerStageTotalTime = parser.createDuration(entryA.powerStageTotalTime()).plus(parser.createDuration(entryB.powerStageTotalTime()));
-        String powerStageMerged = parser.formatStageTime(activityTotalTime);
+        String powerStageMerged = parser.formatStageTime(powerStageTotalTime);
 
         return new DriverResultTo(
                 entryA.racenet(),

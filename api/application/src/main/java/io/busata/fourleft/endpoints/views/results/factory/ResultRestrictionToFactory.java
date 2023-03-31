@@ -19,7 +19,7 @@ public class ResultRestrictionToFactory {
 
 
     public ResultRestrictionsTo create(UUID resultViewId, String challengeId, String eventId) {
-        final var restrictions = viewEventRestrictionsRepository.findByResultViewIdAndChallengeIdAndEventId(resultViewId, challengeId, eventId);
+        final var restrictions = viewEventRestrictionsRepository.findByResultsViewIdAndChallengeIdAndEventId(resultViewId, challengeId, eventId);
 
         return restrictions.map(this::create).orElse(new NoResultRestrictionsTo());
     }

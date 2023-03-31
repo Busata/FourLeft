@@ -1,28 +1,30 @@
 package io.busata.fourleft.endpoints.frontend.discord_integration;
 
+import io.busata.fourleft.api.models.discord.DiscordChannelTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildTo;
+import io.busata.fourleft.api.models.discord.DiscordTokenTo;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
-import io.busata.fourleft.endpoints.frontend.discord_integration.feign.DiscordMemberTo;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.bot.DiscordBotClient;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.auth.DiscordOauth2Client;
 import io.busata.fourleft.endpoints.frontend.discord_integration.feign.user.DiscordUserClient;
+import io.busata.fourleft.endpoints.security.FourLeftRole;
+import io.busata.fourleft.endpoints.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -36,21 +38,31 @@ public class DiscordIntegrationService {
     private final DiscordBotClient discordBotClient;
     private final DiscordUserClient discordUserClient;
 
-    public List<DiscordGuildSummaryTo> getGuildSummaries() {
-        List<String> botGuildIds = this.discordBotClient.getGuilds().stream().map(DiscordGuildTo::id).toList();
+    private final SecurityService securityService;
 
-        return this.discordUserClient.getGuilds().stream()
+    private final DiscordGuildSummaryToFactory discordGuildSummaryToFactory;
+
+    public List<DiscordGuildSummaryTo> getGuildSummaries() {
+        List<DiscordGuildTo> botGuilds = this.discordBotClient.getGuilds();
+        List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
+
+        List<DiscordGuildSummaryTo> discordGuildSummaryTos = userGuilds.stream()
                 .filter(DiscordGuildTo::canManageServer)
                 .map(guild -> {
-                    boolean botJoined = botGuildIds.contains(guild.id());
-                    return new DiscordGuildSummaryTo(
-                            guild.id(),
-                            guild.name(),
-                            guild.icon(),
-                            botJoined
-                    );
+                    boolean botJoined = botGuilds.contains(guild);
+                    return discordGuildSummaryToFactory.create(guild, botJoined);
                 })
                 .toList();
+
+
+        if(securityService.userHasRole(FourLeftRole.ADMIN)) {
+            return Stream.concat(
+                    botGuilds.stream().map(guild -> discordGuildSummaryToFactory.create(guild, true))
+                    ,discordGuildSummaryTos.stream()
+            ).distinct().toList();
+        }
+
+        return discordGuildSummaryTos;
     }
 
     public boolean isAuthenticated() {

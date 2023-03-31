@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 import {AppRoutingModule} from "./app-routing.module";
 import {AuthConfig, OAuthModule} from "angular-oauth2-oidc";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
-import {Oauth2Interceptor} from "./fourleft/private/services/oauth2-interceptor.service";
+import {Oauth2Interceptor} from "./fourleft/private/services/security/oauth2-interceptor.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 

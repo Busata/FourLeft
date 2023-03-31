@@ -19,9 +19,6 @@ public class ClubView {
     @GeneratedValue
     UUID id;
 
-    String description;
-
-    @Enumerated(EnumType.STRING)
     BadgeType badgeType;
 
     @OneToOne(cascade = CascadeType.ALL)

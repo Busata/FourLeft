@@ -1,14 +1,22 @@
 package io.busata.fourleft.domain.configuration.results_views;
 
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PartitionElement {
 
     @Id
@@ -16,10 +24,6 @@ public class PartitionElement {
     UUID id;
 
     String name;
-
-    @ManyToOne
-    @JoinColumn(name="partition_view_id")
-    PartitionView partitionView;
 
     int order;
 

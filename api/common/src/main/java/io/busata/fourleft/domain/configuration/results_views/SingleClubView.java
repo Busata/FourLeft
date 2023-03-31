@@ -22,7 +22,7 @@ public class SingleClubView extends ResultsView  {
     @ElementCollection
     List<Integer> powerStageIndices;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     PlayerFilter playerFilter;
 
     @Override

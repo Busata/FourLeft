@@ -1,0 +1,10 @@
+<div [formGroup]="form">
+<div class="form-group">
+  <label>Enable autoposting</label>
+  <input type="checkbox" formControlName="enableAutoposts"/>
+
+</div>
+
+<app-club-view-form [formGroup]="clubViewForm"></app-club-view-form>
+<button class="primary" (click)="saveConfiguration()">Save configuration</button>
+</div>

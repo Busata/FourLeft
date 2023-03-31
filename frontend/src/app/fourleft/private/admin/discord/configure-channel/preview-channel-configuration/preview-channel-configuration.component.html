@@ -1,0 +1,14 @@
+<div *ngIf="results">
+
+  <div *ngFor="let multiList of results.multiListResults">
+
+    {{multiList.name}}
+{{multiList.activityInfoTo[0].eventName}}
+    {{multiList.activityInfoTo[0].country}}
+    <div *ngFor="let result of multiList.results">
+      {{result.relative.activityRank}} - {{result.result.racenet}} - {{result.result.activityTotalTime}} - ({{result.relative.activityTotalDiff}})
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,40 @@
+<form [formGroup]="partitionFormGroup">
+  <h2>Partition club view</h2>
+
+  <input type="text" formControlName="name" placeholder="Partition view">
+
+
+  <div class="form-group">
+    <label>Results view type</label>
+    <select (change)="setResultsView($event)" [value]="''">
+      <option *ngIf="!hasResultsView()" value="">Select a results view</option>
+      <option value="singleClub">Single club</option>
+      <option value="mergeClub">Merge clubs</option>
+    </select>
+  </div>
+
+  <ng-container *ngIf="resultViewForm">
+    <ng-container *ngIf="resultsViewType == 'singleClub'">
+      <app-single-club-view-form [formGroup]="resultViewForm"></app-single-club-view-form>
+    </ng-container>
+    <ng-container *ngIf="resultsViewType == 'mergeClub'">
+      <app-merge-club-view-form [formGroup]="resultViewForm"></app-merge-club-view-form>
+    </ng-container>
+    <ng-container *ngIf="resultsViewType == 'partitionClub'">
+      <app-partition-club-view-form [formGroup]="resultViewForm"></app-partition-club-view-form>
+    </ng-container>
+  </ng-container>
+
+  <h3>Partition elements</h3>
+
+  <button (click)="addPartitionElement()">Add partition element</button>
+
+  <div formArrayName="partitionElements">
+    <ng-container *ngFor="let partitionElementForm of partitionElements.controls;let i=index">
+      <app-partition-element-form [formGroup]="cast(partitionElementForm)"></app-partition-element-form>
+      <button (click)="removePartitionElement(i)">Remove this</button>
+    </ng-container>
+
+  </div>
+
+</form>

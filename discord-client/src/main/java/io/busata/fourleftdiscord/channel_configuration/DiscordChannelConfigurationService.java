@@ -25,7 +25,7 @@ public class DiscordChannelConfigurationService {
         return this.getConfigurations()
                 .stream()
                 .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                .filter(configuration -> configuration.includesClub(clubId))
+                //TODO .filter(configuration -> configuration.includesClub(clubId))
                 .collect(Collectors.toList());
     }
 

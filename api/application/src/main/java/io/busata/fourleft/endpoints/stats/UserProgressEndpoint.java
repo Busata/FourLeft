@@ -3,7 +3,6 @@ package io.busata.fourleft.endpoints.stats;
 
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
@@ -13,7 +12,7 @@ import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.challenges.repository.CommunityChallengeRepository;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryTo;
+import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryProjection;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.ClubEventSupplier;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class UserProgressEndpoint {
 
     private final LeaderboardRepository leaderboardRepository;
@@ -52,7 +50,7 @@ public class UserProgressEndpoint {
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> before,
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)  Optional<LocalDate> after) {
 
-        List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
+        List<CommunityChallengeSummaryProjection> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
                 .stream().filter(summary -> {
                     LocalDate challengeDate = summary.getChallengeDate();
                     boolean isBefore = before.map(challengeDate::isBefore).orElse(true);
@@ -66,7 +64,7 @@ public class UserProgressEndpoint {
         BufferedImage imageOut = new BufferedImage(totalSize*2, imageHeight, BufferedImage.TYPE_INT_RGB);
 
         for (int x = 0; x < communityChallengeSummary.size()*2; x++) {
-            CommunityChallengeSummaryTo summaryEntry = communityChallengeSummary.get((int)x/2);
+            CommunityChallengeSummaryProjection summaryEntry = communityChallengeSummary.get((int)x/2);
 
             final var percentageRank = ((float) summaryEntry.getRank() / (float) summaryEntry.getTotal()) * 100f;
             final var color = getPixelColour(percentageRank, summaryEntry.getIsDnf());

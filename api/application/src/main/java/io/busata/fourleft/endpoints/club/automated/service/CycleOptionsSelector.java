@@ -1,6 +1,5 @@
 package io.busata.fourleft.endpoints.club.automated.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 @Component
-@Slf4j
 public class CycleOptionsSelector {
     private Random random = new Random(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
 

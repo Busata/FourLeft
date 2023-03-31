@@ -74,7 +74,7 @@ public class Routes {
     public static final String USER_OVERVIEW = "/api/users/overview";
         public static final String USER_COMMUNITY_PROGRESSION = "/api/public/users/community/progression";
 
-    public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channel_configurations";
+    public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channels/{channelId}/configuration";
     public static final String DISCORD_CALLBACK = "/api/public/discord/callback";
     public static final String DISCORD_INTEGRATION_AUTH = "/api/discord/integration/auth";
 
@@ -87,4 +87,6 @@ public class Routes {
     public static final String DISCORD_GUILD = "/api/discord/integration/guilds/{guildId}";
 
     public static final String DISCORD_GUILD_CHANNELS = "/api/discord/integration/guilds/{guildId}/channels";
+
+    public static final String SECURITY_USER = "/api/security/user";
 }

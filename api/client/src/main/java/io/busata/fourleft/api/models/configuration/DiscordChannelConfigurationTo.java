@@ -15,7 +15,4 @@ public record DiscordChannelConfigurationTo(
         return !this.autopostClubViews.isEmpty();
     }
 
-    public boolean includesClub(long clubId) {
-        return this.autopostClubViews.stream().anyMatch(clubViewTo -> clubViewTo.includesClub(clubId));
-    }
 }

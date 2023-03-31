@@ -18,7 +18,6 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class RacenetClubMemberSyncService {
 
     private final RacenetGateway client;

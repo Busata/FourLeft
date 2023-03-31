@@ -1,6 +1,11 @@
 package io.busata.fourleft.endpoints.frontend.discord_integration;
 
 import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.models.discord.DiscordAuthenticationStatusTo;
+import io.busata.fourleft.api.models.discord.DiscordChannelTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildPermissionTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class DiscordIntegrationEndpoint {
     private final DiscordIntegrationService discordIntegrationService;
 

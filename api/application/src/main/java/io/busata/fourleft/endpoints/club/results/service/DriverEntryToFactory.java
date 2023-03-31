@@ -37,7 +37,7 @@ public class DriverEntryToFactory {
         driverResults = mergePowerStageEntries(driverResults, view, event);
 
         if(view.getPlayerFilter().getFilterType() == PlayerFilterType.INCLUDE) {
-            driverResults = includeNames(driverResults, view.getPlayerFilter().getPlayerNames());
+            driverResults = includeNames(driverResults, view.getPlayerFilter().getRacenetNames());
         }
 
         int totalEntries = driverResults.size();
@@ -45,7 +45,7 @@ public class DriverEntryToFactory {
         List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
 
         if(view.getPlayerFilter().getFilterType() == PlayerFilterType.FILTER) {
-            driverEntryTos = filterNames(driverEntryTos, view.getPlayerFilter().getPlayerNames());
+            driverEntryTos = filterNames(driverEntryTos, view.getPlayerFilter().getRacenetNames());
         }
 
         return new FilteredEntryList<>(driverEntryTos, totalEntries);

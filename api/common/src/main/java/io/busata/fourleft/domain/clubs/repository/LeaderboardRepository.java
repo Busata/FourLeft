@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +26,5 @@ public interface LeaderboardRepository extends JpaRepository<Leaderboard, UUID> 
                              where lower(be.name)=lower(:name)
                      order by cc.end_time desc;
             """, nativeQuery = true)
-    List<CommunityChallengeSummaryTo> findCommunityChallengeSummary(@Param("name") String name);
+    List<CommunityChallengeSummaryProjection> findCommunityChallengeSummary(@Param("name") String name);
 }

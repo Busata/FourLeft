@@ -14,6 +14,7 @@
     <name>Fourleft Server</name>
     <description>fourleft</description>
     <properties>
+        <error-prone.version>2.18.0</error-prone.version>
         <java.version>17</java.version>
         <selenium.version>4.8.1</selenium.version>
         <spring-cloud.version>2021.0.1</spring-cloud.version>
@@ -176,8 +177,31 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>-Xplugin:ErrorProne</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>${error-prone.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>2.6.5</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
+
             </plugin>
         </plugins>
     </build>

@@ -40,7 +40,7 @@ public class AutoPostClubResultsService {
         discordChannelConfigurationService.getConfigurations()
                 .stream()
                 .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                .filter(configuration -> configuration.includesClub(event.clubId()))
+                //TODO TODO .filter(configuration -> configuration.includesClub(event.clubId()))
                 .forEach(this::tryPostingResults);
     }
 

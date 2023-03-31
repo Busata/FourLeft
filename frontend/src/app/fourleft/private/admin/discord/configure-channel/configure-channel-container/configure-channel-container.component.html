@@ -1,16 +1,4 @@
-Create clubview
-
-Description
-
-ClubViews (for commands)
-
-ClubViews (for autoposting)
-
-ClubView
--> Description
--> ResultsView
--> -> SingleClub
--> -> TiersClub
--> PointsCalculator
--> -> Default points
--> -> Fixed points
+<div class="configure-channel">
+  <app-discord-channel-configuration-form [existingForm]="existingForm | async" (formSave)="saveConfiguration($event)"></app-discord-channel-configuration-form>
+  <app-preview-channel-configuration [configuration]="existingForm | async"></app-preview-channel-configuration>
+</div>

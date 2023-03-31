@@ -7,5 +7,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ViewEventRestrictionsRepository extends JpaRepository<ViewEventRestrictions, UUID> {
-    Optional<ViewEventRestrictions> findByResultViewIdAndChallengeIdAndEventId(UUID resultViewId, String challengeId, String eventId);
+    Optional<ViewEventRestrictions> findByResultsViewIdAndChallengeIdAndEventId(UUID resultsViewId, String challengeId, String eventId);
 }

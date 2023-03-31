@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class RacenetClubSyncService {
 
     private final RacenetGateway racenetGateway;

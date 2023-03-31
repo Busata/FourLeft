@@ -1,5 +1,6 @@
 package io.busata.fourleft.endpoints.club.members;
 
+import com.google.errorprone.annotations.DoNotCall;
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.api.models.ClubMemberTo;
@@ -18,13 +19,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
 public class ClubMembersEndpoint {
     private final ClubSyncService clubSyncService;
     private final ClubMemberFactory clubMemberToFactory;
     private final ClubViewRepository clubViewRepository;
-
 
     @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
     public List<ClubMemberTo> getClubMembers(@PathVariable UUID viewId) {

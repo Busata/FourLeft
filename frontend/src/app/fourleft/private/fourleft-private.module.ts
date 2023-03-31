@@ -27,7 +27,10 @@ import {ClubMergerService} from "./admin/club-merger/club-merger.service";
 import {ClubTiersService} from "./admin/club-tiers/club-tiers.service";
 import {FieldMappingQueryService} from "./admin/field-mappings/field-mapping-query.service";
 import {FourleftPrivateRoutingModule} from "./fourleft-private-routing.module";
-import {AuthenticationService} from "./services/authentication.service";
+import {LoginService} from "./services/security/login.service";
+import {AuthenticationService} from "./services/security/authentication.service";
+import {UserStoreService} from "./services/security/user-store.service";
+import {HasPermissionDirective} from "./services/security/has-permission.directive";
 
 
 @NgModule({
@@ -36,6 +39,7 @@ import {AuthenticationService} from "./services/authentication.service";
     FieldMappingsListComponent,
     FieldMappingEditComponent,
     ClubMergeResultsComponent,
+    HasPermissionDirective,
     ClubTiersContainerComponent,
     TierConfigurationComponent,
     RacenetNamesComponent,
@@ -54,7 +58,7 @@ import {AuthenticationService} from "./services/authentication.service";
     DiscordModule
   ],
   providers: [
-    AuthenticationService,
+    LoginService, AuthenticationService, UserStoreService,
     UsersService, FieldMappingsService, ClubMergerService, ClubTiersService, FieldMappingQueryService]
 })
 export class FourleftPrivateModule {

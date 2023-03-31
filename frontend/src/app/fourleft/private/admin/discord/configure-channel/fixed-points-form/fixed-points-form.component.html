@@ -1,0 +1,43 @@
+<div [formGroup]="fixedPointsFormGroup">
+
+  <div class="form-group">
+    <label>Default standing points</label>
+    <input type="number" formControlName="defaultStandingPoint"/>
+  </div>
+  <div class="form-group">
+    <label>Default powerstage points</label>
+    <input type="number" formControlName="defaultPowerstagePoint"/>
+  </div>
+  <div class="form-group">
+    <label>Default DNF points</label>
+    <input type="number" formControlName="defaultDNFPoint"/>
+  </div>
+
+  <h3>Ranking points</h3>
+  <button (click)="addStandingPoints()">Add ranking</button>
+
+  <div formArrayName="standingPoints">
+    <ng-container *ngFor="let _ of standingPoints.controls;let i=index">
+      <div [formGroupName]="i">
+        <input type="number" formControlName="rank">
+        <input type="number" formControlName="point">
+      </div>
+      <button (click)="removeStandingsPair(i)">Remove</button>
+
+    </ng-container>
+  </div>
+
+
+  <h3>Powerstage points</h3>
+  <button (click)="addPowerstagePoints()">Add powerstage</button>
+  <div formArrayName="powerStagePoints">
+    <ng-container *ngFor="let _ of powerStagePoints.controls;let i=index">
+      <div [formGroupName]="i">
+        <input type="number" formControlName="rank">
+        <input type="number" formControlName="point">
+      </div>
+
+      <button (click)="removePowerStagePair(i)">Remove</button>
+    </ng-container>
+  </div>
+</div>

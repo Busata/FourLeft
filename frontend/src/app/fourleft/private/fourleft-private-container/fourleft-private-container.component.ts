@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthenticationService} from "../services/authentication.service";
+import {LoginService} from "../services/security/login.service";
+import {UserStoreService} from "../services/security/user-store.service";
 
 @Component({
   selector: 'app-app-container',
@@ -8,7 +9,7 @@ import {AuthenticationService} from "../services/authentication.service";
 })
 export class FourleftPrivateContainerComponent implements OnInit{
 
-  constructor(private authenticationService: AuthenticationService) { }
+  constructor(private authenticationService: LoginService, private userStoreStore: UserStoreService) { }
 
   ngOnInit(): void {
     this.authenticationService.configure();
