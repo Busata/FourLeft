@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.busata.fourleft</groupId>
-    <artifactId>game-server</artifactId>
+    <artifactId>application</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Fourleft Server</name>
     <description>fourleft</description>
