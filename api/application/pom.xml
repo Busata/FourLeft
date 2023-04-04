@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>io.busata.fourleft</groupId>
-            <artifactId>server-client</artifactId>
+            <artifactId>client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

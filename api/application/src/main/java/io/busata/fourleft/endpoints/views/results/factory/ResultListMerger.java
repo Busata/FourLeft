@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,8 +31,9 @@ public class ResultListMerger {
         results.stream().map(ResultListTo::results).
                 forEach(entries -> {
                     entries.stream().map(DriverEntryTo::result).forEach(entry -> {
-                        driverEntries.putIfAbsent(entry.racenet(), entry);
                         driverEntries.computeIfPresent(entry.racenet(), (key, existingDriverEntry) -> mergeEntries(entry, existingDriverEntry));
+                        driverEntries.putIfAbsent(entry.racenet(), entry);
+
                     });
                 });
 
@@ -40,7 +42,7 @@ public class ResultListMerger {
 
         List<ActivityInfoTo> mergedActivities = results.stream().flatMap(list -> list.activityInfoTo().stream()).distinct().toList();
 
-        return new ResultListTo("", mergedActivities, results.size(), driverResultTos);
+        return new ResultListTo("", mergedActivities, results.size(), driverResultTos.stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).collect(Collectors.toList()));
     }
     public DriverResultTo mergeEntries(DriverResultTo entryA, DriverResultTo entryB) {
         Duration activityTotalTime = parser.createDuration(entryA.activityTotalTime()).plus(parser.createDuration(entryB.activityTotalTime()));

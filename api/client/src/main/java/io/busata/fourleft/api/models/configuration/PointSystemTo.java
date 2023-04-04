@@ -14,6 +14,6 @@ public record PointSystemTo(
     int defaultDNFPoint,
 
     List<PointPair> powerStagePoints,
-    List<PointPair> rankingPoints
+    List<PointPair> standingPoints
 ) {
 }

@@ -1,0 +1,10 @@
+<div *ngIf="form" [formGroup]="form">
+<div class="form-group">
+  <label>Enable autoposting</label>
+  <input type="checkbox" [formControl]="form.enableAutoposts"/>
+
+</div>
+
+<app-club-view-form [formGroup]="form.clubView"></app-club-view-form>
+<button class="primary" (click)="saveConfiguration()">Save configuration</button>
+</div>

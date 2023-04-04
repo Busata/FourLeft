@@ -11,18 +11,18 @@ import {DiscordStateService} from "./discord-state.service";
 import {MatButtonModule} from "@angular/material/button";
 import { ManageDiscordServerComponent } from './manage-server/manage-discord-server/manage-discord-server.component';
 import { ManageDiscordServerContainerComponent } from './manage-server/manage-discord-server-container/manage-discord-server-container.component';
-import { ConfigureChannelContainerComponent } from './configure-channel/configure-channel-container/configure-channel-container.component';
+import { ConfigureChannelContainerComponent } from './configure-channel/core/configure-channel-container/configure-channel-container.component';
 import {MatCardModule} from "@angular/material/card";
-import { ClubViewFormComponent } from './configure-channel/club-view-form/club-view-form.component';
-import { ResultsViewFormComponent } from './configure-channel/results-view-form/results-view-form.component';
+import { ClubViewFormComponent } from './configure-channel/core/club-view-form/club-view-form.component';
 import {ReactiveFormsModule} from "@angular/forms";
-import { SingleClubViewFormComponent } from './configure-channel/single-club-view-form/single-club-view-form.component';
-import {MergeViewClubFormComponent} from "./configure-channel/merge-club-view-form/merge-view-club-form.component";
-import { PartitionClubViewFormComponent } from './configure-channel/partition-club-view-form/partition-club-view-form.component';
-import { PartitionElementFormComponent } from './configure-channel/partition-element-form/partition-element-form.component';
-import { FixedPointsFormComponent } from './configure-channel/fixed-points-form/fixed-points-form.component';
-import { DiscordChannelConfigurationFormComponent } from './configure-channel/discord-channel-configuration-form/discord-channel-configuration-form.component';
-import { PreviewChannelConfigurationComponent } from './configure-channel/preview-channel-configuration/preview-channel-configuration.component';
+import { SingleClubViewFormComponent } from './configure-channel/results/single-club-view-form/single-club-view-form.component';
+import {MergeViewClubFormComponent} from "./configure-channel/results/merge-club-view-form/merge-view-club-form.component";
+import { PartitionClubViewFormComponent } from './configure-channel/results/partition-club-view-form/partition-club-view-form.component';
+import { PartitionElementFormComponent } from './configure-channel/results/partition-element-form/partition-element-form.component';
+import { FixedPointsFormComponent } from './configure-channel/points/fixed-points-form/fixed-points-form.component';
+import { DiscordChannelConfigurationFormComponent } from './configure-channel/core/discord-channel-configuration-form/discord-channel-configuration-form.component';
+import { PreviewChannelConfigurationComponent } from './configure-channel/preview/preview-channel-configuration/preview-channel-configuration.component';
+import { PointPairFormComponent } from './configure-channel/points/point-pair-form/point-pair-form.component';
 
 
 
@@ -36,13 +36,13 @@ import { PreviewChannelConfigurationComponent } from './configure-channel/previe
     ConfigureChannelContainerComponent,
     ClubViewFormComponent,
     MergeViewClubFormComponent,
-    ResultsViewFormComponent,
     SingleClubViewFormComponent,
     PartitionClubViewFormComponent,
     PartitionElementFormComponent,
     FixedPointsFormComponent,
     DiscordChannelConfigurationFormComponent,
     PreviewChannelConfigurationComponent,
+    PointPairFormComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
     imports: [

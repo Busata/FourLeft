@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
@@ -19,7 +20,7 @@ public class FixedPointsCalculator extends PointsCalculator {
     int joinChampionshipsCount;
     String offsetChampionship;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     PointSystem pointSystem;
 
 

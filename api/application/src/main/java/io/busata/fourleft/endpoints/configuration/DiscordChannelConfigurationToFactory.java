@@ -88,7 +88,7 @@ public class DiscordChannelConfigurationToFactory {
     private PartitionElementTo createPartitionElementTo(PartitionElement partitionElement) {
         return new PartitionElementTo(
                 partitionElement.getName(),
-                partitionElement.getOrder(),
+                partitionElement.getCustomOrder(),
                 partitionElement.getRacenetNames()
         );
     }

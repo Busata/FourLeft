@@ -17,7 +17,6 @@
         <module>racenet</module>
         <module>client</module>
         <module>common</module>
-        <module>wrc-server</module>
     </modules>
 
 </project>

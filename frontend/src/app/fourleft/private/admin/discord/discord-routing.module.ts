@@ -14,7 +14,7 @@ import {
 } from "./manage-server/manage-discord-server-container/manage-discord-server-container.component";
 import {
   ConfigureChannelContainerComponent
-} from "./configure-channel/configure-channel-container/configure-channel-container.component";
+} from "./configure-channel/core/configure-channel-container/configure-channel-container.component";
 
 const routes: Routes = [
   {

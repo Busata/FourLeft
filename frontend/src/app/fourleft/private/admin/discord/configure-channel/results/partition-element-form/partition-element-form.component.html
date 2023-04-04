@@ -1,0 +1,19 @@
+<div [formGroup]="partitionElementFormGroup">
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" formControlName="name">
+  </div>
+  <div class="form-group">
+    <label>Players</label>
+    <input #player type="text" placeholder="Racenet name">
+    <button (click)="partitionElementFormGroup.addPlayer(player.value); player.value=''" >Add</button>
+  </div>
+  <div formArrayName="racenetNames">
+    <ng-container *ngFor="let playerControl of partitionElementFormGroup.racenetNames.controls; let i=index">
+      <div class="form-group">
+        <input type="text" [formControlName]="i">
+        <button (click)="partitionElementFormGroup.removePlayer(i)">Remove</button>
+      </div>
+    </ng-container>
+  </div>
+</div>

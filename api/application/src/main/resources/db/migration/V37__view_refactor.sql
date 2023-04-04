@@ -16,7 +16,7 @@ CREATE TABLE partition_element
     id                UUID    NOT NULL,
     name              VARCHAR(255),
     partition_view_id UUID,
-    "order"           INTEGER NOT NULL,
+    custom_order           INTEGER NOT NULL,
     CONSTRAINT pk_partitionelement PRIMARY KEY (id)
 );
 

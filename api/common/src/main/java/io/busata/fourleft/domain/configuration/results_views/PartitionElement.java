@@ -25,7 +25,7 @@ public class PartitionElement {
 
     String name;
 
-    int order;
+    int customOrder;
 
     @ElementCollection
     List<String> racenetNames;

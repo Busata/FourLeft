@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class PartitionViewTo extends ResultsViewTo {
 
-    private ResultsViewTo resultsViewTo;
+    private ResultsViewTo resultsView;
 
     private List<PartitionElementTo> partitionElements;
 

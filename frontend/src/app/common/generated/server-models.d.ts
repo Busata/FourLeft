@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-03-30 08:46:20.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-04 23:01:14.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -239,7 +239,7 @@ export interface FixedPointsCalculatorTo extends PointsCalculatorTo {
     type: "fixedPoints";
     joinChampionshipsCount: number;
     offsetChampionship: string;
-    pointSystemTo: PointSystemTo;
+    pointSystem: PointSystemTo;
 }
 
 export interface PlayerRestrictionsTo {
@@ -252,7 +252,7 @@ export interface PointSystemTo {
     defaultPowerstagePoint: number;
     defaultDNFPoint: number;
     powerStagePoints: PointPair[];
-    rankingPoints: PointPair[];
+    standingPoints: PointPair[];
 }
 
 export interface PointsCalculatorTo {
@@ -270,14 +270,12 @@ export interface CommunityChallengeViewTo extends ResultsViewTo {
     postWeeklies: boolean;
     postMonthlies: boolean;
     badgeType: BadgeType;
-    id: string;
 }
 
 export interface MergedViewTo extends ResultsViewTo {
     type: "mergeClub";
     name: string;
     resultViews: SingleClubViewTo[];
-    id: string;
 }
 
 export interface PartitionElementTo {
@@ -288,9 +286,8 @@ export interface PartitionElementTo {
 
 export interface PartitionViewTo extends ResultsViewTo {
     type: "partitionClub";
-    resultsViewTo: ResultsViewToUnion;
+    resultsView: ResultsViewToUnion;
     partitionElements: PartitionElementTo[];
-    id: string;
 }
 
 export interface PlayerFilterTo {
@@ -300,6 +297,7 @@ export interface PlayerFilterTo {
 
 export interface ResultsViewTo {
     type: "communityChallengeView" | "mergeClub" | "partitionClub" | "singleClub";
+    id: string;
 }
 
 export interface SingleClubViewTo extends ResultsViewTo {
@@ -309,7 +307,6 @@ export interface SingleClubViewTo extends ResultsViewTo {
     usePowerstage: boolean;
     powerStageIndex: number;
     playerFilter: PlayerFilterTo;
-    id: string;
 }
 
 export interface DiscordAuthenticationStatusTo {
@@ -554,7 +551,7 @@ export interface LeaderboardKey {
 
 export interface PointPair {
     rank: number;
-    points: number;
+    point: number;
 }
 
 export type ChampionshipPointsType = "DEFAULT" | "JRC";

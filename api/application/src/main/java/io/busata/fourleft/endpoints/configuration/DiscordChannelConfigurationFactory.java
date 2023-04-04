@@ -105,18 +105,18 @@ public class DiscordChannelConfigurationFactory {
         return new FixedPointsCalculator(
                 1,
                 null,
-                    createPointSystem(pointsCalculatorTo.getPointSystemTo())
+                    createPointSystem(pointsCalculatorTo.getPointSystem())
                 );
     }
 
-    private PointSystem createPointSystem(PointSystemTo pointSystemTo) {
+    private PointSystem createPointSystem(PointSystemTo pointsView) {
         return new PointSystem(
                 null,
                 "",
-                pointSystemTo.defaultStandingPoint(),
-                pointSystemTo.defaultPowerstagePoint(),
-                pointSystemTo.rankingPoints(),
-                pointSystemTo.powerStagePoints()
+                pointsView.defaultStandingPoint(),
+                pointsView.defaultPowerstagePoint(),
+                pointsView.standingPoints(),
+                pointsView.powerStagePoints()
         );
     }
 
@@ -126,7 +126,7 @@ public class DiscordChannelConfigurationFactory {
 
     private PartitionView createPartitionView(PartitionViewTo clubViewTo) {
         return new PartitionView(
-                createResultsView(clubViewTo.getResultsViewTo()),
+                createResultsView(clubViewTo.getResultsView()),
                 clubViewTo.getPartitionElements().stream().map(this::createPartitionElement).toList()
         );
     }
@@ -144,7 +144,7 @@ public class DiscordChannelConfigurationFactory {
         return new SingleClubView(
                 clubViewTo.getClubId(),
                 clubViewTo.getName(),
-                clubViewTo.isUsePowerstage() ? List.of(clubViewTo.getPowerStageIndex()) : List.of(),
+                        clubViewTo.isUsePowerstage() ? List.of(clubViewTo.getPowerStageIndex()) : List.of(),
                 createPlayerFilter(clubViewTo.getPlayerFilter())
         );
     }
