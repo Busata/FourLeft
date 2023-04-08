@@ -13,7 +13,8 @@ public record PointSystemTo(
     int defaultPowerstagePoint,
     int defaultDNFPoint,
 
-    List<PointPair> powerStagePoints,
-    List<PointPair> standingPoints
+    List<PointPair> standingPoints,
+    List<PointPair> powerStagePoints
+
 ) {
 }

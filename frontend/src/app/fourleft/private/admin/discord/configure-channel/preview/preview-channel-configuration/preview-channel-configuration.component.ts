@@ -1,5 +1,9 @@
 import {Component, Input} from '@angular/core';
-import {CreateDiscordChannelConfigurationTo, ViewResultTo} from "../../../../../../../common/generated/server-models";
+import {
+  CreateDiscordChannelConfigurationTo,
+  ViewPointsTo,
+  ViewResultTo
+} from "../../../../../../../common/generated/server-models";
 import {PreviewChannelConfigurationService} from "../../services/preview-channel-configuration.service";
 
 @Component({
@@ -17,6 +21,8 @@ export class PreviewChannelConfigurationComponent {
 
   results: ViewResultTo | undefined = undefined;
 
+  points: ViewPointsTo | undefined = undefined;
+
   constructor(private previewChannelConfigurationService: PreviewChannelConfigurationService) {
   }
 
@@ -24,5 +30,9 @@ export class PreviewChannelConfigurationComponent {
     this.previewChannelConfigurationService.getResults(value.clubView.id).subscribe(results => {
       this.results = results;
     })
+
+    this.previewChannelConfigurationService.getPoints(value.clubView.id).subscribe(points => {
+      this.points = points;
+    });
   }
 }

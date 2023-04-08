@@ -5,10 +5,11 @@ import {PartitionClubViewForm} from "../../results/partition-club-view-form/part
 import {FixedPointsForm} from "../../points/fixed-points-form/fixed-points.form";
 import {DefaultPointsForm} from "../../points/default-points-form/default-points.form";
 import {
-  ClubViewTo, FixedPointsCalculatorTo, MergedViewTo, PartitionViewTo, PointsCalculatorTo,
+  ClubViewTo, ConcatenationViewTo, FixedPointsCalculatorTo, MergedViewTo, PartitionViewTo, PointsCalculatorTo,
   ResultsViewTo,
   SingleClubViewTo
 } from "../../../../../../../common/generated/server-models";
+import {ConcatenationViewForm} from '../../results/concatenation-view-form/concatenation-view.form';
 
 export class ClubViewForm extends FormGroup {
   public readonly badgeType = this.get('badgeType') as FormControl;
@@ -29,13 +30,16 @@ export class ClubViewForm extends FormGroup {
   public get partitionClubView() {
     return this.resultsView as PartitionClubViewForm;
   }
+  public get concatenationView() {
+    return this.resultsView as ConcatenationViewForm;
+  }
 
   public get pointsView() { return this.get('pointsView') as FormGroup}
   public get fixedPointsView() {return this.pointsView as FixedPointsForm }
 
   constructor(value?: ClubViewTo) {
     super({
-      badgeType: new FormControl(value?.badgeType, {nonNullable: true}),
+      badgeType: new FormControl(value?.badgeType || 'NONE', {nonNullable: true}),
     });
 
     this.setResultsView(value?.resultsView as ResultsViewTo);
@@ -49,10 +53,8 @@ export class ClubViewForm extends FormGroup {
   }
 
   public setResultsView(value: any) {
-    if(!value) {
-      return;
-    }
-    switch (value.type) {
+
+    switch (value?.type) {
       case 'singleClub':
         this.setControl('resultsView', new SingleClubViewForm(value as SingleClubViewTo));
         break;
@@ -62,16 +64,16 @@ export class ClubViewForm extends FormGroup {
       case 'partitionClub':
         this.setControl('resultsView', new PartitionClubViewForm(value as PartitionViewTo));
         break;
+      case 'concatenationClub':
+        this.setControl('resultsView', new ConcatenationViewForm(value as ConcatenationViewTo));
+        break;
       default:
-        this.setControl('resultsView', undefined);
+        this.setControl('resultsView', new FormGroup({type: new FormControl('', {})}));
     }
   }
 
   setPointsView(value: PointsCalculatorTo) {
-    if(!value) {
-      return;
-    }
-    switch (value.type) {
+    switch (value?.type) {
       case 'defaultPoints':
         this.setControl('pointsView', new DefaultPointsForm());
         break;
@@ -79,7 +81,7 @@ export class ClubViewForm extends FormGroup {
         this.setControl('pointsView', new FixedPointsForm(value as FixedPointsCalculatorTo));
         break;
       default:
-        this.setControl('pointsView', undefined);
+        this.setControl('pointsView', new FormGroup({type: new FormControl('', {})}));
     }
   }
 }

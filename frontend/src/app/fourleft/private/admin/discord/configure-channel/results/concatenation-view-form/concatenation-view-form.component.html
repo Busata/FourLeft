@@ -1,0 +1,17 @@
+<div [formGroup]="form">
+  <h2>Concatenation club view</h2>
+
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" [formControl]="form.name">
+  </div>
+
+  <button (click)="form.addSingleClubView()">Add single club</button>
+
+  <ng-container *ngFor="let form of form.resultViews.controls; let i = index">
+
+    <app-single-club-view-form [formGroup]="cast(form)"></app-single-club-view-form>
+
+  </ng-container>
+
+</div>

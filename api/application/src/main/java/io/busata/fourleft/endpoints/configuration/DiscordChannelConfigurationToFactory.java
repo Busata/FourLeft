@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.PointSystemTo;
 import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.create.CreateDiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.results.ConcatenationViewTo;
 import io.busata.fourleft.api.models.configuration.results.MergedViewTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionElementTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionViewTo;
@@ -19,6 +20,7 @@ import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.PointSystem;
 import io.busata.fourleft.domain.configuration.points.PointsCalculator;
+import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
 import io.busata.fourleft.domain.configuration.results_views.PartitionElement;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
@@ -55,12 +57,15 @@ public class DiscordChannelConfigurationToFactory {
             case SingleClubView view -> createSingleClubViewTo(view);
             case MergeResultsView view -> createMergeResultsViewTo(view);
             case PartitionView view -> createPartitionViewTo(view);
+            case ConcatenationView view -> createConcatenationViewTo(view);
             default -> throw new UnsupportedOperationException("Unexpected value");
         };
         resultsViewTo.setId(resultsView.getId());
         return resultsViewTo;
 
     }
+
+
     private SingleClubViewTo createSingleClubViewTo(SingleClubView view) {
         return new SingleClubViewTo(
                 view.getClubId(),
@@ -96,6 +101,15 @@ public class DiscordChannelConfigurationToFactory {
     private ResultsViewTo createMergeResultsViewTo(MergeResultsView view) {
         return new MergedViewTo(
                 view.getName(),
+                createPlayerFilterTo(view.getPlayerFilter()),
+                view.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList())
+        );
+    }
+
+
+    private ResultsViewTo createConcatenationViewTo(ConcatenationView view) {
+        return new ConcatenationViewTo(
+                view.getName(),
                 view.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList())
         );
     }
@@ -126,7 +140,7 @@ public class DiscordChannelConfigurationToFactory {
                 pointSystem.getDefaultPowerstagePoint(),
                 0,
                 pointSystem.getRankingPoints(),
-                pointSystem.getRankingPoints()
+                pointSystem.getPowerStagePoints()
         );
     }
 

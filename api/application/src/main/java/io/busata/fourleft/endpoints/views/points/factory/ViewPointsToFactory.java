@@ -4,6 +4,7 @@ import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
+import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
@@ -35,12 +36,7 @@ public class ViewPointsToFactory {
         throw new UnsupportedOperationException("View not supported");
     }
     private ViewPointsTo createFixedPoints(FixedPointsCalculator fixedPointsCalculator, ClubView clubView) {
-        return switch(clubView.getResultsView()) {
-            case SingleClubView resultsView -> resultsViewFixedPointsFactory.createFixedPoints(clubView, fixedPointsCalculator, resultsView);
-            case MergeResultsView mergeResultsView -> resultsViewFixedPointsFactory.createFixedPoints(clubView, fixedPointsCalculator, mergeResultsView);
-            case PartitionView partitionView -> resultsViewFixedPointsFactory.createFixedPoints(clubView, fixedPointsCalculator, partitionView);
-            default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
-        };
+        return resultsViewFixedPointsFactory.createFixedPoints(clubView, fixedPointsCalculator, clubView.getResultsView());
     }
 
 

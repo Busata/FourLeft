@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-04 23:01:14.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-08 14:22:47.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -251,8 +251,8 @@ export interface PointSystemTo {
     defaultStandingPoint: number;
     defaultPowerstagePoint: number;
     defaultDNFPoint: number;
-    powerStagePoints: PointPair[];
     standingPoints: PointPair[];
+    powerStagePoints: PointPair[];
 }
 
 export interface PointsCalculatorTo {
@@ -272,9 +272,16 @@ export interface CommunityChallengeViewTo extends ResultsViewTo {
     badgeType: BadgeType;
 }
 
+export interface ConcatenationViewTo extends ResultsViewTo {
+    type: "ConcatenationViewTo";
+    name: string;
+    resultViews: SingleClubViewTo[];
+}
+
 export interface MergedViewTo extends ResultsViewTo {
     type: "mergeClub";
     name: string;
+    playerFilter: PlayerFilterTo;
     resultViews: SingleClubViewTo[];
 }
 
@@ -296,7 +303,7 @@ export interface PlayerFilterTo {
 }
 
 export interface ResultsViewTo {
-    type: "communityChallengeView" | "mergeClub" | "partitionClub" | "singleClub";
+    type: "communityChallengeView" | "ConcatenationViewTo" | "mergeClub" | "partitionClub" | "singleClub";
     id: string;
 }
 
@@ -554,6 +561,29 @@ export interface PointPair {
     point: number;
 }
 
+export interface ConcatenationView extends ResultsView {
+    name: string;
+    resultViews: SingleClubView[];
+}
+
+export interface SingleClubView extends ResultsView {
+    clubId: number;
+    name: string;
+    powerStageIndices: number[];
+    playerFilter: PlayerFilter;
+}
+
+export interface ResultsView {
+    id: string;
+    associatedClubs: number[];
+}
+
+export interface PlayerFilter {
+    id: string;
+    filterType: PlayerFilterType;
+    racenetNames: string[];
+}
+
 export type ChampionshipPointsType = "DEFAULT" | "JRC";
 
 export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
@@ -574,6 +604,6 @@ export type ViewType = "STANDARD" | "EXTRA";
 
 export type PointsCalculatorToUnion = DefaultPointsCalculatorTo | FixedPointsCalculatorTo;
 
-export type ResultsViewToUnion = SingleClubViewTo | MergedViewTo | PartitionViewTo | CommunityChallengeViewTo;
+export type ResultsViewToUnion = SingleClubViewTo | MergedViewTo | PartitionViewTo | ConcatenationView | CommunityChallengeViewTo;
 
 export type ResultRestrictionsToUnion = NoResultRestrictionsTo | ResultListRestrictionsTo;

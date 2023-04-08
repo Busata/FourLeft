@@ -30,7 +30,7 @@ public class RacenetGateway {
 
     @PostConstruct
     public void afterConstruction() {
-        authorization.refreshLogin();
+        //authorization.refreshLogin();
     }
 
     public DR2ChampionshipStandings getClubChampionshipStandings(long clubId, int page) {

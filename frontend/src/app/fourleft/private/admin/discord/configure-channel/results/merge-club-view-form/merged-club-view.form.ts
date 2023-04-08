@@ -7,12 +7,17 @@ export class MergedClubViewForm extends FormGroup {
   public readonly type = this.get('type') as FormControl;
   public readonly name = this.get('name') as FormControl;
   public readonly resultViews = this.get('resultViews') as FormArray;
+  public readonly playerFilter = this.get('playerFilter') as FormGroup;
 
   constructor(value?: MergedViewTo) {
     super({
         type: new FormControl('mergeClub', {}),
         name: new FormControl(value?.name, {}),
-      resultViews: new FormArray(value?.resultViews?.map(v => new SingleClubViewForm(v)) || [])
+      resultViews: new FormArray(value?.resultViews?.map(v => new SingleClubViewForm(v)) || []),
+      playerFilter: new FormGroup({
+        playerFilterType: new FormControl(value?.playerFilter?.playerFilterType, {}),
+        racenetNames: new FormArray(value?.playerFilter?.racenetNames?.map(name => new FormControl(name, {})) || [])
+      })
     })
   }
 

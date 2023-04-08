@@ -27,10 +27,14 @@ public class ResultListMerger {
 
     public ResultListTo mergeResults(List<ResultListTo> results) {
         HashMap<String, DriverResultTo> driverEntries = new HashMap<>();
+        HashMap<String, Long> driverEntryCount = new HashMap<>();
 
         results.stream().map(ResultListTo::results).
                 forEach(entries -> {
                     entries.stream().map(DriverEntryTo::result).forEach(entry -> {
+                        driverEntryCount.computeIfPresent(entry.racenet(), (key, existingCount) -> existingCount + 1);
+                        driverEntryCount.putIfAbsent(entry.racenet(), 1L);
+
                         driverEntries.computeIfPresent(entry.racenet(), (key, existingDriverEntry) -> mergeEntries(entry, existingDriverEntry));
                         driverEntries.putIfAbsent(entry.racenet(), entry);
 
@@ -38,7 +42,11 @@ public class ResultListMerger {
                 });
 
 
-        List<DriverEntryTo> driverResultTos = driverEntryToFactory.calculateRelativeData(new ArrayList<>(driverEntries.values()));
+        List<DriverResultTo> entriesOccuringInEveryList = driverEntries.values().stream().filter(
+                entry -> driverEntryCount.get(entry.racenet()) == results.size()
+        ).collect(Collectors.toList());
+
+        List<DriverEntryTo> driverResultTos = driverEntryToFactory.calculateRelativeData(new ArrayList<>(entriesOccuringInEveryList));
 
         List<ActivityInfoTo> mergedActivities = results.stream().flatMap(list -> list.activityInfoTo().stream()).distinct().toList();
 

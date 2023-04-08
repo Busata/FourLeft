@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.configuration.create.CreateDiscordChannelCo
 import io.busata.fourleft.api.models.configuration.DefaultPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
+import io.busata.fourleft.api.models.configuration.results.ConcatenationViewTo;
 import io.busata.fourleft.api.models.configuration.results.MergedViewTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionElementTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionViewTo;
@@ -19,6 +20,7 @@ import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.PointSystem;
 import io.busata.fourleft.domain.configuration.points.PointsCalculator;
+import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
 import io.busata.fourleft.domain.configuration.results_views.PartitionElement;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
@@ -88,9 +90,11 @@ public class DiscordChannelConfigurationFactory {
             case (SingleClubViewTo clubViewTo) -> createSingleClubView(clubViewTo);
             case (MergedViewTo clubViewTo) -> createMergedResultsView(clubViewTo);
             case (PartitionViewTo clubViewTo) -> createPartitionView(clubViewTo);
+            case (ConcatenationViewTo clubViewTo) -> createConcatenationView(clubViewTo);
             default -> throw new IllegalArgumentException("Unsupported");
         };
     }
+
 
 
     private PointsCalculator createPointsView(PointsCalculatorTo pointsView) {
@@ -159,6 +163,14 @@ public class DiscordChannelConfigurationFactory {
 
     private MergeResultsView createMergedResultsView(MergedViewTo clubViewTo) {
         return new MergeResultsView(
+                clubViewTo.getName(),
+                clubViewTo.getResultViews().stream().map(this::createSingleClubView).toList(),
+                createPlayerFilter(clubViewTo.getPlayerFilter())
+        );
+    }
+
+    private ConcatenationView createConcatenationView(ConcatenationViewTo clubViewTo) {
+        return new ConcatenationView(
                 clubViewTo.getName(),
                 clubViewTo.getResultViews().stream().map(this::createSingleClubView).toList()
         );

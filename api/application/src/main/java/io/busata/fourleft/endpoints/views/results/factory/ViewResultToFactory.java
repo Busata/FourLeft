@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
+import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
 import io.busata.fourleft.domain.configuration.results_views.ResultsView;
@@ -46,11 +47,13 @@ public class ViewResultToFactory {
     public Optional<ViewResultTo> createViewResultFromResultsView(ClubView clubView, ResultsView resultsView, EventSupplier type) {
         return switch (resultsView) {
             case SingleClubView typedResultsView -> createSingleClubViewResult(clubView, typedResultsView, type);
-            case PartitionView typedResultsView -> createPartitionedView(clubView, typedResultsView, type);
             case MergeResultsView typedResultsView -> createMergedView(clubView, typedResultsView, type);
+            case ConcatenationView typedResultsView -> createConcatenationView(clubView, typedResultsView, type);
+            case PartitionView typedResultsView -> createPartitionedView(clubView, typedResultsView, type);
             default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
         };
     }
+
 
     private Optional<ViewResultTo> createSingleClubViewResult(ClubView clubView, SingleClubView resultsView, EventSupplier eventSupplier) {
         final var club = clubSyncService.getOrCreate(resultsView.getClubId());
@@ -67,12 +70,12 @@ public class ViewResultToFactory {
 
         return Optional.of(viewResult);
     }
-    private Optional<ViewResultTo> createMergedView(ClubView clubView, MergeResultsView typedResultsView, EventSupplier eventSupplier) {
-        if (!hasActiveEvent(eventSupplier, typedResultsView.getResultViews())) {
+    private Optional<ViewResultTo> createMergedView(ClubView clubView, MergeResultsView mergedResultsView, EventSupplier eventSupplier) {
+        if (!hasActiveEvent(eventSupplier, mergedResultsView.getResultViews())) {
             return Optional.empty();
         }
 
-        final var resultViewEventsMap = typedResultsView.getResultViews().stream()
+        final var resultViewEventsMap = mergedResultsView.getResultViews().stream()
                 .map(resultView -> {
                     final var club = clubSyncService.getOrCreate(resultView.getClubId());
 
@@ -84,10 +87,6 @@ public class ViewResultToFactory {
                 }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
         int maximumEventsToJoin = resultViewEventsMap.values().stream().mapToInt(List::size).min().orElseThrow();
-
-        // SHAKEDOWN, EVENT TO MERGE 1
-        // EVENT TO MERGE 2
-        // CAN ONLY MERGE 1 EVENT
 
         List<ResultListTo> resultListToStream = IntStream.range(0, maximumEventsToJoin).mapToObj(index -> {
 
@@ -104,13 +103,37 @@ public class ViewResultToFactory {
         }).toList();
 
         ViewResultTo viewResult = new ViewResultTo(
-                typedResultsView.getName(),
-                new ViewPropertiesTo(hasPowerStage(typedResultsView.getResultViews()), clubView.getBadgeType()),
+                mergedResultsView.getName(),
+                new ViewPropertiesTo(hasPowerStage(mergedResultsView.getResultViews()), clubView.getBadgeType()),
                 resultListToStream
         );
 
         return Optional.of(viewResult);
     }
+
+
+    private Optional<ViewResultTo> createConcatenationView(ClubView clubView, ConcatenationView typedResultsView, EventSupplier eventSupplier) {
+        if (!hasActiveEvent(eventSupplier, typedResultsView.getResultViews())) {
+            return Optional.empty();
+        }
+
+        List<ResultListTo> results = typedResultsView.getResultViews().stream().flatMap(resultView -> {
+            final var club = clubSyncService.getOrCreate(resultView.getClubId());
+            return eventSupplier.getEvents(club).map(event -> {
+                return resultListToFactory.createResultList(resultView, event);
+            });
+        }).collect(Collectors.toList());
+
+        ViewResultTo viewResult = new ViewResultTo(
+                typedResultsView.getName(),
+                new ViewPropertiesTo(hasPowerStage(typedResultsView.getResultViews()), clubView.getBadgeType()),
+                results
+        );
+
+
+        return Optional.of(viewResult);
+    }
+
     private Optional<ViewResultTo> createPartitionedView(ClubView clubView, PartitionView typedResultsView, EventSupplier eventSupplier) {
         return createViewResultFromResultsView(clubView, typedResultsView.getResultsView(), eventSupplier).map(resultsView -> {
             return new ViewResultTo(

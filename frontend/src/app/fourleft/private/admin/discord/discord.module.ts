@@ -23,6 +23,7 @@ import { FixedPointsFormComponent } from './configure-channel/points/fixed-point
 import { DiscordChannelConfigurationFormComponent } from './configure-channel/core/discord-channel-configuration-form/discord-channel-configuration-form.component';
 import { PreviewChannelConfigurationComponent } from './configure-channel/preview/preview-channel-configuration/preview-channel-configuration.component';
 import { PointPairFormComponent } from './configure-channel/points/point-pair-form/point-pair-form.component';
+import { ConcatenationViewFormComponent } from './configure-channel/results/concatenation-view-form/concatenation-view-form.component';
 
 
 
@@ -43,6 +44,7 @@ import { PointPairFormComponent } from './configure-channel/points/point-pair-fo
     DiscordChannelConfigurationFormComponent,
     PreviewChannelConfigurationComponent,
     PointPairFormComponent,
+    ConcatenationViewFormComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
     imports: [

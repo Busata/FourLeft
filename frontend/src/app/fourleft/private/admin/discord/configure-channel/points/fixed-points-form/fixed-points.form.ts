@@ -16,17 +16,17 @@ export class FixedPointsForm extends FormGroup {
     super({
       type: new FormControl("fixedPoints", {}),
       pointSystem: new FormGroup({
-        defaultStandingPoint: new FormControl(value?.pointSystemTo?.defaultStandingPoint, {}),
-        defaultPowerstagePoint: new FormControl(value?.pointSystemTo?.defaultPowerstagePoint, {}),
-        defaultDNFPoint: new FormControl(value?.pointSystemTo?.defaultDNFPoint,{}),
-        standingPoints: new FormArray([]),
-        powerStagePoints: new FormArray([]),
+        defaultStandingPoint: new FormControl(value?.pointSystem?.defaultStandingPoint, {}),
+        defaultPowerstagePoint: new FormControl(value?.pointSystem?.defaultPowerstagePoint, {}),
+        defaultDNFPoint: new FormControl(value?.pointSystem?.defaultDNFPoint,{}),
+        standingPoints: new FormArray(value?.pointSystem?.standingPoints?.map((pair) => new PointPairForm(pair)) || []),
+        powerStagePoints: new FormArray(value?.pointSystem?.powerStagePoints?.map((pair) => new PointPairForm(pair)) || [])
       })
     });
   }
 
   public addStandingPoints() {
-    this.standingPoints.push(new PointPairForm(this.standingPoints.length + 1));
+    this.standingPoints.push(new PointPairForm({ rank: this.standingPoints.length + 1, point: 0}));
   }
 
   public removeStandingsPair(index: number) {
@@ -34,7 +34,7 @@ export class FixedPointsForm extends FormGroup {
   }
 
   public addPowerPoints() {
-    this.powerStagePoints.push(new PointPairForm(this.powerStagePoints.length + 1));
+    this.powerStagePoints.push(new PointPairForm({rank: this.powerStagePoints.length + 1, point: 0}));
   }
 
   public removePowerpoints(index: number) {

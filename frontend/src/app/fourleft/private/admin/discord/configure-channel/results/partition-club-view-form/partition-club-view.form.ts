@@ -32,17 +32,11 @@ export class PartitionClubViewForm extends FormGroup {
       type: new FormControl('partitionClub', {}),
       partitionElements: new FormArray(value?.partitionElements?.map(e => new PartitionElementForm(e)) || []),
     });
-
     this.setResultsView(value?.resultsView as ResultsViewTo);
   }
 
-
   public setResultsView(value: any) {
-    console.log(value);
-    if(!value) {
-      return;
-    }
-    switch (value.type) {
+    switch (value?.type) {
       case 'singleClub':
         this.setControl('resultsView', new SingleClubViewForm(value as SingleClubViewTo));
         break;
@@ -50,7 +44,7 @@ export class PartitionClubViewForm extends FormGroup {
         this.setControl('resultsView', new MergedClubViewForm(value as MergedViewTo));
         break;
       default:
-        this.setControl('resultsView', undefined);
+        this.setControl('resultsView', new FormGroup({type: new FormControl('', {})}));
     }
   }
 

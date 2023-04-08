@@ -12,9 +12,10 @@
     <div class="form-group" *ngIf="clubViewForm.resultsView">
       <label>Results view type</label>
       <select (change)="clubViewForm.setResultsView({type: $event.target.value})" [formControl]="clubViewForm.resultsViewType">
-        <option>Select a results view</option>
+        <option value="">Select a results view</option>
         <option value="singleClub">Single club</option>
         <option value="mergeClub">Merge clubs</option>
+        <option value="concatenationClub">Concatenate clubs</option>
         <option value="partitionClub">Partition clubs</option>
       </select>
 
@@ -23,7 +24,7 @@
     <div class="form-group" *ngIf="clubViewForm.pointsView">
       <label>Points system</label>
       <select (change)="clubViewForm.setPointsView({type: $event.target.value})" [formControl]="clubViewForm.pointsViewType">
-        <option *ngIf="!clubViewForm.pointsView" value="">Select a points system</option>
+        <option value="">Select a points system</option>
         <option value="defaultPoints">Default racenet points</option>
         <option value="fixedPoints">Fixed points</option>
       </select>
@@ -40,6 +41,9 @@
       </ng-container>
       <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'partitionClub'">
         <app-partition-club-view-form [formGroup]="clubViewForm.partitionClubView"></app-partition-club-view-form>
+      </ng-container>
+      <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'concatenationClub'">
+        <app-concatenation-view-form [formGroup]="clubViewForm.concatenationView"></app-concatenation-view-form>
       </ng-container>
 
       <button (click)="configureClubView()">Back to club configuration</button>
