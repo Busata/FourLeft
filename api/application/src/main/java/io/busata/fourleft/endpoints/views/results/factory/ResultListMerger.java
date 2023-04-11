@@ -5,10 +5,8 @@ import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.common.StageTimeParser;
-import io.busata.fourleft.endpoints.club.results.service.DriverEntryToFactory;
 import io.busata.fourleft.helpers.Factory;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.time.Duration;
 import java.util.ArrayList;

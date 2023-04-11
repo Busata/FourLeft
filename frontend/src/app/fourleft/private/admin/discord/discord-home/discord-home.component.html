@@ -1,4 +1,5 @@
 <div class="guilds" >
+  <h2>Servers</h2>
   <div class="flex" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
     <img [src]="getGuildIcon(guild)"/>
     <div class="ml-4">

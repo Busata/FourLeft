@@ -39,8 +39,6 @@ public interface FourLeftApi {
     @GetMapping(Routes.COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getCommunityResults();
 
-    @GetMapping(Routes.CLUB_EVENT_SUMMARY_BY_CLUB_ID)
-    ChampionshipEventSummaryTo getEventSummary(@PathVariable UUID clubId);
     @GetMapping(Routes.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
     ViewEventSummaryTo getViewEventSummary(@PathVariable UUID viewId);
 

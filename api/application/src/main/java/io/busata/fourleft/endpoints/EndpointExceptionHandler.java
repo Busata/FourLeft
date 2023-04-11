@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints;
 
-import io.busata.fourleft.endpoints.frontend.discord_integration.exceptions.DiscordNotAuthenticatedException;
+import io.busata.fourleft.endpoints.discord.integration.exceptions.DiscordNotAuthenticatedException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

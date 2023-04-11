@@ -1,7 +1,7 @@
 package io.busata.fourleft.club.championship.creator;
 
 import io.busata.fourleft.domain.options.models.VehicleClassGroups;
-import io.busata.fourleft.endpoints.club.automated.service.CycleOptionsSelector;
+import io.busata.fourleft.automated.service.CycleOptionsSelector;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

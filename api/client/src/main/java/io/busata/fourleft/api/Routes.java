@@ -11,12 +11,11 @@ public class Routes {
     public static final String CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID = "/api/views/{viewId}/standings/previous";
 
     public static final String CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID = "/api/views/{viewId}/event_summary";
+    public static final String CLUB_VIEWS_REFRESH = "/api/views/{viewId}/refresh";
 
     public static final String CLUB_MEMBERS_BY_VIEW_ID = "/api/clubs/{viewId}/members";
-    public static final String CLUB_EVENT_SUMMARY_BY_CLUB_ID = "/api/clubs/{clubId}/event_summary";
     public static final String CLUB_TIERS_BY_CLUB_ID = "/api/clubs/{clubId}/tiers";
     public static final String TIER_RESULTS_BY_CLUB_ID = "/api/clubs/{clubId}/tiers/results/current";
-    public static final String REFRESH_CLUB_BY_CLUB_ID = "/api/clubs/{clubId}/refresh";
 
     /*
         Community
