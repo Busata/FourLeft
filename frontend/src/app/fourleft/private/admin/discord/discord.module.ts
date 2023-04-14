@@ -24,8 +24,8 @@ import { DiscordChannelConfigurationFormComponent } from './configure-channel/co
 import { PreviewChannelConfigurationComponent } from './configure-channel/preview/preview-channel-configuration/preview-channel-configuration.component';
 import { PointPairFormComponent } from './configure-channel/points/point-pair-form/point-pair-form.component';
 import { ConcatenationViewFormComponent } from './configure-channel/results/concatenation-view-form/concatenation-view-form.component';
-
-
+import { ViewRestrictionsContainerComponent } from './configure-channel/core/view-restrictions-container/view-restrictions-container.component';
+import { ViewRestrictionsFormComponent } from './configure-channel/core/view-restrictions-form/view-restrictions-form.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +45,8 @@ import { ConcatenationViewFormComponent } from './configure-channel/results/conc
     PreviewChannelConfigurationComponent,
     PointPairFormComponent,
     ConcatenationViewFormComponent,
+    ViewRestrictionsContainerComponent,
+    ViewRestrictionsFormComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
     imports: [

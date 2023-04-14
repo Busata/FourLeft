@@ -68,6 +68,7 @@ public class DiscordChannelConfigurationToFactory {
 
     private SingleClubViewTo createSingleClubViewTo(SingleClubView view) {
         return new SingleClubViewTo(
+                view.getId(),
                 view.getClubId(),
                 view.getName(),
                 view.hasPowerStage(),

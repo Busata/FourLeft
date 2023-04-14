@@ -9,10 +9,13 @@ import {DiscordChannelConfigurationForm} from "./discord-channel-configuration.f
 })
 export class DiscordChannelConfigurationFormComponent implements OnInit {
   public form!: DiscordChannelConfigurationForm;
+  public configuation!: CreateDiscordChannelConfigurationTo;
 
   @Input()
   public set existingForm(value: CreateDiscordChannelConfigurationTo) {
     if(!value) { return;}
+
+    this.configuation = value;
 
     this.form = new DiscordChannelConfigurationForm(value);
   }

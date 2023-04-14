@@ -1,10 +1,7 @@
 package io.busata.fourleftdiscord.messages.templates;
 
 import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.ResultEntryTo;
-import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
-import io.busata.fourleft.api.models.views.ResultListRestrictionsTo;
 import io.busata.fourleft.domain.players.ControllerType;
 import io.busata.fourleft.domain.players.Platform;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostResultList;

@@ -19,7 +19,7 @@ public class ResultListToFactory {
 
         final var filteredEntryList = driverEntryToFactory.create(view, event);
 
-        final var eventRestrictions = resultRestrictionToFactory.create(view.getId(), event.getChallengeId(), event.getReferenceId());
+        final var eventRestrictions = resultRestrictionToFactory.getResultRestrictionsTo(view.getId(), event);
 
         final var activityInfo = eventToFactory.create(event, eventRestrictions);
 

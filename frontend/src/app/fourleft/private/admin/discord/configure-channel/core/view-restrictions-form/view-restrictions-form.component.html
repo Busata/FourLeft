@@ -1,0 +1,20 @@
+<div>
+  {{fieldMapper.getReadableName(form.vehicleClass.value) | async}}
+  <ul>
+    <li *ngFor="let vehicle of vehicles">
+
+      <span [ngClass]="{'is-restricted': isRestricted(vehicle)}">{{vehicle.displayName}}</span>
+
+      <ng-container *ngIf="!isRestricted(vehicle)">
+        <button (click)="restrictVehicle(vehicle)">Restrict</button>
+      </ng-container>
+
+      <ng-container *ngIf="isRestricted(vehicle)">
+        <button (click)="allowVehicle(vehicle)">Allow</button>
+      </ng-container>
+
+    </li>
+  </ul>
+
+</div>
+

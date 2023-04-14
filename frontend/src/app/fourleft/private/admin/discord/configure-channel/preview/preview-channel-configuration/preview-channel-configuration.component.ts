@@ -4,7 +4,7 @@ import {
   ViewPointsTo,
   ViewResultTo
 } from "../../../../../../../common/generated/server-models";
-import {PreviewChannelConfigurationService} from "../../services/preview-channel-configuration.service";
+import {ViewResultsStoreService} from '../../services/view-results-store.service';
 
 @Component({
   selector: 'app-preview-channel-configuration',
@@ -23,15 +23,15 @@ export class PreviewChannelConfigurationComponent {
 
   points: ViewPointsTo | undefined = undefined;
 
-  constructor(private previewChannelConfigurationService: PreviewChannelConfigurationService) {
+  constructor(private viewResultsStoreService: ViewResultsStoreService) {
   }
 
   updatePreview(value: CreateDiscordChannelConfigurationTo) {
-    this.previewChannelConfigurationService.getResults(value.clubView.id).subscribe(results => {
+    this.viewResultsStoreService.getResults(value.clubView.id).subscribe(results => {
       this.results = results;
     })
 
-    this.previewChannelConfigurationService.getPoints(value.clubView.id).subscribe(points => {
+    this.viewResultsStoreService.getPoints(value.clubView.id).subscribe(points => {
       this.points = points;
     });
   }

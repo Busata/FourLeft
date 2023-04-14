@@ -1,8 +1,9 @@
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
-import {SingleClubViewTo} from "../../../../../../../common/generated/server-models";
+import {SingleClubViewTo} from "@server-models";
 
 export class SingleClubViewForm extends FormGroup {
 
+  public readonly id = this.get('id') as FormControl;
   public readonly type = this.get('type') as FormControl;
   public readonly name = this.get('name') as FormControl;
   public readonly clubId = this.get('clubId') as FormControl;
@@ -13,6 +14,7 @@ export class SingleClubViewForm extends FormGroup {
 
   constructor(value?: SingleClubViewTo) {
     super({
+      id: new FormControl(value?.id, {}),
       type: new FormControl("singleClub", {}),
       name: new FormControl(value?.name, {}),
       clubId: new FormControl(value?.clubId, [Validators.required]),

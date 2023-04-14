@@ -1,15 +1,26 @@
 package io.busata.fourleft.api.models.views;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = NoResultRestrictionsTo.class, name = "NO_RESTRICTIONS"),
-        @JsonSubTypes.Type(value = ResultListRestrictionsTo.class, name = "RESULTS_LIST_RESTRCTIONS"),
-})
-public abstract class ResultRestrictionsTo {
+import java.util.List;
+import java.util.UUID;
+
+@Getter
+@AllArgsConstructor
+public class ResultRestrictionsTo {
+
+        UUID id;
+        String vehicleClass;
+
+        UUID resultId;
+        String challengeId;
+        String eventId;
+
+        List<VehicleTo> restrictedVehicles;
+
+        public boolean isValidVehicle(String vehicleName) {
+                return this.restrictedVehicles.stream().anyMatch(vehicleTo -> vehicleTo.displayName().equalsIgnoreCase(vehicleName));
+        }
 
 }

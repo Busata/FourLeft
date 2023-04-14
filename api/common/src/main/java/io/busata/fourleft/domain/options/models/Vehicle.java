@@ -2,6 +2,8 @@ package io.busata.fourleft.domain.options.models;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 public enum Vehicle {
     MINI_COOPER_S("MINI Cooper S"),
     BMW_M1_PROCAR_RALLY("BMW M1 Procar Rally"),
@@ -60,9 +62,6 @@ public enum Vehicle {
     PEUGEOT_205_T16_EVO_2("Peugeot 205 T16 Evo 2"),
     FORD_FIESTA_R2("Ford Fiesta R2"),
     SUBARU_LEGACY_RS("SUBARU Legacy RS");
-
-
-
 
     @Getter
     String displayName;

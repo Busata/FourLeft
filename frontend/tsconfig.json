@@ -22,7 +22,13 @@
       "es2020",
       "dom"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "paths": {
+      "@server-models": [
+        "src/app/common/generated"
+      ]
+
+    }
   },
   "angularCompilerOptions": {
     "strictDomEventTypes": false,

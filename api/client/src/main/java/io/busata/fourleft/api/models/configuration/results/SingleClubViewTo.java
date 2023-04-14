@@ -6,7 +6,8 @@ import io.busata.fourleft.domain.configuration.results_views.BadgeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+import java.util.UUID;
+
 @Getter
 public class SingleClubViewTo extends ResultsViewTo {
     private long clubId;
@@ -20,4 +21,12 @@ public class SingleClubViewTo extends ResultsViewTo {
     PlayerFilterTo playerFilter;
 
 
+    public SingleClubViewTo(UUID id, long clubId, String name, boolean usePowerstage, Integer powerStageIndex, PlayerFilterTo playerFilter) {
+        this.setId(id);
+        this.clubId = clubId;
+        this.name = name;
+        this.usePowerstage = usePowerstage;
+        this.powerStageIndex = powerStageIndex;
+        this.playerFilter = playerFilter;
+    }
 }

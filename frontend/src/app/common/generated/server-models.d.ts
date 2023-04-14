@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-08 14:22:47.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-14 16:09:19.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -273,7 +273,7 @@ export interface CommunityChallengeViewTo extends ResultsViewTo {
 }
 
 export interface ConcatenationViewTo extends ResultsViewTo {
-    type: "ConcatenationViewTo";
+    type: "concatenationClub";
     name: string;
     resultViews: SingleClubViewTo[];
 }
@@ -303,7 +303,7 @@ export interface PlayerFilterTo {
 }
 
 export interface ResultsViewTo {
-    type: "communityChallengeView" | "ConcatenationViewTo" | "mergeClub" | "partitionClub" | "singleClub";
+    type: "communityChallengeView" | "concatenationClub" | "mergeClub" | "partitionClub" | "singleClub";
     id: string;
 }
 
@@ -417,60 +417,6 @@ export interface UserTo {
     roles: string[];
 }
 
-export interface ClubEventInfoTo {
-    eventId: string;
-    eventChallengeId: string;
-    eventName: string;
-    stageName: string;
-    stageNames: string[];
-    vehicleClass: string;
-    country: string;
-    lastUpdate: Date;
-    endTime: Date;
-}
-
-export interface PlayerTo {
-    id: string;
-    racenet: string;
-    tiers: TierTo[];
-}
-
-export interface TierActiveInfoTo {
-    eventId: string;
-    challengeId: string;
-    country: string;
-    stageNames: string[];
-    vehicleClass: string;
-    vehicles: VehicleTo[];
-}
-
-export interface TierCreateTo {
-    name: string;
-}
-
-export interface TierInfoTo {
-    tierName: string;
-    allowedVehicles: string[];
-}
-
-export interface TierResultTo {
-    tierInfo: TierInfoTo[];
-    eventInfo: ClubEventInfoTo;
-    entries: TieredResultEntryTo[];
-}
-
-export interface TierTo {
-    id: string;
-    name: string;
-    clubId: number;
-}
-
-export interface TieredResultEntryTo {
-    tierName: string;
-    usesValidVehicle: boolean;
-    entry: ResultEntryTo;
-}
-
 export interface ActivityInfoTo {
     id: string;
     eventId: string;
@@ -481,22 +427,13 @@ export interface ActivityInfoTo {
     country: string;
     lastUpdate: Date;
     endTime: Date;
-    restrictions: ResultRestrictionsToUnion;
-}
-
-export interface NoResultRestrictionsTo extends ResultRestrictionsTo {
-    type: "NO_RESTRICTIONS";
+    restrictions: ResultRestrictionsTo;
 }
 
 export interface PointPairTo {
     name: string;
     nationality: string;
     points: number;
-}
-
-export interface ResultListRestrictionsTo extends ResultRestrictionsTo {
-    type: "RESULTS_LIST_RESTRCTIONS";
-    allowedVehicles: VehicleTo[];
 }
 
 export interface ResultListTo {
@@ -507,7 +444,12 @@ export interface ResultListTo {
 }
 
 export interface ResultRestrictionsTo {
-    type: "NO_RESTRICTIONS" | "RESULTS_LIST_RESTRCTIONS";
+    id: string;
+    vehicleClass: string;
+    resultId: string;
+    challengeId: string;
+    eventId: string;
+    restrictedVehicles: VehicleTo[];
 }
 
 export interface SinglePointListTo {
@@ -561,29 +503,6 @@ export interface PointPair {
     point: number;
 }
 
-export interface ConcatenationView extends ResultsView {
-    name: string;
-    resultViews: SingleClubView[];
-}
-
-export interface SingleClubView extends ResultsView {
-    clubId: number;
-    name: string;
-    powerStageIndices: number[];
-    playerFilter: PlayerFilter;
-}
-
-export interface ResultsView {
-    id: string;
-    associatedClubs: number[];
-}
-
-export interface PlayerFilter {
-    id: string;
-    filterType: PlayerFilterType;
-    racenetNames: string[];
-}
-
 export type ChampionshipPointsType = "DEFAULT" | "JRC";
 
 export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
@@ -604,6 +523,4 @@ export type ViewType = "STANDARD" | "EXTRA";
 
 export type PointsCalculatorToUnion = DefaultPointsCalculatorTo | FixedPointsCalculatorTo;
 
-export type ResultsViewToUnion = SingleClubViewTo | MergedViewTo | PartitionViewTo | ConcatenationView | CommunityChallengeViewTo;
-
-export type ResultRestrictionsToUnion = NoResultRestrictionsTo | ResultListRestrictionsTo;
+export type ResultsViewToUnion = SingleClubViewTo | MergedViewTo | PartitionViewTo | ConcatenationViewTo | CommunityChallengeViewTo;

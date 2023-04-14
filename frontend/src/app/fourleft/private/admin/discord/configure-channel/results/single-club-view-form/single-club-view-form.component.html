@@ -1,4 +1,5 @@
-<div [formGroup]="singleClubFormGroup">
+<div class="side-view">
+<div class="configuration" [formGroup]="singleClubFormGroup">
   <div class="form-group">
     <label>Name</label>
     <input type="text" [formControl]="singleClubFormGroup.name">
@@ -38,6 +39,10 @@
       </ng-container>
     </div>
   </div>
+</div>
 
-
+<div class="restrictions" *ngIf="singleClubFormGroup.id.value">
+  <h2>Active event - restrictions</h2>
+  <app-view-restrictions-container [resultViewId]="singleClubFormGroup.id.value"></app-view-restrictions-container>
+</div>
 </div>
