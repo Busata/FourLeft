@@ -12,6 +12,7 @@ public class AutoPostableFactory {
     public AutoPostableView create(ViewResultTo result, List<String> entries) {
 
         return new AutoPostableView(
+                result.getViewEventKey(),
                 result.getViewPropertiesTo(),
                 result.getMultiListResults().stream().map(multiListResults -> {
                     return new AutoPostResultList(

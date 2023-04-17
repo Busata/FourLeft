@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 @Getter
 @AllArgsConstructor
 public class ViewResultTo {
+    private String viewEventKey;
 
     private String description;
 

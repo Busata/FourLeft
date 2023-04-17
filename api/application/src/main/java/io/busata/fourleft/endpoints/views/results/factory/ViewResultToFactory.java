@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +63,12 @@ public class ViewResultToFactory {
                 .map(event -> resultListToFactory.createResultList(resultsView, event))
                 .toList();
 
+        String key = resultsView.getId().toString() + eventSupplier.getEvents(club).flatMap(event -> {
+            return Stream.of(event.getChallengeId(), event.getReferenceId());
+        }).distinct().sorted().collect(Collectors.joining("#"));
+
         ViewResultTo viewResult = new ViewResultTo(
+                key,
                 resultsView.getName(),
                 new ViewPropertiesTo(resultsView.hasPowerStage(), clubView.getBadgeType()),
                 results
@@ -70,6 +76,7 @@ public class ViewResultToFactory {
 
         return Optional.of(viewResult);
     }
+
     private Optional<ViewResultTo> createMergedView(ClubView clubView, MergeResultsView mergedResultsView, EventSupplier eventSupplier) {
         if (!hasActiveEvent(eventSupplier, mergedResultsView.getResultViews())) {
             return Optional.empty();
@@ -102,7 +109,16 @@ public class ViewResultToFactory {
 
         }).toList();
 
+
+        String key = mergedResultsView.getId().toString() + resultViewEventsMap.values().stream().flatMap(Collection::stream)
+                .flatMap(event -> Stream.of(event.getChallengeId(), event.getReferenceId()))
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("#"));
+
+
         ViewResultTo viewResult = new ViewResultTo(
+                key,
                 mergedResultsView.getName(),
                 new ViewPropertiesTo(hasPowerStage(mergedResultsView.getResultViews()), clubView.getBadgeType()),
                 resultListToStream
@@ -124,7 +140,16 @@ public class ViewResultToFactory {
             });
         }).collect(Collectors.toList());
 
+
+        String key = typedResultsView.getId().toString() + results.stream()
+                .flatMap(resultList -> resultList.activityInfoTo().stream())
+                .flatMap(event -> Stream.of(event.eventChallengeId(), event.eventId()))
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("#"));
+
         ViewResultTo viewResult = new ViewResultTo(
+                key,
                 typedResultsView.getName(),
                 new ViewPropertiesTo(hasPowerStage(typedResultsView.getResultViews()), clubView.getBadgeType()),
                 results
@@ -136,11 +161,14 @@ public class ViewResultToFactory {
 
     private Optional<ViewResultTo> createPartitionedView(ClubView clubView, PartitionView typedResultsView, EventSupplier eventSupplier) {
         return createViewResultFromResultsView(clubView, typedResultsView.getResultsView(), eventSupplier).map(resultsView -> {
+
+
             return new ViewResultTo(
+                    typedResultsView + "#" + resultsView.getViewEventKey(),
                     resultsView.getDescription(),
                     resultsView.getViewPropertiesTo(),
                     resultsView.getMultiListResults().stream().flatMap(resultList -> {
-                       return resultListPartitioner.partitionResults(typedResultsView.getPartitionElements(), resultList).stream();
+                        return resultListPartitioner.partitionResults(typedResultsView.getPartitionElements(), resultList).stream();
                     }).collect(Collectors.toList())
             );
         });

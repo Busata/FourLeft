@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-16 14:39:15.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-17 22:12:39.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -232,14 +232,6 @@ export interface DefaultPointsCalculatorTo extends PointsCalculatorTo {
     type: "defaultPoints";
 }
 
-export interface DiscordChannelConfigurationTo {
-    id: string;
-    channelId: number;
-    description: string;
-    commandClubViews: ClubViewTo[];
-    autopostClubViews: ClubViewTo[];
-}
-
 export interface FixedPointsCalculatorTo extends PointsCalculatorTo {
     type: "fixedPoints";
     joinChampionshipsCount: number;
@@ -264,8 +256,9 @@ export interface PointsCalculatorTo {
     type: "defaultPoints" | "fixedPoints";
 }
 
-export interface CreateDiscordChannelConfigurationTo {
+export interface DiscordChannelConfigurationTo {
     enableAutoposts: boolean;
+    channelId: number;
     clubView: ClubViewTo;
 }
 
@@ -310,6 +303,7 @@ export interface PlayerFilterTo {
 export interface ResultsViewTo {
     type: "communityChallengeView" | "concatenationClub" | "mergeClub" | "partitionClub" | "singleClub";
     id: string;
+    associatedClubs: number[];
 }
 
 export interface SingleClubViewTo extends ResultsViewTo {
@@ -492,6 +486,7 @@ export interface ViewPropertiesTo {
 }
 
 export interface ViewResultTo {
+    viewEventKey: string;
     description: string;
     viewPropertiesTo: ViewPropertiesTo;
     multiListResults: ResultListTo[];

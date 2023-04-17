@@ -105,7 +105,7 @@ public class AutopostClubResultsMessageService {
         multiView.getMultiListResults().stream().flatMap(multiList -> {
             return multiList.results().stream().map(entry -> {
                     final var autoPostEntry = new AutoPostEntry();
-                createAutopostEntry(autoPostEntry, entry, messageId, multiList.activityInfoTo().get(0));
+                createAutopostEntry(autoPostEntry, entry, messageId, multiView.getEventKey());
 
                 return autoPostEntry;
             });
@@ -113,15 +113,14 @@ public class AutopostClubResultsMessageService {
     }
 
 
-    private static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, ActivityInfoTo singleView) {
+    private static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, String eventKey) {
         autoPostEntry.setName(entry.racenet());
         autoPostEntry.setTotalTime(entry.activityTotalTime());
         autoPostEntry.setNationality(entry.nationality());
         autoPostEntry.setVehicle(entry.vehicles().get(0).vehicleName());
         autoPostEntry.setMessageId(messageId);
 
-        autoPostEntry.setEventId(singleView.eventId());
-        autoPostEntry.setChallengeId(singleView.eventChallengeId());
+        autoPostEntry.setEventKey(eventKey);
     }
     Optional<Message> tryReusingLastMessage(Snowflake channelId, ViewResultTo viewResultTo) {
         return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getEventInfo()));

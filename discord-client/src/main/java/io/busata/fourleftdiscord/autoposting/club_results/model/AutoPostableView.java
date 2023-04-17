@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class AutoPostableView {
+    private String eventKey;
     private ViewPropertiesTo viewProperties;
     private List<AutoPostResultList> multiListResults;
 }

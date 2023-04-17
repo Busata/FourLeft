@@ -26,8 +26,7 @@ public class AutoPostEntry {
     @GeneratedValue
     private UUID id;
 
-    private String eventId;
-    private String challengeId;
+    private String eventKey;
 
     String name;
     String totalTime;
