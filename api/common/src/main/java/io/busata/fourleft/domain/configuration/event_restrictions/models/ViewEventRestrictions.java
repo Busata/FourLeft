@@ -3,10 +3,12 @@ package io.busata.fourleft.domain.configuration.event_restrictions.models;
 import io.busata.fourleft.domain.configuration.results_views.ResultsView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.domain.options.models.Vehicle;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -22,14 +24,15 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class ViewEventRestrictions {
 
     @Id
-    @Getter
     @GeneratedValue
     UUID id;
 
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="results_view_id")
     ResultsView resultsView;
 
@@ -41,20 +44,8 @@ public class ViewEventRestrictions {
     @Getter
     List<Vehicle> vehicles = new ArrayList<>();
 
-     @Builder(toBuilder = true)
-    public ViewEventRestrictions(ResultsView resultsView, String challengeId, String eventId, List<Vehicle> vehicles) {
-        this.resultsView = resultsView;
-        this.challengeId = challengeId;
-        this.eventId = eventId;
-        this.vehicles.addAll(vehicles);
-    }
-
-    public void updateVehicles(List<Vehicle> updates) {
-        vehicles.clear();
-        vehicles.addAll(updates);
-    }
 
     public boolean isValidVehicle(String vehicle) {
-        return this.vehicles.isEmpty() || this.vehicles.stream().anyMatch(v -> v.matches(vehicle));
+        return this.vehicles.isEmpty() || this.vehicles.stream().noneMatch(v -> v.matches(vehicle));
     }
 }

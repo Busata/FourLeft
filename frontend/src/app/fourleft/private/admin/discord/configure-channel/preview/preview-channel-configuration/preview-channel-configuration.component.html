@@ -7,7 +7,7 @@
 {{multiList.activityInfoTo[0].eventName}}
     {{multiList.activityInfoTo[0].country}}
     <div *ngFor="let result of multiList.results">
-      {{result.relative.activityRank}} - {{result.result.racenet}} - {{result.result.activityTotalTime}} - ({{result.relative.activityTotalDiff}})
+      {{result.relative.activityRank}} - {{result.result.racenet}} - {{result.result.activityTotalTime}} - ({{result.relative.activityTotalDiff}}) ({{result.result.vehicles[0].vehicleName}} - {{isValidVehicle(result.result.vehicles)}})
     </div>
 
   </div>

@@ -117,7 +117,7 @@ public class AutopostClubResultsMessageService {
         autoPostEntry.setName(entry.racenet());
         autoPostEntry.setTotalTime(entry.activityTotalTime());
         autoPostEntry.setNationality(entry.nationality());
-        autoPostEntry.setVehicle(entry.vehicles().get(0));
+        autoPostEntry.setVehicle(entry.vehicles().get(0).vehicleName());
         autoPostEntry.setMessageId(messageId);
 
         autoPostEntry.setEventId(singleView.eventId());

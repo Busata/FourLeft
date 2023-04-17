@@ -1,7 +1,9 @@
 package io.busata.fourleftdiscord.messages.templates;
 
 import io.busata.fourleft.api.models.DriverEntryTo;
+import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
+import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.domain.players.ControllerType;
 import io.busata.fourleft.domain.players.Platform;
 import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostResultList;
@@ -9,6 +11,7 @@ import io.busata.fourleftdiscord.autoposting.club_results.model.AutoPostableView
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
 import io.busata.fourleftdiscord.messages.BadgeMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 
@@ -78,13 +81,15 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         groupedListValueMap.put("entries", listEntries);
 
         groupedListValueMap.put("vehicleRestrictions", "");
-        //TODO
-        /*
-        if (list.restrictions() instanceof ResultListRestrictionsTo restrictions) {
-            String vehicleRestrictions = restrictions.getAllowedVehicles().stream().map(VehicleTo::displayName).collect(Collectors.joining(" • "));
+
+
+        String vehicleRestrictions = list.activityInfoTo().stream().flatMap(activityInfoTo -> activityInfoTo.restrictions().getRestrictedVehicles().stream())
+                .map(VehicleTo::displayName).distinct().collect(Collectors.joining(" • "));
+
+        if (StringUtils.isNotBlank(vehicleRestrictions)) {
             groupedListValueMap.put("vehicleRestrictions", "*(%s)*".formatted(vehicleRestrictions));
         }
-         */
+
         groupedListValueMap.put("tierName", list.name());
 
         return StringSubstitutor.replace(groupedListTemplate, groupedListValueMap);
@@ -98,7 +103,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("name", entry.racenet());
         valueMap.put("totalTime", entry.activityTotalTime());
         valueMap.put("totalDiff", entry.activityTotalDiff());
-        valueMap.put("vehicleName", entry.vehicles().get(0));
+        valueMap.put("vehicleName", entry.vehicles().get(0).vehicleName());
         valueMap.put("powerStageBadge", determinePowerstageBadge(entry));
         valueMap.put("tierName", listData.name());
 
@@ -117,15 +122,9 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
             ));
         }
 
-        valueMap.put("validVehicle", "");
+        final var validVehicle = entry.result().vehicles().stream().allMatch(VehicleEntryTo::vehicleAllowed);
 
-        //TODO
-        /*
-        if (listData.restrictions() instanceof ResultListRestrictionsTo restrictions) {
-            boolean useValidVehicle = restrictions.isValidVehicle(entry.vehicle());
-            valueMap.put("validVehicle", useValidVehicle ? "" : ":pineapple:");
-        }
-         */
+        valueMap.put("validVehicle", validVehicle ? "" : ":pineapple:");
 
         return StringSubstitutor.replace(template, valueMap);
     }

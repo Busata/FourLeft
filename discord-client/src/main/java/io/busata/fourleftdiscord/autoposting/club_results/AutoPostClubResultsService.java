@@ -5,10 +5,9 @@ import feign.FeignException;
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntryRepository;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
@@ -39,17 +38,15 @@ public class AutoPostClubResultsService {
 
         discordChannelConfigurationService.getConfigurations()
                 .stream()
-                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                //TODO TODO .filter(configuration -> configuration.includesClub(event.clubId()))
+                .filter(DiscordChannelConfigurationTo::enableAutoposts)
+                .filter(configuration -> configuration.includesClub(event.clubId()))
                 .forEach(this::tryPostingResults);
     }
 
     private void tryPostingResults(DiscordChannelConfigurationTo configuration) {
-        log.info("-- Checking for channel {}", configuration.description());
+        log.info("-- Checking for channel {}", configuration.clubView().description());
         try {
-            configuration.autopostClubViews().forEach(clubViewTo -> {
-                tryPostingNewEntries(clubViewTo, Snowflake.of(configuration.channelId()));
-            });
+            tryPostingNewEntries(configuration.clubView(), Snowflake.of(configuration.channelId()));
         }
         catch (FeignException.NotFound ex) {
             log.warn("No results found");

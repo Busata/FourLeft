@@ -1,9 +1,9 @@
 import {Component, Input} from '@angular/core';
 import {
-  CreateDiscordChannelConfigurationTo,
+  CreateDiscordChannelConfigurationTo, VehicleEntryTo,
   ViewPointsTo,
   ViewResultTo
-} from "../../../../../../../common/generated/server-models";
+} from "@server-models";
 import {ViewResultsStoreService} from '../../services/view-results-store.service';
 
 @Component({
@@ -34,5 +34,9 @@ export class PreviewChannelConfigurationComponent {
     this.viewResultsStoreService.getPoints(value.clubView.id).subscribe(points => {
       this.points = points;
     });
+  }
+
+  isValidVehicle(vehicles: VehicleEntryTo[]) {
+    return vehicles.every(v=> v.vehicleAllowed);
   }
 }

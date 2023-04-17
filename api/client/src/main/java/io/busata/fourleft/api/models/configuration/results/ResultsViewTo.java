@@ -8,6 +8,7 @@ import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @JsonTypeInfo(
@@ -25,4 +26,8 @@ public abstract class ResultsViewTo {
     @Setter
     @Getter
     private UUID id;
+
+    @Getter
+    @Setter
+    private Set<Long> associatedClubs;
 }

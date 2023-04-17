@@ -5,7 +5,7 @@ import io.busata.fourleft.api.models.configuration.DefaultPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.PointSystemTo;
 import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
-import io.busata.fourleft.api.models.configuration.create.CreateDiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleft.api.models.configuration.results.ConcatenationViewTo;
 import io.busata.fourleft.api.models.configuration.results.MergedViewTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionElementTo;
@@ -34,9 +34,10 @@ import java.util.stream.Collectors;
 public class DiscordChannelConfigurationToFactory {
 
 
-    public CreateDiscordChannelConfigurationTo create(DiscordChannelConfiguration discordChannelConfiguration) {
-        return new CreateDiscordChannelConfigurationTo(
+    public DiscordChannelConfigurationTo create(DiscordChannelConfiguration discordChannelConfiguration) {
+        return new DiscordChannelConfigurationTo(
                 discordChannelConfiguration.getAutopostClubViews().size() > 0,
+                discordChannelConfiguration.getChannelId(),
                 createClubViewTo(discordChannelConfiguration.getCommandsClubView())
         );
     }
@@ -61,6 +62,7 @@ public class DiscordChannelConfigurationToFactory {
             default -> throw new UnsupportedOperationException("Unexpected value");
         };
         resultsViewTo.setId(resultsView.getId());
+        resultsViewTo.setAssociatedClubs(resultsView.getAssociatedClubs());
         return resultsViewTo;
 
     }

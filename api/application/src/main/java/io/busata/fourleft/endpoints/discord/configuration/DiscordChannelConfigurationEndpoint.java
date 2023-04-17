@@ -1,36 +1,39 @@
 package io.busata.fourleft.endpoints.discord.configuration;
 
-import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.configuration.create.CreateDiscordChannelConfigurationTo;
+import io.busata.fourleft.api.DiscordChannelConfigurationApi;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.List.of;
 
 @RestController
 @RequiredArgsConstructor
-public class DiscordChannelConfigurationEndpoint {
+public class DiscordChannelConfigurationEndpoint implements DiscordChannelConfigurationApi {
     private final DiscordChannelConfigurationFactory discordChannelConfigurationFactory;
     private final DiscordChannelConfigurationToFactory discordChannelConfigurationToFactory;
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
 
-    @PostMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
-    public UUID createConfiguration(@PathVariable Long channelId, @RequestBody CreateDiscordChannelConfigurationTo clubViewTo) {
+
+    public List<DiscordChannelConfigurationTo> getConfigurations() {
+        return this.discordChannelConfigurationService.findAll().stream().map(discordChannelConfigurationToFactory::create).collect(Collectors.toList());
+
+    }
+
+    public UUID createConfiguration(@PathVariable Long channelId, @RequestBody DiscordChannelConfigurationTo clubViewTo) {
         DiscordChannelConfiguration configuration = discordChannelConfigurationFactory.create(channelId, clubViewTo);
         return discordChannelConfigurationService.createConfiguration(configuration);
     }
 
-    @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
-    public Optional<CreateDiscordChannelConfigurationTo> getConfiguration(@PathVariable Long channelId) {
-
+    public Optional<DiscordChannelConfigurationTo> getConfiguration(@PathVariable Long channelId) {
         return this.discordChannelConfigurationService.findConfigurationByChannelId(channelId)
                 .map(discordChannelConfigurationToFactory::create);
 

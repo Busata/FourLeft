@@ -18,7 +18,6 @@ import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.ClubEventSupplier;
 import io.busata.fourleft.endpoints.views.results.factory.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,7 +63,7 @@ public class UserProgressEndpoint {
         BufferedImage imageOut = new BufferedImage(totalSize*2, imageHeight, BufferedImage.TYPE_INT_RGB);
 
         for (int x = 0; x < communityChallengeSummary.size()*2; x++) {
-            CommunityChallengeSummaryProjection summaryEntry = communityChallengeSummary.get((int)x/2);
+            CommunityChallengeSummaryProjection summaryEntry = communityChallengeSummary.get(x/2);
 
             final var percentageRank = ((float) summaryEntry.getRank() / (float) summaryEntry.getTotal()) * 100f;
             final var color = getPixelColour(percentageRank, summaryEntry.getIsDnf());
@@ -190,7 +189,7 @@ public class UserProgressEndpoint {
                                 activityInfoTo.stageNames().get(activityInfoTo.stageNames().size() - 1),
                                 activityInfoTo.endTime(),
                                 entry.nationality(),
-                                entry.vehicles().get(0),
+                                entry.vehicles().get(0).vehicleName(),
                                 entry.activityRank(),
                                 resultList.totalUniqueEntries(),
                                 ((float) entry.activityRank() / (float) resultList.totalUniqueEntries()) * 100f,

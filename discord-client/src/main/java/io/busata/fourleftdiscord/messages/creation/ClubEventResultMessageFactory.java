@@ -6,6 +6,7 @@ import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
+import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
@@ -15,8 +16,10 @@ import io.busata.fourleftdiscord.messages.templates.ResultEntryTemplateResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -103,14 +106,8 @@ public class ClubEventResultMessageFactory {
                 builder.description("*No entries yet*");
             }
 
-            String vehicleRestrictions = "\u200B";
-            //TODO
-            //if (resultList.restrictions() instanceof ResultListRestrictionsTo restrictions) {
-           //     vehicleRestrictions = "*(%s)*".formatted(restrictions.getAllowedVehicles().stream().map(VehicleTo::displayName).collect(Collectors.joining(" • ")));
-           // }
-
             if (StringUtils.isNotBlank(resultList.name())) {
-                builder.addField("**%s**".formatted(resultList.name()), "%s".formatted(vehicleRestrictions), false);
+                builder.addField("**%s**".formatted(resultList.name()), "%s".formatted(getVehicleRestrictions(resultList)), false);
             }
 
             if (clubResult.getViewPropertiesTo().powerStage()) {
@@ -141,22 +138,30 @@ public class ClubEventResultMessageFactory {
             }
 
 
-/* TODO
-            if(i == multiListResults.size() - 1) {
-                builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().lastUpdate())), true);
-                if(resultList.totalEntries() > 0) {
-                    builder.addField("**Total entries**", "*%s*".formatted(resultList.totalEntries()), true);
-                }
-                builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
-            }
 
- */
+            if(i == multiListResults.size() - 1) {
+                builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().stream().findAny().orElseThrow().lastUpdate())), true);
+                if(resultList.totalUniqueEntries() > 0) {
+                    builder.addField("**Total entries**", "*%s*".formatted(resultList.totalUniqueEntries()), true);
+                }
+                builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().stream().findAny().orElseThrow().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
+            }
 
             specs.add(builder.build());
             builder = createFullWidthBuilder();
         }
 
         return specs;
+    }
+
+    private static String getVehicleRestrictions(ResultListTo resultList) {
+        String vehicleRestrictions = resultList.activityInfoTo().stream().flatMap(activityInfoTo -> activityInfoTo.restrictions().getRestrictedVehicles().stream())
+                .map(VehicleTo::displayName).distinct().collect(Collectors.joining(" • "));
+        if(StringUtils.isBlank(vehicleRestrictions)) {
+            return "\u200B";
+        } else {
+            return vehicleRestrictions;
+        }
     }
 
     private static EmbedCreateSpec.Builder createFullWidthBuilder() {
@@ -181,8 +186,8 @@ public class ClubEventResultMessageFactory {
                 );
                 joiner.add(format);
             }
-            //TODO
-           // builder.addField("Powerstage *(%s)*".formatted(clubResult.activityInfoTo().stageNames().get(clubResult.activityInfoTo().stageNames().size() - 1)), joiner.toString(), false);
+            String powerStageNames = clubResult.activityInfoTo().stream().map(activityInfoTo -> activityInfoTo.stageNames().get(activityInfoTo.stageNames().size() - 1)).collect(Collectors.joining(" "));
+            builder.addField("Powerstage *(%s)*".formatted(powerStageNames), joiner.toString(), false);
         }
     }
     private String determineHeader(int idx, int groupSize) {

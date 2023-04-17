@@ -31,7 +31,7 @@ public class ViewEventSummaryToFactory {
     }
 
     private ViewEventSummaryTo createMergedView(List<SingleClubView> tiers) {
-        return createSingleClub(tiers.get(0).getClubId()); //TODO
+        return createSingleClub(tiers.get(0).getClubId());
     }
 
     private ViewEventSummaryTo createSingleClub(long clubId) {

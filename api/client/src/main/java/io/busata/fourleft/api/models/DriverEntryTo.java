@@ -30,7 +30,7 @@ public record DriverEntryTo(
         return result.isDnf();
     }
 
-    public List<String> vehicles() {
+    public List<VehicleEntryTo> vehicles() {
         return result.vehicles();
     }
 

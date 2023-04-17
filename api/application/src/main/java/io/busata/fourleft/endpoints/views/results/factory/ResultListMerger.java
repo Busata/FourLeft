@@ -2,6 +2,7 @@ package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.DriverResultTo;
+import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.common.StageTimeParser;
@@ -64,8 +65,12 @@ public class ResultListMerger {
                 activityTotalMerged,
                 powerStageMerged,
                 entryA.isDnf() && entryB.isDnf(),
-                Stream.concat(entryA.vehicles().stream(), entryB.vehicles().stream()).distinct().collect(Collectors.toList())
+                mergeVehicleEntries(entryA, entryB)
         );
+    }
+
+    private List<VehicleEntryTo> mergeVehicleEntries(DriverResultTo entryA, DriverResultTo entryB) {
+        return Stream.concat(entryA.vehicles().stream(), entryB.vehicles().stream()).collect(Collectors.toList());
     }
 
 }

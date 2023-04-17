@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-14 16:09:19.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-16 14:39:15.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -130,7 +130,7 @@ export interface DriverResultTo {
     activityTotalTime: string;
     powerStageTotalTime: string;
     isDnf: boolean;
-    vehicles: string[];
+    vehicles: VehicleEntryTo[];
 }
 
 export interface FieldMappingRequestTo {
@@ -213,6 +213,11 @@ export interface StageResultTo {
 export interface TrackUserRequestTo {
     nickName: string;
     alias: string;
+}
+
+export interface VehicleEntryTo {
+    vehicleName: string;
+    vehicleAllowed: boolean;
 }
 
 export interface ClubViewTo {

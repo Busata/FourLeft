@@ -1,6 +1,7 @@
 package io.busata.fourleftdiscord.messages.templates;
 
 import io.busata.fourleft.api.models.DriverEntryTo;
+import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
 import io.busata.fourleftdiscord.messages.BadgeMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class ResultEntryTemplateResolver implements TemplateResolver<DriverEntry
         valueMap.put("rank",String.valueOf(entry.activityRank()));
         valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.activityRank(), entry.isDnf()));
         valueMap.put("nationalityEmoticon",fieldMapper.createEmoticon(entry.nationality()));
-        valueMap.put("vehicle",entry.vehicles().stream().collect(Collectors.joining(",")));
+        valueMap.put("vehicle",entry.vehicles().stream().map(VehicleEntryTo::vehicleName).collect(Collectors.joining(",")));
         valueMap.put("name",entry.racenet());
         valueMap.put("totalTime",entry.activityTotalTime());
         valueMap.put("totalDiff",entry.activityTotalDiff());

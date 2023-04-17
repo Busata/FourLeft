@@ -1,13 +1,9 @@
 package io.busata.fourleft.api;
 
-import io.busata.fourleft.api.models.ChampionshipEventSummaryTo;
-import io.busata.fourleft.api.models.ChampionshipStandingEntryTo;
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
 import io.busata.fourleft.api.models.FieldMappingTo;
-import io.busata.fourleft.api.models.configuration.ClubViewTo;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
@@ -48,8 +44,6 @@ public interface FourLeftApi {
     @PostMapping(Routes.FIELD_MAPPINGS)
     FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request);
 
-    @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
-    List<ClubViewTo> getConfiguration();
 
     @GetMapping(Routes.QUERY_TRACK)
     QueryTrackResultsTo queryTrack(@RequestParam String stageName);
@@ -67,9 +61,6 @@ public interface FourLeftApi {
 
     @GetMapping(Routes.USER_OVERVIEW)
     UserResultSummaryTo getUserResultSummary(@RequestParam String query);
-
-    @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
-    List<DiscordChannelConfigurationTo> getDiscordChannelConfigurations();
 
     @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     ViewResultTo getViewCurrentResults(@PathVariable UUID viewId);

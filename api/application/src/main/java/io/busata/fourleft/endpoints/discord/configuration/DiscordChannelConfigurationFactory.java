@@ -2,7 +2,7 @@ package io.busata.fourleft.endpoints.discord.configuration;
 
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.PointSystemTo;
-import io.busata.fourleft.api.models.configuration.create.CreateDiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleft.api.models.configuration.DefaultPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
@@ -33,34 +33,7 @@ import java.util.List;
 @Factory
 public class DiscordChannelConfigurationFactory {
 
-
-    public CreateDiscordChannelConfigurationTo create(DiscordChannelConfiguration discordChannelConfiguration) {
-        return new CreateDiscordChannelConfigurationTo(
-                discordChannelConfiguration.getAutopostClubViews().size() > 0,
-                createClubViewTo(discordChannelConfiguration.getCommandsClubView())
-        );
-    }
-
-    private ClubViewTo createClubViewTo(ClubView clubView) {
-        return new ClubViewTo(
-                clubView.getId(),
-                "",
-                clubView.getBadgeType(),
-                createResultsViewTo(clubView.getResultsView()),
-                createPointsViewTo(clubView.getPointsCalculator())
-        );
-    }
-
-    private ResultsViewTo createResultsViewTo(ResultsView resultsView) {
-        return null;
-    }
-    private PointsCalculatorTo createPointsViewTo(PointsCalculator pointsCalculator) {
-        return null;
-    }
-
-
-
-    public DiscordChannelConfiguration create(Long channelId, CreateDiscordChannelConfigurationTo createDiscordChannelConfigurationTo) {
+    public DiscordChannelConfiguration create(Long channelId, DiscordChannelConfigurationTo createDiscordChannelConfigurationTo) {
         ClubView clubView = createClubView(createDiscordChannelConfigurationTo.clubView());
 
         return new DiscordChannelConfiguration(

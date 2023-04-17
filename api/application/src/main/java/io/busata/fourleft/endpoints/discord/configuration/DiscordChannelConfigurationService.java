@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +16,10 @@ import java.util.UUID;
 public class DiscordChannelConfigurationService {
     private final DiscordChannelConfigurationRepository discordChannelConfigurationRepository;
 
+
+    public List<DiscordChannelConfiguration> findAll() {
+        return discordChannelConfigurationRepository.findAll();
+    }
 
     @Transactional
     public UUID createConfiguration(DiscordChannelConfiguration configuration)  {

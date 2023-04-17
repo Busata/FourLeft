@@ -1,7 +1,7 @@
 package io.busata.fourleftdiscord.channel_configuration;
 
 import discord4j.common.util.Snowflake;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,14 +18,14 @@ public class DiscordChannelConfigurationService {
 
     @Cacheable("channel_configurations")
     public List<DiscordChannelConfigurationTo> getConfigurations() {
-        return this.api.getDiscordChannelConfigurations();
+        return this.api.getConfigurations();
     }
 
     public List<DiscordChannelConfigurationTo> findConfigurationByClubId(Long clubId) {
         return this.getConfigurations()
                 .stream()
-                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
-                //TODO .filter(configuration -> configuration.includesClub(clubId))
+                .filter(DiscordChannelConfigurationTo::enableAutoposts)
+                .filter(configuration -> configuration.includesClub(clubId))
                 .collect(Collectors.toList());
     }
 
@@ -39,6 +39,6 @@ public class DiscordChannelConfigurationService {
 
     public UUID getViewId(Snowflake channelId) {
         final var configuration = this.findConfigurationByChannelId(channelId);
-        return configuration.commandClubViews().get(0).id();
+        return configuration.clubView().id();
     }
 }

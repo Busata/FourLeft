@@ -74,8 +74,9 @@ public class Routes {
      */
     public static final String MERGE_CLUB = "/api/merge";
     public static final String USER_OVERVIEW = "/api/users/overview";
-        public static final String USER_COMMUNITY_PROGRESSION = "/api/public/users/community/progression";
+    public static final String USER_COMMUNITY_PROGRESSION = "/api/public/users/community/progression";
 
+    public static final String ALL_DISCORD_CHANNEL_CONFIGURATION = "/api/discord/configurations";
     public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channels/{channelId}/configuration";
     public static final String DISCORD_CALLBACK = "/api/public/discord/callback";
     public static final String DISCORD_INTEGRATION_AUTH = "/api/discord/integration/auth";
