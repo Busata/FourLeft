@@ -2,7 +2,7 @@ package io.busata.fourleftdiscord.channel_configuration;
 
 import discord4j.common.util.Snowflake;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
-import io.busata.fourleftdiscord.client.FourLeftClient;
+import io.busata.fourleftdiscord.client.DiscordChannelConfigurationClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class DiscordChannelConfigurationService {
-    private final FourLeftClient api;
+    private final DiscordChannelConfigurationClient api;
 
     @Cacheable("channel_configurations")
     public List<DiscordChannelConfigurationTo> getConfigurations() {

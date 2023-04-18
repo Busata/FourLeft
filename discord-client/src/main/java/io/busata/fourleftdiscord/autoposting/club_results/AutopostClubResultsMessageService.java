@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageEditSpec;
 import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
@@ -123,18 +122,16 @@ public class AutopostClubResultsMessageService {
         autoPostEntry.setEventKey(eventKey);
     }
     Optional<Message> tryReusingLastMessage(Snowflake channelId, ViewResultTo viewResultTo) {
-        return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getEventInfo()));
+        return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getViewEventKey()));
     }
 
-    boolean canBeReused(Message lastMessage, List<ActivityInfoTo> eventInfoList) {
+    boolean canBeReused(Message lastMessage, String viewEventKey) {
         boolean isAutopost = api.hasMessage(lastMessage.getId().asLong(), MessageType.AUTO_POST);
         if(!isAutopost) {
             return false;
         }
 
-       return  eventInfoList.stream().anyMatch(eventInfo -> {
-            return autoPostEntryRepository.findByEventIdAndChallengeId(eventInfo.eventId(), eventInfo.eventChallengeId()).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
+        return autoPostEntryRepository.findByEventKey(viewEventKey).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
 
-        });
     }
 }

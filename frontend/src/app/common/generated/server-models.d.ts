@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-17 22:12:39.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-18 20:51:33.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface AutoPostEntryRepository extends JpaRepository<AutoPostEntry, UUID> {
 
-    List<AutoPostEntry> findByEventIdAndChallengeId(String eventId, String challengeId);
+    List<AutoPostEntry> findByEventKey(String eventKey);
     List<AutoPostEntry> findByMessageId(Long messageId);
     long countByMessageId(Long messageId);
 

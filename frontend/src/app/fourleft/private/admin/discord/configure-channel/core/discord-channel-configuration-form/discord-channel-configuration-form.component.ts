@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {CreateDiscordChannelConfigurationTo} from "../../../../../../../common/generated/server-models";
+import {DiscordChannelConfigurationTo} from "@server-models";
 import {DiscordChannelConfigurationForm} from "./discord-channel-configuration.form";
 
 @Component({
@@ -9,10 +9,10 @@ import {DiscordChannelConfigurationForm} from "./discord-channel-configuration.f
 })
 export class DiscordChannelConfigurationFormComponent implements OnInit {
   public form!: DiscordChannelConfigurationForm;
-  public configuation!: CreateDiscordChannelConfigurationTo;
+  public configuation!: DiscordChannelConfigurationTo;
 
   @Input()
-  public set existingForm(value: CreateDiscordChannelConfigurationTo) {
+  public set existingForm(value: DiscordChannelConfigurationTo) {
     if(!value) { return;}
 
     this.configuation = value;

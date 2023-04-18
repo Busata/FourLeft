@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {
-  CreateDiscordChannelConfigurationTo, VehicleEntryTo,
+  DiscordChannelConfigurationTo, VehicleEntryTo,
   ViewPointsTo,
   ViewResultTo
 } from "@server-models";
@@ -14,7 +14,7 @@ import {ViewResultsStoreService} from '../../services/view-results-store.service
 export class PreviewChannelConfigurationComponent {
 
   @Input()
-  set configuration(value: CreateDiscordChannelConfigurationTo) {
+  set configuration(value: DiscordChannelConfigurationTo) {
     if(!value) { return;}
     this.updatePreview(value)
   }
@@ -26,7 +26,7 @@ export class PreviewChannelConfigurationComponent {
   constructor(private viewResultsStoreService: ViewResultsStoreService) {
   }
 
-  updatePreview(value: CreateDiscordChannelConfigurationTo) {
+  updatePreview(value: DiscordChannelConfigurationTo) {
     this.viewResultsStoreService.getResults(value.clubView.id).subscribe(results => {
       this.results = results;
     })

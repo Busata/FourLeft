@@ -6,7 +6,6 @@ import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
-import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntryRepository;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -59,7 +57,7 @@ public class AutoPostClubResultsService {
         final var newResults = api.getViewCurrentResults(clubViewTo.id());
 
         List<String> unpostedEntries = newResults.getMultiListResults().stream().flatMap(namedListResult -> {
-            final var postedEntries = findPostedEntries(namedListResult.activityInfoTo());
+            final var postedEntries = findPostedEntries(newResults.getViewEventKey());
 
             return findUnposted(namedListResult.results(), postedEntries).stream();
         }).limit(10).collect(Collectors.toList());
@@ -73,13 +71,8 @@ public class AutoPostClubResultsService {
         autopostClubResultsMessageService.postNewEntries(channelId, newResults, unpostedEntries);
     }
 
-    private List<AutoPostEntry> findPostedEntries(List<ActivityInfoTo> eventInfo) {
-
-        final var sortedEventInfo = eventInfo.stream().sorted(Comparator.comparing(ActivityInfoTo::eventChallengeId).thenComparing(ActivityInfoTo::eventId)).collect(Collectors.toList());
-        final var eventId = sortedEventInfo.stream().map(ActivityInfoTo::eventId).collect(Collectors.joining(";"));
-        final var eventChallengeId = sortedEventInfo.stream().map(ActivityInfoTo::eventChallengeId).collect(Collectors.joining(";"));
-
-        return autoPostEntryRepository.findByEventIdAndChallengeId(eventId, eventChallengeId);
+    private List<AutoPostEntry> findPostedEntries(String viewEventKey) {
+        return autoPostEntryRepository.findByEventKey(viewEventKey);
     }
 
     private List<String> findUnposted(List<DriverEntryTo> entries, List<AutoPostEntry> postedEntries) {
