@@ -57,7 +57,7 @@ public class AutoPostClubResultsService {
         final var newResults = api.getViewCurrentResults(clubViewTo.id());
 
         List<String> unpostedEntries = newResults.getMultiListResults().stream().flatMap(namedListResult -> {
-            final var postedEntries = findPostedEntries(newResults.getViewEventKey());
+            final var postedEntries = findPostedEntries(channelId.asString() + "#" + newResults.getViewEventKey());
 
             return findUnposted(namedListResult.results(), postedEntries).stream();
         }).limit(10).collect(Collectors.toList());

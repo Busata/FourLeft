@@ -65,7 +65,7 @@ public class AutopostClubResultsMessageService {
         } catch (Exception ex) {
             log.error("Something went wrong saving the message to server", ex);
         } finally {
-            saveNewEntries(messageId, autoPost);
+            saveNewEntries(channelId, messageId, autoPost);
         }
     }
     void updateLastMessage(ViewResultTo clubResult, List<String> newEntries, Message message) {
@@ -79,7 +79,7 @@ public class AutopostClubResultsMessageService {
         } catch (Exception ex) {
             throw new MessagePostingException("Failed to edit", ex);
         }
-        saveNewEntries(message.getId().asLong(), autoPost);
+        saveNewEntries(message.getChannelId(), message.getId().asLong(), autoPost);
     }
 
     private List<String> mergePostedWithUnposted(ViewResultTo clubResult, List<String> newEntries, Message message) {
@@ -100,11 +100,11 @@ public class AutopostClubResultsMessageService {
         return messageTemplateFactory.createAutopostMessage(autoPostableView);
     }
 
-    public void saveNewEntries(Long messageId, AutoPostableView multiView) {
+    public void saveNewEntries(Snowflake channelId, Long messageId, AutoPostableView multiView) {
         multiView.getMultiListResults().stream().flatMap(multiList -> {
             return multiList.results().stream().map(entry -> {
                     final var autoPostEntry = new AutoPostEntry();
-                createAutopostEntry(autoPostEntry, entry, messageId, multiView.getEventKey());
+                createAutopostEntry(autoPostEntry, entry, messageId, channelId.asString() + "#" + multiView.getEventKey());
 
                 return autoPostEntry;
             });
