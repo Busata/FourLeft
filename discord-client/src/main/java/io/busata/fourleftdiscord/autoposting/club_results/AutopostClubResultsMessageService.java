@@ -131,7 +131,7 @@ public class AutopostClubResultsMessageService {
             return false;
         }
 
-        return autoPostEntryRepository.findByEventKey(viewEventKey).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
+        return autoPostEntryRepository.findByEventKey(lastMessage.getChannelId().asString() + "#" + viewEventKey).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
 
     }
 }
