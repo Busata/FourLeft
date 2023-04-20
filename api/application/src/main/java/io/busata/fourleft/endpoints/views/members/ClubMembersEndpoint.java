@@ -1,6 +1,5 @@
 package io.busata.fourleft.endpoints.views.members;
 
-import com.google.errorprone.annotations.DoNotCall;
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.domain.clubs.models.Club;
 import io.busata.fourleft.api.models.ClubMemberTo;
@@ -9,7 +8,6 @@ import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.gateway.racenet.factory.ClubMemberFactory;
 import io.busata.fourleft.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
