@@ -170,7 +170,7 @@ public class ClubEventResultMessageFactory {
     }
 
     private void addPowerStageField(ResultListTo clubResult, EmbedCreateSpec.Builder builder) {
-        final var powerstageEntries = clubResult.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityTotalTime)).limit(5).collect(Collectors.toList());
+        final var powerstageEntries = clubResult.results().stream().sorted(Comparator.comparing(DriverEntryTo::powerStageRank)).limit(5).collect(Collectors.toList());
 
         if(powerstageEntries.size() > 0) {
             StringJoiner joiner = new StringJoiner("\n");

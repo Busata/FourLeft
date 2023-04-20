@@ -122,7 +122,7 @@ public class DriverEntryToFactory {
                     entry.nationality(),
                     entry.platform(),
                     entry.activityTotalTime(),
-                    stageTimeParser.formatStageDiff(stageTime),
+                    stageTimeParser.formatStageTime(stageTime),
                     entry.isDnf(),
                     entry.vehicles()
             );
@@ -146,7 +146,7 @@ public class DriverEntryToFactory {
     private List<DriverResultTo> getPowerStageEntries(SingleClubView view, Event event) {
         var stages = event.getStages();
         return view.getPowerStageIndices().stream()
-                .map(index -> index >= 0 ? index : view.getPowerStageIndices().size() + index)
+                .map(index -> index >= 0 ? index : event.getStages().size() + index)
                 .map(stages::get)
                 .map(stage -> getEntries(event, stage))
                 .flatMap(Collection::stream)
