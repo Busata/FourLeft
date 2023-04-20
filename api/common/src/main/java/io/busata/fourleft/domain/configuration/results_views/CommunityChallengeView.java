@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -24,7 +25,7 @@ public class CommunityChallengeView extends ResultsView {
 
 
     @Override
-    public List<Long> getAssociatedClubs() {
-        return List.of();
+    public Set<Long> getAssociatedClubs() {
+        return Set.of();
     }
 }

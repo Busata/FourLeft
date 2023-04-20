@@ -3,7 +3,7 @@ package io.busata.fourleft.events;
 
 import io.busata.fourleft.api.messages.*;
 import io.busata.fourleft.domain.configuration.repository.ClubConfigurationRepository;
-import io.busata.fourleft.endpoints.club.automated.service.ChampionshipCreator;
+import io.busata.fourleft.automated.service.ChampionshipCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;

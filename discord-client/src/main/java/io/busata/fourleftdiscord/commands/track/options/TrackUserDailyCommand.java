@@ -8,7 +8,7 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;

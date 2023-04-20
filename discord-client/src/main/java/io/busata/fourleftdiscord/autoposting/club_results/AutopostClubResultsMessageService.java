@@ -3,8 +3,8 @@ package io.busata.fourleftdiscord.autoposting.club_results;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageEditSpec;
-import io.busata.fourleft.api.models.ResultEntryTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.DriverEntryTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
@@ -88,10 +88,10 @@ public class AutopostClubResultsMessageService {
         final var updatedEntries = postedEntries.stream()
                 .flatMap(autoPostEntry ->
                         clubResult.getResultEntries().stream()
-                                .filter(clubEntry -> clubEntry.name().equals(autoPostEntry.getName()))
+                                .filter(clubEntry -> clubEntry.racenet().equals(autoPostEntry.getName()))
                                 .findFirst()
                                 .stream()
-                ).map(ResultEntryTo::name).toList();
+                ).map(DriverEntryTo::racenet).toList();
 
         return Stream.concat(updatedEntries.stream(), newEntries.stream()).collect(Collectors.toList());
     }
@@ -104,7 +104,7 @@ public class AutopostClubResultsMessageService {
         multiView.getMultiListResults().stream().flatMap(multiList -> {
             return multiList.results().stream().map(entry -> {
                     final var autoPostEntry = new AutoPostEntry();
-                createAutopostEntry(autoPostEntry, entry, messageId, multiList.eventInfoTo());
+                createAutopostEntry(autoPostEntry, entry, messageId, multiView.getEventKey());
 
                 return autoPostEntry;
             });
@@ -112,29 +112,26 @@ public class AutopostClubResultsMessageService {
     }
 
 
-    private static void createAutopostEntry(AutoPostEntry autoPostEntry, ResultEntryTo entry, Long messageId, EventInfoTo singleView) {
-        autoPostEntry.setName(entry.name());
-        autoPostEntry.setTotalTime(entry.totalTime());
+    private static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, String eventKey) {
+        autoPostEntry.setName(entry.racenet());
+        autoPostEntry.setTotalTime(entry.activityTotalTime());
         autoPostEntry.setNationality(entry.nationality());
-        autoPostEntry.setVehicle(entry.vehicle());
+        autoPostEntry.setVehicle(entry.vehicles().get(0).vehicleName());
         autoPostEntry.setMessageId(messageId);
 
-        autoPostEntry.setEventId(singleView.eventId());
-        autoPostEntry.setChallengeId(singleView.eventChallengeId());
+        autoPostEntry.setEventKey(eventKey);
     }
     Optional<Message> tryReusingLastMessage(Snowflake channelId, ViewResultTo viewResultTo) {
-        return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getEventInfo()));
+        return discordMessageGateway.getLastMessage(channelId).filter(lastMessage -> canBeReused(lastMessage, viewResultTo.getViewEventKey()));
     }
 
-    boolean canBeReused(Message lastMessage, List<EventInfoTo> eventInfoList) {
+    boolean canBeReused(Message lastMessage, String viewEventKey) {
         boolean isAutopost = api.hasMessage(lastMessage.getId().asLong(), MessageType.AUTO_POST);
         if(!isAutopost) {
             return false;
         }
 
-       return  eventInfoList.stream().anyMatch(eventInfo -> {
-            return autoPostEntryRepository.findByEventIdAndChallengeId(eventInfo.eventId(), eventInfo.eventChallengeId()).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
+        return autoPostEntryRepository.findByEventKey(viewEventKey).stream().anyMatch(entry -> entry.getMessageId().equals(lastMessage.getId().asLong()));
 
-        });
     }
 }

@@ -36,7 +36,7 @@ public class PointSystem {
         if(rank > rankingPoints.size()) {
             return defaultRankingPoint;
         } else {
-            return rankingPoints.get(rank - 1).getPoints();
+            return rankingPoints.get(rank - 1).getPoint();
         }
     }
 
@@ -44,7 +44,7 @@ public class PointSystem {
         if(rank > powerStagePoints.size()) {
             return defaultPowerstagePoint;
         } else {
-            return powerStagePoints.get(rank - 1).getPoints();
+            return powerStagePoints.get(rank - 1).getPoint();
         }
     }
 }

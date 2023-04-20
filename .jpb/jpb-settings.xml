@@ -2,7 +2,6 @@
 <project version="4">
   <component name="JpaLiquibaseChangesConfig">
     <exclude-change idName="event#archived" tagName="addNotNullConstraint" />
-    <exclude-change idName="message_log#author" tagName="modifyDataType" />
     <exclude-change idName="club_member#championship_bronzes" tagName="addNotNullConstraint" />
     <exclude-change idName="club_member#championship_golds" tagName="addNotNullConstraint" />
     <exclude-change idName="club_member#championship_participation" tagName="addNotNullConstraint" />
@@ -10,7 +9,6 @@
     <exclude-change idName="channel_configuration#channel_id" tagName="dropNotNullConstraint" />
     <exclude-change idName="message_log#channel_id" tagName="dropNotNullConstraint" />
     <exclude-change idName="club_member#club_id" tagName="dropNotNullConstraint" />
-    <exclude-change idName="message_log#content" tagName="modifyDataType" />
     <exclude-change idName="channel_configuration#description" tagName="modifyDataType" />
     <exclude-change idName="club#description" tagName="modifyDataType" />
     <exclude-change idName="club_configuration#description" tagName="modifyDataType" />

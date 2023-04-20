@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.busata.fourleft</groupId>
-    <artifactId>server-client</artifactId>
+    <artifactId>client</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Fourleft Server Client</name>
     <description>fourleft</description>
@@ -51,4 +51,30 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>2.35.1025</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        io.busata.fourleft.**To
+                    </classPatterns>
+                    <outputKind>module</outputKind>
+                    <outputFile>../../frontend/src/app/common/generated/server-models.d.ts</outputFile>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

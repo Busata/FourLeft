@@ -26,6 +26,8 @@ public class BoardEntry {
     private long rank;
     private String name;
     private String vehicleName;
+
+    //Replace these with durations
     private String stageTime;
     private String stageDiff;
     private String totalTime;

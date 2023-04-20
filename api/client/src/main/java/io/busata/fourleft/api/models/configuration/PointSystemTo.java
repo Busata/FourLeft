@@ -8,7 +8,13 @@ import java.util.UUID;
 public record PointSystemTo(
     UUID id,
     String description,
-    List<PointPair> powerStagePoints,
-    List<PointPair> rankingPoints
+
+    int defaultStandingPoint,
+    int defaultPowerstagePoint,
+    int defaultDNFPoint,
+
+    List<PointPair> standingPoints,
+    List<PointPair> powerStagePoints
+
 ) {
 }

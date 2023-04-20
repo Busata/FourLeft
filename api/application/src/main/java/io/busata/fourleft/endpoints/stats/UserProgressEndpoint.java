@@ -2,26 +2,24 @@ package io.busata.fourleft.endpoints.stats;
 
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.api.models.ResultEntryTo;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.overview.ClubResultSummaryTo;
 import io.busata.fourleft.api.models.overview.CommunityResultSummaryTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
-import io.busata.fourleft.api.models.views.EventInfoTo;
+import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.challenges.repository.CommunityChallengeRepository;
 import io.busata.fourleft.domain.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryTo;
+import io.busata.fourleft.domain.clubs.repository.CommunityChallengeSummaryProjection;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.endpoints.views.ClubEventSupplierType;
-import io.busata.fourleft.endpoints.views.ViewResultToFactory;
+import io.busata.fourleft.endpoints.views.ClubEventSupplier;
+import io.busata.fourleft.endpoints.views.results.factory.ViewResultToFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,7 +33,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class UserProgressEndpoint {
 
     private final LeaderboardRepository leaderboardRepository;
@@ -52,7 +49,7 @@ public class UserProgressEndpoint {
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> before,
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)  Optional<LocalDate> after) {
 
-        List<CommunityChallengeSummaryTo> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
+        List<CommunityChallengeSummaryProjection> communityChallengeSummary = leaderboardRepository.findCommunityChallengeSummary(query)
                 .stream().filter(summary -> {
                     LocalDate challengeDate = summary.getChallengeDate();
                     boolean isBefore = before.map(challengeDate::isBefore).orElse(true);
@@ -66,7 +63,7 @@ public class UserProgressEndpoint {
         BufferedImage imageOut = new BufferedImage(totalSize*2, imageHeight, BufferedImage.TYPE_INT_RGB);
 
         for (int x = 0; x < communityChallengeSummary.size()*2; x++) {
-            CommunityChallengeSummaryTo summaryEntry = communityChallengeSummary.get((int)x/2);
+            CommunityChallengeSummaryProjection summaryEntry = communityChallengeSummary.get(x/2);
 
             final var percentageRank = ((float) summaryEntry.getRank() / (float) summaryEntry.getTotal()) * 100f;
             final var color = getPixelColour(percentageRank, summaryEntry.getIsDnf());
@@ -109,8 +106,8 @@ public class UserProgressEndpoint {
     @GetMapping(Routes.USER_OVERVIEW)
     public UserResultSummaryTo getUserOverview(@RequestParam String query) {
 
-        List<ViewResultTo> currentViewResults = getViewResults(ClubEventSupplierType.CURRENT);
-        List<ViewResultTo> previousViewResults = getViewResults(ClubEventSupplierType.PREVIOUS);
+        List<ViewResultTo> currentViewResults = getViewResults(ClubEventSupplier.CURRENT);
+        List<ViewResultTo> previousViewResults = getViewResults(ClubEventSupplier.PREVIOUS);
 
 
         final var activeClubResults = getClubResults(query, currentViewResults);
@@ -137,7 +134,7 @@ public class UserProgressEndpoint {
         );
     }
 
-    private List<ViewResultTo> getViewResults(ClubEventSupplierType supplierType) {
+    private List<ViewResultTo> getViewResults(ClubEventSupplier supplierType) {
         return clubViewRepository.findAll().stream().parallel()
                 .flatMap(clubView -> viewResultToFactory.createViewResult(clubView.getId(), supplierType).stream())
                 .collect(Collectors.toList());
@@ -178,27 +175,27 @@ public class UserProgressEndpoint {
     private List<ClubResultSummaryTo> getClubResults(String query, List<ViewResultTo> viewResults) {
 
         return viewResults.stream().flatMap(viewResult -> {
-            List<ResultEntryTo> resultEntries = viewResult.getResultEntries();
+            List<DriverEntryTo> resultEntries = viewResult.getResultEntries();
 
-            return resultEntries.stream().filter(entry -> entry.name().equalsIgnoreCase(query))
+            return resultEntries.stream().filter(entry -> entry.racenet().equalsIgnoreCase(query))
                     .findFirst().stream().map(entry -> {
-                        EventInfoTo eventInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
+                        ActivityInfoTo activityInfoTo = viewResult.getEventInfo().stream().findFirst().orElseThrow();
 
                         final var resultList = viewResult.getMultiListResults().stream().findFirst().orElseThrow();
 
                         return new ClubResultSummaryTo(
                                 viewResult.getDescription(),
-                                eventInfoTo.country(),
-                                eventInfoTo.stageNames().get(eventInfoTo.stageNames().size() - 1),
-                                eventInfoTo.endTime(),
+                                activityInfoTo.country(),
+                                activityInfoTo.stageNames().get(activityInfoTo.stageNames().size() - 1),
+                                activityInfoTo.endTime(),
                                 entry.nationality(),
-                                entry.vehicle(),
-                                entry.rank(),
-                                resultList.totalEntries(),
-                                ((float) entry.rank() / (float) resultList.totalEntries()) * 100f,
+                                entry.vehicles().get(0).vehicleName(),
+                                entry.activityRank(),
+                                resultList.totalUniqueEntries(),
+                                ((float) entry.activityRank() / (float) resultList.totalUniqueEntries()) * 100f,
                                 entry.isDnf(),
-                                entry.totalTime(),
-                                entry.totalDiff()
+                                entry.activityTotalTime(),
+                                entry.activityTotalDiff()
                         );
                     });
         }).collect(Collectors.toList());

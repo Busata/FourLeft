@@ -3,16 +3,19 @@ package io.busata.fourleft.endpoints.query;
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.QueryTrackResultsTo;
 import io.busata.fourleft.api.models.StageOptionTo;
+import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.domain.options.models.CountryConfiguration;
 import io.busata.fourleft.domain.options.models.CountryOption;
 import io.busata.fourleft.domain.options.models.StageConfiguration;
 import io.busata.fourleft.domain.options.models.StageOption;
 import io.busata.fourleft.domain.clubs.repository.BoardEntryRepository;
+import io.busata.fourleft.domain.options.models.VehicleClass;
 import io.busata.fourleft.endpoints.query.models.FuzzySearchResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +31,14 @@ import java.util.stream.Collectors;
 public class QueryEndpoint
 {
     private final BoardEntryRepository boardEntryRepository;
+
+    @GetMapping(Routes.QUERY_VEHICLE_CLASS)
+    public List<VehicleTo> getVehiclesForClass(@PathVariable String vehicleClass) {
+        VehicleClass byId = VehicleClass.findById(vehicleClass);
+        return byId.getVehicles().stream().map(vehicle -> {
+            return new VehicleTo(vehicle.name(), vehicle.getDisplayName());
+        }).toList();
+    }
 
     @GetMapping(Routes.QUERY_NAME)
     public List<String> queryName(@RequestParam String query) {

@@ -13,5 +13,5 @@ import javax.persistence.Embeddable;
 public class PointPair {
 
     Integer rank;
-    Integer points;
+    Integer point;
 }

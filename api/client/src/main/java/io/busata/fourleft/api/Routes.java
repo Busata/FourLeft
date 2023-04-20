@@ -4,25 +4,19 @@ public class Routes {
     /*
         Club routes
      */
-    public static final String CLUB_RESULTS_CURRENT_EXPORT = "/api/public/clubs/{clubId}/current/export";
-    public static final String CLUB_RESULTS_PREVIOUS_EXPORT = "/api/public/clubs/{clubId}/previous/export";
     public static final String CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID = "/api/views/{viewId}/results/current";
     public static final String CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID = "/api/views/{viewId}/results/previous";
 
     public static final String CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID = "/api/views/{viewId}/standings/current";
     public static final String CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID = "/api/views/{viewId}/standings/previous";
 
+    public static final String RESULT_VIEW_EVENT_RESTRICTION = "/api/views/{resultViewId}/restrictions";
     public static final String CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID = "/api/views/{viewId}/event_summary";
+    public static final String CLUB_VIEWS_REFRESH = "/api/views/{viewId}/refresh";
 
-    public static final String CLUB_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/championship_standings";
-    public static final String CLUB_CUSTOM_STANDINGS_BY_CLUB_ID = "/api/clubs/{clubId}/custom_standings";
     public static final String CLUB_MEMBERS_BY_VIEW_ID = "/api/clubs/{viewId}/members";
-    public static final String CLUB_EVENT_SUMMARY_BY_CLUB_ID = "/api/clubs/{clubId}/event_summary";
     public static final String CLUB_TIERS_BY_CLUB_ID = "/api/clubs/{clubId}/tiers";
-    public static final String CLUB_ACTIVE_EVENT_BY_CLUB_ID = "/api/clubs/{clubId}/active_event";
     public static final String TIER_RESULTS_BY_CLUB_ID = "/api/clubs/{clubId}/tiers/results/current";
-    public static final String REFRESH_CLUB_BY_CLUB_ID = "/api/clubs/{clubId}/refresh";
-    public static final String STAGE_SUMMARY_BY_CLUB_ID = "/api/clubs/{clubId}/stage_summary";
 
     /*
         Community
@@ -39,6 +33,8 @@ public class Routes {
      */
     public static final String QUERY_TRACK = "/api/query/track";
     public static final String QUERY_NAME = "/api/query/name";
+
+    public static final String QUERY_VEHICLE_CLASS = "/api/query/vehicle_class/{vehicleClass}";
 
     /*
         Field Mappings
@@ -64,12 +60,6 @@ public class Routes {
         Tiers
      */
     public static final String TIER_RESULTS_BY_TIER_ID = "/api/tier/{tierId}/results/current";
-    public static final String PLAYERS = "/api/players";
-    public static final String PLAYER_BY_PLAYER_ID = "/api/players/{playerId}";
-    public static final String PLAYER_BY_TIER_ID = "/api/players/by_tier/{tierId}";
-    public static final String TIER_PLAYER_BY_TIER_ID_AND_PLAYER_ID = "/api/tiers/{tierId}/player/{playerId}";
-    public static final String CLEAR_PLAYER_TIERS_BY_PLAYER_ID = "/api/players/{playerId}/clear_tiers";
-    public static final String TIER_VEHICLE_RESTRICTIONS_BY_TIER_ID_AND_CHALLENGE_ID_AND_EVENT_ID = "/api/tiers/{tierId}/competition/{challengeId}/{eventId}/vehicles";
 
     /*
         Automated creation
@@ -84,12 +74,25 @@ public class Routes {
      */
     public static final String MERGE_CLUB = "/api/merge";
     public static final String USER_OVERVIEW = "/api/users/overview";
-        public static final String USER_COMMUNITY_PROGRESSION = "/api/public/users/community/progression";
+    public static final String USER_COMMUNITY_PROGRESSION = "/api/public/users/community/progression";
 
-    public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channel_configurations";
+    public static final String ALL_DISCORD_CHANNEL_CONFIGURATION = "/api/discord/configurations";
+    public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channels/{channelId}/configuration";
+
+    public static final String DISCORD_CHANNEL_SINGLE_CONFIGURATION = "/api/discord/configurations/{configurationId}";
+
     public static final String DISCORD_CALLBACK = "/api/public/discord/callback";
     public static final String DISCORD_INTEGRATION_AUTH = "/api/discord/integration/auth";
 
     public static final String DISCORD_GUILDS = "/api/discord/integration/guilds";
     public static final String DISCORD_AUTHENTICATION_STATUS = "/api/discord/integration/authentication_status";
+    public static final String DISCORD_REDIRECT = "/api/public/discord/redirect";
+    public static final String DISCORD_INVITE_BOT = "/api/public/discord/invite_bot";
+
+    public static final String DISCORD_MANAGE_SERVER = "/api/discord/integration/guilds/{guildId}/can_manage";
+    public static final String DISCORD_GUILD = "/api/discord/integration/guilds/{guildId}";
+
+    public static final String DISCORD_GUILD_CHANNELS = "/api/discord/integration/guilds/{guildId}/channels";
+
+    public static final String SECURITY_USER = "/api/security/user";
 }

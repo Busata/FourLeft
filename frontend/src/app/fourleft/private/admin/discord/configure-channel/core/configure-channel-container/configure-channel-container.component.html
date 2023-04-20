@@ -1,0 +1,4 @@
+<div class="configure-channel">
+  <app-discord-channel-configuration-form [existingForm]="existingForm | async" (formSave)="saveConfiguration($event)"></app-discord-channel-configuration-form>
+  <app-preview-channel-configuration [configuration]="existingForm | async"></app-preview-channel-configuration>
+</div>

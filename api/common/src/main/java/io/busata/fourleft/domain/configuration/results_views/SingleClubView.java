@@ -1,56 +1,36 @@
 package io.busata.fourleft.domain.configuration.results_views;
 
+import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class SingleClubView extends ResultsView implements ResultProperties {
+public class SingleClubView extends ResultsView  {
 
     long clubId;
-    boolean usePowerStage;
-    int defaultPowerstageIndex; // -1 for last.
 
-    @Enumerated(EnumType.STRING)
-    BadgeType badgeType;
-
-    @Enumerated(EnumType.STRING)
-    PlayerRestrictions playerRestriction;
+    String name;
 
     @ElementCollection
-    List<String> players;
+    List<Integer> powerStageIndices;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    PlayerFilter playerFilter;
 
     @Override
-    public boolean isPowerStage() {
-        return this.usePowerStage;
+    public Set<Long> getAssociatedClubs() {
+        return Set.of(clubId);
     }
 
-    @Override
-    public int getPowerStageIndex() {
-        return defaultPowerstageIndex;
-    }
-
-    @Override
-    public List<String> getPlayerNames() {
-        return this.players;
-    }
-
-    @Override
-    public PlayerRestrictions getPlayerRestrictions() {
-        return this.playerRestriction;
-    }
-
-    @Override
-    public List<Long> getAssociatedClubs() {
-        return List.of(clubId);
+    public boolean hasPowerStage() {
+        return !this.powerStageIndices.isEmpty();
     }
 }

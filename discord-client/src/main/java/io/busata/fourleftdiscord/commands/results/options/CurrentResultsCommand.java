@@ -8,7 +8,6 @@ import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
-import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -16,7 +15,7 @@ import discord4j.core.spec.InteractionFollowupCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleft.domain.discord.bot.models.ViewType;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
 import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;
@@ -34,7 +33,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -130,26 +128,6 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
         try {
             return Mono.just(event).flatMap(evt -> {
                 Snowflake channelId = event.getInteraction().getChannelId();
-
-                final var channelConfiguration = discordChannelConfigurationService.findConfigurationByChannelId(channelId);
-                if (channelConfiguration.commandClubViews().size() > 1) {
-
-                    SelectMenu menu = SelectMenu.of("current-results", channelConfiguration.commandClubViews().stream().map(clubView -> {
-                                return SelectMenu.Option.of(clubView.description(), clubView.id().toString());
-                            }).collect(Collectors.toList())
-                    );
-
-                    Button removeButton = Button.danger("remove", "Remove");
-
-
-                    return event.createFollowup(InteractionFollowupCreateSpec.builder()
-                            .ephemeral(true)
-                            .content("Which view?")
-                            .addComponent(ActionRow.of(menu))
-                            .addComponent(ActionRow.of(removeButton))
-                            .build());
-                }
-
                 Button cycleView = Button.secondary(CYCLE_RESULTS_BUTTON_ID, ViewType.STANDARD.next().getButtonLabel());
 
                 List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResultsByChannelId(channelId, ViewType.STANDARD);

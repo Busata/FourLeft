@@ -1,7 +1,8 @@
 package io.busata.fourleftdiscord.messages.templates;
 
+import io.busata.fourleft.api.models.DriverEntryTo;
+import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
-import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleftdiscord.messages.BadgeMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringSubstitutor;
@@ -9,29 +10,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
-public class ResultEntryTemplateResolver implements TemplateResolver<ResultEntryTo> {
+public class ResultEntryTemplateResolver implements TemplateResolver<DriverEntryTo> {
     private final DR2FieldMapper fieldMapper;
 
     @Override
-    public String resolve(MessageTemplate template, ResultEntryTo value) {
+    public String resolve(MessageTemplate template, DriverEntryTo value) {
         return StringSubstitutor.replace(template.getTemplate(), buildValuesMap(value));
     }
 
-    public Map<String, String> buildValuesMap(ResultEntryTo entry) {
+    public Map<String, String> buildValuesMap(DriverEntryTo entry) {
         Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("rank",String.valueOf(entry.rank()));
-        valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.rank(), entry.isDnf()));
+        valueMap.put("rank",String.valueOf(entry.activityRank()));
+        valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.activityRank(), entry.isDnf()));
         valueMap.put("nationalityEmoticon",fieldMapper.createEmoticon(entry.nationality()));
-        valueMap.put("vehicle",entry.vehicle());
-        valueMap.put("name",entry.name());
-        valueMap.put("totalTime",entry.totalTime());
-        valueMap.put("totalDiff",entry.totalDiff());
-        valueMap.put("platform", fieldMapper.createEmoticon(entry.platform().name()));
-        valueMap.put("controllerType", fieldMapper.createEmoticon(entry.controllerType().name()));
+        valueMap.put("vehicle",entry.vehicles().stream().map(VehicleEntryTo::vehicleName).collect(Collectors.joining(",")));
+        valueMap.put("name",entry.racenet());
+        valueMap.put("totalTime",entry.activityTotalTime());
+        valueMap.put("totalDiff",entry.activityTotalDiff());
+        valueMap.put("platform", fieldMapper.createEmoticon(entry.platform().platform().name()));
+        valueMap.put("controllerType", fieldMapper.createEmoticon(entry.platform().controller().name()));
 
         return valueMap;
     }

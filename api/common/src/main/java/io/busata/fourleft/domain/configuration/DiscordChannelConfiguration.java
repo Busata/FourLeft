@@ -10,8 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,17 +30,17 @@ public class DiscordChannelConfiguration {
     @Setter
     String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = javax.persistence.CascadeType.ALL)
     @JoinColumn(name = "club_view_configuration_id")
     ClubView commandsClubView;
 
-    @ManyToMany
+    @OneToMany(cascade = javax.persistence.CascadeType.ALL)
     @JoinTable(name = "discord_channel_club_view_configurations",
             joinColumns = {@JoinColumn(name = "discord_channel_configuration_id")},
             inverseJoinColumns = {@JoinColumn(name = "commands_club_view_configuration_id")})
     List<ClubView> commandsClubViews;
 
-    @ManyToMany
+    @OneToMany(cascade = javax.persistence.CascadeType.ALL)
     @JoinTable(name = "discord_channel_autopost_configurations",
             joinColumns = {@JoinColumn(name = "discord_channel_configuration_id")},
             inverseJoinColumns = {@JoinColumn(name = "club_view_configuration_id")})

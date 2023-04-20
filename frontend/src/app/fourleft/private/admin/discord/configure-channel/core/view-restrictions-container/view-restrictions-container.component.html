@@ -1,0 +1,3 @@
+<ng-container *ngFor="let restriction of restrictions">
+  <app-view-restrictions-form [viewRestrictions]="restriction" (restrictionsUpdated)="this.updateRestriction(restriction, $event)"></app-view-restrictions-form>
+</ng-container>

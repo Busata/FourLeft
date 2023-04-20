@@ -1,5 +1,6 @@
 package io.busata.fourleftdiscord.autoposting.club_results.domain;
 
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.ResultEntryTo;
 import io.busata.fourleftdiscord.autoposting.club_results.AutoPostableResultEntry;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,7 @@ public class AutoPostEntry {
     @GeneratedValue
     private UUID id;
 
-    private String eventId;
-    private String challengeId;
+    private String eventKey;
 
     String name;
     String totalTime;
@@ -35,12 +35,12 @@ public class AutoPostEntry {
 
     Long messageId;
 
-    public boolean hasEqualName(ResultEntryTo resultEntryTo) {
-        return name.equals(resultEntryTo.name());
+    public boolean hasEqualName(DriverEntryTo resultEntryTo) {
+        return name.equals(resultEntryTo.racenet());
     }
 
-    public boolean hasEqualTimeVehicleAndNationality(ResultEntryTo resultEntryTo) {
-        return totalTime.equals(resultEntryTo.totalTime()) && vehicle.equals(resultEntryTo.vehicle()) && nationality.equals(resultEntryTo.nationality());
+    public boolean hasEqualTimeVehicleAndNationality(DriverEntryTo resultEntryTo) {
+        return totalTime.equals(resultEntryTo.activityTotalTime()) && vehicle.equals(resultEntryTo.vehicles().get(0)) && nationality.equals(resultEntryTo.nationality());
     }
 
 }

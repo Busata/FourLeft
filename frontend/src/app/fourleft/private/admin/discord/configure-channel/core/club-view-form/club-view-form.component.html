@@ -1,0 +1,63 @@
+<h2>{{title}}</h2>
+<form [formGroup]="clubViewForm">
+  <div class="club-view-configuration" [hidden]="!configuringClubView">
+    <div class="form-group">
+      <label>Badge type</label>
+      <select [formControl]="clubViewForm.badgeType">
+        <option value="NONE">None</option>
+        <option value="RANKED">Rank</option>
+        <option value="PERCENTAGE">Percentage</option>
+      </select>
+    </div>
+    <div class="form-group" *ngIf="clubViewForm.resultsView">
+      <label>Results view type</label>
+      <select (change)="clubViewForm.setResultsView({type: $event.target.value})" [formControl]="clubViewForm.resultsViewType">
+        <option value="">Select a results view</option>
+        <option value="singleClub">Single club</option>
+        <option value="mergeClub">Merge clubs</option>
+        <option value="concatenationClub">Concatenate clubs</option>
+        <option value="partitionClub">Partition clubs</option>
+      </select>
+
+      <button class="g-button" (click)="configureResults()">Configure</button>
+    </div>
+    <div class="form-group" *ngIf="clubViewForm.pointsView">
+      <label>Points system</label>
+      <select (change)="clubViewForm.setPointsView({type: $event.target.value})" [formControl]="clubViewForm.pointsViewType">
+        <option value="">Select a points system</option>
+        <option value="defaultPoints">Default racenet points</option>
+        <option value="fixedPoints">Fixed points</option>
+      </select>
+      <button class="g-button" (click)="configurePoints()">Configure</button>
+    </div>
+  </div>
+  <div class="results-view-configuration" [hidden]="!configuringResults">
+    <ng-container *ngIf="clubViewForm.resultsView">
+      <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'singleClub'">
+        <app-single-club-view-form [formGroup]="clubViewForm.singleClubView"></app-single-club-view-form>
+      </ng-container>
+      <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'mergeClub'">
+        <app-merge-club-view-form [formGroup]="clubViewForm.mergeClubView"></app-merge-club-view-form>
+      </ng-container>
+      <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'partitionClub'">
+        <app-partition-club-view-form [formGroup]="clubViewForm.partitionClubView"></app-partition-club-view-form>
+      </ng-container>
+      <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'concatenationClub'">
+        <app-concatenation-view-form [formGroup]="clubViewForm.concatenationView"></app-concatenation-view-form>
+      </ng-container>
+
+      <button class="g-button" (click)="configureClubView()">Back to club configuration</button>
+    </ng-container>
+  </div>
+  <div class="points-view-configuration" [hidden]="!configuringPoints">
+
+    <ng-container *ngIf="clubViewForm.pointsView">
+      <ng-container *ngIf="clubViewForm.pointsViewType?.value === 'fixedPoints'">
+        <app-fixed-points-form [formGroup]="clubViewForm.fixedPointsView"></app-fixed-points-form>
+        <button class="secondary" (click)="configureClubView()">Back to club configuration</button>
+      </ng-container>
+
+    </ng-container>
+  </div>
+
+</form>

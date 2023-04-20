@@ -12,13 +12,13 @@ public class AutoPostableFactory {
     public AutoPostableView create(ViewResultTo result, List<String> entries) {
 
         return new AutoPostableView(
+                result.getViewEventKey(),
                 result.getViewPropertiesTo(),
                 result.getMultiListResults().stream().map(multiListResults -> {
                     return new AutoPostResultList(
                             multiListResults.name(),
-                            multiListResults.eventInfoTo(),
-                            multiListResults.restrictions(),
-                            multiListResults.results().stream().filter(resultEntryTo -> entries.contains(resultEntryTo.name())).collect(Collectors.toList())
+                            multiListResults.activityInfoTo(),
+                            multiListResults.results().stream().filter(resultEntryTo -> entries.contains(resultEntryTo.racenet())).collect(Collectors.toList())
                     );
                 }).collect(Collectors.toList())
 

@@ -1,15 +1,17 @@
 package io.busata.fourleft.api.models.configuration;
 
+import io.busata.fourleft.api.models.configuration.results.ResultsViewTo;
+import io.busata.fourleft.domain.configuration.results_views.BadgeType;
+
 import java.util.UUID;
 
+
 public record ClubViewTo(
+
         UUID id,
         String description,
+        BadgeType badgeType,
         ResultsViewTo resultsView,
-        PointsCalculatorTo pointsCalculator
+        PointsCalculatorTo pointsView
 
-) {
-    public boolean includesClub(long clubId) {
-        return resultsView.includesClub(clubId);
-    }
-}
+) {}

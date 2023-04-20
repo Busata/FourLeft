@@ -1,0 +1,1 @@
+delete from auto_post_entry;

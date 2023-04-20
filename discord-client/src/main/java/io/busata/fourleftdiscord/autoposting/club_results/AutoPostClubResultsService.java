@@ -4,9 +4,9 @@ import discord4j.common.util.Snowflake;
 import feign.FeignException;
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
-import io.busata.fourleft.api.models.ResultEntryTo;
+import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
-import io.busata.fourleft.api.models.configuration.DiscordChannelConfigurationTo;
+import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntry;
 import io.busata.fourleftdiscord.autoposting.club_results.domain.AutoPostEntryRepository;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
@@ -36,17 +36,15 @@ public class AutoPostClubResultsService {
 
         discordChannelConfigurationService.getConfigurations()
                 .stream()
-                .filter(DiscordChannelConfigurationTo::hasAutopostViews)
+                .filter(DiscordChannelConfigurationTo::enableAutoposts)
                 .filter(configuration -> configuration.includesClub(event.clubId()))
                 .forEach(this::tryPostingResults);
     }
 
     private void tryPostingResults(DiscordChannelConfigurationTo configuration) {
-        log.info("-- Checking for channel {}", configuration.description());
+        log.info("-- Checking for channel {}", configuration.clubView().description());
         try {
-            configuration.autopostClubViews().forEach(clubViewTo -> {
-                tryPostingNewEntries(clubViewTo, Snowflake.of(configuration.channelId()));
-            });
+            tryPostingNewEntries(configuration.clubView(), Snowflake.of(configuration.channelId()));
         }
         catch (FeignException.NotFound ex) {
             log.warn("No results found");
@@ -59,8 +57,7 @@ public class AutoPostClubResultsService {
         final var newResults = api.getViewCurrentResults(clubViewTo.id());
 
         List<String> unpostedEntries = newResults.getMultiListResults().stream().flatMap(namedListResult -> {
-            final var eventInfo = namedListResult.eventInfoTo();
-            final var postedEntries = autoPostEntryRepository.findByEventIdAndChallengeId(eventInfo.eventId(), eventInfo.eventChallengeId());
+            final var postedEntries = findPostedEntries(newResults.getViewEventKey());
 
             return findUnposted(namedListResult.results(), postedEntries).stream();
         }).limit(10).collect(Collectors.toList());
@@ -72,10 +69,13 @@ public class AutoPostClubResultsService {
         }
 
         autopostClubResultsMessageService.postNewEntries(channelId, newResults, unpostedEntries);
-
     }
 
-    private List<String> findUnposted(List<ResultEntryTo> entries, List<AutoPostEntry> postedEntries) {
+    private List<AutoPostEntry> findPostedEntries(String viewEventKey) {
+        return autoPostEntryRepository.findByEventKey(viewEventKey);
+    }
+
+    private List<String> findUnposted(List<DriverEntryTo> entries, List<AutoPostEntry> postedEntries) {
         final var unpostedByName = findUnpostedEntries(entries, postedEntries, (newEntry, postedEntry) -> postedEntry.hasEqualName(newEntry));
         final var unpostedByTimeVehicleAndNationality = findUnpostedEntries(entries , postedEntries, (newEntry, postedEntry) -> postedEntry.hasEqualTimeVehicleAndNationality(newEntry));
 
@@ -87,10 +87,10 @@ public class AutoPostClubResultsService {
     }
 
 
-    private List<String> findUnpostedEntries(List<ResultEntryTo> entries, List<AutoPostEntry> postedEntries, BiPredicate<ResultEntryTo, AutoPostEntry> entryFilter) {
+    private List<String> findUnpostedEntries(List<DriverEntryTo> entries, List<AutoPostEntry> postedEntries, BiPredicate<DriverEntryTo, AutoPostEntry> entryFilter) {
         return entries.stream()
                 .filter(newEntry -> postedEntries.stream().noneMatch(postedEntry -> entryFilter.test(newEntry, postedEntry)))
-                .map(ResultEntryTo::name)
+                .map(DriverEntryTo::racenet)
                 .collect(Collectors.toList());
 
     }
