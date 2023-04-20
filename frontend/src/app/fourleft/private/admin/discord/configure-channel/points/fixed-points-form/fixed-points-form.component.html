@@ -1,6 +1,10 @@
 <div [formGroup]="fixedPointsFormGroup.pointSystem">
 
   <div class="form-group">
+    <label>Join championships?</label>
+    <input type="number" [formControl]="fixedPointsFormGroup.joinChampionshipsCount"/>
+  </div>
+  <div class="form-group">
     <label>Default standing points</label>
     <input type="number" [formControl]="fixedPointsFormGroup.defaultStandingPoint"/>
   </div>

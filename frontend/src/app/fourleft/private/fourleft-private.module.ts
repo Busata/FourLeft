@@ -19,6 +19,7 @@ import {LoginService} from "./services/security/login.service";
 import {AuthenticationService} from "./services/security/authentication.service";
 import {UserStoreService} from "./services/security/user-store.service";
 import {HasPermissionDirective} from "./services/security/has-permission.directive";
+import { ManagementContainerComponent } from './admin/management/management-container/management-container.component';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import {HasPermissionDirective} from "./services/security/has-permission.directi
     FieldMappingsListComponent,
     FieldMappingEditComponent,
     HasPermissionDirective,
-    FourleftPrivateContainerComponent],
+    FourleftPrivateContainerComponent,
+    ManagementContainerComponent],
   imports: [
     FourleftPrivateRoutingModule,
     CommonModule,

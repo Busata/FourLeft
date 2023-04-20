@@ -63,7 +63,7 @@ public class ViewResultToFactory {
                 .map(event -> resultListToFactory.createResultList(resultsView, event))
                 .toList();
 
-        String key = resultsView.getId().toString() + eventSupplier.getEvents(club).flatMap(event -> {
+        String key = resultsView.getId().toString() + "#" + eventSupplier.getEvents(club).flatMap(event -> {
             return Stream.of(event.getChallengeId(), event.getReferenceId());
         }).distinct().sorted().collect(Collectors.joining("#"));
 
@@ -110,7 +110,7 @@ public class ViewResultToFactory {
         }).toList();
 
 
-        String key = mergedResultsView.getId().toString() + resultViewEventsMap.values().stream().flatMap(Collection::stream)
+        String key = mergedResultsView.getId().toString() + "#" + resultViewEventsMap.values().stream().flatMap(Collection::stream)
                 .flatMap(event -> Stream.of(event.getChallengeId(), event.getReferenceId()))
                 .distinct()
                 .sorted()
@@ -141,7 +141,7 @@ public class ViewResultToFactory {
         }).collect(Collectors.toList());
 
 
-        String key = typedResultsView.getId().toString() + results.stream()
+        String key = typedResultsView.getId().toString() + "#" + results.stream()
                 .flatMap(resultList -> resultList.activityInfoTo().stream())
                 .flatMap(event -> Stream.of(event.eventChallengeId(), event.eventId()))
                 .distinct()

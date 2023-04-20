@@ -1,6 +1,6 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {PointPairForm} from "../point-pair-form/point-pair.form";
-import {FixedPointsCalculatorTo} from "../../../../../../../common/generated/server-models";
+import {FixedPointsCalculatorTo} from "@server-models";
 
 export class FixedPointsForm extends FormGroup {
   readonly type = this.get('type') as FormControl;
@@ -11,10 +11,12 @@ export class FixedPointsForm extends FormGroup {
   readonly defaultDNFPoint = this.get('pointSystem.defaultDNFPoint') as FormControl;
   readonly standingPoints = this.get('pointSystem.standingPoints') as FormArray;
   readonly powerStagePoints = this.get('pointSystem.powerStagePoints') as FormArray;
+  readonly joinChampionshipsCount = this.get('joinChampionshipsCount') as FormControl;
 
   constructor(value: FixedPointsCalculatorTo) {
     super({
       type: new FormControl("fixedPoints", {}),
+      joinChampionshipsCount: new FormControl(value?.joinChampionshipsCount, {}),
       pointSystem: new FormGroup({
         defaultStandingPoint: new FormControl(value?.pointSystem?.defaultStandingPoint, {}),
         defaultPowerstagePoint: new FormControl(value?.pointSystem?.defaultPowerstagePoint, {}),

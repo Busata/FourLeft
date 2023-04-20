@@ -1,19 +1,16 @@
 <div>
-<h1>{{guild.name}}</h1>
+  <h1>{{guild.name}}</h1>
 
-  <mat-card>
-    <mat-card-title>Channels</mat-card-title>
-    <mat-card-content>
-      <ul>
-        <li *ngFor="let channel of channels" class="channel-item">
-          <span class="channel-name">#{{channel.name}}</span>
-          <button
-            mat-button mat-raised-button
-            [routerLink]="['channels', channel.id]"
-          >Manage configuration</button>
-        </li>
-      </ul>
-    </mat-card-content>
-  </mat-card>
+  <div>
+    <h2>Channels</h2>
+    <div class="pure-g" *ngFor="let channel of channels">
+      <div class="pure-u-1-2">#{{channel.name}}</div>
+      <div class="pure-u-1-2">
+        <button class="pure-button pure-button-primary" [routerLink]="['channels', channel.id]">
+          Manage configuration
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>

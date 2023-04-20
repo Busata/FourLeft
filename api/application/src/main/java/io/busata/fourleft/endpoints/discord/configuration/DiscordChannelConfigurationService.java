@@ -1,6 +1,7 @@
 package io.busata.fourleft.endpoints.discord.configuration;
 
 
+import io.busata.fourleft.domain.configuration.ClubViewRepository;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DiscordChannelConfigurationService {
     private final DiscordChannelConfigurationRepository discordChannelConfigurationRepository;
+    private final ClubViewRepository clubViewRepository;
 
 
     public List<DiscordChannelConfiguration> findAll() {
@@ -34,5 +36,10 @@ public class DiscordChannelConfigurationService {
 
     public Optional<DiscordChannelConfiguration> findConfigurationByChannelId(Long channelId) {
         return this.discordChannelConfigurationRepository.findByChannelId(channelId);
+    }
+
+    @Transactional
+    public void deleteConfigurationByChannelId(UUID configurationId) {
+        this.discordChannelConfigurationRepository.deleteById(configurationId);
     }
 }

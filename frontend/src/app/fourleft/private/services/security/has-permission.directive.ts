@@ -23,7 +23,7 @@ export class HasPermissionDirective implements OnInit {
   private checkAccess(user: User) {
 
     if (user.roles.indexOf(this.permission) != -1) {
-      this.elementRef.nativeElement.style.display = "inherit";
+      this.elementRef.nativeElement.style.display = "";
     } else {
       this.elementRef.nativeElement.style.display = "none";
     }

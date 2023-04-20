@@ -24,7 +24,7 @@ public class ResultListToFactory {
         final var activityInfo = eventToFactory.create(event, eventRestrictions);
 
         return new ResultListTo(
-                event.getChampionship().getClub().getName(),
+                view.getName(),
                 List.of(activityInfo),
                 filteredEntryList.totalBeforeExclude(),
                 filteredEntryList.entries()

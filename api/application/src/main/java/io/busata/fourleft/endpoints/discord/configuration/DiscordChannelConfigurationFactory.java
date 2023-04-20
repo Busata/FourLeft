@@ -80,7 +80,7 @@ public class DiscordChannelConfigurationFactory {
 
     private PointsCalculator createFixedPointsCalculator(FixedPointsCalculatorTo pointsCalculatorTo) {
         return new FixedPointsCalculator(
-                1,
+                pointsCalculatorTo.getJoinChampionshipsCount(),
                 null,
                     createPointSystem(pointsCalculatorTo.getPointSystem())
                 );

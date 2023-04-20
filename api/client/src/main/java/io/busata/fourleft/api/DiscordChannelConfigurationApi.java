@@ -1,6 +1,7 @@
 package io.busata.fourleft.api;
 
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,4 +21,7 @@ public interface DiscordChannelConfigurationApi {
 
     @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
     Optional<DiscordChannelConfigurationTo> getConfiguration(@PathVariable Long channelId);
+
+    @DeleteMapping(Routes.DISCORD_CHANNEL_SINGLE_CONFIGURATION)
+    void deleteConfiguration(@PathVariable UUID configurationId);
 }

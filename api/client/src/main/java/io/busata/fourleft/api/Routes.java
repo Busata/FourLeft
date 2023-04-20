@@ -78,6 +78,9 @@ public class Routes {
 
     public static final String ALL_DISCORD_CHANNEL_CONFIGURATION = "/api/discord/configurations";
     public static final String DISCORD_CHANNEL_CONFIGURATION = "/api/discord/channels/{channelId}/configuration";
+
+    public static final String DISCORD_CHANNEL_SINGLE_CONFIGURATION = "/api/discord/configurations/{configurationId}";
+
     public static final String DISCORD_CALLBACK = "/api/public/discord/callback";
     public static final String DISCORD_INTEGRATION_AUTH = "/api/discord/integration/auth";
 

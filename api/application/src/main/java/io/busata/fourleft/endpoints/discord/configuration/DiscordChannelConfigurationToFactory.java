@@ -36,7 +36,8 @@ public class DiscordChannelConfigurationToFactory {
 
     public DiscordChannelConfigurationTo create(DiscordChannelConfiguration discordChannelConfiguration) {
         return new DiscordChannelConfigurationTo(
-                discordChannelConfiguration.getAutopostClubViews().size() > 0,
+                discordChannelConfiguration.getId(),
+    discordChannelConfiguration.getAutopostClubViews().size() > 0,
                 discordChannelConfiguration.getChannelId(),
                 createClubViewTo(discordChannelConfiguration.getCommandsClubView())
         );

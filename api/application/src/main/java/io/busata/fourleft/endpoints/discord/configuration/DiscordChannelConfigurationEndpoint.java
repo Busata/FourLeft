@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.List.of;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,19 +22,27 @@ public class DiscordChannelConfigurationEndpoint implements DiscordChannelConfig
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
 
 
+    @Override
     public List<DiscordChannelConfigurationTo> getConfigurations() {
         return this.discordChannelConfigurationService.findAll().stream().map(discordChannelConfigurationToFactory::create).collect(Collectors.toList());
 
     }
 
+    @Override
     public UUID createConfiguration(@PathVariable Long channelId, @RequestBody DiscordChannelConfigurationTo clubViewTo) {
         DiscordChannelConfiguration configuration = discordChannelConfigurationFactory.create(channelId, clubViewTo);
         return discordChannelConfigurationService.createConfiguration(configuration);
     }
 
+    @Override
     public Optional<DiscordChannelConfigurationTo> getConfiguration(@PathVariable Long channelId) {
         return this.discordChannelConfigurationService.findConfigurationByChannelId(channelId)
                 .map(discordChannelConfigurationToFactory::create);
 
+    }
+
+    @Override
+    public void deleteConfiguration(@PathVariable UUID configurationId) {
+        this.discordChannelConfigurationService.deleteConfigurationByChannelId(configurationId);
     }
 }

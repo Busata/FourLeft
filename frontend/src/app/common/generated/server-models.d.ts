@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-18 20:51:33.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-19 15:43:39.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -257,6 +257,7 @@ export interface PointsCalculatorTo {
 }
 
 export interface DiscordChannelConfigurationTo {
+    id: string;
     enableAutoposts: boolean;
     channelId: number;
     clubView: ClubViewTo;

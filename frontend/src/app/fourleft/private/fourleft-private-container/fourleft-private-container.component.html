@@ -1,6 +1,7 @@
-<div class="links">
-  <button mat-stroked-button [routerLink]="['discord']">Discord integration</button>
-  <button mat-stroked-button hasPermission="admin" [routerLink]="['field_mappings']">Field Mappings</button>
-  <button mat-stroked-button hasPermission="admin" [routerLink]="['users']">Users</button>
+<div class="pure-g">
+  <button class="pure-button" [routerLink]="['discord']">Discord integration</button>
+  <button class="pure-button" hasPermission="admin" [routerLink]="['field_mappings']">Field Mappings</button>
+  <button class="pure-button" hasPermission="admin" [routerLink]="['users']">Users</button>
+  <button class="pure-button" hasPermission="admin" [routerLink]="['management']">Management</button>
 </div>
 <router-outlet></router-outlet>

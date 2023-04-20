@@ -1,0 +1,5 @@
+<input type="text" #clubId> <button (click)="triggerUpdate(clubId.value)">Trigger LEADERBOARD_UPDATED</button>
+
+<div *ngFor="let configuration of configurations">
+    {{configuration.channelId}} {{configuration.clubView.resultsView.associatedClubs}} <button (click)="removeConfiguration(configuration)">Remove</button>
+</div>
