@@ -72,6 +72,7 @@ public class AutoPostClubResultsService {
     }
 
     private List<AutoPostEntry> findPostedEntries(String viewEventKey) {
+        log.info("Checking posted entries -- {} --", viewEventKey);
         return autoPostEntryRepository.findByEventKey(viewEventKey);
     }
 
