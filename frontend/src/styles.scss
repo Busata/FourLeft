@@ -1,5 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
-@import "purecss/build/pure.css";
+@import "purecss/build/base-min.css";
+@import "purecss/build/grids-min.css";
+@import "purecss/build/grids-responsive-min.css";
+
+@import "styles/buttons";
+@import "styles/forms";
 
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;

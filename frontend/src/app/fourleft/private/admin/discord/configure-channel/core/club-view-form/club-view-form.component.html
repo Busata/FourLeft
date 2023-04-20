@@ -19,7 +19,7 @@
         <option value="partitionClub">Partition clubs</option>
       </select>
 
-      <button class="secondary" (click)="configureResults()">Configure</button>
+      <button class="g-button" (click)="configureResults()">Configure</button>
     </div>
     <div class="form-group" *ngIf="clubViewForm.pointsView">
       <label>Points system</label>
@@ -28,7 +28,7 @@
         <option value="defaultPoints">Default racenet points</option>
         <option value="fixedPoints">Fixed points</option>
       </select>
-      <button class="secondary" (click)="configurePoints()">Configure</button>
+      <button class="g-button" (click)="configurePoints()">Configure</button>
     </div>
   </div>
   <div class="results-view-configuration" [hidden]="!configuringResults">
@@ -46,7 +46,7 @@
         <app-concatenation-view-form [formGroup]="clubViewForm.concatenationView"></app-concatenation-view-form>
       </ng-container>
 
-      <button (click)="configureClubView()">Back to club configuration</button>
+      <button class="g-button" (click)="configureClubView()">Back to club configuration</button>
     </ng-container>
   </div>
   <div class="points-view-configuration" [hidden]="!configuringPoints">

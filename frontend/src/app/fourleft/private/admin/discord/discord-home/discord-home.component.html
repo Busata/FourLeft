@@ -1,24 +1,26 @@
-<div class="guilds" >
+<div class="guilds">
   <h2>Servers</h2>
-  <div class="flex" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
-    <img [src]="getGuildIcon(guild)"/>
-    <div class="ml-4">
-    <div class="font-bold">{{guild.name}}</div>
-    <div>
-      <div class="italic color-red-100" *ngIf="guild.botJoined">
-        Bot present
-      </div>
-      <div class="italic text-red-500" *ngIf="!guild.botJoined">
-        Bot not present yet
-      </div>
-      <div *ngIf="guild.botJoined">
-        <button mat-stroked-button [routerLink]="'configure/'+guild.id">Manage server</button>
+  <div class="pure-g">
+    <div class="pure-u-1-12" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
+      <img alt="Guild icon" [ngSrc]="getGuildIcon(guild)" width="125" height="125"/>
+      <div>
+        <div class="font-bold">{{guild.name}}</div>
+        <div>
+          <div class="italic color-red-100" *ngIf="guild.botJoined">
+            Bot present
+          </div>
+          <div class="italic text-red-500" *ngIf="!guild.botJoined">
+            Bot not present yet
+          </div>
+          <div *ngIf="guild.botJoined">
+            <button class="g-button g-button-primary" [routerLink]="'configure/'+guild.id">Manage server</button>
 
+          </div>
+          <div *ngIf="!guild.botJoined">
+            <button class="g-button g-button-primary" (click)="inviteBot(guild)">Invite bot</button>
+          </div>
+        </div>
       </div>
-      <div *ngIf="!guild.botJoined">
-        <button mat-stroked-button (click)="inviteBot(guild)">Invite bot</button>
-      </div>
-    </div>
     </div>
   </div>
 </div>

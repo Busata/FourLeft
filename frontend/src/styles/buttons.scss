@@ -1,0 +1,26 @@
+.g-button {
+  border-style: none;
+  padding: 15px;
+
+  -webkit-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.1);
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.1);
+
+  &:hover {
+    cursor:pointer;
+
+
+    -webkit-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+  }
+}
+
+.g-button-primary {
+  box-shadow: #1b3719;
+
+  border-radius:5px;
+  color: white;
+  font-weight: 800;
+  background-color: #65b7b9;
+}

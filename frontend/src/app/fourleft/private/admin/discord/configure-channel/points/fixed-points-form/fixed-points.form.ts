@@ -12,11 +12,13 @@ export class FixedPointsForm extends FormGroup {
   readonly standingPoints = this.get('pointSystem.standingPoints') as FormArray;
   readonly powerStagePoints = this.get('pointSystem.powerStagePoints') as FormArray;
   readonly joinChampionshipsCount = this.get('joinChampionshipsCount') as FormControl;
+  readonly offsetChampionship = this.get('offsetChampionship') as FormControl;
 
   constructor(value: FixedPointsCalculatorTo) {
     super({
       type: new FormControl("fixedPoints", {}),
       joinChampionshipsCount: new FormControl(value?.joinChampionshipsCount, {}),
+      offsetChampionship: new FormControl(value?.offsetChampionship, {}),
       pointSystem: new FormGroup({
         defaultStandingPoint: new FormControl(value?.pointSystem?.defaultStandingPoint, {}),
         defaultPowerstagePoint: new FormControl(value?.pointSystem?.defaultPowerstagePoint, {}),

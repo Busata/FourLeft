@@ -1,0 +1,27 @@
+.form-group {
+  label {
+    font-weight: 800;
+    font-size: 0.8em;
+    display:block;
+    color: #767575;
+  }
+  * {
+    margin: 3px;
+  }
+
+  margin-bottom: 5px;
+
+}
+
+input,select {
+  padding: 10px;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid black;
+}
+
+select {
+  background-color: white;
+  padding-right: 15px;
+}
+

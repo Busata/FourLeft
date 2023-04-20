@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {DiscordRoutingModule} from "./discord-routing.module";
 import {
   DiscordPageComponent
@@ -49,12 +49,13 @@ import { ViewRestrictionsFormComponent } from './configure-channel/core/view-res
     ViewRestrictionsFormComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],
-    imports: [
-        DiscordRoutingModule,
-        CommonModule,
-        MatButtonModule,
-        MatCardModule,
-        ReactiveFormsModule,
-    ]
+  imports: [
+    DiscordRoutingModule,
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    ReactiveFormsModule,
+    NgOptimizedImage,
+  ]
 })
 export class DiscordModule { }
