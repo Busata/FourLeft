@@ -40,7 +40,10 @@ public class AutoPostEntry {
     }
 
     public boolean hasEqualTimeVehicleAndNationality(DriverEntryTo resultEntryTo) {
-        return totalTime.equals(resultEntryTo.activityTotalTime()) && vehicle.equals(resultEntryTo.vehicles().get(0)) && nationality.equals(resultEntryTo.nationality());
+        boolean timeMatches = totalTime.equals(resultEntryTo.activityTotalTime());
+        boolean nationalityMatches = nationality.equals(resultEntryTo.nationality());
+        boolean vehicleMatches = vehicle.equals(resultEntryTo.vehicles().get(0).vehicleName());
+        return timeMatches && vehicleMatches && nationalityMatches;
     }
 
 }
