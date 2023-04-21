@@ -8,5 +8,7 @@ public class QueueNames {
     public static final String COMMUNITY_UPDATED = "q.community.updated";
     public static final String LEADERBOARD_UPDATE = "q.clubs.leaderboard.updated";
 
+    public static final String TICKER_ENTRIES_UPDATE = "q.ticker.entries.updated";
+
     private QueueNames() {}
 }

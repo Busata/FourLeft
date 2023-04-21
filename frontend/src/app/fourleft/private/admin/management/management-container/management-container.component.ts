@@ -26,4 +26,9 @@ export class ManagementContainerComponent implements OnInit {
   removeConfiguration(configuration: DiscordChannelConfigurationTo) {
     this.http.delete(`/api/discord/configurations/${configuration.id}`).subscribe();
   }
+
+  triggerImportTicker() {
+    this.http.post<any>(`/api/management/import_ticker`, {}).subscribe();
+
+  }
 }
