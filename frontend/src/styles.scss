@@ -14,6 +14,12 @@ body {
 #footer {
   width: 100%;
   position: fixed;
-  text-align: center;
+  text-align: left;
+  padding-left: 30px;
   bottom: 0;
+  z-index:99;
+}
+
+.g-image-h-400 {
+  max-height: 450px;
 }

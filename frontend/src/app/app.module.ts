@@ -35,6 +35,8 @@ const authConfig: AuthConfig = {
     },
     { provide: AuthConfig, useValue: authConfig },
     ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  declarations: [
+  ]
 })
 export class AppModule { }

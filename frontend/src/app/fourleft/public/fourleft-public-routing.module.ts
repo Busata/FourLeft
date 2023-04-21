@@ -10,7 +10,7 @@ export const routes: Routes = [
   },
       {
         path: 'user_community_progress',
-        component: UserCommunityProgressComponent
+        redirectTo :'/public',
       }
 ];
 

@@ -1,3 +1,9 @@
+.user-community-progress {
+ & >mat-card-title {
+   padding: 15px;
+
+ }
+}
 .url-generate-form {
   display: flex;
   flex-direction: column;
@@ -26,11 +32,8 @@
 
 }
 
-.user-community-progress {
-  min-width: 66vw;
-}
-
 .image-result {
   margin-top: 10px;
+  min-height: 75px;
   text-align: center;
 }

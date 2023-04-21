@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatSlideToggleChange} from "@angular/material/slide-toggle";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
@@ -7,8 +7,8 @@ import {MatSnackBar} from "@angular/material/snack-bar";
   templateUrl: './user-community-progress.component.html',
   styleUrls: ['./user-community-progress.component.scss']
 })
-export class UserCommunityProgressComponent {
-  public racenet: string = "";
+export class UserCommunityProgressComponent implements OnInit {
+  public racenet: string = "Catty7073";
   public includeNickname: boolean = false;
 
   public filterByBefore: boolean = false;
@@ -20,6 +20,10 @@ export class UserCommunityProgressComponent {
 
   constructor(private _snackBar: MatSnackBar) {
   }
+
+  ngOnInit(): void {
+        this.generateUrl();
+    }
 
 
   public generateUrl() {
