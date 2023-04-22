@@ -2,6 +2,7 @@ package io.busata.fourleftdiscord.listeners;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.WRCTickerUpdateTo;
 import io.busata.fourleft.domain.discord.bot.models.MessageType;
@@ -26,6 +27,7 @@ public class WRCTickerListener {
         update.stream().sorted(Comparator.comparing(WRCTickerUpdateTo::dateTime)).forEach(wrcTickerUpdateTo -> {
             EmbedCreateSpec.Builder tickerUpdate = EmbedCreateSpec.builder()
                     .title(fieldMapper.createEmoticon(wrcTickerUpdateTo.tickerEventKey()) + " • " + wrcTickerUpdateTo.title() + " • <t:%s:R>".formatted(wrcTickerUpdateTo.dateTime()))
+                    .color(fieldMapper.createColour(wrcTickerUpdateTo.tickerEventKey()))
                     .description(wrcTickerUpdateTo.text().replace("\\n", "\n").replace("\\u200B", "\u200B"));
 
             Optional.ofNullable(wrcTickerUpdateTo.imageUrl()).ifPresent(tickerUpdate::image);
@@ -34,6 +36,5 @@ public class WRCTickerListener {
                     MessageType.RESULTS_POST
             );
         });
-
     }
 }

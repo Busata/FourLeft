@@ -19,6 +19,11 @@ public enum FieldMappingType {
         public String getDefaultValue() {
             return "";
         }
+    }, COLOUR {
+        @Override
+        public String getDefaultValue() {
+            return "0,0,0";
+        }
     };
 
 

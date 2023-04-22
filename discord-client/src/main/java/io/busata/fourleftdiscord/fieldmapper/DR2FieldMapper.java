@@ -1,5 +1,6 @@
 package io.busata.fourleftdiscord.fieldmapper;
 
+import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.FieldMappingTo;
 import io.busata.fourleft.domain.discord.bot.models.FieldMappingType;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
@@ -8,12 +9,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class DR2FieldMapper {
     private final FourLeftClient fourLeftClient;
+
+    public Color createColour(String value) {
+        String fieldMapping = getFieldMapping(value, FieldMappingType.COLOUR);
+
+        Integer[] array = Arrays.stream(fieldMapping.split(",")).map(Integer::parseInt).toArray(Integer[]::new);
+
+        return Color.of(array[0], array[1], array[2]);
+    }
 
     public String createEmoticon(String value) {
         return getFieldMapping(value, FieldMappingType.EMOTE);

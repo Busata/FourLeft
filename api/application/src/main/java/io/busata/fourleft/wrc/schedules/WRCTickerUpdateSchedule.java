@@ -1,4 +1,4 @@
-package io.busata.fourleft.schedules;
+package io.busata.fourleft.wrc.schedules;
 
 import io.busata.fourleft.wrc.importer.WRCTickerImportService;
 import lombok.RequiredArgsConstructor;
