@@ -53,6 +53,8 @@ export class PartitionClubViewForm extends FormGroup {
   }
 
   removePartitionElement(i: number) {
-    this.partitionElements.removeAt(i);
+    if(confirm("Are you sure?")) {
+      this.partitionElements.removeAt(i);
+    }
   }
 }

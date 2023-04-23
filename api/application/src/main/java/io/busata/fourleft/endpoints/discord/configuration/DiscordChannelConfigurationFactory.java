@@ -8,7 +8,7 @@ import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.results.ConcatenationViewTo;
 import io.busata.fourleft.api.models.configuration.results.MergedViewTo;
-import io.busata.fourleft.api.models.configuration.results.PartitionElementTo;
+import io.busata.fourleft.api.models.configuration.results.RacenetFilterElementTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionViewTo;
 import io.busata.fourleft.api.models.configuration.results.PlayerFilterTo;
 import io.busata.fourleft.api.models.configuration.results.ResultsViewTo;
@@ -22,7 +22,7 @@ import io.busata.fourleft.domain.configuration.points.PointSystem;
 import io.busata.fourleft.domain.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
-import io.busata.fourleft.domain.configuration.results_views.PartitionElement;
+import io.busata.fourleft.domain.configuration.results_views.RacenetFilterElement;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
 import io.busata.fourleft.domain.configuration.results_views.ResultsView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
@@ -108,8 +108,8 @@ public class DiscordChannelConfigurationFactory {
         );
     }
 
-    private PartitionElement createPartitionElement(PartitionElementTo partitionElementTo) {
-        return new PartitionElement(
+    private RacenetFilterElement createPartitionElement(RacenetFilterElementTo partitionElementTo) {
+        return new RacenetFilterElement(
                 null,
                 partitionElementTo.getName(),
                 0,

@@ -1,4 +1,9 @@
 .form-group {
+  & inline {
+    label {
+      display: inline-block;
+    }
+  }
   label {
     font-weight: 800;
     font-size: 0.8em;

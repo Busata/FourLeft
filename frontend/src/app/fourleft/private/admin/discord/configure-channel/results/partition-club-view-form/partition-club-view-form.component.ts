@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {AbstractControl, FormGroup} from "@angular/forms";
+import {AbstractControl} from "@angular/forms";
 import {PartitionClubViewForm} from "./partition-club-view.form";
 import {PartitionElementForm} from "../partition-element-form/partition-element.form";
 
@@ -17,4 +17,18 @@ export class PartitionClubViewFormComponent {
     return partitionElementForm as PartitionElementForm;
   }
 
+  promotePlayer(idx: number, playerIdx: number) {
+    const sourcePartitionElement = this.partitionFormGroup.partitionElements.controls[idx] as PartitionElementForm;
+    const targetPartitionElement = this.partitionFormGroup.partitionElements.controls[idx - 1] as PartitionElementForm;
+
+    targetPartitionElement.racenetNames.push(sourcePartitionElement.racenetNames.controls[playerIdx]);
+    sourcePartitionElement.racenetNames.removeAt(playerIdx);
+  }
+
+  demotePlayer(idx: number, playerIdx: number) {
+    const sourcePartitionElement = this.partitionFormGroup.partitionElements.controls[idx] as PartitionElementForm;
+    const targetPartitionElement = this.partitionFormGroup.partitionElements.controls[idx + 1] as PartitionElementForm;
+    targetPartitionElement.racenetNames.push(sourcePartitionElement.racenetNames.controls[playerIdx]);
+    sourcePartitionElement.racenetNames.removeAt(playerIdx);
+  }
 }

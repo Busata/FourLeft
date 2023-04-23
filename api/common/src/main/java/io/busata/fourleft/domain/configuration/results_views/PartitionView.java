@@ -24,7 +24,7 @@ public class PartitionView extends ResultsView {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "partition_view_id")
-    List<PartitionElement> partitionElements;
+    List<RacenetFilterElement> partitionElements;
 
     @Override
     public Set<Long> getAssociatedClubs() {

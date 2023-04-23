@@ -1,9 +1,8 @@
 package io.busata.fourleft.api.models.configuration.results;
 
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilterType;
+import io.busata.fourleft.domain.configuration.player_restrictions.RacenetFilterMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,6 +10,6 @@ import java.util.List;
 @Getter
 public class PlayerFilterTo {
 
-    private PlayerFilterType playerFilterType;
+    private RacenetFilterMode playerFilterType;
     private List<String> racenetNames;
 }

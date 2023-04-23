@@ -25,4 +25,8 @@ export class MergedClubViewForm extends FormGroup {
   addSingleClubView() {
     this.resultViews.push(new SingleClubViewForm());
   }
+
+  removeClubAt(i: number) {
+    this.resultViews.removeAt(i);
+  }
 }

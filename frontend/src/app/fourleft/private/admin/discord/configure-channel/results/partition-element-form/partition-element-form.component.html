@@ -3,17 +3,17 @@
     <label>Name</label>
     <input type="text" formControlName="name">
   </div>
-  <div class="form-group">
-    <label>Players</label>
-    <input #player type="text" placeholder="Racenet name">
-    <button (click)="partitionElementFormGroup.addPlayer(player.value); player.value=''" >Add</button>
-  </div>
-  <div formArrayName="racenetNames">
-    <ng-container *ngFor="let playerControl of partitionElementFormGroup.racenetNames.controls; let i=index">
-      <div class="form-group">
-        <input type="text" [formControlName]="i">
-        <button (click)="partitionElementFormGroup.removePlayer(i)">Remove</button>
-      </div>
-    </ng-container>
+  <app-player-search (added)="this.partitionElementFormGroup.addPlayer($event)"></app-player-search>
+  <div>
+    <div formArrayName="racenetNames">
+      <ng-container *ngFor="let playerControl of partitionElementFormGroup.racenetNames.controls; let i=index">
+        <div class="form-group inline" >
+          <input class="g-readonly" type="text" [formControlName]="i" readonly>
+          <button class="g-button g-button-danger" (click)="partitionElementFormGroup.removePlayer(i)">Remove</button>
+          <button *ngIf="canPromote" class="g-button g-button-primary" (click)="promote.emit(i)">+</button>
+          <button *ngIf="canDemote" class="g-button g-button-tertiary" (click)="demote.emit(i)">-</button>
+        </div>
+      </ng-container>
+    </div>
   </div>
 </div>

@@ -4,11 +4,12 @@ import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.QueryTrackResultsTo;
 import io.busata.fourleft.api.models.StageOptionTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
+import io.busata.fourleft.domain.clubs.models.UniquePlayersView;
+import io.busata.fourleft.domain.clubs.repository.UniquePlayersViewRepository;
 import io.busata.fourleft.domain.options.models.CountryConfiguration;
 import io.busata.fourleft.domain.options.models.CountryOption;
 import io.busata.fourleft.domain.options.models.StageConfiguration;
 import io.busata.fourleft.domain.options.models.StageOption;
-import io.busata.fourleft.domain.clubs.repository.BoardEntryRepository;
 import io.busata.fourleft.domain.options.models.VehicleClass;
 import io.busata.fourleft.endpoints.query.models.FuzzySearchResult;
 import lombok.RequiredArgsConstructor;
@@ -22,37 +23,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class QueryEndpoint
 {
-    private final BoardEntryRepository boardEntryRepository;
+    private final UniquePlayersViewRepository uniquePlayersViewRepository;
 
     @GetMapping(Routes.QUERY_VEHICLE_CLASS)
     public List<VehicleTo> getVehiclesForClass(@PathVariable String vehicleClass) {
         VehicleClass byId = VehicleClass.findById(vehicleClass);
-        return byId.getVehicles().stream().map(vehicle -> {
-            return new VehicleTo(vehicle.name(), vehicle.getDisplayName());
-        }).toList();
+        return byId.getVehicles().stream().map(vehicle -> new VehicleTo(vehicle.name(), vehicle.getDisplayName())).toList();
     }
 
     @GetMapping(Routes.QUERY_NAME)
     public List<String> queryName(@RequestParam String query) {
         log.info("Finding name {}", query);
-        List<String> names = boardEntryRepository.findDistinctNames();
-        String normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD);
+        return uniquePlayersViewRepository.findSimilar(query);
+    }
 
-        return names.stream().map(name -> {
-            String normalizedName = Normalizer.normalize(name, Normalizer.Form.NFD);
-            int ratio = FuzzySearch.ratio(normalizedQuery, normalizedName);
-
-            return new FuzzySearchResult(name, ratio);
-        }).sorted(Comparator.comparingInt(FuzzySearchResult::ratio).reversed()).limit(5).map(FuzzySearchResult::name).collect(Collectors.toList());
-
+    private static String normalizeName(String query) {
+        return Normalizer.normalize(query.toLowerCase().replace(" ", ""), Normalizer.Form.NFC);
     }
 
     @GetMapping(Routes.QUERY_TRACK)

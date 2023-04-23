@@ -1,10 +1,9 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {PartitionElementTo} from "../../../../../../../common/generated/server-models";
+import {PartitionElementTo} from "@server-models";
 
 export class PartitionElementForm extends FormGroup {
 
   readonly name = this.get('name') as FormControl;
-  readonly order = this.get('order') as FormControl;
   readonly racenetNames = this.get('racenetNames') as FormArray;
 
   constructor(value?: PartitionElementTo) {

@@ -24,7 +24,7 @@ public class PlayerFilter {
     UUID id;
 
     @Enumerated(EnumType.STRING)
-    PlayerFilterType filterType;
+    RacenetFilterMode filterType;
 
     @ElementCollection
     List<String> racenetNames;

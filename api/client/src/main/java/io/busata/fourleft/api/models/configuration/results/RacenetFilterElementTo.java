@@ -8,9 +8,8 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class PartitionElementTo {
+public class RacenetFilterElementTo {
 
     private String name;
-    private int order;
     List<String> racenetNames;
 }

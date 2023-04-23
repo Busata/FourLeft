@@ -1,5 +1,6 @@
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {SingleClubViewTo} from "@server-models";
+import {PlayerFilterForm} from '../player-filter-form/player-filter.form';
 
 export class SingleClubViewForm extends FormGroup {
 
@@ -10,7 +11,7 @@ export class SingleClubViewForm extends FormGroup {
   public readonly usePowerstage = this.get('usePowerstage') as FormControl;
   public readonly powerStageIndex = this.get('powerStageIndex') as FormControl;
 
-  public readonly playerFilter = this.get('playerFilter') as FormGroup;
+  public readonly playerFilter = this.get('playerFilter') as PlayerFilterForm;
 
   constructor(value?: SingleClubViewTo) {
     super({
@@ -20,10 +21,7 @@ export class SingleClubViewForm extends FormGroup {
       clubId: new FormControl(value?.clubId, [Validators.required]),
       usePowerstage: new FormControl(value?.usePowerstage, {}),
       powerStageIndex: new FormControl(value?.powerStageIndex, {}),
-      playerFilter: new FormGroup({
-        playerFilterType: new FormControl(value?.playerFilter?.playerFilterType, {}),
-        racenetNames: new FormArray(value?.playerFilter?.racenetNames?.map(name => new FormControl(name, {})) || [])
-      })
+      playerFilter: new PlayerFilterForm(value?.playerFilter)
     });
 
   }

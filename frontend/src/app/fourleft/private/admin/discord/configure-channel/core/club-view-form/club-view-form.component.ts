@@ -48,4 +48,11 @@ export class ClubViewFormComponent {
     this.activeConfiguration = 'points';
   }
 
+  isResultsViewDisabled() {
+    return this.clubViewForm?.resultsViewType?.value === '';
+  }
+
+  isPointsViewDisabled() {
+    return this.clubViewForm?.pointsViewType?.value === '';
+  }
 }

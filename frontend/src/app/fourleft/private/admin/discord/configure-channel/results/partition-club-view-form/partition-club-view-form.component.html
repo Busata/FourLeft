@@ -19,16 +19,21 @@
     </ng-container>
   </ng-container>
 
+  <div class="g-card">
   <h3>Partition elements</h3>
 
-  <button (click)="partitionFormGroup.addPartitionElement()">Add partition element</button>
+  <button class="g-button g-button-secondary" (click)="partitionFormGroup.addPartitionElement()">Add partition element</button>
 
-  <div formArrayName="partitionElements">
-    <ng-container *ngFor="let partitionElementForm of partitionFormGroup.partitionElements.controls;let i=index">
-      <app-partition-element-form [formGroup]="cast(partitionElementForm)"></app-partition-element-form>
-      <button (click)="partitionFormGroup.removePartitionElement(i)">Remove this</button>
-    </ng-container>
+  <div formArrayName="partitionElements" class="pure-g" cdkDropListGroup>
+    <div class="pure-u-1-4" *ngFor="let partitionElementForm of partitionFormGroup.partitionElements.controls;let i=index">
+      <app-partition-element-form [canPromote]="i !== 0"
+                                  [canDemote]="i !== partitionFormGroup.partitionElements.controls.length - 1"
+                                  (promote)="promotePlayer(i, $event)"
+                                  (demote)="demotePlayer(i, $event)"
+                                  [formGroup]="cast(partitionElementForm)"></app-partition-element-form>
+      <button class="g-button g-button-danger" (click)="partitionFormGroup.removePartitionElement(i)">Remove this</button>
+    </div>
 
   </div>
-
+  </div>
 </form>
