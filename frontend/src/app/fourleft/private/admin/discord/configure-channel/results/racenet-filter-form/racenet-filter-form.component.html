@@ -1,0 +1,29 @@
+<div [formGroup]="racenetFilterFormGroup">
+  <div class="form-group" *ngIf="enableModeChange">
+    <label>Player filter</label>
+    <select [formControl]="racenetFilterFormGroup.filterMode" (change)="updatePlayers()">
+      <option value="NONE">None</option>
+      <option value="INCLUDE">Recalculate results</option>
+      <option value="FILTER">Filter only</option>
+    </select>
+  </div>
+  <ng-container *ngIf="showPlayers()">
+  <div class="form-group" *ngIf="enableName">
+    <label>Racenet filter name</label>
+    <input type="text" formControlName="name">
+  </div>
+  <app-player-search (added)="this.racenetFilterFormGroup.addPlayer($event)"></app-player-search>
+  <div>
+    <div formArrayName="racenetNames">
+      <ng-container *ngFor="let playerControl of racenetFilterFormGroup.racenetNames.controls; let i=index">
+        <div class="form-group inline" >
+          <input class="g-readonly" type="text" [formControlName]="i" readonly>
+          <button class="g-button g-button-danger" (click)="racenetFilterFormGroup.removePlayer(i)">Remove</button>
+          <button *ngIf="canPromote" class="g-button g-button-primary" (click)="promote.emit(i)">+</button>
+          <button *ngIf="canDemote" class="g-button g-button-tertiary" (click)="demote.emit(i)">-</button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  </ng-container>
+</div>

@@ -16,7 +16,8 @@
     <label>Default power stage index</label>
     <input type="number" [formControl]="singleClubFormGroup.powerStageIndex" placeholder="-1 would be the last stage."/>
   </div>
-  <app-player-filter-form [formGroup]="singleClubFormGroup.playerFilter"></app-player-filter-form>
+
+  <app-racenet-filter-form [formGroup]="singleClubFormGroup.racenetFilter"></app-racenet-filter-form>
 
 </div>
 

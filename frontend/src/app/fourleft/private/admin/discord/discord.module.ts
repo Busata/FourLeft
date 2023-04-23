@@ -18,7 +18,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { SingleClubViewFormComponent } from './configure-channel/results/single-club-view-form/single-club-view-form.component';
 import {MergeViewClubFormComponent} from "./configure-channel/results/merge-club-view-form/merge-view-club-form.component";
 import { PartitionClubViewFormComponent } from './configure-channel/results/partition-club-view-form/partition-club-view-form.component';
-import { PartitionElementFormComponent } from './configure-channel/results/partition-element-form/partition-element-form.component';
+import { RacenetFilterFormComponent } from './configure-channel/results/racenet-filter-form/racenet-filter-form.component';
 import { FixedPointsFormComponent } from './configure-channel/points/fixed-points-form/fixed-points-form.component';
 import { DiscordChannelConfigurationFormComponent } from './configure-channel/core/discord-channel-configuration-form/discord-channel-configuration-form.component';
 import { PreviewChannelConfigurationComponent } from './configure-channel/preview/preview-channel-configuration/preview-channel-configuration.component';
@@ -26,7 +26,6 @@ import { PointPairFormComponent } from './configure-channel/points/point-pair-fo
 import { ConcatenationViewFormComponent } from './configure-channel/results/concatenation-view-form/concatenation-view-form.component';
 import { ViewRestrictionsContainerComponent } from './configure-channel/core/view-restrictions-container/view-restrictions-container.component';
 import { ViewRestrictionsFormComponent } from './configure-channel/core/view-restrictions-form/view-restrictions-form.component';
-import { PlayerFilterFormComponent } from './configure-channel/results/player-filter-form/player-filter-form.component';
 import { PlayerSearchComponent } from './configure-channel/results/player-search/player-search.component';
 import {CdkDrag, CdkDragHandle, CdkDropList, CdkDropListGroup} from '@angular/cdk/drag-drop';
 
@@ -42,7 +41,7 @@ import {CdkDrag, CdkDragHandle, CdkDropList, CdkDropListGroup} from '@angular/cd
     MergeViewClubFormComponent,
     SingleClubViewFormComponent,
     PartitionClubViewFormComponent,
-    PartitionElementFormComponent,
+    RacenetFilterFormComponent,
     FixedPointsFormComponent,
     DiscordChannelConfigurationFormComponent,
     PreviewChannelConfigurationComponent,
@@ -50,7 +49,6 @@ import {CdkDrag, CdkDragHandle, CdkDropList, CdkDropListGroup} from '@angular/cd
     ConcatenationViewFormComponent,
     ViewRestrictionsContainerComponent,
     ViewRestrictionsFormComponent,
-    PlayerFilterFormComponent,
     PlayerSearchComponent,
   ],
   providers: [DiscordStateService, DiscordIntegrationApiService],

@@ -9,18 +9,24 @@
       </select>
     </div>
 
-    <div class="results-view">
-      <div class="form-group" *ngIf="clubViewForm.resultsView">
-        <label>Results view type</label>
-        <select (change)="clubViewForm.setResultsView({type: $event.target.value})" [formControl]="clubViewForm.resultsViewType">
-          <option value="">Select a results view</option>
-          <option value="singleClub">Single club</option>
-          <option value="mergeClub">Merge clubs</option>
-          <option value="concatenationClub">Concatenate clubs</option>
-          <option value="partitionClub">Partition clubs</option>
-        </select>
+    <button class="g-button" [ngClass]="{'g-active': configuringResults}" (click)="configureResults()">Results</button>
+    <button class="g-button" [ngClass]="{'g-active': configuringPoints}" (click)="configurePoints()">Points</button>
 
-      </div>
+    <div class="g-card" *ngIf="configuringResults">
+      <h3>Customize results</h3>
+      <div class="results-view">
+        <div class="form-group" *ngIf="clubViewForm.resultsView">
+          <label>Results view type</label>
+          <select (change)="clubViewForm.setResultsView({type: $event.target.value})"
+                  [formControl]="clubViewForm.resultsViewType">
+            <option value="">Select a results view</option>
+            <option value="singleClub">Single club</option>
+            <option value="mergeClub">Merge clubs</option>
+            <option value="concatenationClub">Concatenate clubs</option>
+            <option value="partitionClub">Partition clubs</option>
+          </select>
+
+        </div>
         <div class="results-view-configuration g-card" *ngIf="!isResultsViewDisabled()">
           <ng-container *ngIf="clubViewForm.resultsViewType?.value == 'singleClub'">
             <app-single-club-view-form [formGroup]="clubViewForm.singleClubView"></app-single-club-view-form>
@@ -35,24 +41,27 @@
             <app-concatenation-view-form [formGroup]="clubViewForm.concatenationView"></app-concatenation-view-form>
           </ng-container>
         </div>
+      </div>
     </div>
-    <div class="form-group" *ngIf="clubViewForm.pointsView">
-      <label>Points system</label>
-      <select (change)="clubViewForm.setPointsView({type: $event.target.value})" [formControl]="clubViewForm.pointsViewType">
-        <option value="">Select a points system</option>
-        <option value="defaultPoints">Default racenet points</option>
-        <option value="fixedPoints">Fixed points</option>
-      </select>
+    <div class="g-card" *ngIf="configuringPoints">
+      <h3>Customize points</h3>
+      <div class="form-group" *ngIf="clubViewForm.pointsView">
+        <label>Points system</label>
+        <select (change)="clubViewForm.setPointsView({type: $event.target.value})"
+                [formControl]="clubViewForm.pointsViewType">
+          <option value="">Select a points system</option>
+          <option value="defaultPoints">Default racenet points</option>
+          <option value="fixedPoints">Fixed points</option>
+        </select>
+      </div>
+    <div class="points-view-configuration" [hidden]="isPointsViewDisabled()">
+      <ng-container *ngIf="clubViewForm.pointsView">
+        <ng-container *ngIf="clubViewForm.pointsViewType?.value === 'fixedPoints'">
+          <app-fixed-points-form [formGroup]="clubViewForm.fixedPointsView"></app-fixed-points-form>
+        </ng-container>
+      </ng-container>
     </div>
   </div>
-  <div class="points-view-configuration" [hidden]="isPointsViewDisabled()">
-    <ng-container *ngIf="clubViewForm.pointsView">
-      <ng-container *ngIf="clubViewForm.pointsViewType?.value === 'fixedPoints'">
-        <app-fixed-points-form [formGroup]="clubViewForm.fixedPointsView"></app-fixed-points-form>
-        <button class="secondary" (click)="configureClubView()">Back to club configuration</button>
-      </ng-container>
-
-    </ng-container>
   </div>
 
 </form>

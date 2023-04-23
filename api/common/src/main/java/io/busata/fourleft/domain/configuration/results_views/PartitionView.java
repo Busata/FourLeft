@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.util.List;
@@ -22,9 +24,8 @@ public class PartitionView extends ResultsView {
     @JoinColumn(name="results_view_id")
     ResultsView resultsView;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "partition_view_id")
-    List<RacenetFilterElement> partitionElements;
+    @ManyToMany(cascade = CascadeType.ALL)
+    List<RacenetFilter> partitionElements;
 
     @Override
     public Set<Long> getAssociatedClubs() {

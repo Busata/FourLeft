@@ -6,7 +6,7 @@ import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.common.StageTimeParser;
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
+import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
 import io.busata.fourleft.helpers.Factory;
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +24,7 @@ public class ResultListMerger {
     private final StageTimeParser parser;
     private final DriverEntryToFactory driverEntryToFactory;
 
-    public ResultListTo mergeResults(List<ResultListTo> results, PlayerFilter playerFilter) {
+    public ResultListTo mergeResults(List<ResultListTo> results, RacenetFilter racenetFilter) {
         HashMap<String, DriverResultTo> driverEntries = new HashMap<>();
         HashMap<String, Long> driverEntryCount = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class ResultListMerger {
                 entry -> driverEntryCount.get(entry.racenet()) == results.size()
         ).collect(Collectors.toList());
 
-        FilteredEntryList<DriverEntryTo> driverResultTos = driverEntryToFactory.filterResultsByFilter(entriesOccuringInEveryList, playerFilter);
+        FilteredEntryList<DriverEntryTo> driverResultTos = driverEntryToFactory.filterResultsByFilter(entriesOccuringInEveryList, racenetFilter);
 
 
         List<ActivityInfoTo> mergedActivities = results.stream().flatMap(list -> list.activityInfoTo().stream()).distinct().toList();

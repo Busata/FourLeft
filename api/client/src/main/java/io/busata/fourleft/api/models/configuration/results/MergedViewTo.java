@@ -1,6 +1,5 @@
 package io.busata.fourleft.api.models.configuration.results;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,7 +11,7 @@ public class MergedViewTo extends ResultsViewTo {
 
     private String name;
 
-    PlayerFilterTo playerFilter;
+    RacenetFilterTo racenetFilter;
 
     private List<SingleClubViewTo> resultViews;
 }

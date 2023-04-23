@@ -11,8 +11,8 @@ import io.busata.fourleft.domain.clubs.models.Stage;
 import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.domain.configuration.event_restrictions.models.ViewEventRestrictions;
 import io.busata.fourleft.domain.configuration.event_restrictions.repository.ViewEventRestrictionsRepository;
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
 import io.busata.fourleft.domain.configuration.player_restrictions.RacenetFilterMode;
+import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -50,21 +50,21 @@ public class DriverEntryToFactory {
 
         driverResults = mergePowerStageEntries(driverResults, view, event);
 
-        PlayerFilter playerFilter = view.getPlayerFilter();
-        return filterResultsByFilter(driverResults, playerFilter);
+        RacenetFilter racenetFilter = view.getRacenetFilter();
+        return filterResultsByFilter(driverResults, racenetFilter);
     }
 
-    public FilteredEntryList<DriverEntryTo> filterResultsByFilter(List<DriverResultTo> driverResults, PlayerFilter playerFilter) {
-        if (playerFilter.getFilterType() == RacenetFilterMode.INCLUDE) {
-            driverResults = includeNames(driverResults, playerFilter.getRacenetNames());
+    public FilteredEntryList<DriverEntryTo> filterResultsByFilter(List<DriverResultTo> driverResults, RacenetFilter racenetFilter) {
+        if (racenetFilter.getFilterMode() == RacenetFilterMode.INCLUDE) {
+            driverResults = includeNames(driverResults, racenetFilter.getRacenetNames());
         }
 
         int totalEntries = driverResults.size();
 
         List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
 
-        if (playerFilter.getFilterType() == RacenetFilterMode.FILTER) {
-            driverEntryTos = filterNames(driverEntryTos, playerFilter.getRacenetNames());
+        if (racenetFilter.getFilterMode() == RacenetFilterMode.FILTER) {
+            driverEntryTos = filterNames(driverEntryTos, racenetFilter.getRacenetNames());
         }
 
         return new FilteredEntryList<>(driverEntryTos, totalEntries);

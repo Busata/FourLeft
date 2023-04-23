@@ -24,6 +24,7 @@ public class QueryUpdateSchedule {
     private EntityManager entityManager;
 
     @Scheduled(cron = "0 */1 * * * *", zone = "UTC")
+    @Transactional
     public void refreshUniquePlayersView() {
         Query nativeQuery = entityManager.createNativeQuery("REFRESH MATERIALIZED VIEW unique_players;");
         nativeQuery.executeUpdate();

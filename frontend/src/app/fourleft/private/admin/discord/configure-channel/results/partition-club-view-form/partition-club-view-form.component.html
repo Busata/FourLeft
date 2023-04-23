@@ -26,11 +26,13 @@
 
   <div formArrayName="partitionElements" class="pure-g" cdkDropListGroup>
     <div class="pure-u-1-4" *ngFor="let partitionElementForm of partitionFormGroup.partitionElements.controls;let i=index">
-      <app-partition-element-form [canPromote]="i !== 0"
+      <app-racenet-filter-form [canPromote]="i !== 0"
+                               [enableName]="true"
+                               [enableModeChange]="false"
                                   [canDemote]="i !== partitionFormGroup.partitionElements.controls.length - 1"
                                   (promote)="promotePlayer(i, $event)"
                                   (demote)="demotePlayer(i, $event)"
-                                  [formGroup]="cast(partitionElementForm)"></app-partition-element-form>
+                                  [formGroup]="cast(partitionElementForm)"></app-racenet-filter-form>
       <button class="g-button g-button-danger" (click)="partitionFormGroup.removePartitionElement(i)">Remove this</button>
     </div>
 

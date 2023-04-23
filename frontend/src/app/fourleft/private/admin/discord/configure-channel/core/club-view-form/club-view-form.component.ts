@@ -11,21 +11,7 @@ export class ClubViewFormComponent {
   @Input("formGroup")
   clubViewForm!: ClubViewForm;
 
-  private activeConfiguration : 'club' | 'results' | 'points' = 'club';
-
-  public get title() {
-    let title = ['Configure Club View'];
-    if(this.activeConfiguration == 'results') {
-      title.push('Results View');
-    } else if(this.activeConfiguration == 'points') {
-      title.push('Points View');
-    }
-
-    return title.join(' - ');
-  }
-  public get configuringClubView() {
-    return this.activeConfiguration === 'club';
-  }
+  private activeConfiguration : 'results' | 'points' = 'results';
 
   public get configuringResults() {
     return this.activeConfiguration === 'results';
@@ -39,11 +25,6 @@ export class ClubViewFormComponent {
   configureResults() {
     this.activeConfiguration = 'results';
   }
-
-  configureClubView() {
-    this.activeConfiguration = 'club';
-  }
-
   configurePoints() {
     this.activeConfiguration = 'points';
   }

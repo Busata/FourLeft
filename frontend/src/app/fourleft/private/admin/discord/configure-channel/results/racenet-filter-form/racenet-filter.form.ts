@@ -1,15 +1,17 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {PartitionElementTo} from "@server-models";
+import {RacenetFilterTo} from '@server-models';
 
-export class PartitionElementForm extends FormGroup {
+export class RacenetFilterForm extends FormGroup {
 
   readonly name = this.get('name') as FormControl;
+  readonly filterMode = this.get('filterMode') as FormControl;
   readonly racenetNames = this.get('racenetNames') as FormArray;
 
-  constructor(value?: PartitionElementTo) {
+  constructor(value?: RacenetFilterTo) {
     super({
-      name: new FormControl(value?.name, {}),
-      order: new FormControl(value?.order, {}),
+      id: new FormControl(value?.id, {}),
+      filterMode: new FormControl(value?.filterMode || 'NONE', {}),
+      name: new FormControl(value?.name || '', {}),
       racenetNames: new FormArray(value?.racenetNames?.map(e => new FormControl(e)) || [])
     });
   }

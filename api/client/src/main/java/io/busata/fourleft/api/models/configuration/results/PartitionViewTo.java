@@ -11,6 +11,6 @@ public class PartitionViewTo extends ResultsViewTo {
 
     private ResultsViewTo resultsView;
 
-    private List<RacenetFilterElementTo> partitionElements;
+    private List<RacenetFilterTo> partitionElements;
 
 }
