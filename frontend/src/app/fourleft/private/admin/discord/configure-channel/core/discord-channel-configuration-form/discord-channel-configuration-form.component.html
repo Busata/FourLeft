@@ -1,9 +1,9 @@
-<div *ngIf="form" [formGroup]="form">
-<div class="form-group">
-  <label>Enable autoposting</label>
-  <input type="checkbox" [formControl]="form.enableAutoposts"/>
-
-</div>
+<div class="discord-channel-configuration" *ngIf="form" [formGroup]="form">
+  <h2>Channel configuration</h2>
+  <div class="form-group">
+    <label>Enable autoposting</label>
+    <input type="checkbox" [formControl]="form.enableAutoposts"/>
+  </div>
 
 <app-club-view-form [formGroup]="form.clubView"></app-club-view-form>
 

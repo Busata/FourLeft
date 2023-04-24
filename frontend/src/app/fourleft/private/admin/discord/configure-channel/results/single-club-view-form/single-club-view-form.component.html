@@ -1,5 +1,5 @@
-<div class="side-view">
-<div class="configuration" [formGroup]="singleClubFormGroup">
+<div class="pure-g">
+<div class="configuration pure-u-1-2" [formGroup]="singleClubFormGroup">
   <div class="form-group">
     <label>Name</label>
     <input type="text" [formControl]="singleClubFormGroup.name">
@@ -16,32 +16,12 @@
     <label>Default power stage index</label>
     <input type="number" [formControl]="singleClubFormGroup.powerStageIndex" placeholder="-1 would be the last stage."/>
   </div>
-  <div [formGroup]="singleClubFormGroup.playerFilter">
-    <div class="form-group">
-      <label>Player filter</label>
-      <select formControlName="playerFilterType" (change)="updatePlayers()">
-        <option value="NONE">None</option>
-        <option value="INCLUDE">Recalculate results</option>
-        <option value="FILTER">Filter only</option>
-      </select>
-    </div>
-    <div class="form-group" *ngIf="showPlayers()">
-      <label>Players</label>
-      <input #player type="text" placeholder="Racenet name">
-      <button (click)="addPlayer(player.value); player.value=''">Add</button>
-    </div>
-    <div formArrayName="racenetNames">
-      <ng-container *ngFor="let playerControl of players.controls; let i=index">
-        <div class="form-group">
-          <input type="text" [formControlName]="i">
-          <button (click)="removePlayer(i)">Remove</button>
-        </div>
-      </ng-container>
-    </div>
-  </div>
+
+  <app-racenet-filter-form [formGroup]="singleClubFormGroup.racenetFilter"></app-racenet-filter-form>
+
 </div>
 
-<div class="restrictions" *ngIf="singleClubFormGroup.id.value">
+<div class="restrictions pure-u-1-2" *ngIf="singleClubFormGroup.id.value">
   <h2>Active event - restrictions</h2>
   <app-view-restrictions-container [resultViewId]="singleClubFormGroup.id.value"></app-view-restrictions-container>
 </div>

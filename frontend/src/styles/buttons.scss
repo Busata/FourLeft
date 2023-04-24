@@ -16,11 +16,32 @@
   }
 }
 
-.g-button-primary {
+.g-active {
+  background-color: #5d9573;
+  color: white;
+  font-weight: 800;
+}
+
+.g-button-primary, .g-button-secondary,.g-button-tertiary, .g-button-danger {
   box-shadow: #1b3719;
 
   border-radius:5px;
   color: white;
   font-weight: 800;
+}
+
+.g-button-primary {
   background-color: #65b7b9;
+}
+
+.g-button-secondary {
+  background-color: #5d9573;
+}
+
+.g-button-danger {
+  background-color: #b81431;
+}
+
+.g-button-tertiary {
+  background-color: #ffa100;
 }

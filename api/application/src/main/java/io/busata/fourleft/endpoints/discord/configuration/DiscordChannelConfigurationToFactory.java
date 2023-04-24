@@ -8,26 +8,26 @@ import io.busata.fourleft.api.models.configuration.PointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleft.api.models.configuration.results.ConcatenationViewTo;
 import io.busata.fourleft.api.models.configuration.results.MergedViewTo;
-import io.busata.fourleft.api.models.configuration.results.PartitionElementTo;
+import io.busata.fourleft.api.models.configuration.results.RacenetFilterTo;
 import io.busata.fourleft.api.models.configuration.results.PartitionViewTo;
-import io.busata.fourleft.api.models.configuration.results.PlayerFilterTo;
 import io.busata.fourleft.api.models.configuration.results.ResultsViewTo;
 import io.busata.fourleft.api.models.configuration.results.SingleClubViewTo;
 import io.busata.fourleft.domain.configuration.ClubView;
 import io.busata.fourleft.domain.configuration.DiscordChannelConfiguration;
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
+import io.busata.fourleft.domain.configuration.player_restrictions.RacenetFilterMode;
 import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.configuration.points.PointSystem;
 import io.busata.fourleft.domain.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
-import io.busata.fourleft.domain.configuration.results_views.PartitionElement;
+import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
 import io.busata.fourleft.domain.configuration.results_views.PartitionView;
 import io.busata.fourleft.domain.configuration.results_views.ResultsView;
 import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
 import io.busata.fourleft.helpers.Factory;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Factory
@@ -76,36 +76,33 @@ public class DiscordChannelConfigurationToFactory {
                 view.getName(),
                 view.hasPowerStage(),
                 view.getPowerStageIndices().stream().findFirst().orElse(null),
-                createPlayerFilterTo(view.getPlayerFilter())
+                createRacenetElementfilter(view.getRacenetFilter())
         );
     }
 
-    private PlayerFilterTo createPlayerFilterTo(PlayerFilter playerFilter) {
-        return new PlayerFilterTo(
-                playerFilter.getFilterType(),
-                playerFilter.getRacenetNames()
+    private RacenetFilterTo createRacenetElementfilter(RacenetFilter racenetFilter) {
+        if(racenetFilter == null) {
+            return new RacenetFilterTo(null, "", RacenetFilterMode.NONE, List.of());
+        }
+        return new RacenetFilterTo(
+                racenetFilter.getId(),
+                racenetFilter.getName(),
+                racenetFilter.getFilterMode(),
+                racenetFilter.getRacenetNames()
         );
     }
 
     private ResultsViewTo createPartitionViewTo(PartitionView view) {
         return new PartitionViewTo(
                 createResultsViewTo(view.getResultsView()),
-                view.getPartitionElements().stream().map(this::createPartitionElementTo).collect(Collectors.toList())
-        );
-    }
-
-    private PartitionElementTo createPartitionElementTo(PartitionElement partitionElement) {
-        return new PartitionElementTo(
-                partitionElement.getName(),
-                partitionElement.getCustomOrder(),
-                partitionElement.getRacenetNames()
+                view.getPartitionElements().stream().map(this::createRacenetElementfilter).collect(Collectors.toList())
         );
     }
 
     private ResultsViewTo createMergeResultsViewTo(MergeResultsView view) {
         return new MergedViewTo(
                 view.getName(),
-                createPlayerFilterTo(view.getPlayerFilter()),
+                createRacenetElementfilter(view.getRacenetFilter()),
                 view.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList())
         );
     }

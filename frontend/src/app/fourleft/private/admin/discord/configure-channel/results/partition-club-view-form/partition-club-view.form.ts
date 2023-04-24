@@ -1,7 +1,7 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {SingleClubViewForm} from "../single-club-view-form/single-club-view.form";
 import {MergedClubViewForm} from "../merge-club-view-form/merged-club-view.form";
-import {PartitionElementForm} from "../partition-element-form/partition-element.form";
+import {RacenetFilterForm} from "../racenet-filter-form/racenet-filter.form";
 import {
   MergedViewTo,
   PartitionViewTo,
@@ -30,7 +30,7 @@ export class PartitionClubViewForm extends FormGroup {
   constructor(value?: PartitionViewTo) {
     super({
       type: new FormControl('partitionClub', {}),
-      partitionElements: new FormArray(value?.partitionElements?.map(e => new PartitionElementForm(e)) || []),
+      partitionElements: new FormArray(value?.partitionElements?.map(e => new RacenetFilterForm(e)) || []),
     });
     this.setResultsView(value?.resultsView as ResultsViewTo);
   }
@@ -49,10 +49,12 @@ export class PartitionClubViewForm extends FormGroup {
   }
 
   addPartitionElement() {
-    this.partitionElements.push(new PartitionElementForm());
+    this.partitionElements.push(new RacenetFilterForm({filterMode: 'INCLUDE', name: '', racenetNames:[], id:''}));
   }
 
   removePartitionElement(i: number) {
-    this.partitionElements.removeAt(i);
+    if(confirm("Are you sure?")) {
+      this.partitionElements.removeAt(i);
+    }
   }
 }
