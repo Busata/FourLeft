@@ -22,9 +22,8 @@ public class DiscordIntegrationEndpoint {
 
 
     @GetMapping(Routes.DISCORD_MANAGE_SERVER)
-    @DiscordAuthenticated
     public DiscordGuildPermissionTo canManage(@PathVariable(name="guildId") String guildId) {
-        return new DiscordGuildPermissionTo(true);
+        return new DiscordGuildPermissionTo(discordIntegrationService.canManage(guildId));
     }
 
     @GetMapping(Routes.DISCORD_INVITE_BOT)
@@ -61,18 +60,15 @@ public class DiscordIntegrationEndpoint {
     }
 
     @GetMapping(Routes.DISCORD_GUILDS)
-    @DiscordAuthenticated
     public List<DiscordGuildSummaryTo> getGuildSummary() {
         return this.discordIntegrationService.getGuildSummaries();
     }
 
     @GetMapping(Routes.DISCORD_GUILD)
-    @DiscordAuthenticated
     public DiscordGuildTo getGuild(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuild(guildId);
     }
     @GetMapping(Routes.DISCORD_GUILD_CHANNELS)
-    @DiscordAuthenticated
     public List<DiscordChannelTo> getChannels(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuildChannels(guildId);
     }

@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
+import io.busata.fourleft.domain.discord.integration.models.UserDiscordGuildAccessRepository;
 import io.busata.fourleft.endpoints.discord.integration.feign.auth.DiscordOauth2Client;
 import io.busata.fourleft.endpoints.discord.integration.feign.user.DiscordUserClient;
 import io.busata.fourleft.endpoints.discord.integration.feign.bot.DiscordBotClient;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -40,29 +42,33 @@ public class DiscordIntegrationService {
 
     private final SecurityService securityService;
 
+    private final UserDiscordGuildAccessRepository userDiscordGuildAccessRepository;
+
     private final DiscordGuildSummaryToFactory discordGuildSummaryToFactory;
 
     public List<DiscordGuildSummaryTo> getGuildSummaries() {
         List<DiscordGuildTo> botGuilds = this.discordBotClient.getGuilds();
-        List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
 
-        List<DiscordGuildSummaryTo> discordGuildSummaryTos = userGuilds.stream()
-                .filter(DiscordGuildTo::canManageServer)
-                .map(guild -> {
-                    boolean botJoined = botGuilds.contains(guild);
-                    return discordGuildSummaryToFactory.create(guild, botJoined);
-                })
-                .toList();
+        List<DiscordGuildSummaryTo> discordGuildSummaryTos = Stream.of(isAuthenticated())
+                .filter(x -> x)
+                .flatMap(authenticated -> {
+                    List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
 
+                    return userGuilds.stream()
+                            .filter(DiscordGuildTo::canManageServer)
+                            .map(guild -> {
+                                boolean botJoined = botGuilds.contains(guild);
+                                return discordGuildSummaryToFactory.create(guild, botJoined);
+                            });
+                }).toList();
 
-        if(securityService.userHasRole(FourLeftRole.ADMIN)) {
-            return Stream.concat(
-                    botGuilds.stream().map(guild -> discordGuildSummaryToFactory.create(guild, true))
-                    ,discordGuildSummaryTos.stream()
-            ).distinct().toList();
-        }
+        return Stream.concat(
+                botGuilds.stream()
+                        .filter(guild -> canManage(guild.id()))
+                        .map(guild -> discordGuildSummaryToFactory.create(guild, true))
+                ,discordGuildSummaryTos.stream()
+        ).distinct().toList();
 
-        return discordGuildSummaryTos;
     }
 
     public boolean isAuthenticated() {
@@ -167,5 +173,14 @@ public class DiscordIntegrationService {
         return this.discordBotClient.getChannels(guildId).stream()
                 .filter(channel -> channel.type() == DisordChannelType.TEXT.getType())
                 .toList();
+    }
+
+    public boolean canManage(String guildId) {
+        final var isAdmin = securityService.userHasRole(FourLeftRole.ADMIN);
+
+        final var userAccess = userDiscordGuildAccessRepository.findById(securityService.getUserId());
+
+        return userAccess.map(user -> user.getGuildIds().contains(guildId)).orElse(false) || isAdmin;
+
     }
 }

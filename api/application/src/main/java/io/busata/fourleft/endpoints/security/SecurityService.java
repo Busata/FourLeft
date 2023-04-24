@@ -1,10 +1,14 @@
 package io.busata.fourleft.endpoints.security;
 
 
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class SecurityService {
@@ -24,4 +28,8 @@ public class SecurityService {
     }
 
 
+    public UUID getUserId() {
+        String userId = ((SimpleKeycloakAccount) getAuthentication().getDetails()).getKeycloakSecurityContext().getToken().getSubject();
+        return UUID.fromString(userId);
+    }
 }
