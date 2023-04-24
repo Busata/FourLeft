@@ -55,7 +55,8 @@ public class DriverEntryToFactory {
     }
 
     public FilteredEntryList<DriverEntryTo> filterResultsByFilter(List<DriverResultTo> driverResults, RacenetFilter racenetFilter) {
-        if (racenetFilter.getFilterMode() == RacenetFilterMode.INCLUDE) {
+
+        if (racenetFilter != null && racenetFilter.getFilterMode() == RacenetFilterMode.INCLUDE) {
             driverResults = includeNames(driverResults, racenetFilter.getRacenetNames());
         }
 
@@ -63,7 +64,7 @@ public class DriverEntryToFactory {
 
         List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
 
-        if (racenetFilter.getFilterMode() == RacenetFilterMode.FILTER) {
+        if (racenetFilter != null && racenetFilter.getFilterMode() == RacenetFilterMode.FILTER) {
             driverEntryTos = filterNames(driverEntryTos, racenetFilter.getRacenetNames());
         }
 
