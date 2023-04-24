@@ -5,8 +5,8 @@ import io.busata.fourleft.api.messages.ClubEventEnded;
 import io.busata.fourleft.api.messages.ClubEventStarted;
 import io.busata.fourleft.api.messages.QueueNames;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
-import io.busata.fourleftdiscord.autoposting.community_challenges.AutoPostCommunityEventResultsService;
 import io.busata.fourleftdiscord.autoposting.automated_championships.AutoPosterAutomatedDailyClubService;
+import io.busata.fourleftdiscord.autoposting.community_challenges.AutoPostCommunityEventResultsService;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "io.busata.fourleft.scheduling", name="autoposting", havingValue="true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "io.busata.fourleft.scheduling", name = "autoposting", havingValue = "true", matchIfMissing = true)
 public class AutoPostListener {
     private final AutoPostCommunityEventResultsService autoPostCommunityEventResultsService;
     private final AutoPosterAutomatedDailyClubService autoPosterAutomatedDailyClubService;
@@ -32,19 +32,28 @@ public class AutoPostListener {
     @RabbitListener(queues = QueueNames.CLUB_EVENT_ENDED)
     public void postPreviousEventResults(ClubEventEnded event) {
         log.info("Received club updated event: {}, event ended.", event.clubId());
-        discordChannelConfigurationService.findConfigurationByClubId(event.clubId())
-                .forEach(configuration -> {
-                    final var channelId = Snowflake.of(configuration.channelId());
-                    autoPosterAutomatedDailyClubService.postResults(channelId);
-                    autoPosterAutomatedDailyClubService.postChampionship(channelId);
-                });
+        try {
+            discordChannelConfigurationService.findConfigurationByClubId(event.clubId())
+                    .forEach(configuration -> {
+                        final var channelId = Snowflake.of(configuration.channelId());
+                        autoPosterAutomatedDailyClubService.postResults(channelId);
+                        autoPosterAutomatedDailyClubService.postChampionship(channelId);
+                    });
+        } catch (Exception ex) {
+            log.error("Error posting results for club: {}", event.clubId(), ex);
+        }
     }
+
     @RabbitListener(queues = QueueNames.CLUB_EVENT_STARTED)
     public void postNewEventInfo(ClubEventStarted event) {
         log.info("Received club updated event: {}, event started.", event.clubId());
-        discordChannelConfigurationService.findConfigurationByClubId(event.clubId()).stream()
-                .map(DiscordChannelConfigurationTo::channelId)
-                .map(Snowflake::of)
-                .forEach(autoPosterAutomatedDailyClubService::postNewStage);
+        try {
+            discordChannelConfigurationService.findConfigurationByClubId(event.clubId()).stream()
+                    .map(DiscordChannelConfigurationTo::channelId)
+                    .map(Snowflake::of)
+                    .forEach(autoPosterAutomatedDailyClubService::postNewStage);
+        } catch (Exception ex) {
+            log.error("Error posting results for club: {}", event.clubId(), ex);
+        }
     }
 }
