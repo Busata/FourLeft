@@ -32,13 +32,17 @@ public class AutoPostClubResultsService {
 
     @RabbitListener(queues = QueueNames.LEADERBOARD_UPDATE)
     public void updateClub(LeaderboardUpdated event) {
-        log.info("-- Leaderboards for {} were updated", event.clubId());
+        try {
+            log.info("-- Leaderboards for {} were updated", event.clubId());
 
-        discordChannelConfigurationService.getConfigurations()
-                .stream()
-                .filter(DiscordChannelConfigurationTo::enableAutoposts)
-                .filter(configuration -> configuration.includesClub(event.clubId()))
-                .forEach(this::tryPostingResults);
+            discordChannelConfigurationService.getConfigurations()
+                    .stream()
+                    .filter(DiscordChannelConfigurationTo::enableAutoposts)
+                    .filter(configuration -> configuration.includesClub(event.clubId()))
+                    .forEach(this::tryPostingResults);
+        } catch (Exception ex) {
+            log.error("!! !! Something wrong while posting auto results", ex);
+        }
     }
 
     private void tryPostingResults(DiscordChannelConfigurationTo configuration) {

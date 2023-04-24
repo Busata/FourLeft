@@ -25,14 +25,19 @@ public class AutoPostListener {
 
     @RabbitListener(queues = QueueNames.COMMUNITY_UPDATED)
     public void updateChallenges(String message) {
-        log.info("Community update message: {}", message);
-        autoPostCommunityEventResultsService.update();
+        try {
+            log.info("Community update message: {}", message);
+            autoPostCommunityEventResultsService.update();
+        } catch (Exception ex) {
+            log.error("Error updating community challenges", ex);
+        }
     }
 
     @RabbitListener(queues = QueueNames.CLUB_EVENT_ENDED)
     public void postPreviousEventResults(ClubEventEnded event) {
-        log.info("Received club updated event: {}, event ended.", event.clubId());
         try {
+            log.info("Received club updated event: {}, event ended.", event.clubId());
+
             discordChannelConfigurationService.findConfigurationByClubId(event.clubId())
                     .forEach(configuration -> {
                         final var channelId = Snowflake.of(configuration.channelId());
@@ -46,8 +51,9 @@ public class AutoPostListener {
 
     @RabbitListener(queues = QueueNames.CLUB_EVENT_STARTED)
     public void postNewEventInfo(ClubEventStarted event) {
-        log.info("Received club updated event: {}, event started.", event.clubId());
         try {
+            log.info("Received club updated event: {}, event started.", event.clubId());
+
             discordChannelConfigurationService.findConfigurationByClubId(event.clubId()).stream()
                     .map(DiscordChannelConfigurationTo::channelId)
                     .map(Snowflake::of)

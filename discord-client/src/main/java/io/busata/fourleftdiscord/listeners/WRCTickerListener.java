@@ -24,17 +24,21 @@ public class WRCTickerListener {
     private final DR2FieldMapper fieldMapper;
     @RabbitListener(queues = QueueNames.TICKER_ENTRIES_UPDATE)
     public void listen(List<WRCTickerUpdateTo> update) {
-        update.stream().sorted(Comparator.comparing(WRCTickerUpdateTo::dateTime)).forEach(wrcTickerUpdateTo -> {
-            EmbedCreateSpec.Builder tickerUpdate = EmbedCreateSpec.builder()
-                    .title(fieldMapper.createEmoticon(wrcTickerUpdateTo.tickerEventKey()) + " • " + wrcTickerUpdateTo.title() + " • <t:%s:R>".formatted(wrcTickerUpdateTo.dateTime()))
-                    .color(fieldMapper.createColour(wrcTickerUpdateTo.tickerEventKey()))
-                    .description(wrcTickerUpdateTo.text().replace("\\n", "\n").replace("\\u200B", "\u200B"));
+        try {
+            update.stream().sorted(Comparator.comparing(WRCTickerUpdateTo::dateTime)).forEach(wrcTickerUpdateTo -> {
+                EmbedCreateSpec.Builder tickerUpdate = EmbedCreateSpec.builder()
+                        .title(fieldMapper.createEmoticon(wrcTickerUpdateTo.tickerEventKey()) + " • " + wrcTickerUpdateTo.title() + " • <t:%s:R>".formatted(wrcTickerUpdateTo.dateTime()))
+                        .color(fieldMapper.createColour(wrcTickerUpdateTo.tickerEventKey()))
+                        .description(wrcTickerUpdateTo.text().replace("\\n", "\n").replace("\\u200B", "\u200B"));
 
-            Optional.ofNullable(wrcTickerUpdateTo.imageUrl()).ifPresent(tickerUpdate::image);
-            facade.postMessage(Snowflake.of(892372267445661727L),
-                    tickerUpdate.build(),
-                    MessageType.RESULTS_POST
-            );
-        });
+                Optional.ofNullable(wrcTickerUpdateTo.imageUrl()).ifPresent(tickerUpdate::image);
+                facade.postMessage(Snowflake.of(892372267445661727L),
+                        tickerUpdate.build(),
+                        MessageType.RESULTS_POST
+                );
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }
