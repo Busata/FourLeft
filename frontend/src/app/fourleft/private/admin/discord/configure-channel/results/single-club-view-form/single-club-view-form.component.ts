@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {SingleClubViewForm} from "./single-club-view.form";
 
@@ -11,6 +11,18 @@ export class SingleClubViewFormComponent {
 
   @Input("formGroup")
   singleClubFormGroup!: SingleClubViewForm
+
+  @Input()
+  public canPromote = false;
+
+  @Input()
+  public canDemote = false;
+
+  @Output()
+  public promoted = new EventEmitter();
+
+  @Output()
+  public demoted = new EventEmitter();
 
 
   showPlayers() {

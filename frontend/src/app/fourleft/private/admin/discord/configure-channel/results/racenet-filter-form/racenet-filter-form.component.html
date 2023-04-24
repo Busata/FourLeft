@@ -13,11 +13,11 @@
       <input type="checkbox" [formControl]="racenetFilterFormGroup.isFilterEnabled">
     </div>
   </div>
-  <ng-container *ngIf="showPlayers()">
   <div class="form-group" *ngIf="enableName">
     <label>Racenet filter name</label>
     <input type="text" formControlName="name">
   </div>
+  <ng-container *ngIf="showPlayers()">
   <app-player-search (added)="this.racenetFilterFormGroup.addPlayer($event)"></app-player-search>
   <div>
     <div formArrayName="racenetNames">

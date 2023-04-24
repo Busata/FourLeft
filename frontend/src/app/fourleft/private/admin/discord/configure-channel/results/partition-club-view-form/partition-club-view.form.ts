@@ -30,9 +30,12 @@ export class PartitionClubViewForm extends FormGroup {
   constructor(value?: PartitionViewTo) {
     super({
       type: new FormControl('partitionClub', {}),
-      partitionElements: new FormArray(value?.partitionElements?.map(e => new RacenetFilterForm(e)) || []),
+      partitionElements: new FormArray(value?.partitionElements?.map(e => new RacenetFilterForm(e)) || [
+        new RacenetFilterForm({filterMode: 'NONE', name: 'All entries', racenetNames:[], id:'', enabled: true})
+      ]),
     });
     this.setResultsView(value?.resultsView as ResultsViewTo);
+
   }
 
   public setResultsView(value: any) {

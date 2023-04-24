@@ -20,9 +20,9 @@
   </ng-container>
 
   <div class="g-card">
-  <h3>Partition elements</h3>
+  <h3>Filter elements</h3>
 
-  <button class="g-button g-button-secondary" (click)="partitionFormGroup.addPartitionElement()">Add partition element</button>
+  <button class="g-button g-button-secondary" (click)="partitionFormGroup.addPartitionElement()">Add filter element</button>
 
   <div formArrayName="partitionElements" class="pure-g">
     <div class="pure-u-1-4" *ngFor="let partitionElementForm of partitionFormGroup.partitionElements.controls;let i=index">

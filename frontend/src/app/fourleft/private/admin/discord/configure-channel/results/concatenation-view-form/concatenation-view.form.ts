@@ -20,4 +20,10 @@ export class ConcatenationViewForm extends FormGroup {
   addSingleClubView() {
     this.resultViews.push(new SingleClubViewForm());
   }
+
+  removeView(index: number) {
+    if(confirm("Are you sure?")) {
+      this.resultViews.removeAt(index);
+    }
+  }
 }
