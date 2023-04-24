@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-19 15:43:39.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-23 23:31:43.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -220,6 +220,14 @@ export interface VehicleEntryTo {
     vehicleAllowed: boolean;
 }
 
+export interface WRCTickerUpdateTo {
+    title: string;
+    tickerEventKey: string;
+    dateTime: number;
+    text: string;
+    imageUrl: string;
+}
+
 export interface ClubViewTo {
     id: string;
     description: string;
@@ -280,24 +288,20 @@ export interface ConcatenationViewTo extends ResultsViewTo {
 export interface MergedViewTo extends ResultsViewTo {
     type: "mergeClub";
     name: string;
-    playerFilter: PlayerFilterTo;
+    racenetFilter: RacenetFilterTo;
     resultViews: SingleClubViewTo[];
-}
-
-export interface PartitionElementTo {
-    name: string;
-    order: number;
-    racenetNames: string[];
 }
 
 export interface PartitionViewTo extends ResultsViewTo {
     type: "partitionClub";
     resultsView: ResultsViewToUnion;
-    partitionElements: PartitionElementTo[];
+    partitionElements: RacenetFilterTo[];
 }
 
-export interface PlayerFilterTo {
-    playerFilterType: PlayerFilterType;
+export interface RacenetFilterTo {
+    id: string;
+    name: string;
+    filterMode: RacenetFilterMode;
     racenetNames: string[];
 }
 
@@ -313,7 +317,7 @@ export interface SingleClubViewTo extends ResultsViewTo {
     name: string;
     usePowerstage: boolean;
     powerStageIndex: number;
-    playerFilter: PlayerFilterTo;
+    racenetFilter: RacenetFilterTo;
 }
 
 export interface DiscordAuthenticationStatusTo {
@@ -508,7 +512,7 @@ export type ChampionshipPointsType = "DEFAULT" | "JRC";
 
 export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
 
-export type FieldMappingType = "HUMAN_READABLE" | "EMOTE" | "IMAGE";
+export type FieldMappingType = "HUMAN_READABLE" | "EMOTE" | "IMAGE" | "COLOUR";
 
 export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
 
@@ -516,7 +520,7 @@ export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "UNKNOWN";
 
 export type BadgeType = "NONE" | "PERCENTAGE" | "RANKED";
 
-export type PlayerFilterType = "NONE" | "INCLUDE" | "FILTER";
+export type RacenetFilterMode = "NONE" | "INCLUDE" | "FILTER";
 
 export type MessageType = "AUTO_POST" | "RESULTS_POST" | "CURRENT_RESULTS_POST" | "PREVIOUS_RESULTS_POST" | "COMMUNITY_EVENT" | "AUTOMATED_CLUB_POST";
 

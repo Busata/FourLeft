@@ -1,6 +1,6 @@
 package io.busata.fourleft.domain.configuration.player_restrictions;
 
-public enum PlayerFilterType {
+public enum RacenetFilterMode {
     NONE,
     INCLUDE,
     FILTER

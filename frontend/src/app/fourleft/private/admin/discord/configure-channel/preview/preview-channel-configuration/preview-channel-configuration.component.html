@@ -1,5 +1,6 @@
-<h2>Results</h2>
+<div class="preview-container">
 <div *ngIf="results">
+  <h2>Results</h2>
 
   <div *ngFor="let multiList of results.multiListResults">
 
@@ -14,8 +15,9 @@
 
 </div>
 
-<h2>Standings</h2>
 <div *ngIf="points">
+  <h2>Standings</h2>
+
   <div *ngFor="let pointsList of points.points">
     {{pointsList.name}}
     <div *ngFor="let result of pointsList.points">
@@ -24,4 +26,5 @@
 
   </div>
 
+</div>
 </div>

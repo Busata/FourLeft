@@ -6,11 +6,11 @@ import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.common.StageTimeParser;
+import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
 import io.busata.fourleft.helpers.Factory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +24,7 @@ public class ResultListMerger {
     private final StageTimeParser parser;
     private final DriverEntryToFactory driverEntryToFactory;
 
-    public ResultListTo mergeResults(List<ResultListTo> results) {
+    public ResultListTo mergeResults(List<ResultListTo> results, RacenetFilter racenetFilter) {
         HashMap<String, DriverResultTo> driverEntries = new HashMap<>();
         HashMap<String, Long> driverEntryCount = new HashMap<>();
 
@@ -45,11 +45,12 @@ public class ResultListMerger {
                 entry -> driverEntryCount.get(entry.racenet()) == results.size()
         ).collect(Collectors.toList());
 
-        List<DriverEntryTo> driverResultTos = driverEntryToFactory.calculateRelativeData(new ArrayList<>(entriesOccuringInEveryList));
+        FilteredEntryList<DriverEntryTo> driverResultTos = driverEntryToFactory.filterResultsByFilter(entriesOccuringInEveryList, racenetFilter);
+
 
         List<ActivityInfoTo> mergedActivities = results.stream().flatMap(list -> list.activityInfoTo().stream()).distinct().toList();
 
-        return new ResultListTo("", mergedActivities, results.size(), driverResultTos.stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).collect(Collectors.toList()));
+        return new ResultListTo("", mergedActivities, driverResultTos.totalBeforeExclude(), driverResultTos.entries().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).collect(Collectors.toList()));
     }
     public DriverResultTo mergeEntries(DriverResultTo entryA, DriverResultTo entryB) {
         Duration activityTotalTime = parser.createDuration(entryA.activityTotalTime()).plus(parser.createDuration(entryB.activityTotalTime()));

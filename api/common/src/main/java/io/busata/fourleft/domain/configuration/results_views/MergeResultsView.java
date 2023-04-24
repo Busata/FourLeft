@@ -1,7 +1,6 @@
 package io.busata.fourleft.domain.configuration.results_views;
 
 
-import io.busata.fourleft.domain.configuration.player_restrictions.PlayerFilter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,7 @@ public class MergeResultsView extends ResultsView {
     List<SingleClubView> resultViews;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    PlayerFilter playerFilter;
+    RacenetFilter racenetFilter;
 
     @Override
     public Set<Long> getAssociatedClubs() {
