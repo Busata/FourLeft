@@ -110,7 +110,8 @@ public class DiscordChannelConfigurationFactory {
         return new RacenetFilter(
                 racenetFilterTo.getName(),
                 racenetFilterTo.getFilterMode(),
-                racenetFilterTo.getRacenetNames()
+                racenetFilterTo.getRacenetNames(),
+                racenetFilterTo.isEnabled()
         );
     }
 

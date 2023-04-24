@@ -32,9 +32,12 @@ public class RacenetFilter {
     @ElementCollection
     List<String> racenetNames;
 
-    public RacenetFilter(String name, RacenetFilterMode filterMode, List<String> racenetNames) {
+    boolean enabled;
+
+    public RacenetFilter(String name, RacenetFilterMode filterMode, List<String> racenetNames, boolean enabled) {
         this.name = name;
         this.filterMode = filterMode;
         this.racenetNames = racenetNames;
+        this.enabled = enabled;
     }
 }

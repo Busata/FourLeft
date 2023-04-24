@@ -17,6 +17,9 @@ export class RacenetFilterFormComponent {
   enableModeChange = true;
 
   @Input()
+  public canEnable = false;
+
+  @Input()
   public canPromote = false;
 
   @Input()
@@ -34,6 +37,6 @@ export class RacenetFilterFormComponent {
     }
   }
   showPlayers() {
-    return ["INCLUDE","EXCLUDE"].indexOf(this.racenetFilterFormGroup.filterMode.value) !== -1;
+    return ["INCLUDE","FILTER"].indexOf(this.racenetFilterFormGroup.filterMode.value) !== -1;
   }
 }

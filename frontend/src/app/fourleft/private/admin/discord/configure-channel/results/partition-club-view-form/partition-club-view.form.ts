@@ -7,7 +7,7 @@ import {
   PartitionViewTo,
   ResultsViewTo,
   SingleClubViewTo
-} from "../../../../../../../common/generated/server-models";
+} from "@server-models";
 
 export class PartitionClubViewForm extends FormGroup {
 
@@ -49,7 +49,7 @@ export class PartitionClubViewForm extends FormGroup {
   }
 
   addPartitionElement() {
-    this.partitionElements.push(new RacenetFilterForm({filterMode: 'INCLUDE', name: '', racenetNames:[], id:''}));
+    this.partitionElements.push(new RacenetFilterForm({filterMode: 'INCLUDE', name: '', racenetNames:[], id:'', enabled: true}));
   }
 
   removePartitionElement(i: number) {

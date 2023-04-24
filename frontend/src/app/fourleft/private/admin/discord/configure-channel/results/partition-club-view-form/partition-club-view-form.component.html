@@ -24,11 +24,12 @@
 
   <button class="g-button g-button-secondary" (click)="partitionFormGroup.addPartitionElement()">Add partition element</button>
 
-  <div formArrayName="partitionElements" class="pure-g" cdkDropListGroup>
+  <div formArrayName="partitionElements" class="pure-g">
     <div class="pure-u-1-4" *ngFor="let partitionElementForm of partitionFormGroup.partitionElements.controls;let i=index">
       <app-racenet-filter-form [canPromote]="i !== 0"
                                [enableName]="true"
-                               [enableModeChange]="false"
+                               [canEnable]="true"
+                               [enableModeChange]="true"
                                   [canDemote]="i !== partitionFormGroup.partitionElements.controls.length - 1"
                                   (promote)="promotePlayer(i, $event)"
                                   (demote)="demotePlayer(i, $event)"

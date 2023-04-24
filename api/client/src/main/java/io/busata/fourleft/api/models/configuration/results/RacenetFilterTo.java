@@ -16,4 +16,5 @@ public class RacenetFilterTo {
     private String name;
     RacenetFilterMode filterMode;
     List<String> racenetNames;
+    boolean enabled;
 }

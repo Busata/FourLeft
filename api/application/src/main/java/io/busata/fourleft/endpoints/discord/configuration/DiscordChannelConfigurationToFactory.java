@@ -82,13 +82,14 @@ public class DiscordChannelConfigurationToFactory {
 
     private RacenetFilterTo createRacenetElementfilter(RacenetFilter racenetFilter) {
         if(racenetFilter == null) {
-            return new RacenetFilterTo(null, "", RacenetFilterMode.NONE, List.of());
+            return new RacenetFilterTo(null, "", RacenetFilterMode.NONE, List.of(), true);
         }
         return new RacenetFilterTo(
                 racenetFilter.getId(),
                 racenetFilter.getName(),
                 racenetFilter.getFilterMode(),
-                racenetFilter.getRacenetNames()
+                racenetFilter.getRacenetNames(),
+                racenetFilter.isEnabled()
         );
     }
 

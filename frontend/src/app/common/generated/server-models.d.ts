@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-23 23:31:43.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-24 21:18:59.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -303,6 +303,7 @@ export interface RacenetFilterTo {
     name: string;
     filterMode: RacenetFilterMode;
     racenetNames: string[];
+    enabled: boolean;
 }
 
 export interface ResultsViewTo {

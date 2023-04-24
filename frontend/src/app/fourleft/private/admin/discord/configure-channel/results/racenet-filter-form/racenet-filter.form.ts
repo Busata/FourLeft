@@ -5,6 +5,7 @@ export class RacenetFilterForm extends FormGroup {
 
   readonly name = this.get('name') as FormControl;
   readonly filterMode = this.get('filterMode') as FormControl;
+  readonly isFilterEnabled = this.get('enabled') as FormControl;
   readonly racenetNames = this.get('racenetNames') as FormArray;
 
   constructor(value?: RacenetFilterTo) {
@@ -12,6 +13,7 @@ export class RacenetFilterForm extends FormGroup {
       id: new FormControl(value?.id, {}),
       filterMode: new FormControl(value?.filterMode || 'NONE', {}),
       name: new FormControl(value?.name || '', {}),
+      enabled: new FormControl(value?.enabled || false, {}),
       racenetNames: new FormArray(value?.racenetNames?.map(e => new FormControl(e)) || [])
     });
   }

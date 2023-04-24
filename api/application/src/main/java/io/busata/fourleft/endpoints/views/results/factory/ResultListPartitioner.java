@@ -16,18 +16,11 @@ public class ResultListPartitioner {
     private final DriverEntryToFactory factory;
 
     public List<ResultListTo> partitionResults(List<RacenetFilter> partitions, ResultListTo resultList) {
-        return partitions.stream().map(partition -> {
-            final var racenetNames = partition.getRacenetNames();
+        return partitions.stream().filter(RacenetFilter::isEnabled).map(partition -> {
 
-            List<DriverResultTo> partitionedList = resultList.results().stream()
-                    .map(DriverEntryTo::result)
-                    .filter(driverEntryTo -> racenetNames.contains(driverEntryTo.racenet()))
-                    .collect(Collectors.toList());
+            FilteredEntryList<DriverEntryTo> filteredList = factory.filterResultsByFilter(resultList.results().stream().map(DriverEntryTo::result).toList(), partition);
 
-
-            List<DriverEntryTo> driverEntryTos = factory.calculateRelativeData(partitionedList);
-
-            return new ResultListTo(partition.getName(), resultList.activityInfoTo(), driverEntryTos.size(), driverEntryTos);
+            return new ResultListTo(partition.getName(), resultList.activityInfoTo(), filteredList.entries().size(), filteredList.entries());
         }).collect(Collectors.toList());
     }
 
