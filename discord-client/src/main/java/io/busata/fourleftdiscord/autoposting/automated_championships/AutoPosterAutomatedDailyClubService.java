@@ -21,8 +21,6 @@ public class AutoPosterAutomatedDailyClubService {
 
     public void postResults(Snowflake channelId) {
         List<EmbedCreateSpec> message = resultsFetcher.getPreviousEventResults(channelId);
-
-
         try {
             discordUtils.postMessage(
                     channelId,
@@ -30,7 +28,7 @@ public class AutoPosterAutomatedDailyClubService {
                             MessageType.AUTOMATED_CLUB_POST
             );
         } catch (Exception ex) {
-            log.error("Something went wrong posting the weekly results", ex);
+            log.error("Something went wrong posting the results", ex);
         }
     }
 
@@ -43,7 +41,7 @@ public class AutoPosterAutomatedDailyClubService {
                     MessageType.AUTOMATED_CLUB_POST
             );
         } catch (Exception ex) {
-            log.error("Something went wrong posting the weekly results", ex);
+            log.error("Something went wrong posting the championship results", ex);
         }
     }
 

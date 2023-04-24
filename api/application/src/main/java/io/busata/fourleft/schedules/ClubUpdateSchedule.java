@@ -26,11 +26,10 @@ public class ClubUpdateSchedule {
     @Scheduled(cron = "0 */1 * * * *", zone = "UTC")
     @CacheEvict(value = "view_results", allEntries = true)
     public void updateLeaderboards() {
-        /*clubSyncService.cleanArchived();
-
+        clubSyncService.cleanArchived();
         clubSyncService.findClubs().forEach(club -> {
             clubSyncService.updateClubDetails(club);
             clubSyncService.updateClubLeaderboards(club);
-        });*/
+        });
     }
 }
