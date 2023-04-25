@@ -60,14 +60,14 @@ public class ClubEventResultMessageFactory {
     private MessageTemplate getTemplate(ViewPropertiesTo properties) {
         return switch (properties.badgeType()) {
             case NONE -> NORMAL_TEMPLATE;
-            case PERCENTAGE -> throw new UnsupportedOperationException();
+            case PERCENTAGE -> NORMAL_TEMPLATE;
             case RANKED -> RANKED_BADGE_TEMPLATE;
         };
     }
     private MessageTemplate getMetaDataTemplate(ViewPropertiesTo properties) {
         return switch (properties.badgeType()) {
             case NONE -> META_NORMAL_TEMPLATE;
-            case PERCENTAGE -> throw new UnsupportedOperationException();
+            case PERCENTAGE -> NORMAL_TEMPLATE;
             case RANKED -> META_RANKED_BADGE_TEMPLATE;
         };
     }

@@ -61,13 +61,13 @@ public class AutoPostResultMessageFactory {
         if (properties.powerStage()) {
             return switch (properties.badgeType()) {
                 case NONE -> POWERSTAGE_TEMPLATE;
-                case PERCENTAGE -> throw new UnsupportedOperationException();
+                case PERCENTAGE -> NORMAL_TEMPLATE;
                 case RANKED -> POWERSTAGE_AND_RANKED_BADGE_TEMPLATE;
             };
         } else {
             return switch (properties.badgeType()) {
                 case NONE -> NORMAL_TEMPLATE;
-                case PERCENTAGE -> throw new UnsupportedOperationException();
+                case PERCENTAGE -> NORMAL_TEMPLATE;
                 case RANKED -> RANKED_BADGE_TEMPLATE;
             };
         }
