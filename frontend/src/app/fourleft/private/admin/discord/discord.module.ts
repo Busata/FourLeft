@@ -27,7 +27,7 @@ import { ConcatenationViewFormComponent } from './configure-channel/results/conc
 import { ViewRestrictionsContainerComponent } from './configure-channel/core/view-restrictions-container/view-restrictions-container.component';
 import { ViewRestrictionsFormComponent } from './configure-channel/core/view-restrictions-form/view-restrictions-form.component';
 import { PlayerSearchComponent } from './configure-channel/results/player-search/player-search.component';
-import {CdkDrag, CdkDragHandle, CdkDropList, CdkDropListGroup} from '@angular/cdk/drag-drop';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [
@@ -60,10 +60,7 @@ import {CdkDrag, CdkDragHandle, CdkDropList, CdkDropListGroup} from '@angular/cd
     ReactiveFormsModule,
     NgOptimizedImage,
     FormsModule,
-    CdkDropList,
-    CdkDrag,
-    CdkDragHandle,
-    CdkDropListGroup,
+    MatSnackBarModule
   ]
 })
 export class DiscordModule { }
