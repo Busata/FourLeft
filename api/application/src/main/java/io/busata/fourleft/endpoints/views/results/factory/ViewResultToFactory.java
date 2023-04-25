@@ -105,7 +105,7 @@ public class ViewResultToFactory {
                 return resultListToFactory.createResultList(resultView, resultViewEvents.get(index));
             }).collect(Collectors.toList());
 
-            return resultListMerger.mergeResults(resultLists, mergedResultsView.getRacenetFilter());
+            return resultListMerger.mergeResults(resultLists, mergedResultsView.getMergeMode(), mergedResultsView.getRacenetFilter());
 
         }).toList();
 

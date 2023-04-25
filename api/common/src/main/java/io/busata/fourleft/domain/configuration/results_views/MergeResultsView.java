@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 public class MergeResultsView extends ResultsView {
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    MergeMode mergeMode;
+
     @OneToMany(cascade = CascadeType.ALL)
     List<SingleClubView> resultViews;
 

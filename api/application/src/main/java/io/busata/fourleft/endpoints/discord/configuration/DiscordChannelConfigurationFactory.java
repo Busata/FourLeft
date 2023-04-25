@@ -128,6 +128,7 @@ public class DiscordChannelConfigurationFactory {
     private MergeResultsView createMergedResultsView(MergedViewTo clubViewTo) {
         return new MergeResultsView(
                 clubViewTo.getName(),
+                clubViewTo.getMergeMode(),
                 clubViewTo.getResultViews().stream().map(this::createSingleClubView).toList(),
                 createRacenetFilter(clubViewTo.getRacenetFilter())
         );

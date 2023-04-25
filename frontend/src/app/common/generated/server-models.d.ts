@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-24 22:08:09.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-25 11:25:35.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -287,6 +287,7 @@ export interface ConcatenationViewTo extends ResultsViewTo {
 
 export interface MergedViewTo extends ResultsViewTo {
     type: "mergeClub";
+    mergeMode: MergeMode;
     name: string;
     racenetFilter: RacenetFilterTo;
     resultViews: SingleClubViewTo[];
@@ -520,6 +521,8 @@ export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
 export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "UNKNOWN";
 
 export type BadgeType = "NONE" | "PERCENTAGE" | "RANKED";
+
+export type MergeMode = "ADD_TIMES" | "TAKE_BEST";
 
 export type RacenetFilterMode = "NONE" | "INCLUDE" | "FILTER";
 

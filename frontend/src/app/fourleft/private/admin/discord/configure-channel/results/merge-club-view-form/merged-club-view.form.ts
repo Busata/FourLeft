@@ -8,13 +8,15 @@ export class MergedClubViewForm extends FormGroup {
   public readonly type = this.get('type') as FormControl;
   public readonly name = this.get('name') as FormControl;
   public readonly resultViews = this.get('resultViews') as FormArray;
+  public readonly mergeMode = this.get('mergeMode') as FormControl;
   public readonly racenetFilter = this.get('racenetFilter') as RacenetFilterForm;
 
   constructor(value?: MergedViewTo) {
     super({
-        type: new FormControl('mergeClub', {}),
-        name: new FormControl(value?.name, {}),
+      type: new FormControl('mergeClub', {}),
+      name: new FormControl(value?.name, {}),
       resultViews: new FormArray(value?.resultViews?.map(v => new SingleClubViewForm(v)) || []),
+      mergeMode: new FormControl(value?.mergeMode || 'ADD_TIMES', {}),
       racenetFilter: new RacenetFilterForm(value?.racenetFilter)
     })
   }

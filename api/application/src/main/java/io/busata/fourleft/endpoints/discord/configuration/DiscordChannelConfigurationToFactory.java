@@ -102,6 +102,7 @@ public class DiscordChannelConfigurationToFactory {
 
     private ResultsViewTo createMergeResultsViewTo(MergeResultsView view) {
         return new MergedViewTo(
+                view.getMergeMode(),
                 view.getName(),
                 createRacenetElementfilter(view.getRacenetFilter()),
                 view.getResultViews().stream().map(this::createSingleClubViewTo).collect(Collectors.toList())

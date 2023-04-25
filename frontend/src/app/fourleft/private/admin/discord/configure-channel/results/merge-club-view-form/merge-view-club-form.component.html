@@ -12,6 +12,14 @@
       <button (click)="mergeClubForm.removeClubAt(i)" class="g-button g-button-danger">Remove</button>
     </div>
   </div>
+
+  <div class="form-group">
+    <select [formControl]="mergeClubForm.mergeMode">
+      <option value="ADD_TIMES">Add together</option>
+      <option value="TAKE_BEST">Take best</option>
+    </select>
+  </div>
+
   <app-racenet-filter-form [formGroup]="mergeClubForm.racenetFilter"></app-racenet-filter-form>
 
 </div>

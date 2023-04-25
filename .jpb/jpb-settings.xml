@@ -20,5 +20,12 @@
     <exclude-change idName="channel_configuration#post_community_results" tagName="addNotNullConstraint" />
     <exclude-change idName="channel_configuration#use_badges" tagName="addNotNullConstraint" />
     <exclude-change idName="field_mapping#value" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#event_id" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#reference_id" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#text_html" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#text_markdown" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#ticker_entry_image_url" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#ticker_event_key" tagName="modifyDataType" />
+    <exclude-change idName="wrcticker_entry#title" tagName="modifyDataType" />
   </component>
 </project>

@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.common.StageTimeParser;
+import io.busata.fourleft.domain.configuration.results_views.MergeMode;
 import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
 import io.busata.fourleft.helpers.Factory;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class ResultListMerger {
     private final StageTimeParser parser;
     private final DriverEntryToFactory driverEntryToFactory;
 
-    public ResultListTo mergeResults(List<ResultListTo> results, RacenetFilter racenetFilter) {
+    public ResultListTo mergeResults(List<ResultListTo> results, MergeMode mode, RacenetFilter racenetFilter) {
         HashMap<String, DriverResultTo> driverEntries = new HashMap<>();
         HashMap<String, Long> driverEntryCount = new HashMap<>();
 
@@ -34,7 +35,7 @@ public class ResultListMerger {
                         driverEntryCount.computeIfPresent(entry.racenet(), (key, existingCount) -> existingCount + 1);
                         driverEntryCount.putIfAbsent(entry.racenet(), 1L);
 
-                        driverEntries.computeIfPresent(entry.racenet(), (key, existingDriverEntry) -> mergeEntries(entry, existingDriverEntry));
+                        driverEntries.computeIfPresent(entry.racenet(), (key, existingDriverEntry) -> mergeEntries(mode, entry, existingDriverEntry));
                         driverEntries.putIfAbsent(entry.racenet(), entry);
 
                     });
@@ -52,11 +53,12 @@ public class ResultListMerger {
 
         return new ResultListTo("", mergedActivities, driverResultTos.totalBeforeExclude(), driverResultTos.entries().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).collect(Collectors.toList()));
     }
-    public DriverResultTo mergeEntries(DriverResultTo entryA, DriverResultTo entryB) {
-        Duration activityTotalTime = parser.createDuration(entryA.activityTotalTime()).plus(parser.createDuration(entryB.activityTotalTime()));
+    public DriverResultTo mergeEntries(MergeMode mode, DriverResultTo entryA, DriverResultTo entryB) {
+
+        Duration activityTotalTime = mode.merge(parser.createDuration(entryA.activityTotalTime()), parser.createDuration(entryB.activityTotalTime()));
         String activityTotalMerged = parser.formatStageTime(activityTotalTime);
 
-        Duration powerStageTotalTime = parser.createDuration(entryA.powerStageTotalTime()).plus(parser.createDuration(entryB.powerStageTotalTime()));
+        Duration powerStageTotalTime = mode.merge(parser.createDuration(entryA.powerStageTotalTime()), parser.createDuration(entryB.powerStageTotalTime()));
         String powerStageMerged = parser.formatStageTime(powerStageTotalTime);
 
         return new DriverResultTo(
