@@ -1,6 +1,6 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {SingleClubViewForm} from "../single-club-view-form/single-club-view.form";
-import {MergedViewTo, RacenetFilterTo} from "@server-models";
+import {MergedViewTo} from "@server-models";
 import {RacenetFilterForm} from '../racenet-filter-form/racenet-filter.form';
 
 export class MergedClubViewForm extends FormGroup {

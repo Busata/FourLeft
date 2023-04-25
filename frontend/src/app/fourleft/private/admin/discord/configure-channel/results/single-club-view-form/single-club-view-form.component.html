@@ -1,5 +1,4 @@
-<div class="pure-g">
-<div class="configuration pure-u-1-2" [formGroup]="singleClubFormGroup">
+<div class="configuration"  [formGroup]="singleClubFormGroup">
   <div class="form-group">
     <label>Name</label>
     <input type="text" [formControl]="singleClubFormGroup.name">
@@ -24,10 +23,4 @@
     (demote)="demoted.emit($event)"
     [formGroup]="singleClubFormGroup.racenetFilter"></app-racenet-filter-form>
 
-</div>
-
-<div class="restrictions pure-u-1-2" *ngIf="false">
-  <h2>Active event - restrictions</h2>
-  <app-view-restrictions-container [resultViewId]="singleClubFormGroup.id.value"></app-view-restrictions-container>
-</div>
 </div>
