@@ -1,6 +1,4 @@
 <form [formGroup]="partitionFormGroup">
-  <h2>Partition club view</h2>
-
   <div class="form-group" *ngIf="partitionFormGroup.resultsView">
     <label>Results view type</label>
     <select (change)="partitionFormGroup.setResultsView({type:$event.target.value})" [formControl]="partitionFormGroup.resultsViewType">

@@ -1,12 +1,58 @@
 .discord-channel-configuration {
-  padding: 15px;
+  .save-button {margin-top:20px;}
+  .channel-configuration-sidebar {
+    height: 100vh;
+    position:fixed;
+    width: 160px;
+    left: 160px;
 
-  border-radius: 5px;
-  margin: 25px;
+    background-color: #40444b;
+
+    .buttons {
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 160px;
+
+      -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.45);
+      -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.45);
+      box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.45);
+
+      .menu-button {
+        text-align: left;
+        &:hover {
+          background-color: lighten(#40444b, 10%);
+        }
+        &.menu-button-active {
+          background-color: lighten(#40444b, 10%);
+        }
+      }
+
+      .inline-menu-button {
+        background-color: lighten(#40444b, 30%);
 
 
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+        &:hover {
+          background-color: lighten(#40444b, 50%);
+        }
+
+        &.menu-button-active {
+          background-color: lighten(#40444b, 50%);
+        }
+      }
+
+    }
+  }
+
+  .channel-configuration-main {
+    padding-top: 15px;
+    margin-left: 175px;
+  }
+
+
+  .configure-basic {
+    padding: 15px;
+  }
 }
 

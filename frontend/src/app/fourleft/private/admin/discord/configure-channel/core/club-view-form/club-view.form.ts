@@ -68,7 +68,8 @@ export class ClubViewForm extends FormGroup {
         this.setControl('resultsView', new ConcatenationViewForm(value as ConcatenationViewTo));
         break;
       default:
-        this.setControl('resultsView', new FormGroup({type: new FormControl('', {})}));
+        this.setControl('resultsView', new SingleClubViewForm(value as SingleClubViewTo));
+
     }
   }
 
@@ -81,7 +82,7 @@ export class ClubViewForm extends FormGroup {
         this.setControl('pointsView', new FixedPointsForm(value as FixedPointsCalculatorTo));
         break;
       default:
-        this.setControl('pointsView', new FormGroup({type: new FormControl('', {})}));
+        this.setControl('pointsView', new DefaultPointsForm());
     }
   }
 }

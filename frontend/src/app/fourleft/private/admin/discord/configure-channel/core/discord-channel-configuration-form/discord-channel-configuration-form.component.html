@@ -1,11 +1,59 @@
-<div class="discord-channel-configuration" *ngIf="form" [formGroup]="form">
-  <h2>Channel configuration</h2>
-  <div class="form-group">
-    <label>Enable autoposting</label>
-    <input type="checkbox" [formControl]="form.enableAutoposts"/>
+<div class="discord-channel-configuration">
+
+  <div class="channel-configuration-sidebar">
+    <div class="buttons">
+    <button class="menu-button" [ngClass]="{'menu-button-active': configuringResults}" (click)="configureResults()">Results</button>
+      <ng-container *ngIf="configuringResults">
+      <button class="inline-menu-button"  [ngClass]="{'menu-button-active': resultsType === 'singleClub'}" (click)="setResultsType('singleClub')">Single</button>
+      <button class="inline-menu-button" [ngClass]="{'menu-button-active': resultsType === 'concatenationClub'}" (click)="setResultsType('concatenationClub')" >Concatenate</button>
+      <button class="inline-menu-button" [ngClass]="{'menu-button-active': resultsType === 'partitionClub'}" (click)="setResultsType('partitionClub')">Partition</button>
+      </ng-container>
+
+    <button class="menu-button" [ngClass]="{'menu-button-active': configuringPoints}" (click)="configurePoints()">Points</button>
+      <ng-container *ngIf="configuringPoints">
+        <button class="inline-menu-button" [ngClass]="{'menu-button-active': pointsType === 'defaultPoints'}" (click)="setPointsType('defaultPoints')">Default racenet</button>
+        <button class="inline-menu-button" [ngClass]="{'menu-button-active': pointsType === 'fixedPoints'}"  (click)="setPointsType('fixedPoints')">Fixed points</button>
+      </ng-container>
+      <button class="menu-button" [ngClass]="{'menu-button-active': configuringBasic}" (click)="configureBasic()">Channel</button>
+    <button class="menu-button" [ngClass]="{'menu-button-active': isPreviewOpen}" (click)="openPreview()">Preview</button>
+    <button class="menu-button g-button-primary save-button" [ngClass]="{'menu-button-active': isPreviewOpen}" (click)="saveConfiguration()">Save</button>
+    </div>
+  </div>
+  <div class="channel-configuration-main">
+    <div *ngIf="form" [formGroup]="form">
+      <div class="g-header-h1">
+        Channel configuration
+        <div class="g-header-label">
+          <span *ngIf="this.resultsType == 'singleClub'">Single</span>
+          <span *ngIf="this.resultsType == 'concatenationClub'">Concatenate</span>
+          <span *ngIf="this.resultsType == 'partitionClub'">Partition</span>
+          •
+          <span *ngIf="this.pointsType == 'defaultPoints'">Default points</span>
+          <span *ngIf="this.pointsType == 'fixedPoints'">Fixed points</span>
+        </div>
+      </div>
+
+
+      <div [hidden]="!configuringBasic">
+
+        <div class="configure-basic">
+      <div class="form-group">
+        <label>Enable autoposting</label>
+        <input type="checkbox" [formControl]="form.enableAutoposts"/>
+      </div>
+        </div>
+
+      </div>
+      <div [hidden]="!(configuringPoints || configuringResults)">
+        <app-club-view-form [resultsViewType]="this.resultsType" [pointsViewType]="this.pointsType"  [activeConfiguration]="this.activeConfiguration" [formGroup]="form.clubView"></app-club-view-form>
+      </div>
+      <div [hidden]="!isPreviewOpen">
+        <app-preview-channel-configuration [configuration]="configuation"></app-preview-channel-configuration>
+      </div>
+    </div>
   </div>
 
-<app-club-view-form [formGroup]="form.clubView"></app-club-view-form>
-
-<button class="g-button g-button-primary" (click)="saveConfiguration()">Save configuration</button>
 </div>
+
+
+
