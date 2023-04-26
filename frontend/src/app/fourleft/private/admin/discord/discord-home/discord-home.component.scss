@@ -1,0 +1,25 @@
+.bot-present {
+  color: mediumseagreen;
+  font-weight: 800;
+}
+
+.bot-not-present {
+  color: darkred;
+  font-weight: 800;
+}
+
+.guild-name {
+  display: block;
+  font-weight: 800;
+  width: 150px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow: ellipsis;
+}
+
+
+.server-card {
+  width: 150px;
+  text-align: center;
+
+}

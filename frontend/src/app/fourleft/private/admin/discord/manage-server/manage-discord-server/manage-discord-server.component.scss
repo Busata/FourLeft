@@ -1,9 +1,9 @@
 .channel-item {
-  .channel-name {
-    font-weight: 800;
-
-  }
-  display:flex;
+  width:400px;
   justify-content: space-between;
-  margin-bottom: 15px;
+  align-items: center;
+}
+
+.channels-list {
+  padding: 15px;
 }

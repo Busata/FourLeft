@@ -1,9 +1,8 @@
 <div>
-  <h1>{{guild.name}}</h1>
+  <div class="g-header-h1">{{guild.name}} <div class="g-header-label">Channels</div></div>
 
-  <div>
-    <h2>Channels</h2>
-    <div class="pure-g" *ngFor="let channel of channels">
+  <div class="channels-list">
+    <div class="pure-g channel-item g-card" *ngFor="let channel of channels">
       <div class="pure-u-1-2">#{{channel.name}}</div>
       <div class="pure-u-1-2">
         <button class="g-button g-button-primary" [routerLink]="['channels', channel.id]">

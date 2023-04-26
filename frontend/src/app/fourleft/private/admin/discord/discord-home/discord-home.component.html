@@ -1,20 +1,22 @@
 <div class="guilds">
-  <h2>Servers</h2>
+  <div class="g-header-h1">
+    Available discord servers
+    <span class="g-header-label">A list of servers that you can configure or invite the bot to.</span>
+  </div>
   <div class="pure-g">
-    <div class="pure-u-1-12" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
-      <img alt="Guild icon" [ngSrc]="getGuildIcon(guild)" width="125" height="125"/>
+    <div class="g-card server-card" [title]="guild.name" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
+      <img class="g-image-rounded" alt="Guild icon" [ngSrc]="getGuildIcon(guild)" width="125" height="125" onerror="this.onerror=null;this.src='/assets/no_image_125_125.png'">
       <div>
-        <div class="font-bold">{{guild.name}}</div>
+        <div class="guild-name">{{guild.name}}</div>
         <div>
-          <div class="italic color-red-100" *ngIf="guild.botJoined">
+          <div class="bot-present" *ngIf="guild.botJoined">
             Bot present
           </div>
-          <div class="italic text-red-500" *ngIf="!guild.botJoined">
+          <div class="bot-not-present" *ngIf="!guild.botJoined">
             Bot not present yet
           </div>
           <div *ngIf="guild.botJoined">
             <button class="g-button g-button-primary" [routerLink]="'configure/'+guild.id">Manage server</button>
-
           </div>
           <div *ngIf="!guild.botJoined">
             <button class="g-button g-button-primary" (click)="inviteBot(guild)">Invite bot</button>

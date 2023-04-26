@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+$roboto-font-path: "~roboto-fontface/fonts" !default;
+@import "roboto-fontface/css/roboto/sass/roboto-fontface";
+
 @import "purecss/build/base-min.css";
 @import "purecss/build/grids-min.css";
 @import "purecss/build/grids-responsive-min.css";
@@ -10,6 +13,32 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+.g-header-h1 {
+  font-size: 1.5em;
+}
+.g-header-h2 {
+  font-size: 1em;
+}
+.g-full-width {
+  width: 100%;
+}
+.g-header-h1, .g-header-h2 {
+  padding-left: 15px;
+  font-size: 1.5em;
+  font-weight: 800;
+
+  .g-header-label {
+    margin-top: 5px;
+    display: block;
+    font-size: 0.7em;
+    color: lightslategrey;
+    font-weight: 400;
+  }
+}
+
+.g-image-rounded {
+  border-radius: 5px;
+}
 
 #footer {
   width: 100%;
@@ -18,7 +47,7 @@ body {
   text-align: right;
   padding-left: 30px;
   bottom: 0;
-  z-index:99;
+  z-index: 99;
 }
 
 .g-image-h-400 {
@@ -29,9 +58,15 @@ body {
   margin: 10px;
   padding: 15px;
   border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
+
+  &:hover {
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  }
 }
 
 .g-readonly {
@@ -40,7 +75,8 @@ body {
 
 .drag-handle {
   user-select: none;
+
   &:hover {
-    cursor:grab;
+    cursor: grab;
   }
 }
