@@ -28,8 +28,12 @@ public class ClubUpdateSchedule {
     public void updateLeaderboards() {
         clubSyncService.cleanArchived();
         clubSyncService.findClubs().forEach(club -> {
-            clubSyncService.updateClubDetails(club);
-            clubSyncService.updateClubLeaderboards(club);
+            try {
+                clubSyncService.updateClubDetails(club);
+                clubSyncService.updateClubLeaderboards(club);
+            } catch (Exception ex) {
+                log.warn("Error updating club {}", club.getName(), ex);
+            }
         });
     }
 }
