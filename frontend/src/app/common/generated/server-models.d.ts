@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-26 10:57:35.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-27 08:16:34.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -324,6 +324,12 @@ export interface SingleClubViewTo extends ResultsViewTo {
 
 export interface DiscordAuthenticationStatusTo {
     authenticated: boolean;
+}
+
+export interface DiscordChannelSummaryTo {
+    id: string;
+    name: string;
+    hasConfiguration: boolean;
 }
 
 export interface DiscordChannelTo {
