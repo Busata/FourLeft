@@ -21,7 +21,7 @@ public class AutoPostResultMessageFactory {
             .withRecurringTemplate(
                     "multiList",
                     """
-                            **${tierName}**${totalEntries}
+                            **${tierName}**
                             ${entries}
                             """
             );

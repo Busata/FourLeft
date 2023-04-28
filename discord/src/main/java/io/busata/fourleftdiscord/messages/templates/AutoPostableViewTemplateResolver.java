@@ -84,7 +84,6 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
 
         Map<String, String> groupedListValueMap = new HashMap<>();
         groupedListValueMap.put("entries", listEntries);
-        groupedListValueMap.put("totalEntries", " • *%s entries*".formatted(list.totalUniqueEntries()));
 
         groupedListValueMap.put("vehicleRestrictions", "");
 

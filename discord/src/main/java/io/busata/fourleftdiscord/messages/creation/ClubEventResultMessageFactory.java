@@ -109,7 +109,7 @@ public class ClubEventResultMessageFactory {
             }
 
             if (StringUtils.isNotBlank(resultList.name())) {
-                builder.addField("**%s** • *%s entries* ".formatted(resultList.name(), resultList.totalUniqueEntries()), "%s".formatted(getVehicleRestrictions(resultList)), false);
+                builder.addField("**%s**", "%s".formatted(getVehicleRestrictions(resultList)), false);
             }
 
             if (clubResult.getViewPropertiesTo().powerStage()) {
