@@ -10,6 +10,7 @@ import java.util.List;
 public record AutoPostResultList(
         String name,
         List<ActivityInfoTo> activityInfoTo,
+        int totalUniqueEntries,
 
         List<DriverEntryTo> results
 ) {
