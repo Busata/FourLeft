@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   fourleft:
-    build: application
+    build: .
     container_name: fourleft
     restart: always
     extra_hosts:
