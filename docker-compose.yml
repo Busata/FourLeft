@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   fourleft-reverse-proxy:
-    build: reverse-proxy
+    build: devops/reverse-proxy
     container_name: fourleft-reverse-proxy
     restart: always
     environment:

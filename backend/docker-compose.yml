@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+  fourleft:
+    build: application
+    container_name: fourleft
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db.fourleft
+  db.fourleft:
+    container_name: db.fourleft
+    image: postgres:15
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+volumes:
+  pgdata:
+networks:
+  default:
+    name: veevi

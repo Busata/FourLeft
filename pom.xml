@@ -14,9 +14,11 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>backend</module>
         <module>api</module>
-        <module>discord-client</module>
+        <module>discord</module>
         <module>frontend</module>
+        <module>devops</module>
     </modules>
 
 </project>
