@@ -1,6 +1,7 @@
 package io.busata.fourleft.endpoints.views.points.factory.helpers;
 
 import io.busata.fourleft.domain.clubs.models.Championship;
+import io.busata.fourleft.domain.clubs.models.Event;
 import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class FixedPointChampionshipFetcher {
                 .sorted(Comparator.comparing(Championship::getOrder))
                 .dropWhile(calc::isNotOffsetChampionship)
                 .sorted(Comparator.comparing(Championship::getOrder).reversed())
-                .collect(Collectors.toList());
+                .toList();
 
         var requiredChampionships = calculateRequiredChampionships(inactiveOffsetChampionships, calc.getJoinChampionshipsCount());
 
@@ -30,6 +31,7 @@ public class FixedPointChampionshipFetcher {
     private List<Championship> takeLast(List<Championship> championships) {
         return championships.stream()
                 .sorted(Comparator.comparing(Championship::getOrder).reversed())
+                .filter(championship -> championship.getEvents().stream().anyMatch(Event::isPrevious))
                 .limit(1)
                 .collect(Collectors.toList());
     }

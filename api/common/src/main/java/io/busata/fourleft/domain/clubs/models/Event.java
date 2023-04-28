@@ -1,8 +1,7 @@
 package io.busata.fourleft.domain.clubs.models;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -24,6 +23,9 @@ import java.util.UUID;
 @Table(name="event")
 @Getter
 @Setter
+@Builder(builderMethodName = "event")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Event {
 
     @Id
