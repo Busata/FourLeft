@@ -1,9 +1,11 @@
 package io.busata.fourleft.endpoints.discord.integration;
 
+import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordChannelTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
+import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
 import io.busata.fourleft.domain.discord.integration.models.UserDiscordGuildAccessRepository;
@@ -33,6 +35,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class DiscordIntegrationService {
 
+    private final DiscordChannelConfigurationRepository discordChannelConfigurationRepository;
     private final DiscordIntegrationAccessTokensRepository discordIntegrationAccessTokensRepository;
     private final DiscordOauth2Client discordOauth2Client;
     private final DiscordIntegrationConfigurationProperties discordIntegrationConfigurationProperties;
@@ -169,9 +172,14 @@ public class DiscordIntegrationService {
         return this.discordBotClient.getGuild(guildId);
     }
 
-    public List<DiscordChannelTo> getGuildChannels(String guildId) {
+
+    public List<DiscordChannelSummaryTo> getGuildChannels(String guildId) {
         return this.discordBotClient.getChannels(guildId).stream()
                 .filter(channel -> channel.type() == DisordChannelType.TEXT.getType())
+                .map(channel -> {
+                    boolean hasConfiguration = discordChannelConfigurationRepository.findByChannelId(Long.parseLong(channel.id())).isPresent();
+                    return new DiscordChannelSummaryTo(channel.id(), channel.name(), hasConfiguration);
+                })
                 .toList();
     }
 

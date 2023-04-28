@@ -1,5 +1,6 @@
 import {Inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
+import {DiscordChannelSummaryTo} from '@server-models';
 
 
 @Injectable()
@@ -16,7 +17,7 @@ export class DiscordIntegrationApiService {
   }
 
   public getDiscordChannels(guildId: string) {
-    return this.httpClient.get(`/api/discord/integration/guilds/${guildId}/channels`);
+    return this.httpClient.get<DiscordChannelSummaryTo>(`/api/discord/integration/guilds/${guildId}/channels`);
   }
 
   public canManageServer(guildId: string) {

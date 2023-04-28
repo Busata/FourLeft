@@ -2,6 +2,7 @@ package io.busata.fourleft.endpoints.discord.integration;
 
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.discord.DiscordAuthenticationStatusTo;
+import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordChannelTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildPermissionTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
@@ -69,7 +70,7 @@ public class DiscordIntegrationEndpoint {
         return this.discordIntegrationService.getGuild(guildId);
     }
     @GetMapping(Routes.DISCORD_GUILD_CHANNELS)
-    public List<DiscordChannelTo> getChannels(@PathVariable(name="guildId") String guildId) {
+    public List<DiscordChannelSummaryTo> getChannels(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuildChannels(guildId);
     }
 

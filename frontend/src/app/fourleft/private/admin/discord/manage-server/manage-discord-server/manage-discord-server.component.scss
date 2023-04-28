@@ -2,11 +2,19 @@
   padding-top: 15px;
 }
 .channel-item {
-  width:400px;
-  justify-content: space-between;
+  width: 400px;
+  justify-content: flex-end;
   align-items: center;
 }
 
 .channels-list {
   padding: 15px;
+}
+
+.search-bar {
+  padding: 15px;
+  input {
+    width: 300px;
+    margin-right: 15px;
+  }
 }
