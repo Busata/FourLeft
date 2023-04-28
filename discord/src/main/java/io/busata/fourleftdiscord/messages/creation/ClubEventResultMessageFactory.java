@@ -99,6 +99,8 @@ public class ClubEventResultMessageFactory {
 
 
         List<ResultListTo> multiListResults = clubResult.getMultiListResults();
+        int totalEntries = clubResult.getMultiListResults().stream().mapToInt(ResultListTo::totalUniqueEntries).sum();
+
         for (int i = 0; i < multiListResults.size(); i++) {
             ResultListTo resultList = multiListResults.get(i);
 
@@ -107,7 +109,7 @@ public class ClubEventResultMessageFactory {
             }
 
             if (StringUtils.isNotBlank(resultList.name())) {
-                builder.addField("**%s**".formatted(resultList.name()), "%s".formatted(getVehicleRestrictions(resultList)), false);
+                builder.addField("**%s**", "%s".formatted(getVehicleRestrictions(resultList)), false);
             }
 
             if (clubResult.getViewPropertiesTo().powerStage()) {
@@ -141,8 +143,8 @@ public class ClubEventResultMessageFactory {
 
             if(i == multiListResults.size() - 1) {
                 builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().stream().findAny().orElseThrow().lastUpdate())), true);
-                if(resultList.totalUniqueEntries() > 0) {
-                    builder.addField("**Total entries**", "*%s*".formatted(resultList.totalUniqueEntries()), true);
+                if(totalEntries > 0) {
+                    builder.addField("**Total entries**", "*%s*".formatted(totalEntries), true);
                 }
                 builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().stream().findAny().orElseThrow().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
             }

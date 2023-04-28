@@ -16,12 +16,12 @@ public class AutoPostResultMessageFactory {
     private final AutoPostableViewTemplateResolver templateResolver;
 
     MessageTemplate BASE = messageTemplate("""
-            **Results** • **${countryEmoticon}** • **${stageNames}** • **${vehicleClassName}**
+            **Results** • **${countryEmoticon}** • **${stageNames}** • **${vehicleClassName}**${totalEntries}
             ${singleList}${multiList}""")
             .withRecurringTemplate(
                     "multiList",
                     """
-                            **${tierName}** ${vehicleRestrictions}
+                            **${tierName}**
                             ${entries}
                             """
             );

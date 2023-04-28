@@ -18,6 +18,7 @@ public class AutoPostableFactory {
                     return new AutoPostResultList(
                             multiListResults.name(),
                             multiListResults.activityInfoTo(),
+                            multiListResults.totalUniqueEntries(),
                             multiListResults.results().stream().filter(resultEntryTo -> entries.contains(resultEntryTo.racenet())).collect(Collectors.toList())
                     );
                 }).collect(Collectors.toList())

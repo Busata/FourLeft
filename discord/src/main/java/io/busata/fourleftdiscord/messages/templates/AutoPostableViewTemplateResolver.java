@@ -44,19 +44,20 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("countryEmoticon", country);
         valueMap.put("stageNames", stageName);
         valueMap.put("vehicleClassName", vehicleClass);
-        valueMap.put("singleList","");
-        valueMap.put("multiList","");
+        valueMap.put("singleList", "");
+        valueMap.put("multiList", "");
+        valueMap.put("totalEntries", "");
 
-        if(value.getMultiListResults().size() == 1) {
+        if (value.getMultiListResults().size() == 1) {
+            final var multiListResult = value.getMultiListResults().get(0);
             final var entriesTemplate = template.getRecurringTemplate("entries");
-            String entries = value.getMultiListResults().stream()
-                    .flatMap(list -> {
-                        return list.results().stream().map(resultEntryTo -> {
-                            return buildEntry(list, resultEntryTo, entriesTemplate);
-                        });
-                    }).collect(Collectors.joining("\n"));
+            String entries = multiListResult.results().stream().map(resultEntryTo -> {
+                return buildEntry(multiListResult, resultEntryTo, entriesTemplate);
+            }).collect(Collectors.joining("\n"));
 
+            valueMap.put("totalEntries", " • *%s entries*".formatted(multiListResult.totalUniqueEntries()));
             valueMap.put("singleList", entries);
+
 
         } else {
             String multiList = value.getMultiListResults().stream()
@@ -64,6 +65,10 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
                     .map(list -> buildMultiList(template, list))
                     .collect(Collectors.joining("\n"));
             valueMap.put("multiList", multiList);
+
+            int totalEntries = value.getMultiListResults().stream().mapToInt(AutoPostResultList::totalUniqueEntries).sum();
+            valueMap.put("totalEntries", " • *%s entries*".formatted(totalEntries));
+
         }
 
         return valueMap;
@@ -110,13 +115,13 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         valueMap.put("platform", "");
         valueMap.put("controllerType", "");
 
-        if(entry.platform().platform() != Platform.UNKNOWN) {
+        if (entry.platform().platform() != Platform.UNKNOWN) {
             valueMap.put("platform", " %s •".formatted(
                     fieldMapper.createEmoticon(entry.platform().platform().name())
             ));
         }
 
-        if(entry.platform().controller() != ControllerType.UNKNOWN) {
+        if (entry.platform().controller() != ControllerType.UNKNOWN) {
             valueMap.put("controllerType", " %s •".formatted(
                     fieldMapper.createEmoticon(entry.platform().controller().name())
             ));
