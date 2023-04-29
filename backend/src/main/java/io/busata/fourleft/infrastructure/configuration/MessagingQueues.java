@@ -1,6 +1,6 @@
 package io.busata.fourleft.infrastructure.configuration;
 
-import io.busata.fourleft.api.messages.QueueNames;
+import io.busata.fourleft.api.events.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.amqp.core.AmqpAdmin;

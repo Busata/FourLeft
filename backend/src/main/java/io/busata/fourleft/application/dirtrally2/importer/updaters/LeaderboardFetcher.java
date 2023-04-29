@@ -1,11 +1,11 @@
 package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
 
-import io.busata.fourleft.api.models.LeaderboardKey;
+import io.busata.fourleft.common.LeaderboardKey;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.PlatformInfo;
 import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
-import io.busata.fourleft.api.models.ControllerType;
-import io.busata.fourleft.api.models.Platform;
+import io.busata.fourleft.common.ControllerType;
+import io.busata.fourleft.common.Platform;
 import io.busata.fourleft.domain.dirtrally2.players.PlayerInfo;
 import io.busata.fourleft.domain.dirtrally2.players.PlayerInfoRepository;
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;

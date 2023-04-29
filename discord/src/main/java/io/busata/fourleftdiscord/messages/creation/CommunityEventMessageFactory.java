@@ -4,7 +4,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.CommunityChallengeBoardEntryTo;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
-import io.busata.fourleft.api.models.DR2CommunityEventType;
+import io.busata.fourleft.common.DR2CommunityEventType;
 import io.busata.fourleftdiscord.fieldmapper.DR2FieldMapper;
 import io.busata.fourleftdiscord.messages.BadgeMapper;
 import lombok.RequiredArgsConstructor;

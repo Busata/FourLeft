@@ -1,7 +1,7 @@
 package io.busata.fourleft.api.models.configuration;
 
-import io.busata.fourleft.api.models.BadgeType;
 import io.busata.fourleft.api.models.configuration.results.ResultsViewTo;
+import io.busata.fourleft.common.BadgeType;
 
 import java.util.UUID;
 

@@ -1,6 +1,6 @@
 package io.busata.fourleft.domain.discord.bot.repository;
 
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleft.domain.discord.bot.models.MessageLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 

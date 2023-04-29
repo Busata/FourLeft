@@ -4,6 +4,7 @@ import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubResultC
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubChampionships;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Factory
 @RequiredArgsConstructor
 public class EventFactory {
 

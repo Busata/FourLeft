@@ -7,11 +7,12 @@ import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
 import io.busata.fourleft.domain.dirtrally2.clubs.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class EventCleanService {
 

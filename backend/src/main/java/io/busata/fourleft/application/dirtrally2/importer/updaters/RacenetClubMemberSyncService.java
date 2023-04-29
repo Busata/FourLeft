@@ -9,11 +9,12 @@ import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMembers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class RacenetClubMemberSyncService {
 

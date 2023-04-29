@@ -2,7 +2,7 @@ package io.busata.fourleftdiscord.messages;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
-import io.busata.fourleft.api.models.ViewType;
+import io.busata.fourleft.common.ViewType;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
 import io.busata.fourleftdiscord.client.FourLeftClient;

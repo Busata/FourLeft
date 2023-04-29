@@ -2,9 +2,10 @@ package io.busata.fourleft.application.dirtrally2.racenet;
 
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2LeaderboardEntry;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.BoardEntry;
+import io.busata.fourleft.infrastructure.common.Factory;
 import org.springframework.stereotype.Component;
 
-@Component
+@Factory
 public class BoardEntryFactory {
 
     public BoardEntry create(DR2LeaderboardEntry result) {

@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.dirtrally2.challenges.models;
 
-import io.busata.fourleft.api.models.DR2CommunityEventType;
-import io.busata.fourleft.api.models.LeaderboardKey;
+import io.busata.fourleft.common.DR2CommunityEventType;
+import io.busata.fourleft.common.LeaderboardKey;
 import lombok.Getter;
 import lombok.Setter;
 

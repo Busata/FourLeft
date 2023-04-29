@@ -1,6 +1,6 @@
 package io.busata.fourleft.domain.discord.bot.models;
 
-import io.busata.fourleft.api.models.FieldMappingType;
+import io.busata.fourleft.common.FieldMappingType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +24,7 @@ public class FieldMapping {
     private String value;
 
     @Enumerated(EnumType.STRING)
-    private io.busata.fourleft.api.models.FieldMappingType type;
+    private FieldMappingType type;
 
     private boolean mappedByUser;
 

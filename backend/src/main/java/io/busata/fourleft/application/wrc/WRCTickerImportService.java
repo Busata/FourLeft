@@ -1,7 +1,7 @@
 package io.busata.fourleft.application.wrc;
 
 
-import io.busata.fourleft.api.messages.QueueNames;
+import io.busata.fourleft.api.events.WRCTickerUpdateEvent;
 import io.busata.fourleft.api.models.WRCTickerUpdateTo;
 import io.busata.fourleft.infrastructure.clients.wrc.WRCApiClient;
 import io.busata.fourleft.infrastructure.clients.wrc.WRCTickerEntryImageTo;
@@ -14,7 +14,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -32,7 +32,8 @@ public class WRCTickerImportService {
     private final WRCApiClient client;
     private final WRCTickerEntryRepository wrcTickerEntryRepository;
 
-    private final RabbitTemplate rabbitMq;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     public void importTickerEntries(boolean triggerEvents) {
         WRCTickerSummaryTo tickerSummary = client.getTickerSummary(activeEventId);
@@ -75,7 +76,7 @@ public class WRCTickerImportService {
         )).toList();
 
         if(triggerEvents) {
-            rabbitMq.convertAndSend(QueueNames.TICKER_ENTRIES_UPDATE, list);
+            eventPublisher.publishEvent(new WRCTickerUpdateEvent(list));
         }
         wrcTickerEntryRepository.saveAll(newEntries);
     }

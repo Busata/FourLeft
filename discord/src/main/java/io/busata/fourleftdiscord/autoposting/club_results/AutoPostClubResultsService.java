@@ -2,8 +2,8 @@ package io.busata.fourleftdiscord.autoposting.club_results;
 
 import discord4j.common.util.Snowflake;
 import feign.FeignException;
-import io.busata.fourleft.api.messages.LeaderboardUpdated;
-import io.busata.fourleft.api.messages.QueueNames;
+import io.busata.fourleft.api.events.LeaderboardUpdated;
+import io.busata.fourleft.api.events.QueueNames;
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;

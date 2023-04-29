@@ -1,6 +1,6 @@
 package io.busata.fourleft.domain.dirtrally2.clubs.repository;
 
-import io.busata.fourleft.api.models.DR2CommunityEventType;
+import io.busata.fourleft.common.DR2CommunityEventType;
 
 import java.time.LocalDate;
 

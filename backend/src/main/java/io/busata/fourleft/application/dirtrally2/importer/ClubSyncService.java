@@ -1,9 +1,9 @@
 package io.busata.fourleft.application.dirtrally2.importer;
 
-import io.busata.fourleft.api.messages.ClubEventEnded;
-import io.busata.fourleft.api.messages.ClubEventStarted;
-import io.busata.fourleft.api.messages.ClubInactive;
-import io.busata.fourleft.api.messages.LeaderboardUpdated;
+import io.busata.fourleft.api.events.ClubEventEnded;
+import io.busata.fourleft.api.events.ClubEventStarted;
+import io.busata.fourleft.api.events.ClubInactive;
+import io.busata.fourleft.api.events.LeaderboardUpdated;
 import io.busata.fourleft.application.dirtrally2.importer.updaters.EventCleanService;
 import io.busata.fourleft.application.dirtrally2.importer.updaters.RacenetSyncService;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
@@ -12,14 +12,14 @@ import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class ClubSyncService {

@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.dirtrally2.clubs.models;
 
-import io.busata.fourleft.api.models.ControllerType;
-import io.busata.fourleft.api.models.Platform;
+import io.busata.fourleft.common.ControllerType;
+import io.busata.fourleft.common.Platform;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,8 +1,8 @@
 package io.busata.fourleftdiscord.messages.templates;
 
-import io.busata.fourleft.api.models.ControllerType;
+import io.busata.fourleft.common.ControllerType;
 import io.busata.fourleft.api.models.DriverEntryTo;
-import io.busata.fourleft.api.models.Platform;
+import io.busata.fourleft.common.Platform;
 import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.VehicleTo;

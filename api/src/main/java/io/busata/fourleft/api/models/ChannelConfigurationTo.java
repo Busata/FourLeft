@@ -1,6 +1,8 @@
 package io.busata.fourleft.api.models;
 
 
+import io.busata.fourleft.common.ChampionshipPointsType;
+
 public record ChannelConfigurationTo(
         String description,
         Long channelId,

@@ -3,14 +3,14 @@ package io.busata.fourleft.application.dirtrally2.racenet;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityStage;
-import io.busata.fourleft.api.models.DR2CommunityEventType;
+import io.busata.fourleft.common.DR2CommunityEventType;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.communityevents.DR2Challenge;
-import org.springframework.stereotype.Component;
+import io.busata.fourleft.infrastructure.common.Factory;
 
 import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 
-@Component
+@Factory
 public class CommunityChallengeFactory {
 
         public CommunityChallenge updateChallenge(CommunityChallenge challenge, DR2Challenge entry) {

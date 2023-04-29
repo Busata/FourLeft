@@ -19,6 +19,7 @@
         <module>discord</module>
         <module>frontend</module>
         <module>devops</module>
+        <module>common</module>
     </modules>
 
 </project>

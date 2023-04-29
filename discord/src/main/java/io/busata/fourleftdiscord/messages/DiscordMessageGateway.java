@@ -4,8 +4,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
-import io.busata.fourleft.api.messages.MessageType;
-import io.busata.fourleft.api.models.ViewType;
+import io.busata.fourleft.common.MessageType;
+import io.busata.fourleft.common.ViewType;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 
 import java.util.List;

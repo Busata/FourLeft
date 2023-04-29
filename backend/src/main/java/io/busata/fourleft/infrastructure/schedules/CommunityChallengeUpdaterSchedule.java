@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-import static io.busata.fourleft.api.messages.QueueNames.COMMUNITY_UPDATED;
+import static io.busata.fourleft.api.events.QueueNames.COMMUNITY_UPDATED;
 
 @Component
 @Slf4j

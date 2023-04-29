@@ -1,7 +1,7 @@
 package io.busata.fourleft.infrastructure.clients.racenet.dto.communityevents;
 
 
-import io.busata.fourleft.api.models.DR2CommunityEventType;
+import io.busata.fourleft.common.DR2CommunityEventType;
 
 import java.util.List;
 

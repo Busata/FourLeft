@@ -7,16 +7,16 @@ import io.busata.fourleft.infrastructure.common.TransactionHandler;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityChallenge;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityEvent;
 import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityStage;
-import io.busata.fourleft.api.models.DR2CommunityEventType;
+import io.busata.fourleft.common.DR2CommunityEventType;
 import io.busata.fourleft.domain.dirtrally2.challenges.repository.CommunityChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.UUID;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class RacenetChallengesSyncService {

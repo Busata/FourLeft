@@ -4,13 +4,14 @@ import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubChampionships;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubResultChampionship;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Factory
 @RequiredArgsConstructor
 public class ChampionshipFactory {
     private final EventFactory eventFactory;

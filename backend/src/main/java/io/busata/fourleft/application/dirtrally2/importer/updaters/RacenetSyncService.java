@@ -4,10 +4,11 @@ import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class RacenetSyncService {
 

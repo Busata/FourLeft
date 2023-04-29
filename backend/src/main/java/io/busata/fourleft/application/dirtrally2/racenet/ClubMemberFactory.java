@@ -3,10 +3,11 @@ package io.busata.fourleft.application.dirtrally2.racenet;
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMember;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
+@Factory
 @RequiredArgsConstructor
 public class ClubMemberFactory {
 

@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.dirtrally2.clubs.repository;
 
 import io.busata.fourleft.domain.dirtrally2.clubs.models.Leaderboard;
-import io.busata.fourleft.api.models.LeaderboardKey;
+import io.busata.fourleft.common.LeaderboardKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
