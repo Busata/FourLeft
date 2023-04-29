@@ -1,4 +1,4 @@
-package io.busata.fourleft.domain.dirtrally2.clubs.models;
+package io.busata.fourleft.api.models;
 
 public record LeaderboardKey(
         String challengeId,

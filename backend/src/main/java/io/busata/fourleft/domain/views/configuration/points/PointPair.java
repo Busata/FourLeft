@@ -1,4 +1,4 @@
-package io.busata.fourleft.api.models;
+package io.busata.fourleft.domain.views.configuration.points;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -6,11 +6,9 @@ import io.busata.fourleft.infrastructure.configuration.ImageGenerationConfig;
 import io.busata.fourleft.infrastructure.configuration.KeycloakConfig;
 import io.busata.fourleft.infrastructure.configuration.MessagingConfig;
 import io.busata.fourleft.infrastructure.configuration.SchedulingConfig;
-import org.apache.catalina.security.SecurityConfig;
+import io.busata.fourleft.infrastructure.configuration.SecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication

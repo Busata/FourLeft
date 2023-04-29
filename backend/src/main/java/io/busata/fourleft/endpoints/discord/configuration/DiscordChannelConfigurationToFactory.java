@@ -1,5 +1,6 @@
 package io.busata.fourleft.endpoints.discord.configuration;
 
+import io.busata.fourleft.api.models.StandingPointPairTo;
 import io.busata.fourleft.api.models.configuration.ClubViewTo;
 import io.busata.fourleft.api.models.configuration.DefaultPointsCalculatorTo;
 import io.busata.fourleft.api.models.configuration.FixedPointsCalculatorTo;
@@ -17,6 +18,7 @@ import io.busata.fourleft.domain.views.configuration.DiscordChannelConfiguration
 import io.busata.fourleft.api.models.configuration.results.RacenetFilterMode;
 import io.busata.fourleft.domain.views.configuration.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.views.configuration.points.FixedPointsCalculator;
+import io.busata.fourleft.domain.views.configuration.points.PointPair;
 import io.busata.fourleft.domain.views.configuration.points.PointSystem;
 import io.busata.fourleft.domain.views.configuration.points.PointsCalculator;
 import io.busata.fourleft.domain.views.configuration.results_views.ConcatenationView;
@@ -142,8 +144,15 @@ public class DiscordChannelConfigurationToFactory {
                 pointSystem.getDefaultRankingPoint(),
                 pointSystem.getDefaultPowerstagePoint(),
                 0,
-                pointSystem.getRankingPoints(),
-                pointSystem.getPowerStagePoints()
+                pointSystem.getRankingPoints().stream().map(this::createPointPairTo).collect(Collectors.toList()),
+                pointSystem.getPowerStagePoints().stream().map(this::createPointPairTo).collect(Collectors.toList())
+        );
+    }
+
+    private StandingPointPairTo createPointPairTo(PointPair pointPair) {
+        return new StandingPointPairTo(
+                pointPair.getRank(),
+                pointPair.getPoint()
         );
     }
 

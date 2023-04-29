@@ -4,7 +4,6 @@ package io.busata.fourleft.api.models.configuration.results;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.busata.fourleft.domain.configuration.results_views.ConcatenationView;
 import lombok.Getter;
 import lombok.Setter;
 

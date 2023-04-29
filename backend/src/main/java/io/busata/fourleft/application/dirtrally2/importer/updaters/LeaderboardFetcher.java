@@ -1,7 +1,7 @@
 package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.LeaderboardKey;
+import io.busata.fourleft.api.models.LeaderboardKey;
 import io.busata.fourleft.domain.dirtrally2.clubs.models.PlatformInfo;
 import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
 import io.busata.fourleft.api.models.ControllerType;

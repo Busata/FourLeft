@@ -1,6 +1,5 @@
 package io.busata.fourleft.api.models;
 
-import io.busata.fourleft.domain.discord.bot.models.ChampionshipPointsType;
 
 public record ChannelConfigurationTo(
         String description,

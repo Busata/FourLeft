@@ -1,4 +1,4 @@
-package io.busata.fourleft.domain.discord.bot.models;
+package io.busata.fourleft.api.models;
 
 public enum ChampionshipPointsType {
     DEFAULT,

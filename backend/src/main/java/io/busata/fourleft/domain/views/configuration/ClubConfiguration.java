@@ -1,6 +1,6 @@
 package io.busata.fourleft.domain.views.configuration;
 
-import io.busata.fourleft.domain.discord.bot.models.AutomatedGenerationType;
+import io.busata.fourleft.api.models.AutomatedGenerationType;
 import lombok.Getter;
 
 import javax.persistence.Column;
