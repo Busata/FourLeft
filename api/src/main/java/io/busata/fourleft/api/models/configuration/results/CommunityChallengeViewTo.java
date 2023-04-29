@@ -1,6 +1,6 @@
 package io.busata.fourleft.api.models.configuration.results;
 
-import io.busata.fourleft.domain.configuration.results_views.BadgeType;
+import io.busata.fourleft.api.models.BadgeType;
 import lombok.Getter;
 
 @Getter

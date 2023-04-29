@@ -1,10 +1,10 @@
 package io.busata.fourleft.endpoints.views.points.factory;
 
 import io.busata.fourleft.api.models.views.ViewPointsTo;
-import io.busata.fourleft.domain.configuration.ClubView;
-import io.busata.fourleft.domain.configuration.points.DefaultPointsCalculator;
-import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
-import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
+import io.busata.fourleft.domain.views.configuration.ClubView;
+import io.busata.fourleft.domain.views.configuration.points.DefaultPointsCalculator;
+import io.busata.fourleft.domain.views.configuration.points.FixedPointsCalculator;
+import io.busata.fourleft.domain.views.configuration.results_views.SingleClubView;
 import io.busata.fourleft.endpoints.views.points.factory.helpers.SingleClubViewDefaultPointsFactory;
 import io.busata.fourleft.endpoints.views.points.factory.helpers.ResultsViewFixedPointsFactory;
 import lombok.RequiredArgsConstructor;

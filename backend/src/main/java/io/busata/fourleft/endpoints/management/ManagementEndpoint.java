@@ -3,7 +3,7 @@ package io.busata.fourleft.endpoints.management;
 
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
 import io.busata.fourleft.api.messages.QueueNames;
-import io.busata.fourleft.wrc.importer.WRCTickerImportService;
+import io.busata.fourleft.application.wrc.WRCTickerImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.PostMapping;

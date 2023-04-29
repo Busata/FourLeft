@@ -2,7 +2,7 @@ package io.busata.fourleft.endpoints.views.summary;
 
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
-import io.busata.fourleft.domain.configuration.ClubViewRepository;
+import io.busata.fourleft.domain.views.configuration.ClubViewRepository;
 import io.busata.fourleft.endpoints.views.summary.factory.ViewEventSummaryToFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

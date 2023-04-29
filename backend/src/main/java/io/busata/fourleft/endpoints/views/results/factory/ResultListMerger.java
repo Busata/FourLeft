@@ -5,10 +5,10 @@ import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.VehicleEntryTo;
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
-import io.busata.fourleft.common.StageTimeParser;
-import io.busata.fourleft.domain.configuration.results_views.MergeMode;
-import io.busata.fourleft.domain.configuration.results_views.RacenetFilter;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.infrastructure.common.StageTimeParser;
+import io.busata.fourleft.api.models.configuration.results.MergeMode;
+import io.busata.fourleft.domain.views.configuration.results_views.RacenetFilter;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;

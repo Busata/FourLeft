@@ -3,9 +3,9 @@ package io.busata.fourleft.endpoints.views.points.factory.helpers;
 import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
-import io.busata.fourleft.domain.clubs.models.StandingEntry;
-import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.importer.ClubSyncService;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.StandingEntry;
+import io.busata.fourleft.domain.views.configuration.results_views.SingleClubView;
+import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

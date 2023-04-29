@@ -1,10 +1,10 @@
 package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.PlatformTo;
-import io.busata.fourleft.domain.players.ControllerType;
-import io.busata.fourleft.domain.players.Platform;
-import io.busata.fourleft.domain.players.PlayerInfoRepository;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.api.models.ControllerType;
+import io.busata.fourleft.api.models.Platform;
+import io.busata.fourleft.domain.dirtrally2.players.PlayerInfoRepository;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
 @Factory

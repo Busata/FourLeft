@@ -2,9 +2,9 @@ package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
-import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.clubs.models.Stage;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.infrastructure.common.Factory;
 
 import java.util.UUID;
 

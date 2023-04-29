@@ -2,10 +2,10 @@ package io.busata.fourleft.endpoints.views.management;
 
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.messages.LeaderboardUpdated;
-import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.importer.ClubSyncService;
-import io.busata.fourleft.domain.clubs.models.Club;
-import io.busata.fourleft.importer.updaters.RacenetSyncService;
+import io.busata.fourleft.domain.views.configuration.ClubViewRepository;
+import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
+import io.busata.fourleft.application.dirtrally2.importer.updaters.RacenetSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.PathVariable;

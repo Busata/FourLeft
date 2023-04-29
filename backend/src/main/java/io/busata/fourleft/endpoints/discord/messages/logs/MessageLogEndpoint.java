@@ -4,7 +4,7 @@ package io.busata.fourleft.endpoints.discord.messages.logs;
 import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.messages.MessageType;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
-import io.busata.fourleft.common.TransactionHandler;
+import io.busata.fourleft.infrastructure.common.TransactionHandler;
 import io.busata.fourleft.domain.discord.bot.models.MessageLog;
 import io.busata.fourleft.domain.discord.bot.repository.MessageLogRepository;
 import io.busata.fourleft.endpoints.discord.messages.logs.service.MessageLogFactory;

@@ -2,14 +2,14 @@ package io.busata.fourleft.endpoints.views.summary.factory;
 
 import io.busata.fourleft.api.models.views.ViewEventEntryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
-import io.busata.fourleft.domain.clubs.models.Championship;
-import io.busata.fourleft.domain.clubs.models.Club;
-import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.clubs.models.Stage;
-import io.busata.fourleft.domain.configuration.ClubView;
-import io.busata.fourleft.domain.configuration.results_views.MergeResultsView;
-import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.importer.ClubSyncService;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.domain.views.configuration.ClubView;
+import io.busata.fourleft.domain.views.configuration.results_views.MergeResultsView;
+import io.busata.fourleft.domain.views.configuration.results_views.SingleClubView;
+import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

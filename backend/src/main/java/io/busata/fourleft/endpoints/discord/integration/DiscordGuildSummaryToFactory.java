@@ -2,7 +2,7 @@ package io.busata.fourleft.endpoints.discord.integration;
 
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.infrastructure.common.Factory;
 
 @Factory
 public class DiscordGuildSummaryToFactory {

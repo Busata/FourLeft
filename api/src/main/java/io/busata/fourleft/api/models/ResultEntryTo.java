@@ -1,7 +1,5 @@
 package io.busata.fourleft.api.models;
 
-import io.busata.fourleft.domain.players.ControllerType;
-import io.busata.fourleft.domain.players.Platform;
 import lombok.Getter;
 
 public record ResultEntryTo(Long rank,

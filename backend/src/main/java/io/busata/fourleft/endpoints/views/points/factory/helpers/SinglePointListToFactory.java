@@ -3,8 +3,8 @@ package io.busata.fourleft.endpoints.views.points.factory.helpers;
 import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
-import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.domain.views.configuration.points.FixedPointsCalculator;
+import io.busata.fourleft.infrastructure.common.Factory;
 
 import java.util.Comparator;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package io.busata.fourleft.api.models;
 
-import io.busata.fourleft.domain.clubs.models.DR2CommunityEventType;
+
 
 import java.util.List;
 

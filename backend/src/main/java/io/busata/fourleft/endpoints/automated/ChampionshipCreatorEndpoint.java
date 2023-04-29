@@ -1,9 +1,9 @@
 package io.busata.fourleft.endpoints.automated;
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.automated.service.DailyChampionshipCreator;
-import io.busata.fourleft.automated.service.WeeklyChampionshipCreator;
-import io.busata.fourleft.racenet.dto.club.championship.creation.DR2ChampionshipCreateRequestTo;
+import io.busata.fourleft.application.dirtrally2.automated.service.DailyChampionshipCreator;
+import io.busata.fourleft.application.dirtrally2.automated.service.WeeklyChampionshipCreator;
+import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation.DR2ChampionshipCreateRequestTo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

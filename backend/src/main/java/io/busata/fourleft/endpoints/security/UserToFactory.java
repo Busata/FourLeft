@@ -1,7 +1,7 @@
 package io.busata.fourleft.endpoints.security;
 
 import io.busata.fourleft.api.models.security.UserTo;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.infrastructure.common.Factory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

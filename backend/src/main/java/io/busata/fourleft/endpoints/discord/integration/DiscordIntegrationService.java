@@ -4,7 +4,7 @@ import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
-import io.busata.fourleft.domain.configuration.DiscordChannelConfigurationRepository;
+import io.busata.fourleft.domain.views.configuration.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
 import io.busata.fourleft.domain.discord.integration.models.UserDiscordGuildAccessRepository;

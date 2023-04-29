@@ -1,6 +1,7 @@
 package io.busata.fourleft.api.models.views;
 
-import io.busata.fourleft.domain.configuration.results_views.BadgeType;
+
+import io.busata.fourleft.api.models.BadgeType;
 
 public record ViewPropertiesTo(
         boolean powerStage,

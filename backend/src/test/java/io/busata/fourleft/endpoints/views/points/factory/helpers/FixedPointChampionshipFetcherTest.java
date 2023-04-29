@@ -1,9 +1,9 @@
 package io.busata.fourleft.endpoints.views.points.factory.helpers;
 
-import io.busata.fourleft.domain.clubs.models.Championship;
-import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.configuration.points.FixedPointsCalculator;
-import io.busata.fourleft.domain.configuration.points.PointSystem;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.views.configuration.points.FixedPointsCalculator;
+import io.busata.fourleft.domain.views.configuration.points.PointSystem;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

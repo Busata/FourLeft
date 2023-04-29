@@ -1,12 +1,12 @@
 package io.busata.fourleft.endpoints.views.members;
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.domain.clubs.models.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
 import io.busata.fourleft.api.models.ClubMemberTo;
-import io.busata.fourleft.domain.configuration.ClubView;
-import io.busata.fourleft.domain.configuration.ClubViewRepository;
-import io.busata.fourleft.racenet.factory.ClubMemberFactory;
-import io.busata.fourleft.importer.ClubSyncService;
+import io.busata.fourleft.domain.views.configuration.ClubView;
+import io.busata.fourleft.domain.views.configuration.ClubViewRepository;
+import io.busata.fourleft.application.dirtrally2.racenet.ClubMemberFactory;
+import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

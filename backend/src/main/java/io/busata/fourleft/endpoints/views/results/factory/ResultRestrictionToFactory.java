@@ -2,11 +2,11 @@ package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
-import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.configuration.event_restrictions.models.ViewEventRestrictions;
-import io.busata.fourleft.domain.configuration.event_restrictions.repository.ViewEventRestrictionsRepository;
-import io.busata.fourleft.domain.options.models.Vehicle;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.views.configuration.restrictions.events.models.ViewEventRestrictions;
+import io.busata.fourleft.domain.views.configuration.restrictions.events.repository.ViewEventRestrictionsRepository;
+import io.busata.fourleft.domain.dirtrally2.options.models.Vehicle;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

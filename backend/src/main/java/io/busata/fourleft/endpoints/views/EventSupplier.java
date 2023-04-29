@@ -1,7 +1,7 @@
 package io.busata.fourleft.endpoints.views;
 
-import io.busata.fourleft.domain.clubs.models.Club;
-import io.busata.fourleft.domain.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
 
 import java.util.stream.Stream;
 

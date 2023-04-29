@@ -1,17 +1,17 @@
 package io.busata.fourleft.endpoints.community;
 
 import io.busata.fourleft.api.Routes;
-import io.busata.fourleft.domain.challenges.models.CommunityChallenge;
-import io.busata.fourleft.domain.challenges.models.CommunityEvent;
-import io.busata.fourleft.domain.challenges.models.CommunityStage;
+import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityChallenge;
+import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityEvent;
+import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityStage;
 import io.busata.fourleft.api.models.CommunityChallengeBoardEntryTo;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
 import io.busata.fourleft.api.models.TrackUserRequestTo;
-import io.busata.fourleft.domain.challenges.models.CommunityLeaderboardTracking;
-import io.busata.fourleft.domain.challenges.repository.CommunityChallengeRepository;
-import io.busata.fourleft.domain.challenges.repository.CommunityLeaderboardTrackingRepository;
-import io.busata.fourleft.domain.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.clubs.repository.LeaderboardRepository;
+import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityLeaderboardTracking;
+import io.busata.fourleft.domain.dirtrally2.challenges.repository.CommunityChallengeRepository;
+import io.busata.fourleft.domain.dirtrally2.challenges.repository.CommunityLeaderboardTrackingRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.BoardEntry;
+import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

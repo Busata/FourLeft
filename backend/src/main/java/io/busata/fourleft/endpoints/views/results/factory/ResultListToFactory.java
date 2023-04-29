@@ -1,9 +1,9 @@
 package io.busata.fourleft.endpoints.views.results.factory;
 
 import io.busata.fourleft.api.models.views.*;
-import io.busata.fourleft.domain.clubs.models.Event;
-import io.busata.fourleft.domain.configuration.results_views.SingleClubView;
-import io.busata.fourleft.helpers.Factory;
+import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.views.configuration.results_views.SingleClubView;
+import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
