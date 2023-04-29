@@ -3,14 +3,13 @@ package io.busata.fourleft.application.aggregators.helpers;
 import io.busata.fourleft.api.models.views.SinglePointListTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.aggregators.ClubView;
 import io.busata.fourleft.domain.aggregators.points.FixedPointsCalculator;
-import io.busata.fourleft.domain.aggregators.results_views.ResultsView;
+import io.busata.fourleft.domain.aggregators.results.ResultsView;
 import io.busata.fourleft.application.aggregators.ViewResultToFactory;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

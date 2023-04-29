@@ -2,7 +2,7 @@ package io.busata.fourleft.domain.aggregators;
 
 import io.busata.fourleft.domain.aggregators.points.PointsCalculator;
 import io.busata.fourleft.common.BadgeType;
-import io.busata.fourleft.domain.aggregators.results_views.ResultsView;
+import io.busata.fourleft.domain.aggregators.results.ResultsView;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

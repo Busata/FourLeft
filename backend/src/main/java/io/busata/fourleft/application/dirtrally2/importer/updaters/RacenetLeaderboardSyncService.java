@@ -3,12 +3,11 @@ package io.busata.fourleft.application.dirtrally2.importer.updaters;
 import com.google.common.collect.ImmutableList;
 import feign.FeignException;
 import feign.RetryableException;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.EventRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

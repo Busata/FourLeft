@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.aggregators.restrictions;
 
-import io.busata.fourleft.domain.dirtrally2.options.models.Vehicle;
-import io.busata.fourleft.domain.aggregators.results_views.ResultsView;
+import io.busata.fourleft.domain.dirtrally2.options.Vehicle;
+import io.busata.fourleft.domain.aggregators.results.ResultsView;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

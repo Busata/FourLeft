@@ -2,13 +2,12 @@ package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
 
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
-import io.busata.fourleft.application.dirtrally2.racenet.ClubMemberFactory;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.ClubMember;
+import io.busata.fourleft.application.dirtrally2.importer.racenet.ClubMemberFactory;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMembers;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

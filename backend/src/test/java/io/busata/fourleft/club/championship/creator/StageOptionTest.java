@@ -1,6 +1,6 @@
 package io.busata.fourleft.club.championship.creator;
 
-import io.busata.fourleft.domain.dirtrally2.options.models.StageOption;
+import io.busata.fourleft.domain.dirtrally2.options.StageOption;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

@@ -2,8 +2,8 @@ package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
 import io.busata.fourleft.infrastructure.common.Factory;
 
 import java.util.UUID;

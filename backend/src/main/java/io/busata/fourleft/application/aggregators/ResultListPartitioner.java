@@ -2,7 +2,7 @@ package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
-import io.busata.fourleft.domain.aggregators.results_views.RacenetFilter;
+import io.busata.fourleft.domain.aggregators.results.RacenetFilter;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 

@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.aggregators;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 
 import java.util.stream.Stream;
 

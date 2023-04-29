@@ -1,7 +1,7 @@
 package io.busata.fourleft.infrastructure.clients.discord.bot;
 
 import feign.RequestInterceptor;
-import io.busata.fourleft.infrastructure.configuration.DiscordIntegrationConfigurationProperties;
+import io.busata.fourleft.infrastructure.configuration.properties.DiscordIntegrationConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 

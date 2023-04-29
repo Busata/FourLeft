@@ -2,11 +2,11 @@ package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
 
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
-import io.busata.fourleft.application.dirtrally2.racenet.ChampionshipFactory;
-import io.busata.fourleft.application.dirtrally2.racenet.StandingEntryFactory;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
+import io.busata.fourleft.application.dirtrally2.importer.racenet.ChampionshipFactory;
+import io.busata.fourleft.application.dirtrally2.importer.racenet.StandingEntryFactory;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.ClubRepository;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubChampionships;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubRecentResults;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.standings.DR2ChampionshipStandingEntry;

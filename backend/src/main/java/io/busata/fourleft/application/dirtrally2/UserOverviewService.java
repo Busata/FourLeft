@@ -9,11 +9,11 @@ import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.application.aggregators.ViewResultToFactory;
 import io.busata.fourleft.domain.aggregators.ClubEventSupplier;
 import io.busata.fourleft.domain.aggregators.ClubViewRepository;
-import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityChallenge;
-import io.busata.fourleft.domain.dirtrally2.challenges.models.CommunityEvent;
-import io.busata.fourleft.domain.dirtrally2.challenges.repository.CommunityChallengeRepository;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.BoardEntry;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
+import io.busata.fourleft.domain.dirtrally2.community.CommunityChallenge;
+import io.busata.fourleft.domain.dirtrally2.community.CommunityEvent;
+import io.busata.fourleft.domain.dirtrally2.community.CommunityChallengeRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
+import io.busata.fourleft.domain.dirtrally2.clubs.LeaderboardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

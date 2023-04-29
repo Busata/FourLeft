@@ -1,8 +1,8 @@
 package io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation;
 
 
-import io.busata.fourleft.domain.dirtrally2.options.models.CountryOption;
-import io.busata.fourleft.domain.dirtrally2.options.models.VehicleClass;
+import io.busata.fourleft.domain.dirtrally2.options.CountryOption;
+import io.busata.fourleft.domain.dirtrally2.options.VehicleClass;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 

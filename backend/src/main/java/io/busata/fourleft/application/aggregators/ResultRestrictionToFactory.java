@@ -2,10 +2,10 @@ package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.aggregators.restrictions.ViewEventRestrictions;
 import io.busata.fourleft.domain.aggregators.restrictions.ViewEventRestrictionsRepository;
-import io.busata.fourleft.domain.dirtrally2.options.models.Vehicle;
+import io.busata.fourleft.domain.dirtrally2.options.Vehicle;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 

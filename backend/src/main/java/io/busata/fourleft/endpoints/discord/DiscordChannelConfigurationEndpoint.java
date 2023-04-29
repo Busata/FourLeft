@@ -5,7 +5,7 @@ import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigur
 import io.busata.fourleft.application.discord.DiscordChannelConfigurationFactory;
 import io.busata.fourleft.application.discord.DiscordChannelConfigurationService;
 import io.busata.fourleft.application.discord.DiscordChannelConfigurationToFactory;
-import io.busata.fourleft.domain.aggregators.DiscordChannelConfiguration;
+import io.busata.fourleft.domain.discord.DiscordChannelConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,8 +1,8 @@
 package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.*;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.aggregators.results_views.SingleClubView;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.aggregators.results.SingleClubView;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 

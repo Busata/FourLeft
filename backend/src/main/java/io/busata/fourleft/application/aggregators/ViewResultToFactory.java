@@ -3,21 +3,20 @@ package io.busata.fourleft.application.aggregators;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.api.models.views.ViewPropertiesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.aggregators.ClubView;
 import io.busata.fourleft.domain.aggregators.ClubViewRepository;
-import io.busata.fourleft.domain.aggregators.results_views.ConcatenationView;
-import io.busata.fourleft.domain.aggregators.results_views.MergeResultsView;
-import io.busata.fourleft.domain.aggregators.results_views.PartitionView;
-import io.busata.fourleft.domain.aggregators.results_views.ResultsView;
-import io.busata.fourleft.domain.aggregators.results_views.SingleClubView;
+import io.busata.fourleft.domain.aggregators.results.ConcatenationView;
+import io.busata.fourleft.domain.aggregators.results.MergeResultsView;
+import io.busata.fourleft.domain.aggregators.results.PartitionView;
+import io.busata.fourleft.domain.aggregators.results.ResultsView;
+import io.busata.fourleft.domain.aggregators.results.SingleClubView;
 import io.busata.fourleft.domain.aggregators.EventSupplier;
-import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
+import io.busata.fourleft.application.dirtrally2.ClubService;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
@@ -32,7 +31,7 @@ import java.util.stream.Stream;
 @Factory
 @RequiredArgsConstructor
 public class ViewResultToFactory {
-    private final ClubSyncService clubSyncService;
+    private final ClubService clubService;
     private final ClubViewRepository clubViewRepository;
     private final ResultListToFactory resultListToFactory;
     private final ResultListMerger resultListMerger;
@@ -58,7 +57,7 @@ public class ViewResultToFactory {
 
 
     private Optional<ViewResultTo> createSingleClubViewResult(ClubView clubView, SingleClubView resultsView, EventSupplier eventSupplier) {
-        final var club = clubSyncService.getOrCreate(resultsView.getClubId());
+        final var club = clubService.getOrCreate(resultsView.getClubId());
 
         final var results = eventSupplier.getEvents(club)
                 .map(event -> resultListToFactory.createResultList(resultsView, event))
@@ -85,7 +84,7 @@ public class ViewResultToFactory {
 
         final var resultViewEventsMap = mergedResultsView.getResultViews().stream()
                 .map(resultView -> {
-                    final var club = clubSyncService.getOrCreate(resultView.getClubId());
+                    final var club = clubService.getOrCreate(resultView.getClubId());
 
                     List<Event> resultViewEvents = eventSupplier.getEvents(club)
                             .sorted(Comparator.comparing(Event::getReferenceId).reversed())
@@ -135,7 +134,7 @@ public class ViewResultToFactory {
         }
 
         List<ResultListTo> results = typedResultsView.getResultViews().stream().flatMap(resultView -> {
-            final var club = clubSyncService.getOrCreate(resultView.getClubId());
+            final var club = clubService.getOrCreate(resultView.getClubId());
             return eventSupplier.getEvents(club).map(event -> {
                 return resultListToFactory.createResultList(resultView, event);
             });
@@ -179,7 +178,7 @@ public class ViewResultToFactory {
     private boolean hasActiveEvent(EventSupplier eventSupplier, List<SingleClubView> views) {
         return views.stream()
                 .map(SingleClubView::getClubId)
-                .map(clubSyncService::getOrCreate)
+                .map(clubService::getOrCreate)
                 .flatMap(eventSupplier::getEvents)
                 .findAny().isPresent();
     }

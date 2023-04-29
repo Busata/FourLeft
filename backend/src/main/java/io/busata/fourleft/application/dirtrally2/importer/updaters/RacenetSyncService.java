@@ -1,9 +1,8 @@
 package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.ClubRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,11 +19,11 @@ public class RacenetSyncService {
 
 
     @Transactional
-    public Club createClub(long clubId) {
+    public void importClub(long clubId) {
         Club club = new Club();
         club.setReferenceId(clubId);
 
-        return clubRepository.save(club);
+        clubRepository.save(club);
     }
 
     @Transactional

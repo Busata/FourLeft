@@ -7,7 +7,7 @@ import io.busata.fourleft.api.models.views.ActivityInfoTo;
 import io.busata.fourleft.api.models.views.ResultListTo;
 import io.busata.fourleft.infrastructure.common.StageTimeParser;
 import io.busata.fourleft.common.MergeMode;
-import io.busata.fourleft.domain.aggregators.results_views.RacenetFilter;
+import io.busata.fourleft.domain.aggregators.results.RacenetFilter;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 

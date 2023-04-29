@@ -1,7 +1,7 @@
 package io.busata.fourleft.application.dirtrally2;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.CommunityChallengeSummaryProjection;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.CommunityChallengeSummaryProjection;
+import io.busata.fourleft.domain.dirtrally2.clubs.LeaderboardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

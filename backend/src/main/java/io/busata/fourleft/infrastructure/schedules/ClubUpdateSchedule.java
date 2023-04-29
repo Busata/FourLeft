@@ -1,6 +1,6 @@
 package io.busata.fourleft.infrastructure.schedules;
 
-import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
+import io.busata.fourleft.application.dirtrally2.importer.ClubSyncUsecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "io.busata.fourleft.scheduling", name="clubs", havingValue="true", matchIfMissing = true)
 public class ClubUpdateSchedule {
-    private final ClubSyncService clubSyncService;
+    private final ClubSyncUsecase clubSyncService;
 
     @PostConstruct
     public void init() {
@@ -25,14 +25,6 @@ public class ClubUpdateSchedule {
     @Scheduled(cron = "0 */1 * * * *", zone = "UTC")
     @CacheEvict(value = "view_results", allEntries = true)
     public void updateLeaderboards() {
-        clubSyncService.cleanArchived();
-        clubSyncService.findClubs().forEach(club -> {
-            try {
-                clubSyncService.updateClubDetails(club);
-                clubSyncService.updateClubLeaderboards(club);
-            } catch (Exception ex) {
-                log.warn("Error updating club {}", club.getName(), ex);
-            }
-        });
+        clubSyncService.updateLeaderboards();
     }
 }

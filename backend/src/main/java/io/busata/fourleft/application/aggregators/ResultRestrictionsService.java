@@ -1,12 +1,12 @@
 package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
-import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
+import io.busata.fourleft.application.dirtrally2.ClubService;
 import io.busata.fourleft.domain.aggregators.restrictions.ViewEventRestrictions;
 import io.busata.fourleft.domain.aggregators.restrictions.ViewEventRestrictionsRepository;
-import io.busata.fourleft.domain.aggregators.results_views.ResultsViewRepository;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.options.models.Vehicle;
+import io.busata.fourleft.domain.aggregators.results.ResultsViewRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.options.Vehicle;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class ResultRestrictionsService {
 
     private final ViewEventRestrictionsRepository viewEventRestrictionsRepository;
 
-    private final ClubSyncService clubSyncService;
+    private final ClubService clubService;
     private final ResultRestrictionToFactory resultRestrictionToFactory;
 
 
@@ -28,7 +28,7 @@ public class ResultRestrictionsService {
         return resultsViewRepository.findById(resultViewId).stream().flatMap(
                 resultsView -> resultsView.getAssociatedClubs().stream()
         ).flatMap(clubId -> {
-            Club club = clubSyncService.getOrCreate(clubId);
+            Club club = clubService.getOrCreate(clubId);
             return club.getCurrentEvent().map(event -> {
                 return resultRestrictionToFactory.getResultRestrictionsTo(resultViewId, event);
             }).stream();

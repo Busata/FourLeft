@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.aggregators.points;
 
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

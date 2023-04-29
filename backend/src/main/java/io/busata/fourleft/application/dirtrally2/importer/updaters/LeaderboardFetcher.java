@@ -1,9 +1,8 @@
 package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
 
-import io.busata.fourleft.common.LeaderboardKey;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.PlatformInfo;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.LeaderboardRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.PlatformInfo;
+import io.busata.fourleft.domain.dirtrally2.clubs.LeaderboardRepository;
 import io.busata.fourleft.common.ControllerType;
 import io.busata.fourleft.common.Platform;
 import io.busata.fourleft.domain.dirtrally2.players.PlayerInfo;
@@ -12,10 +11,10 @@ import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.ControllerFilter;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2LeaderboardRequest;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2LeaderboardResults;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.BoardEntry;
+import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.PlatformFilter;
-import io.busata.fourleft.application.dirtrally2.racenet.BoardEntryFactory;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Leaderboard;
+import io.busata.fourleft.application.dirtrally2.importer.racenet.BoardEntryFactory;
+import io.busata.fourleft.domain.dirtrally2.clubs.Leaderboard;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,11 +32,6 @@ public class LeaderboardFetcher {
     private final BoardEntryFactory boardEntryFactory;
     private final PlayerInfoRepository playerInfoRepository;
     private final RacenetGateway client;
-
-
-    public void upsertBoard(LeaderboardKey key) {
-        upsertBoard(key.challengeId(), key.eventId(), String.valueOf(key.stageId()), true);
-    }
 
     public void upsertBoard(String challengeId, String eventId, String stageId, boolean syncPlatform) {
         Leaderboard board = leaderboardRepository.findLeaderboardByChallengeIdAndEventIdAndStageId(challengeId, eventId, stageId)

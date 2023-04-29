@@ -1,9 +1,9 @@
 package io.busata.fourleft.club.domain;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

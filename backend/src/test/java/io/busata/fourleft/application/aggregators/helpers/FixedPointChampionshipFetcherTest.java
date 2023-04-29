@@ -1,7 +1,7 @@
 package io.busata.fourleft.application.aggregators.helpers;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.aggregators.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.aggregators.points.PointSystem;
 import org.junit.jupiter.api.Test;

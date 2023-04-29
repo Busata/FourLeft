@@ -2,8 +2,8 @@ package io.busata.fourleft.application.discord;
 
 
 import io.busata.fourleft.domain.aggregators.ClubViewRepository;
-import io.busata.fourleft.domain.aggregators.DiscordChannelConfiguration;
-import io.busata.fourleft.domain.aggregators.DiscordChannelConfigurationRepository;
+import io.busata.fourleft.domain.discord.DiscordChannelConfiguration;
+import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

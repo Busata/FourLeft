@@ -2,8 +2,8 @@ package io.busata.fourleft.application.dirtrally2;
 
 
 import io.busata.fourleft.api.events.*;
-import io.busata.fourleft.domain.aggregators.repository.ClubConfigurationRepository;
-import io.busata.fourleft.application.dirtrally2.automated.service.ChampionshipCreator;
+import io.busata.fourleft.domain.dirtrally2.ClubConfigurationRepository;
+import io.busata.fourleft.application.dirtrally2.championshipcreator.ChampionshipCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;

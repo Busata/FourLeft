@@ -2,17 +2,16 @@ package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.ViewEventEntryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Stage;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
 import io.busata.fourleft.domain.aggregators.ClubView;
-import io.busata.fourleft.domain.aggregators.results_views.MergeResultsView;
-import io.busata.fourleft.domain.aggregators.results_views.SingleClubView;
-import io.busata.fourleft.application.dirtrally2.importer.ClubSyncService;
+import io.busata.fourleft.domain.aggregators.results.MergeResultsView;
+import io.busata.fourleft.domain.aggregators.results.SingleClubView;
+import io.busata.fourleft.application.dirtrally2.ClubService;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 @Factory
 @RequiredArgsConstructor
 public class ViewEventSummaryToFactory {
-    private final ClubSyncService clubSyncService;
+    private final ClubService clubService;
 
     public ViewEventSummaryTo create(ClubView view) {
         return switch (view.getResultsView()) {
@@ -36,7 +35,7 @@ public class ViewEventSummaryToFactory {
     }
 
     private ViewEventSummaryTo createSingleClub(long clubId) {
-        Club club = clubSyncService.getOrCreate(clubId);
+        Club club = clubService.getOrCreate(clubId);
 
         return club.findActiveChampionship().map(championship ->
                 new ViewEventSummaryTo(

@@ -1,7 +1,7 @@
 package io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation;
 
-import io.busata.fourleft.domain.dirtrally2.options.models.StageConditionOption;
-import io.busata.fourleft.domain.dirtrally2.options.models.StageOption;
+import io.busata.fourleft.domain.dirtrally2.options.StageConditionOption;
+import io.busata.fourleft.domain.dirtrally2.options.StageOption;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 

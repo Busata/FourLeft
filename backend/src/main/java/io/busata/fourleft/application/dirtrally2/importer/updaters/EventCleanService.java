@@ -1,12 +1,11 @@
 package io.busata.fourleft.application.dirtrally2.importer.updaters;
 
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Championship;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Club;
-import io.busata.fourleft.domain.dirtrally2.clubs.models.Event;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.ClubRepository;
-import io.busata.fourleft.domain.dirtrally2.clubs.repository.EventRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
+import io.busata.fourleft.domain.dirtrally2.clubs.Club;
+import io.busata.fourleft.domain.dirtrally2.clubs.Event;
+import io.busata.fourleft.domain.dirtrally2.clubs.ClubRepository;
+import io.busata.fourleft.domain.dirtrally2.clubs.EventRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
