@@ -1,10 +1,10 @@
 package io.busata.fourleftdiscord.listeners;
 
 import discord4j.common.util.Snowflake;
-import io.busata.fourleft.api.messages.MessageEvent;
-import io.busata.fourleft.api.messages.MessageOperation;
-import io.busata.fourleft.api.messages.QueueNames;
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.api.events.MessageEvent;
+import io.busata.fourleft.common.MessageOperation;
+import io.busata.fourleft.api.events.QueueNames;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

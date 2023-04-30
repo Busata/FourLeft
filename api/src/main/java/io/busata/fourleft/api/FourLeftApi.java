@@ -1,6 +1,6 @@
 package io.busata.fourleft.api;
 
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
@@ -43,7 +43,6 @@ public interface FourLeftApi {
 
     @PostMapping(Routes.FIELD_MAPPINGS)
     FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request);
-
 
     @GetMapping(Routes.QUERY_TRACK)
     QueryTrackResultsTo queryTrack(@RequestParam String stageName);

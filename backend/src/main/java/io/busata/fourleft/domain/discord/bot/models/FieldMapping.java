@@ -1,5 +1,6 @@
 package io.busata.fourleft.domain.discord.bot.models;
 
+import io.busata.fourleft.common.FieldMappingType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

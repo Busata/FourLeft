@@ -1,7 +1,7 @@
 package io.busata.fourleft.club.championship.creator;
 
-import io.busata.fourleft.domain.options.models.CountryOption;
-import io.busata.fourleft.automated.models.WeightedOccurenceSelector;
+import io.busata.fourleft.domain.dirtrally2.options.CountryOption;
+import io.busata.fourleft.domain.dirtrally2.WeightedOccurenceSelector;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

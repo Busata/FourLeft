@@ -3,7 +3,7 @@ package io.busata.fourleftdiscord.autoposting.community_challenges;
 import discord4j.core.spec.EmbedCreateSpec;
 import io.busata.fourleftdiscord.commands.DiscordChannels;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

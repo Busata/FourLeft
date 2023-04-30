@@ -1,8 +1,8 @@
 package io.busata.fourleft.club;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.busata.fourleft.racenet.dto.club.championship.creation.DR2ChampionshipOptions;
-import io.busata.fourleft.racenet.dto.club.championship.creation.DR2LocationOption;
+import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation.DR2ChampionshipOptions;
+import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation.DR2LocationOption;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 

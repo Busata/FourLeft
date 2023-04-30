@@ -1,6 +1,6 @@
 package io.busata.fourleft.api.models.configuration.results;
 
-import io.busata.fourleft.domain.configuration.results_views.MergeMode;
+import io.busata.fourleft.common.MergeMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

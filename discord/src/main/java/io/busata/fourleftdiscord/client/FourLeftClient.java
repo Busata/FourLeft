@@ -1,6 +1,5 @@
 package io.busata.fourleftdiscord.client;
 
-import io.busata.fourleft.api.DiscordChannelConfigurationApi;
 import io.busata.fourleft.api.FourLeftApi;
 import org.springframework.cloud.openfeign.FeignClient;
 

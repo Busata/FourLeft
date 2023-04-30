@@ -1,7 +1,7 @@
 package io.busata.fourleft.domain.discord.bot.models;
 
-import io.busata.fourleft.api.models.ViewType;
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.ViewType;
+import io.busata.fourleft.common.MessageType;
 import lombok.Getter;
 import lombok.Setter;
 

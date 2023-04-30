@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-27 08:16:34.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-30 11:32:43.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -102,6 +102,16 @@ export interface CommunityChallengeSummaryTo {
     entries: CommunityChallengeBoardEntryTo[];
 }
 
+export interface CommunityLeaderboardTrackingTo {
+    id: string;
+    nickName: string;
+    alias: string;
+    trackRallyCross: boolean;
+    trackDaily: boolean;
+    trackMonthly: boolean;
+    trackWeekly: boolean;
+}
+
 export interface CustomChampionshipStandingEntryTo {
     rank: number;
     nationality: string;
@@ -150,11 +160,6 @@ export interface FieldMappingUpdateTo {
     name: string;
     value: string;
     fieldMappingType: FieldMappingType;
-}
-
-export interface MergeRequestTo {
-    firstClub: LeaderboardKey;
-    secondClub: LeaderboardKey;
 }
 
 export interface PlatformTo {
@@ -210,6 +215,11 @@ export interface StageResultTo {
     isDnf: boolean;
 }
 
+export interface StandingPointPairTo {
+    rank: number;
+    point: number;
+}
+
 export interface TrackUserRequestTo {
     nickName: string;
     alias: string;
@@ -256,8 +266,8 @@ export interface PointSystemTo {
     defaultStandingPoint: number;
     defaultPowerstagePoint: number;
     defaultDNFPoint: number;
-    standingPoints: PointPair[];
-    powerStagePoints: PointPair[];
+    standingPoints: StandingPointPairTo[];
+    powerStagePoints: StandingPointPairTo[];
 }
 
 export interface PointsCalculatorTo {
@@ -503,17 +513,6 @@ export interface ViewResultTo {
     description: string;
     viewPropertiesTo: ViewPropertiesTo;
     multiListResults: ResultListTo[];
-}
-
-export interface LeaderboardKey {
-    challengeId: string;
-    eventId: string;
-    stageId: string;
-}
-
-export interface PointPair {
-    rank: number;
-    point: number;
 }
 
 export type ChampionshipPointsType = "DEFAULT" | "JRC";

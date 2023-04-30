@@ -1,9 +1,9 @@
 package io.busata.fourleftdiscord.listeners;
 
 import discord4j.common.util.Snowflake;
-import io.busata.fourleft.api.messages.ClubEventEnded;
-import io.busata.fourleft.api.messages.ClubEventStarted;
-import io.busata.fourleft.api.messages.QueueNames;
+import io.busata.fourleft.api.events.ClubEventEnded;
+import io.busata.fourleft.api.events.ClubEventStarted;
+import io.busata.fourleft.api.events.QueueNames;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.autoposting.automated_championships.AutoPosterAutomatedDailyClubService;
 import io.busata.fourleftdiscord.autoposting.community_challenges.AutoPostCommunityEventResultsService;

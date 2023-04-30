@@ -2,8 +2,8 @@ package io.busata.fourleftdiscord.fieldmapper;
 
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.FieldMappingTo;
-import io.busata.fourleft.domain.discord.bot.models.FieldMappingType;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
+import io.busata.fourleft.common.FieldMappingType;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

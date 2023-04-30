@@ -2,9 +2,9 @@ package io.busata.fourleftdiscord.autoposting.automated_championships;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
-import io.busata.fourleft.api.models.ViewType;
+import io.busata.fourleft.common.ViewType;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

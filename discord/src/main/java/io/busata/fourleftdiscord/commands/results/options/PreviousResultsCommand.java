@@ -15,7 +15,7 @@ import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;
 import io.busata.fourleftdiscord.commands.CommandNames;
 import io.busata.fourleftdiscord.commands.CommandOptions;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
-import io.busata.fourleft.api.messages.MessageType;
+import io.busata.fourleft.common.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

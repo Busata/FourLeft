@@ -1,5 +1,6 @@
 package io.busata.fourleft.domain.discord.bot.models;
 
+import io.busata.fourleft.common.ChampionshipPointsType;
 import lombok.Getter;
 
 import javax.persistence.Column;
