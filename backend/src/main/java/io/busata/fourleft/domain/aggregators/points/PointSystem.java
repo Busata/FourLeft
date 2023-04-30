@@ -22,7 +22,7 @@ public class PointSystem {
 
     String description;
 
-    //Points given if the player did not dnf but falls outside the points specified below
+    //Points given if the player did not dnf but falls outside the point specified below
     int defaultRankingPoint = 1;
     int defaultPowerstagePoint = 0;
 

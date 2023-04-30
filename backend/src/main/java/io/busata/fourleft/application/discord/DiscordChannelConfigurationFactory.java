@@ -100,7 +100,7 @@ public class DiscordChannelConfigurationFactory {
     private PointPair createStandingPointPair(StandingPointPairTo standingPointPairTo) {
         return new PointPair(
                 standingPointPairTo.rank(),
-                standingPointPairTo.points()
+                standingPointPairTo.point()
         );
     }
 
