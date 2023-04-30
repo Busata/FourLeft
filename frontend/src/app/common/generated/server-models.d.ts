@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-29 22:07:58.
+// Generated using typescript-generator version 2.35.1025 on 2023-04-30 11:32:43.
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -217,7 +217,7 @@ export interface StageResultTo {
 
 export interface StandingPointPairTo {
     rank: number;
-    points: number;
+    point: number;
 }
 
 export interface TrackUserRequestTo {

@@ -5,5 +5,5 @@ import javax.persistence.Entity;
 @Entity
 public class DefaultPointsCalculator extends PointsCalculator {
 
-    //Do nothing, get the points from racenet.
+    //Do nothing, get the point from racenet.
 }
