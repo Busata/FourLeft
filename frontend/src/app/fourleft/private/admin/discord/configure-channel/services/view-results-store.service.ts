@@ -18,7 +18,7 @@ export class ViewResultsStoreService {
 
   getResults(viewId: string): Observable<ViewResultTo> {
     if(!this._viewResults.has(viewId)) {
-      this._viewResults.set(viewId, this.http.get<ViewResultTo>(`/api/views/${viewId}/results/current`)
+      this._viewResults.set(viewId, this.http.get<ViewResultTo>(`/api/external/views/${viewId}/results/current`)
         .pipe(shareReplay()));
     }
 
@@ -28,7 +28,7 @@ export class ViewResultsStoreService {
 
   getPoints(viewId: string): Observable<ViewPointsTo> {
     if(!this._viewStandings.has(viewId)) {
-      this._viewStandings.set(viewId, this.http.get<ViewPointsTo>(`/api/views/${viewId}/standings/current`)
+      this._viewStandings.set(viewId, this.http.get<ViewPointsTo>(`/api/external/views/${viewId}/standings/current`)
         .pipe(shareReplay()));
     }
 
@@ -38,7 +38,7 @@ export class ViewResultsStoreService {
 
   getResultRestrictions(resultViewId: string): Observable<ResultRestrictionsTo[]> {
     if(!this._resultRestrictions.has(resultViewId)) {
-      this._resultRestrictions.set(resultViewId, this.http.get<ResultRestrictionsTo[]>(`/api/views/${resultViewId}/restrictions`)
+      this._resultRestrictions.set(resultViewId, this.http.get<ResultRestrictionsTo[]>(`/api/internal/views/${resultViewId}/restrictions`)
         .pipe(shareReplay()));
     }
 
@@ -47,6 +47,6 @@ export class ViewResultsStoreService {
 
 
   createResultRestrictions(resultViewId: string, $event: ResultRestrictionsTo) {
-    this.http.post(`/api/views/${resultViewId}/restrictions`, $event).subscribe();
+    this.http.post(`/api/internal/views/${resultViewId}/restrictions`, $event).subscribe();
   }
 }

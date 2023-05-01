@@ -13,10 +13,10 @@ export class QueryService {
 
 
   public getVehicles(vehicleClass: string) :Observable<VehicleTo[]> {
-      return this.http.get<VehicleTo[]>(`/api/query/vehicle_class/${vehicleClass}`)
+      return this.http.get<VehicleTo[]>(`/api/internal/query/vehicle_class/${vehicleClass}`)
   }
 
   public getPlayers(playerName: string) :Observable<string[]> {
-    return this.http.get<string[]>(`/api/query/name?query=${playerName}`)
+    return this.http.get<string[]>(`/api/internal/query/name?query=${playerName}`)
   }
 }

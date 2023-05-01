@@ -15,7 +15,7 @@ export class Oauth2Interceptor implements HttpInterceptor {
   }
 
   private checkUrl(url: string): boolean {
-    return url.startsWith("/api");
+    return url.indexOf("/api/internal") !== -1;
   }
 
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

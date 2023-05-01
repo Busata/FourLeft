@@ -1,6 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-04-30 11:32:43.
+// Generated using typescript-generator version 2.35.1025 on 2023-05-01 21:35:47.
+
+export interface RoutesTo {
+}
 
 export interface ChampionshipEventEntryTo {
     countryId: string;
@@ -146,6 +149,7 @@ export interface DriverResultTo {
 export interface FieldMappingRequestTo {
     name: string;
     type: FieldMappingType;
+    context: FieldMappingContext;
 }
 
 export interface FieldMappingTo {
@@ -153,6 +157,7 @@ export interface FieldMappingTo {
     name: string;
     value: string;
     fieldMappingType: FieldMappingType;
+    context: FieldMappingContext;
     mappedByUser: boolean;
 }
 
@@ -519,7 +524,9 @@ export type ChampionshipPointsType = "DEFAULT" | "JRC";
 
 export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
 
-export type FieldMappingType = "HUMAN_READABLE" | "EMOTE" | "IMAGE" | "COLOUR";
+export type FieldMappingType = "HUMAN_READABLE" | "FLAG" | "EMOTE" | "IMAGE" | "COLOUR";
+
+export type FieldMappingContext = "BACKEND" | "FRONTEND";
 
 export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
 

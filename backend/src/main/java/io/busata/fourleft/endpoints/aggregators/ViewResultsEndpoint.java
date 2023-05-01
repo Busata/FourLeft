@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.aggregators;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
 import io.busata.fourleft.application.aggregators.ViewResultsService;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ import java.util.UUID;
 public class ViewResultsEndpoint {
     private final ViewResultsService viewResultsService;
 
-    @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     public ResponseEntity<ViewResultTo> getCurrentResults(@PathVariable UUID viewId) {
         return viewResultsService.getCurrentResults(viewId).map(results -> new ResponseEntity<>(results, HttpStatus.OK))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(Routes.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
     public ResponseEntity<ViewResultTo> getPreviousResults(@PathVariable UUID viewId) {
         return viewResultsService.getPreviousResults(viewId).map(results -> new ResponseEntity<>(results, HttpStatus.OK))
                 .orElse(ResponseEntity.notFound().build());

@@ -5,8 +5,6 @@ import io.busata.fourleft.domain.aggregators.ClubView;
 import io.busata.fourleft.domain.aggregators.points.DefaultPointsCalculator;
 import io.busata.fourleft.domain.aggregators.points.FixedPointsCalculator;
 import io.busata.fourleft.domain.aggregators.results.SingleClubView;
-import io.busata.fourleft.application.aggregators.helpers.SingleClubViewDefaultPointsFactory;
-import io.busata.fourleft.application.aggregators.helpers.ResultsViewFixedPointsFactory;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 

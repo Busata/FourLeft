@@ -23,50 +23,50 @@ import java.util.UUID;
 
 public interface FourLeftApi {
 
-    @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_MEMBERS_BY_VIEW_ID)
     List<ClubMemberTo> getMembers(@PathVariable UUID viewId);
 
-    @PostMapping(Routes.COMMUNITY_TRACK_USER)
+    @PostMapping(RoutesTo.COMMUNITY_TRACK_USER)
     void trackUser(@RequestBody TrackUserRequestTo request);
 
-    @GetMapping(Routes.COMMUNITY_RESULTS)
+    @GetMapping(RoutesTo.COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getCommunityResults();
 
-    @GetMapping(Routes.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
     ViewEventSummaryTo getViewEventSummary(@PathVariable UUID viewId);
 
-    @GetMapping(Routes.PREVIOUS_COMMUNITY_RESULTS)
+    @GetMapping(RoutesTo.PREVIOUS_COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getCommunityResultsFromYesterday();
 
-    @GetMapping(Routes.FIELD_MAPPINGS)
+    @GetMapping(RoutesTo.FIELD_MAPPINGS)
     List<FieldMappingTo> getFieldMappings();
 
-    @PostMapping(Routes.FIELD_MAPPINGS)
+    @PostMapping(RoutesTo.FIELD_MAPPINGS)
     FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request);
 
-    @GetMapping(Routes.QUERY_TRACK)
+    @GetMapping(RoutesTo.QUERY_TRACK)
     QueryTrackResultsTo queryTrack(@RequestParam String stageName);
-    @GetMapping(Routes.QUERY_NAME)
+    @GetMapping(RoutesTo.QUERY_NAME)
     List<String> queryUsername(@RequestParam String query);
 
-    @PostMapping(Routes.DISCORD_ALL_MESSAGES)
+    @PostMapping(RoutesTo.DISCORD_ALL_MESSAGES)
     void postMessage(@RequestBody MessageLogTo messageLog);
 
-    @GetMapping(Routes.DISCORD_MESSAGE_DETAILS)
+    @GetMapping(RoutesTo.DISCORD_MESSAGE_DETAILS)
     MessageLogTo getMessageDetails(@RequestParam long messageId);
 
-    @GetMapping(Routes.DISCORD_MESSAGE)
+    @GetMapping(RoutesTo.DISCORD_MESSAGE)
     boolean hasMessage(@RequestParam long messageId, @RequestParam MessageType messageType);
 
-    @GetMapping(Routes.USER_OVERVIEW)
+    @GetMapping(RoutesTo.USER_OVERVIEW)
     UserResultSummaryTo getUserResultSummary(@RequestParam String query);
 
-    @GetMapping(Routes.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_CURRENT_RESULTS_BY_VIEW_ID)
     ViewResultTo getViewCurrentResults(@PathVariable UUID viewId);
-    @GetMapping(Routes.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_PREVIOUS_RESULTS_BY_VIEW_ID)
     ViewResultTo getViewPreviousResults(@PathVariable UUID viewId);
-    @GetMapping(Routes.CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID)
     ViewPointsTo getViewCurrentStanding(@PathVariable UUID viewId);
-    @GetMapping(Routes.CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID)
     ViewPointsTo getViewPreviousStandings(@PathVariable UUID viewId);
 }

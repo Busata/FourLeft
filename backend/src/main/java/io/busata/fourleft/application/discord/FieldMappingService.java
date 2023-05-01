@@ -1,6 +1,5 @@
 package io.busata.fourleft.application.discord;
 
-import io.busata.fourleft.api.Routes;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
 import io.busata.fourleft.api.models.FieldMappingTo;
 import io.busata.fourleft.api.models.FieldMappingUpdateTo;
@@ -8,10 +7,7 @@ import io.busata.fourleft.domain.discord.bot.models.FieldMapping;
 import io.busata.fourleft.domain.discord.bot.repository.FieldMappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
@@ -31,7 +27,9 @@ public class FieldMappingService {
     }
 
     public FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request) {
-        return factory.create(this.fieldMappingRepository.save(new FieldMapping(request.name(), request.type())));
+       return this.fieldMappingRepository.findByTypeAndNameAndContext(request.type(), request.name(), request.context()).map(factory::create).orElseGet(() -> {
+           return factory.create(this.fieldMappingRepository.save(new FieldMapping(request.name(), request.type(), request.context())));
+       });
     }
 
     @Transactional

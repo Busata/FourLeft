@@ -13,15 +13,15 @@ import java.util.UUID;
 
 public interface DiscordChannelConfigurationApi {
 
-    @GetMapping(Routes.ALL_DISCORD_CHANNEL_CONFIGURATION)
+    @GetMapping(RoutesTo.ALL_DISCORD_CHANNEL_CONFIGURATION)
     List<DiscordChannelConfigurationTo> getConfigurations();
 
-    @PostMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
+    @PostMapping(RoutesTo.DISCORD_CHANNEL_CONFIGURATION)
     UUID createConfiguration(@PathVariable Long channelId, @RequestBody DiscordChannelConfigurationTo clubViewTo);
 
-    @GetMapping(Routes.DISCORD_CHANNEL_CONFIGURATION)
+    @GetMapping(RoutesTo.DISCORD_CHANNEL_CONFIGURATION)
     Optional<DiscordChannelConfigurationTo> getConfiguration(@PathVariable Long channelId);
 
-    @DeleteMapping(Routes.DISCORD_CHANNEL_SINGLE_CONFIGURATION)
+    @DeleteMapping(RoutesTo.DISCORD_CHANNEL_SINGLE_CONFIGURATION)
     void deleteConfiguration(@PathVariable UUID configurationId);
 }

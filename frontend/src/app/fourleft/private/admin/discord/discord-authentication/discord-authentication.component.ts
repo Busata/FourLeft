@@ -16,7 +16,7 @@ export class DiscordAuthenticationComponent implements OnInit{
 
 
   authWithDiscord() {
-    let discordAuthentication = <Window> window.open("/api/public/discord/redirect", 'popup', 'popup,width=600,height=700')
+    let discordAuthentication = <Window> window.open("/api/external/discord/redirect", 'popup', 'popup,width=600,height=700')
     let timer = setInterval(() => {
       if(discordAuthentication.closed) {
         clearInterval(timer);

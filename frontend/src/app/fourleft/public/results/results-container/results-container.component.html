@@ -1,0 +1,8 @@
+<div>
+  <div class="g-header-h1">Results</div>
+
+  <div class="g-card" *ngFor="let view of views">
+    {{view.description}} <button class="g-button g-button-secondary" routerLink="{{view.id}}">Results</button>
+  </div>
+
+</div>

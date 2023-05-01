@@ -1,0 +1,21 @@
+<ng-icon size="2em" name="tablerBrandSteam" *ngIf="value=='PC'"></ng-icon>
+<div class="inline-block" *ngIf="value=='PLAYSTATION'">
+  <div class="pure-g">
+    <div class="pure-u-6-12">
+      <ng-icon size="1em" name="tablerPlaystationSquare"></ng-icon>
+    </div>
+    <div class="pure-u-6-12">
+      <ng-icon size="1em" name="tablerPlaystationTriangle"></ng-icon>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-6-12">
+      <ng-icon size="1em" name="tablerPlaystationX"></ng-icon>
+    </div>
+    <div class="pure-u-6-12">
+      <ng-icon size="1em" name="tablerPlaystationCircle"></ng-icon>
+    </div>
+  </div>
+</div>
+<ng-icon size="2em" name="tablerBrandXbox" *ngIf="value=='XBOX'"></ng-icon>
+<ng-icon size="2em" name="tablerQuestionMark" *ngIf="value=='UNKNOWN'"></ng-icon>

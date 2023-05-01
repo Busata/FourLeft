@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {FieldMapping} from "../field-mapping";
-import {FieldMappingsService} from "../field-mappings.service";
+import {FieldMappingsService} from "../../../../shared/field-mappings.service";
+import {FieldMappingTo} from '@server-models';
 
 @Component({
   selector: 'app-field-mappings-list',
@@ -9,7 +9,7 @@ import {FieldMappingsService} from "../field-mappings.service";
 })
 export class FieldMappingsListComponent implements OnInit {
 
-  public mappings: FieldMapping[] = [];
+  public mappings: FieldMappingTo[] = [];
 
   constructor(private fieldMappingsService: FieldMappingsService) {
   }

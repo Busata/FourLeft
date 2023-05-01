@@ -30,4 +30,6 @@ public abstract class ResultsView {
     List<ViewEventRestrictions> viewEventRestrictions;
 
     public abstract Set<Long> getAssociatedClubs();
+
+    public abstract String getName();
 }

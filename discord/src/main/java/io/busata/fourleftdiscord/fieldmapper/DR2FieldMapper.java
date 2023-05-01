@@ -3,6 +3,7 @@ package io.busata.fourleftdiscord.fieldmapper;
 import discord4j.rest.util.Color;
 import io.busata.fourleft.api.models.FieldMappingTo;
 import io.busata.fourleft.api.models.FieldMappingRequestTo;
+import io.busata.fourleft.common.FieldMappingContext;
 import io.busata.fourleft.common.FieldMappingType;
 import io.busata.fourleftdiscord.client.FourLeftClient;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class DR2FieldMapper {
     }
 
     private FieldMappingTo saveMissingMapping(String name, FieldMappingType type) {
-        return this.fourLeftClient.createFieldMapping(new FieldMappingRequestTo(name, type));
+        return this.fourLeftClient.createFieldMapping(new FieldMappingRequestTo(name, type, FieldMappingContext.BACKEND));
     }
 
     @Cacheable("field_mapppings")

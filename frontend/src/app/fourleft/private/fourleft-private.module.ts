@@ -12,7 +12,6 @@ import {MatIconModule} from "@angular/material/icon";
 import {DragDropModule} from "@angular/cdk/drag-drop";
 import {DiscordModule} from "./admin/discord/discord.module";
 import {UsersService} from "./admin/users/users.service";
-import {FieldMappingsService} from "./admin/field-mappings/field-mappings.service";
 import {FieldMappingQueryService} from "./admin/field-mappings/field-mapping-query.service";
 import {FourleftPrivateRoutingModule} from "./fourleft-private-routing.module";
 import {LoginService} from "./services/security/login.service";
@@ -43,7 +42,7 @@ import { ManagementContainerComponent } from './admin/management/management-cont
   ],
   providers: [
     LoginService, AuthenticationService, UserStoreService,
-    UsersService, FieldMappingsService, FieldMappingQueryService]
+    UsersService, FieldMappingQueryService]
 })
 export class FourleftPrivateModule {
 }

@@ -60,6 +60,10 @@
   &:hover {
     cursor: pointer;
   }
+
+  &.dark {
+    background-color: #202225 ;
+  }
 }
 
 .inline-menu-button {

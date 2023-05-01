@@ -14,6 +14,7 @@ public class FieldMappingToFactory {
                 mapping.getName(),
                 mapping.getValue(),
                 mapping.getType(),
+                mapping.getContext(),
                 mapping.isMappedByUser()
         );
     }

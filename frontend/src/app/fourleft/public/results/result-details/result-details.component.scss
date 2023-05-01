@@ -1,0 +1,23 @@
+.results-row {
+  padding: 10px;
+  border: 1px solid transparent;
+
+  &:hover {
+    border: 1px solid black;
+    border-radius: 5px;
+  }
+
+  &:nth-child(even) {
+    background-color: rgb(235, 240, 241);
+  }
+}
+
+.header-row {
+  font-weight: 800;
+}
+
+.platform-icons {
+  :nth-child(1) {
+    margin-right: 10px;
+  }
+}

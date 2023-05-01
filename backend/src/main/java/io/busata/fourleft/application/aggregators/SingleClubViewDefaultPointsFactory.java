@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.aggregators.helpers;
+package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.PointPairTo;
 import io.busata.fourleft.api.models.views.SinglePointListTo;

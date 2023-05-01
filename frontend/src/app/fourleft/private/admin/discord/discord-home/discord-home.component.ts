@@ -22,7 +22,7 @@ export class DiscordHomeComponent implements OnInit{
   }
 
   inviteBot(guild: any) {
-    let botInvite = <Window> window.open(`/api/public/discord/invite_bot?guild_id=${guild.id}`, 'popup', 'popup,width=600,height=700');
+    let botInvite = <Window> window.open(`/api/external/discord/invite_bot?guild_id=${guild.id}`, 'popup', 'popup,width=600,height=700');
     let timer = setInterval(() => {
       if(botInvite.closed) {
         clearInterval(timer);

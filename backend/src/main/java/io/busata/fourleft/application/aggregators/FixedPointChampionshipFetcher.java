@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.aggregators.helpers;
+package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;

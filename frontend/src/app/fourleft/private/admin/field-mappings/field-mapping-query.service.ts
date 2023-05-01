@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, filter, map, mergeAll, Observable} from 'rxjs';
-import {FieldMapping} from './field-mapping';
-import {FieldMappingsService} from './field-mappings.service';
+import {FieldMappingsService} from '../../../shared/field-mappings.service';
+import {FieldMappingTo} from '@server-models';
 
 @Injectable()
 export class FieldMappingQueryService {
 
-  private _fieldMappings: BehaviorSubject<FieldMapping[]> = new BehaviorSubject([] as FieldMapping[]);
-  public readonly fieldMappings: Observable<FieldMapping[]> = this._fieldMappings.asObservable();
+  private _fieldMappings: BehaviorSubject<FieldMappingTo[]> = new BehaviorSubject([] as FieldMappingTo[]);
+  public readonly fieldMappings: Observable<FieldMappingTo[]> = this._fieldMappings.asObservable();
 
 
   constructor(private fieldMappingService: FieldMappingsService) {

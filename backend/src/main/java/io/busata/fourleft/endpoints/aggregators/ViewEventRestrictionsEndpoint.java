@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.aggregators;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.views.ResultRestrictionsTo;
 import io.busata.fourleft.application.aggregators.ResultRestrictionsService;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +19,12 @@ public class ViewEventRestrictionsEndpoint {
 
     private final ResultRestrictionsService resultRestrictionsService;
 
-    @GetMapping(value = Routes.RESULT_VIEW_EVENT_RESTRICTION)
+    @GetMapping(value = RoutesTo.RESULT_VIEW_EVENT_RESTRICTION)
     public List<ResultRestrictionsTo> getViewRestrictions(@PathVariable UUID resultViewId) {
        return resultRestrictionsService.getViewRestrictions(resultViewId);
     }
 
-    @PostMapping(value= Routes.RESULT_VIEW_EVENT_RESTRICTION)
+    @PostMapping(value= RoutesTo.RESULT_VIEW_EVENT_RESTRICTION)
     public void createViewRestriction(@PathVariable UUID resultViewId, @RequestBody ResultRestrictionsTo resultRestrictionsTo) {
        resultRestrictionsService.createViewRestriction(resultViewId, resultRestrictionsTo);
 

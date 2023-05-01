@@ -11,18 +11,18 @@ export class UsersService {
 
 
   public getUsers() : Observable<User[]> {
-    return this.httpClient.get<User[]>("/api/community/users");
+    return this.httpClient.get<User[]>("/api/internal/community/users");
   }
 
   public createUser(nickName: string, alias: string): Observable<User> {
-    return this.httpClient.post<User>("/api/community/track_user", {
+    return this.httpClient.post<User>("/api/internal/community/track_user", {
       nickName,
       alias
     });
   }
 
   public deleteUser(user: User) {
-    return this.httpClient.delete(`/api/community/users/${user.id}`)
+    return this.httpClient.delete(`/api/internal/community/users/${user.id}`)
   }
 
 

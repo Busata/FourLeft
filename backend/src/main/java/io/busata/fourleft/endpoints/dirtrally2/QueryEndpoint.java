@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.dirtrally2;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.QueryTrackResultsTo;
 import io.busata.fourleft.api.models.views.VehicleTo;
 import io.busata.fourleft.application.dirtrally2.QueryService;
@@ -22,17 +22,17 @@ public class QueryEndpoint
 {
     private final QueryService queryService;
 
-    @GetMapping(Routes.QUERY_VEHICLE_CLASS)
+    @GetMapping(RoutesTo.QUERY_VEHICLE_CLASS)
     public List<VehicleTo> getVehiclesForClass(@PathVariable String vehicleClass) {
         return queryService.getVehiclesForClass(vehicleClass);
     }
 
-    @GetMapping(Routes.QUERY_NAME)
+    @GetMapping(RoutesTo.QUERY_NAME)
     public List<String> queryName(@RequestParam String query) {
        return queryService.queryName(query);
     }
 
-    @GetMapping(Routes.QUERY_TRACK)
+    @GetMapping(RoutesTo.QUERY_TRACK)
     public QueryTrackResultsTo queryTrack(@RequestParam String stageName) {
         return queryService.queryTrack(stageName);
     }

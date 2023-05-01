@@ -1,7 +1,7 @@
 package io.busata.fourleft.endpoints.dirtrally2;
 
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.application.dirtrally2.UserOverviewService;
 import io.busata.fourleft.application.dirtrally2.UserProgressImageService;
@@ -23,7 +23,7 @@ public class UserProgressEndpoint {
     private final UserOverviewService userOverviewService;
 
 
-    @GetMapping(value = Routes.USER_COMMUNITY_PROGRESSION, produces = "image/png")
+    @GetMapping(value = RoutesTo.USER_COMMUNITY_PROGRESSION, produces = "image/png")
     public BufferedImage calculateUser(@RequestParam String query,
                                        @RequestParam(required = false, defaultValue = "false") boolean includeName,
                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> before,
@@ -31,7 +31,7 @@ public class UserProgressEndpoint {
         return userProgressImageService.createImage(query, includeName, before, after);
     }
 
-    @GetMapping(Routes.USER_OVERVIEW)
+    @GetMapping(RoutesTo.USER_OVERVIEW)
     public UserResultSummaryTo getUserOverview(@RequestParam String query) {
         return  userOverviewService.getUserOverview(query);
     }

@@ -34,7 +34,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);
-        web.ignoring().antMatchers("/*","/api/public/**");
     }
 
     @Override
@@ -42,9 +41,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         super.configure(http);
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
-                .and()
-                .anonymous().disable();
+                    .antMatchers("/api/external/**").permitAll()
+                    .antMatchers("/api/internal/**").authenticated()
+                .antMatchers("/error").permitAll()
+                .anyRequest().authenticated();
     }
 }

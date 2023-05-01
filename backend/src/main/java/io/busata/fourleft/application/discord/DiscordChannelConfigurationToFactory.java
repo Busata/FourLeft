@@ -45,11 +45,11 @@ public class DiscordChannelConfigurationToFactory {
         );
     }
 
-    private ClubViewTo createClubViewTo(ClubView clubView) {
+    public ClubViewTo createClubViewTo(ClubView clubView) {
 
         return new ClubViewTo(
                 clubView.getId(),
-                "",
+                clubView.getResultsView().getName(),
                 clubView.getBadgeType(),
                 createResultsViewTo(clubView.getResultsView()),
                 createPointsViewTo(clubView.getPointsCalculator())

@@ -1,0 +1,8 @@
+<ng-container *ngIf="mappings.length > 0">
+<ng-container *ngIf="type=='FLAG'">
+<span class="rounded fi {{findMapping() | async}}"></span>
+</ng-container>
+<ng-container *ngIf="type=='HUMAN_READABLE'">
+  {{findMapping() | async}}
+</ng-container>
+</ng-container>

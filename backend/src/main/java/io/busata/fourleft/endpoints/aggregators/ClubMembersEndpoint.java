@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.aggregators;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.application.aggregators.ClubMembersService;
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.application.dirtrally2.importer.racenet.ClubMemberFactory;
@@ -19,7 +19,7 @@ public class ClubMembersEndpoint {
     private final ClubMembersService clubMembersService;
     private final ClubMemberFactory clubMemberToFactory;
 
-    @GetMapping(Routes.CLUB_MEMBERS_BY_VIEW_ID)
+    @GetMapping(RoutesTo.CLUB_MEMBERS_BY_VIEW_ID)
     public List<ClubMemberTo> getClubMembers(@PathVariable UUID viewId) {
         return clubMembersService.getClubMembers(viewId).stream().map(clubMemberToFactory::create).collect(Collectors.toList());
     }

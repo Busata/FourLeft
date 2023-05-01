@@ -14,21 +14,21 @@ export class ManagementContainerComponent implements OnInit {
   }
 
   triggerUpdate(value: string) {
-    this.http.post('/api/management/update_leaderboard', {clubId: value}).subscribe();
+    this.http.post('/api/internal/management/update_leaderboard', {clubId: value}).subscribe();
   }
 
   ngOnInit(): void {
-    this.http.get<DiscordChannelConfigurationTo[]>('/api/discord/configurations').subscribe(configurations => {
+    this.http.get<DiscordChannelConfigurationTo[]>('/api/internal/discord/configurations').subscribe(configurations => {
       this.configurations = configurations;
     })
   }
 
   removeConfiguration(configuration: DiscordChannelConfigurationTo) {
-    this.http.delete(`/api/discord/configurations/${configuration.id}`).subscribe();
+    this.http.delete(`/api/internal/discord/configurations/${configuration.id}`).subscribe();
   }
 
   triggerImportTicker() {
-    this.http.post<any>(`/api/management/import_ticker`, {}).subscribe();
+    this.http.post<any>(`/api/internal/management/import_ticker`, {}).subscribe();
 
   }
 }

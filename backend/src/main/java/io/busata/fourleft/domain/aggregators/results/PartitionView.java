@@ -29,4 +29,9 @@ public class PartitionView extends ResultsView {
     public Set<Long> getAssociatedClubs() {
         return resultsView.getAssociatedClubs();
     }
+
+    @Override
+    public String getName() {
+        return this.resultsView.getName();
+    }
 }

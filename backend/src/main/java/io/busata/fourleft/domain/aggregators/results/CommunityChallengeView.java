@@ -24,8 +24,15 @@ public class CommunityChallengeView extends ResultsView {
     BadgeType badgeType;
 
 
+
+
     @Override
     public Set<Long> getAssociatedClubs() {
         return Set.of();
+    }
+
+    @Override
+    public String getName() {
+        return "Community posts";
     }
 }

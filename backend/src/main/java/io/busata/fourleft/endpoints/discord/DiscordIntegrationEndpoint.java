@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.discord;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.discord.DiscordAuthenticationStatusTo;
 import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildPermissionTo;
@@ -21,12 +21,12 @@ public class DiscordIntegrationEndpoint {
 
 
 
-    @GetMapping(Routes.DISCORD_MANAGE_SERVER)
+    @GetMapping(RoutesTo.DISCORD_MANAGE_SERVER)
     public DiscordGuildPermissionTo canManage(@PathVariable(name="guildId") String guildId) {
         return new DiscordGuildPermissionTo(discordIntegrationService.canManage(guildId));
     }
 
-    @GetMapping(Routes.DISCORD_INVITE_BOT)
+    @GetMapping(RoutesTo.DISCORD_INVITE_BOT)
     @ResponseStatus(HttpStatus.FOUND)
     public void inviteBot(@RequestParam(name="guild_id") String guildId, HttpServletResponse response) {
         response.setHeader(
@@ -35,34 +35,34 @@ public class DiscordIntegrationEndpoint {
         );
     }
 
-    @GetMapping(Routes.DISCORD_REDIRECT)
+    @GetMapping(RoutesTo.DISCORD_REDIRECT)
     @ResponseStatus(HttpStatus.FOUND)
     public void startAuthentication(HttpServletResponse response) {
         response.setHeader("Location", this.discordIntegrationService.getAuthenticationUrl());
     }
 
-    @GetMapping(Routes.DISCORD_AUTHENTICATION_STATUS)
+    @GetMapping(RoutesTo.DISCORD_AUTHENTICATION_STATUS)
     public DiscordAuthenticationStatusTo getAuthenticationStatus() {
         return new DiscordAuthenticationStatusTo(
                 this.discordIntegrationService.isAuthenticated()
         );
     }
 
-    @PostMapping(Routes.DISCORD_INTEGRATION_AUTH)
+    @PostMapping(RoutesTo.DISCORD_INTEGRATION_AUTH)
     public void authenticate(@RequestBody String code) {
         this.discordIntegrationService.fetchAndStoreAccessToken(code);
     }
 
-    @GetMapping(Routes.DISCORD_GUILDS)
+    @GetMapping(RoutesTo.DISCORD_GUILDS)
     public List<DiscordGuildSummaryTo> getGuildSummary() {
         return this.discordIntegrationService.getGuildSummaries();
     }
 
-    @GetMapping(Routes.DISCORD_GUILD)
+    @GetMapping(RoutesTo.DISCORD_GUILD)
     public DiscordGuildTo getGuild(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuild(guildId);
     }
-    @GetMapping(Routes.DISCORD_GUILD_CHANNELS)
+    @GetMapping(RoutesTo.DISCORD_GUILD_CHANNELS)
     public List<DiscordChannelSummaryTo> getChannels(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuildChannels(guildId);
     }

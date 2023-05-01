@@ -1,6 +1,6 @@
 package io.busata.fourleft.endpoints.infrastructure;
 
-import io.busata.fourleft.api.Routes;
+import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.api.models.security.UserTo;
 import io.busata.fourleft.application.security.UserToFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.Optional;
 public class SecurityEndpoint {
     private final UserToFactory userToFactory;
 
-    @GetMapping(Routes.SECURITY_USER)
+    @GetMapping(RoutesTo.SECURITY_USER)
     public UserTo getUser() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)

@@ -1,5 +1,6 @@
 package io.busata.fourleft.domain.discord.bot.models;
 
+import io.busata.fourleft.common.FieldMappingContext;
 import io.busata.fourleft.common.FieldMappingType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,12 +27,18 @@ public class FieldMapping {
     @Enumerated(EnumType.STRING)
     private FieldMappingType type;
 
+    @Enumerated(EnumType.STRING)
+    private FieldMappingContext context;
+
+
+
     private boolean mappedByUser;
 
-    public FieldMapping(String name, FieldMappingType type) {
+    public FieldMapping(String name, FieldMappingType type, FieldMappingContext context) {
         this.name = name;
-        this.value = type.getDefaultValue();
+        this.value = type.getDefaultValue(context);
         this.type = type;
+        this.context = context;
         this.mappedByUser = false;
     }
 

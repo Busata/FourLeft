@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
-import {FieldMapping} from "../field-mapping";
+import {FieldMappingTo} from '@server-models';
 
 @Component({
   selector: 'app-field-mapping-edit',
@@ -11,11 +11,12 @@ export class FieldMappingEditComponent implements OnInit {
   public form: UntypedFormGroup;
 
   @Input()
-  public set fieldMapping(value: FieldMapping) {
+  public set fieldMapping(value: FieldMappingTo) {
     this.form.patchValue({
       name: value.name,
       value: value.value,
-      fieldMappingType: value.fieldMappingType
+      fieldMappingType: value.fieldMappingType,
+      fieldMappingContext: value.context
     })
   }
 
@@ -26,7 +27,8 @@ export class FieldMappingEditComponent implements OnInit {
     this.form = this.fb.group({
       name: [{value: "", disabled: true}],
       value: [{value:"", disabled: false}],
-      fieldMappingType: [{value:"", disabled: true}]
+      fieldMappingType: [{value:"", disabled: true}],
+      fieldMappingContext: [{value: "", disabled: true}]
     })
   }
 

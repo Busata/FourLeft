@@ -7,7 +7,18 @@ import {AuthConfig, OAuthModule} from "angular-oauth2-oidc";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {Oauth2Interceptor} from "./fourleft/private/services/security/oauth2-interceptor.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-
+import { NgIconsModule } from '@ng-icons/core';
+import { tablerSteeringWheel,
+  tablerBrandXbox,
+  tablerBrandSteam,
+  tablerPlaystationTriangle,
+  tablerPlaystationSquare,
+  tablerPlaystationCircle,
+  tablerQuestionMark,
+  tablerPlaystationX,
+  tablerDeviceGamepad,
+  tablerKeyboard
+} from '@ng-icons/tabler-icons';
 
 const authConfig: AuthConfig = {
   issuer: 'https://heimdall.busata.io/realms/FourLeft',
@@ -25,6 +36,17 @@ const authConfig: AuthConfig = {
     OAuthModule.forRoot(),
     AppRoutingModule,
     BrowserModule,
+    NgIconsModule.withIcons({ tablerSteeringWheel,
+      tablerBrandXbox,
+      tablerBrandSteam,
+      tablerPlaystationTriangle,
+      tablerPlaystationSquare,
+      tablerPlaystationCircle,
+      tablerQuestionMark,
+      tablerPlaystationX,
+      tablerDeviceGamepad,
+      tablerKeyboard
+    }),
     BrowserAnimationsModule,
   ],
   providers: [
@@ -33,8 +55,8 @@ const authConfig: AuthConfig = {
       useClass: Oauth2Interceptor,
       multi: true
     },
-    { provide: AuthConfig, useValue: authConfig },
-    ],
+    {provide: AuthConfig, useValue: authConfig},
+  ],
   bootstrap: [AppComponent],
   declarations: [
   ]

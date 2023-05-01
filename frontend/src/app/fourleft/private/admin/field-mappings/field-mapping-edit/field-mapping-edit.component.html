@@ -12,7 +12,15 @@
       <option [ngValue]="'EMOTE'">Emote</option>
       <option [ngValue]="'HUMAN_READABLE'">Human readable</option>
       <option [ngValue]="'IMAGE'">Image</option>
+      <option [ngValue]="'FLAG'">Flag</option>
       <option [ngValue]="'COLOUR'">Colour</option>
+    </select>
+  </div>
+  <div class="input-group">
+    <label>Context</label>
+    <select formControlName="fieldMappingContext">
+      <option [ngValue]="'BACKEND'">Backend</option>
+      <option [ngValue]="'FRONTEND'">Frontend</option>
     </select>
   </div>
   <button class="save" (click)="saveMapping()">Save</button>

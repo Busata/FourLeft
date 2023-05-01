@@ -10,10 +10,10 @@ export class ConfigureChannelService {
 
 
   saveConfiguration(guildId: number, channelId: number, config: any) {
-    return this.httpClient.post(`/api/discord/channels/${channelId}/configuration`, config);
+    return this.httpClient.post(`/api/internal/discord/channels/${channelId}/configuration`, config);
   }
 
   getConfiguration(guildId: number, channelId: number) {
-    return this.httpClient.get(`/api/discord/channels/${channelId}/configuration`);
+    return this.httpClient.get(`/api/internal/discord/channels/${channelId}/configuration`);
   }
 }

@@ -1,0 +1,95 @@
+<ng-container *ngIf="results">
+  <div class="g-header-h1">
+    Current results
+  </div>
+  <div>
+    <ng-container *ngFor="let singleList of results.multiListResults">
+      <div class="g-header-h2">
+        {{singleList.name}}
+      </div>
+      <div class="g-card">
+        <div class="pure-g header-row">
+          <div class="pure-u-1-12">
+            Country
+          </div>
+          <div class="pure-u-1-12">
+            Stage(s)
+          </div>
+          <div class="pure-u-1-12">
+            Vehicle class
+          </div>
+          <div class="pure-u-1-12">
+            Ends at
+          </div>
+        </div>
+        <div class="pure-g" *ngFor="let activityInfo of singleList.activityInfoTo">
+          <div class="pure-u-1-12">
+            <app-field-map [value]="activityInfo.country" [type]="'HUMAN_READABLE'"></app-field-map>
+          </div>
+          <div class="pure-u-1-12">
+            {{activityInfo.stageNames}}
+          </div>
+          <div class="pure-u-1-12">
+            <app-field-map [value]="activityInfo.vehicleClass" [type]="'HUMAN_READABLE'"></app-field-map>
+          </div>
+          <div class="pure-u-1-12">
+            {{activityInfo.endTime | date:'short'}}
+          </div>
+        </div>
+      </div>
+      <div class="g-card" *ngIf="results.viewPropertiesTo.powerStage">
+        <div class="g-header-h2">
+          Power stage
+        </div>
+        <div class="pure-g results-row" *ngFor="let driverEntry of singleList.results">
+          <div class="pure-u-1-24">
+            {{driverEntry.relative.powerStageRank}}
+          </div>
+          <div class="pure-u-1-24">
+            <app-field-map [value]="driverEntry.result.nationality" [type]="'FLAG'"></app-field-map>
+          </div>
+          <div class="pure-u-1-12">
+            {{driverEntry.result.racenet}}
+          </div>
+          <div class="pure-u-1-12">
+            {{driverEntry.result.powerStageTotalTime}}
+          </div>
+          <div class="pure-u-1-8">
+            {{driverEntry.relative.powerStageTotalDiff}}
+          </div>
+        </div>
+      </div>
+
+      <div class="g-card">
+        <div class="g-header-h2">
+          Results
+        </div>
+        <div class="pure-g results-row" *ngFor="let driverEntry of singleList.results">
+          <div class="pure-u-1-24">
+            {{driverEntry.relative.activityRank}}
+          </div>
+          <div class="pure-u-1-24">
+            <app-field-map [value]="driverEntry.result.nationality" [type]="'FLAG'"></app-field-map>
+          </div>
+          <div class="pure-u-1-12">
+            {{driverEntry.result.racenet}}
+          </div>
+          <div class="pure-u-1-8">
+            <span *ngFor="let vehicle of driverEntry.result.vehicles">{{vehicle.vehicleName}}</span>
+          </div>
+          <div class="pure-u-1-12 platform-icons">
+           <app-controller-type [value]="driverEntry.result.platform.controller"></app-controller-type>
+           <app-platform-type [value]="driverEntry.result.platform.platform"></app-platform-type>
+          </div>
+          <div class="pure-u-1-12">
+            {{driverEntry.result.activityTotalTime}}
+          </div>
+          <div class="pure-u-1-12">
+            {{driverEntry.relative.activityTotalDiff}}
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</ng-container>
