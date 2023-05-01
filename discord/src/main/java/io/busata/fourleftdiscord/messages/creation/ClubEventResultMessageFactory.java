@@ -74,6 +74,7 @@ public class ClubEventResultMessageFactory {
 
     protected List<EmbedCreateSpec> create(UUID viewId, ViewResultTo clubResult, MessageTemplate entryTemplate, boolean powerstageOnly) {
         List<EmbedCreateSpec> specs = new ArrayList<>();
+        String resultsUrl = "https://fourleft.busata.io/results/%s".formatted(viewId);
 
         var builder = EmbedCreateSpec.builder();
 
@@ -90,7 +91,7 @@ public class ClubEventResultMessageFactory {
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
         builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
-        builder.footer(EmbedCreateFields.Footer.of("\u2800".repeat(40), null));
+        builder.footer("Full results @ [https://fourleft.busata.io/...](%s)".formatted(resultsUrl), null);
 
         if(clubResult.getMultiListResults().size() > 1) {
             specs.add(builder.build());
@@ -139,8 +140,6 @@ public class ClubEventResultMessageFactory {
                 }
             }
 
-
-            String resultsUrl = "https://fourleft.busata.io/results/%s".formatted(viewId);
 
             if(i == multiListResults.size() - 1) {
                 builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().stream().findAny().orElseThrow().lastUpdate())), true);
