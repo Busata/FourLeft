@@ -43,18 +43,18 @@ public class ClubEventResultMessageFactory {
     MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
             "**${rank}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
 
-    public List<EmbedCreateSpec> createDefault(ViewResultTo clubResultTo) {
+    public List<EmbedCreateSpec> createDefault(UUID viewId, ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
-        return create(clubResultTo, template, false);
+        return create(viewId, clubResultTo, template, false);
     }
-    public List<EmbedCreateSpec> createMetadata(ViewResultTo clubResultTo) {
+    public List<EmbedCreateSpec> createMetadata(UUID viewId, ViewResultTo clubResultTo) {
         final var template = getMetaDataTemplate(clubResultTo.getViewPropertiesTo());
-        return create(clubResultTo, template, false);
+        return create(viewId, clubResultTo, template, false);
     }
 
-    public List<EmbedCreateSpec> createPowerStage(ViewResultTo clubResultTo) {
+    public List<EmbedCreateSpec> createPowerStage(UUID viewId, ViewResultTo clubResultTo) {
         final var template = getTemplate(clubResultTo.getViewPropertiesTo());
-        return create(clubResultTo, template, true);
+        return create(viewId, clubResultTo, template, true);
     }
 
     private MessageTemplate getTemplate(ViewPropertiesTo properties) {
@@ -72,7 +72,7 @@ public class ClubEventResultMessageFactory {
         };
     }
 
-    protected List<EmbedCreateSpec> create(ViewResultTo clubResult, MessageTemplate entryTemplate, boolean powerstageOnly) {
+    protected List<EmbedCreateSpec> create(UUID viewId, ViewResultTo clubResult, MessageTemplate entryTemplate, boolean powerstageOnly) {
         List<EmbedCreateSpec> specs = new ArrayList<>();
 
         var builder = EmbedCreateSpec.builder();
@@ -140,6 +140,7 @@ public class ClubEventResultMessageFactory {
             }
 
 
+            String resultsUrl = "https://fourleft.busata.io/results/%s".formatted(viewId);
 
             if(i == multiListResults.size() - 1) {
                 builder.addField("**Last update**", "*%s*".formatted(new PrettyTime().format(resultList.activityInfoTo().stream().findAny().orElseThrow().lastUpdate())), true);
@@ -149,6 +150,7 @@ public class ClubEventResultMessageFactory {
                 builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().stream().findAny().orElseThrow().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
             }
 
+            builder.url(resultsUrl);
             specs.add(builder.build());
             builder = createFullWidthBuilder();
         }

@@ -1,7 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {FieldMappingsService} from '../field-mappings.service';
 import {FieldMappingTo, FieldMappingType} from '@server-models';
-import {map, mergeMap, of} from 'rxjs';
+import {map, mergeMap, of, take} from 'rxjs';
 
 @Component({
   selector: 'app-field-map',
@@ -17,6 +17,7 @@ export class FieldMapComponent implements OnInit{
   type!: FieldMappingType;
 
   public mappings: FieldMappingTo[] = [];
+  public mapping: string = '';
 
 
 
@@ -24,9 +25,13 @@ export class FieldMapComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    this.fieldMappingService.getFieldMappings().subscribe(mappings => {
+    this.fieldMappingService.getFieldMappings().pipe(take(1)).subscribe(mappings => {
       this.mappings = mappings.filter(mapping => mapping.context === 'FRONTEND');
-    })
+
+      this.findMapping().subscribe(mapping => {
+        this.mapping = mapping;
+      });
+    });
   }
 
   findMapping() {

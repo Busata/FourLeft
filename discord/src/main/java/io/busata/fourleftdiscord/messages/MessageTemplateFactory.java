@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -30,18 +31,18 @@ public class MessageTemplateFactory {
         return autoPostResultMessageFactory.createAutopostMessage(view);
     }
 
-    public List<EmbedCreateSpec> createEmbedFromClubResult(ViewResultTo result) {
-        return clubEventResultMessageFactory.createDefault(result);
+    public List<EmbedCreateSpec> createEmbedFromClubResult(UUID viewId, ViewResultTo result) {
+        return clubEventResultMessageFactory.createDefault(viewId, result);
     }
-    public List<EmbedCreateSpec> createExtraEmbedFromClubResult(ViewResultTo result) {
-        return clubEventResultMessageFactory.createMetadata(result);
+    public List<EmbedCreateSpec> createExtraEmbedFromClubResult(UUID viewId, ViewResultTo result) {
+        return clubEventResultMessageFactory.createMetadata(viewId, result);
     }
 
     public EmbedCreateSpec createEmbedFromStandingEntries(ViewPointsTo result) {
         return championshipStandingsMessageFactory.create(result);
     }
-    public List<EmbedCreateSpec> createPowerstageEmbed(ViewResultTo clubResult) {
-        return clubEventResultMessageFactory.createPowerStage(clubResult);
+    public List<EmbedCreateSpec> createPowerstageEmbed(UUID viewId, ViewResultTo clubResult) {
+        return clubEventResultMessageFactory.createPowerStage(viewId, clubResult);
     }
 
     public List<EmbedCreateSpec> createEmbedFromCommunityEventResults(List<CommunityChallengeSummaryTo> events) {

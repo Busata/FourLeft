@@ -1,6 +1,15 @@
 <ng-container *ngIf="results">
   <div class="g-header-h1">
-    Current results
+    <span *ngIf="resultsMode == 'current'">Current results</span>
+    <span *ngIf="resultsMode == 'previous'">Previous results</span>
+    <div class="g-header-label">
+      <a href="javascript:void(0)" (click)="toggleMode()">
+        <span *ngIf="resultsMode == 'current'">Previous results</span>
+        <span *ngIf="resultsMode == 'previous'">Current results</span>
+      </a>
+    </div>
+  </div>
+  <div>
   </div>
   <div>
     <ng-container *ngFor="let singleList of results.multiListResults">

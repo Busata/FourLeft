@@ -14,6 +14,7 @@ import {ViewResultTo} from '@server-models';
 export class ResultDetailsComponent implements OnInit {
   public results!: ViewResultTo;
 
+  public resultsMode: 'current' | 'previous' = 'current';
 
   constructor(
     private route: ActivatedRoute,
@@ -21,9 +22,31 @@ export class ResultDetailsComponent implements OnInit {
 
   }
 
+  public toggleMode() {
+    if(this.resultsMode === 'current') {
+      this.getPreviousResults();
+      this.resultsMode = 'previous';
+    } else {
+      this.getCurrentResults();
+      this.resultsMode = 'current';
+    }
+  }
+
   ngOnInit(): void {
+    this.getCurrentResults();
+  }
+
+  getCurrentResults() {
     this.route.params.pipe(mergeMap(params => {
       return this.viewResultsStoreService.getResults(params['id'])
+    })).subscribe(results => {
+      this.results = results;
+    })
+  }
+
+  getPreviousResults() {
+    this.route.params.pipe(mergeMap(params => {
+      return this.viewResultsStoreService.getPreviousResults(params['id'])
     })).subscribe(results => {
       this.results = results;
     })

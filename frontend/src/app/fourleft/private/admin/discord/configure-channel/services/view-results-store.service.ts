@@ -9,6 +9,7 @@ import {HttpClient} from '@angular/common/http';
 export class ViewResultsStoreService {
 
   private _viewResults = new Map<string, Observable<ViewResultTo>>();
+  private _previousResults = new Map<string, Observable<ViewResultTo>>();
   private _viewStandings = new Map<string, Observable<ViewPointsTo>>();
 
   private _resultRestrictions = new Map<string, Observable<ResultRestrictionsTo[]>>();
@@ -23,6 +24,14 @@ export class ViewResultsStoreService {
     }
 
     return this._viewResults.get(viewId) as Observable<ViewResultTo>;
+  }
+  getPreviousResults(viewId: string): Observable<ViewResultTo> {
+    if(!this._previousResults.has(viewId)) {
+      this._previousResults.set(viewId, this.http.get<ViewResultTo>(`/api/external/views/${viewId}/results/previous`)
+        .pipe(shareReplay()));
+    }
+
+    return this._previousResults.get(viewId) as Observable<ViewResultTo>;
   }
 
 

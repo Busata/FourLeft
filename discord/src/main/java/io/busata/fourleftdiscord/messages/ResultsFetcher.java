@@ -29,15 +29,15 @@ public class ResultsFetcher {
     public List<EmbedCreateSpec> getCurrentEventResultsByViewId(UUID viewId, ViewType viewType) {
         final var clubResult = api.getViewCurrentResults(viewId);
         return switch (viewType) {
-            case STANDARD -> messageTemplateFactory.createEmbedFromClubResult(clubResult);
-            case EXTRA -> messageTemplateFactory.createExtraEmbedFromClubResult(clubResult);
+            case STANDARD -> messageTemplateFactory.createEmbedFromClubResult(viewId, clubResult);
+            case EXTRA -> messageTemplateFactory.createExtraEmbedFromClubResult(viewId, clubResult);
         };
     }
 
     public List<EmbedCreateSpec> getPreviousEventResults(Snowflake channelId) {
         final UUID viewId = discordChannelConfigurationService.getViewId(channelId);
         final var clubResult = api.getViewPreviousResults(viewId);
-        return messageTemplateFactory.createEmbedFromClubResult(clubResult);
+        return messageTemplateFactory.createEmbedFromClubResult(viewId, clubResult);
     }
 
     public EmbedCreateSpec getChampionshipStandingsMessage(Snowflake channelId) {
@@ -50,7 +50,7 @@ public class ResultsFetcher {
         final UUID viewId = discordChannelConfigurationService.getViewId(channelId);
 
         final var clubResult = api.getViewCurrentResults(viewId);
-        return messageTemplateFactory.createPowerstageEmbed(clubResult);
+        return messageTemplateFactory.createPowerstageEmbed(viewId, clubResult);
     }
 
     public EmbedCreateSpec getClubMemberStatsMessage(Snowflake channelId) {
