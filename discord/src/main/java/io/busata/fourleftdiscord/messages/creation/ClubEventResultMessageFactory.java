@@ -91,7 +91,6 @@ public class ClubEventResultMessageFactory {
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
         builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
-        builder.description("*Full results @ [https://fourleft.busata.io/...](%s)*".formatted(resultsUrl));
 
         if(clubResult.getMultiListResults().size() > 1) {
             specs.add(builder.build());
@@ -147,6 +146,7 @@ public class ClubEventResultMessageFactory {
                     builder.addField("**Total entries**", "*%s*".formatted(totalEntries), true);
                 }
                 builder.addField("**Event ending**", "<t:%s:R>".formatted(resultList.activityInfoTo().stream().findAny().orElseThrow().endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond()), true);
+                builder.addField("**Full results**", "[Click here](%s)".formatted(resultsUrl), false);
             }
 
             builder.url(resultsUrl);
