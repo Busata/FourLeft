@@ -91,7 +91,7 @@ public class ClubEventResultMessageFactory {
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
         builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
-        builder.footer("Full results @ [https://fourleft.busata.io/...](%s)".formatted(resultsUrl), null);
+        builder.description("*Full results @ [https://fourleft.busata.io/...](%s)*".formatted(resultsUrl));
 
         if(clubResult.getMultiListResults().size() > 1) {
             specs.add(builder.build());
