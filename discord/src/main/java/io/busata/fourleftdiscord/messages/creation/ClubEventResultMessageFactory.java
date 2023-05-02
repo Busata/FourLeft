@@ -103,6 +103,7 @@ public class ClubEventResultMessageFactory {
 
         for (int i = 0; i < multiListResults.size(); i++) {
             ResultListTo resultList = multiListResults.get(i);
+            log.info("Process result list {}", resultList.name());
 
             if(resultList.results().size() == 0 && multiListResults.size() > 1) {
                 builder.description("*No entries yet*");

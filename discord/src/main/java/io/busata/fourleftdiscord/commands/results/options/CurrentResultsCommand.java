@@ -131,6 +131,7 @@ public class CurrentResultsCommand implements BotCommandOptionHandler {
                 Button cycleView = Button.secondary(CYCLE_RESULTS_BUTTON_ID, ViewType.STANDARD.next().getButtonLabel());
 
                 List<EmbedCreateSpec> results = resultsFetcher.getCurrentEventResultsByChannelId(channelId, ViewType.STANDARD);
+                log.info("Posting {} embeds", results.size());
 
                 return event.createFollowup(InteractionFollowupCreateSpec.builder().addAllEmbeds(results).addComponent(ActionRow.of(cycleView)).build());
             });
