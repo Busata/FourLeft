@@ -40,6 +40,7 @@ public class DR2FieldMapper {
 
     private String getFieldMapping(String name, FieldMappingType type) {
         return getFieldMappings().stream()
+                .filter(fieldMappingTo -> fieldMappingTo.context() == FieldMappingContext.BACKEND)
                 .filter(fieldMappingTo -> fieldMappingTo.name().equals(name) && fieldMappingTo.fieldMappingType() == type)
                 .findFirst()
                 .map(FieldMappingTo::value)

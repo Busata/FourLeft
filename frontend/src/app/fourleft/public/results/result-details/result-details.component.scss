@@ -21,3 +21,13 @@
     margin-right: 10px;
   }
 }
+
+.extra-info {
+  display: none;
+
+}
+@media only screen and (min-width: 600px) {
+  .extra-info {
+    display: block;
+  }
+}
