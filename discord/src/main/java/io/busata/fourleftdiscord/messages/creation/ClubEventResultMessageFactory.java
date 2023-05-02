@@ -150,7 +150,6 @@ public class ClubEventResultMessageFactory {
                 builder.addField("**Full results**", "[Click here](%s)".formatted(resultsUrl), false);
             }
 
-            builder.url(resultsUrl);
             specs.add(builder.build());
             builder = createFullWidthBuilder();
         }
