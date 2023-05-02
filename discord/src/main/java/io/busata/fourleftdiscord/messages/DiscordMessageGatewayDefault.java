@@ -73,6 +73,7 @@ public class DiscordMessageGatewayDefault implements DiscordMessageGateway {
     @Override
     public void postMessage(Snowflake channelId, List<EmbedCreateSpec> embeds, MessageType messageType) {
         embeds.forEach(embed -> {
+            log.info("Posting embeds: {} (total: {})", embed.titleOrElse("No title"), embeds.size());   
             final var message = client.getChannelById(channelId)
                     .ofType(MessageChannel.class)
                     .flatMap(channel -> channel.createMessage(embed)).block();
