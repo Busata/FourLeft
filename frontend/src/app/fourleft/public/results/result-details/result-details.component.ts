@@ -4,7 +4,7 @@ import {
 } from '../../../private/admin/discord/configure-channel/services/view-results-store.service';
 import {ActivatedRoute} from '@angular/router';
 import {mergeMap} from 'rxjs';
-import {ViewResultTo} from '@server-models';
+import {DriverEntryTo, ResultListTo, ViewResultTo} from '@server-models';
 
 @Component({
   selector: 'app-result-details',
@@ -52,4 +52,15 @@ export class ResultDetailsComponent implements OnInit {
     })
   }
 
+  getResultsSortedByPowerRank(singleList: DriverEntryTo[]) {
+    return singleList.sort((a, b) => {
+      return a.relative.powerStageRank - b.relative.powerStageRank;
+    })
+  }
+
+  getResultsSortedByActivityRank(singleList: DriverEntryTo[]) {
+    return singleList.sort((a, b) => {
+      return a.relative.activityRank - b.relative.activityRank;
+    })
+  }
 }

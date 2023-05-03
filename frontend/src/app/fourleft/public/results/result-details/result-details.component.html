@@ -36,7 +36,7 @@
         <div class="g-header-h2">
           Power stage
         </div>
-        <div class="pure-g results-row" *ngFor="let driverEntry of singleList.results">
+        <div class="pure-g results-row" *ngFor="let driverEntry of getResultsSortedByPowerRank(singleList.results)">
           <div class="pure-u-1-12 pure-u-sm-1-24">
             {{driverEntry.relative.powerStageRank}}
           </div>
@@ -59,7 +59,7 @@
         <div class="g-header-h2">
           Results
         </div>
-        <div class="pure-g results-row" *ngFor="let driverEntry of singleList.results">
+        <div class="pure-g results-row" *ngFor="let driverEntry of getResultsSortedByActivityRank(singleList.results)">
           <div class="pure-u-1-12 pure-u-sm-1-24">
             {{driverEntry.relative.activityRank}}
           </div>
