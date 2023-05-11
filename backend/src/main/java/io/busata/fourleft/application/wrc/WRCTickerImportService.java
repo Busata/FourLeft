@@ -76,6 +76,7 @@ public class WRCTickerImportService {
         )).toList();
 
         if(triggerEvents) {
+            log.info("Triggering ticker {} events", list.size());
             eventPublisher.publishEvent(new WRCTickerUpdateEvent(list));
         }
         wrcTickerEntryRepository.saveAll(newEntries);
