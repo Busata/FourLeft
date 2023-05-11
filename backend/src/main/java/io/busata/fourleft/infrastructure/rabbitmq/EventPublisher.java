@@ -39,6 +39,6 @@ public class EventPublisher {
     }
     @EventListener
     public void handleMessageEvent(WRCTickerUpdateEvent event) {
-        rabbitMQ.convertAndSend(MESSAGES_QUEUE, event);
+        rabbitMQ.convertAndSend(QueueNames.TICKER_ENTRIES_UPDATE, event);
     }
 }
