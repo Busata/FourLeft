@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, map, Observable, shareReplay} from 'rxjs';
+import {Observable, shareReplay} from 'rxjs';
 import {ResultRestrictionsTo, ViewPointsTo, ViewResultTo} from 'src/app/common/generated/server-models';
 import {HttpClient} from '@angular/common/http';
 

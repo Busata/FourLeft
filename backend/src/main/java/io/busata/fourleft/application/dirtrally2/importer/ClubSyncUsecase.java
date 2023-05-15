@@ -13,7 +13,6 @@ import io.busata.fourleft.infrastructure.common.Usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -75,7 +74,7 @@ public class ClubSyncUsecase {
 
     private void updateClubLeaderboards(Club club) {
         club.getCurrentEvent().ifPresent(event -> {
-            if(shouldUpdateLeaderboards(event)) {
+            if(shouldUpdateLeaderboards(club, event)) {
                 log.info("-- Updating leaderboards for {}", club.getName());
                 racenetSyncService.refreshLeaderboards(club.getReferenceId());
 
@@ -86,7 +85,12 @@ public class ClubSyncUsecase {
         });
     }
 
-    private boolean shouldUpdateLeaderboards(Event event) {
+    private boolean shouldUpdateLeaderboards(Club club, Event event) {
+        if (club.getMembers() > 1500) {
+            log.warn("-- Club {} has too many members, skipping periodic leaderboards update.", club.getName());
+            return false;
+        }
+
         return event.getLastResultCheckedTime() == null ||
                 Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 10;
     }

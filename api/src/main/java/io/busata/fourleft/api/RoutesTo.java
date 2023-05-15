@@ -13,7 +13,6 @@ public class RoutesTo {
 
     public static final String RESULT_VIEW_EVENT_RESTRICTION = "/api/internal/views/{resultViewId}/restrictions";
     public static final String CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID = "/api/internal/views/{viewId}/event_summary";
-    public static final String CLUB_VIEWS_REFRESH = "/api/internal/views/{viewId}/refresh";
 
     public static final String CLUB_MEMBERS_BY_VIEW_ID = "/api/internal/clubs/{viewId}/members";
     public static final String CLUB_TIERS_BY_CLUB_ID = "/api/internal/clubs/{clubId}/tiers";
