@@ -34,7 +34,7 @@ public class ClubSyncUsecase {
                 updateClubDetails(club);
                 updateClubLeaderboards(club);
             } catch (Exception ex) {
-                log.warn("Error updating club {}", club.getName(), ex);
+                log.warn("Error updating club {} - {}", club.getName(), club.getReferenceId(), ex);
             }
         });
     }
@@ -60,7 +60,7 @@ public class ClubSyncUsecase {
 
         }, () -> {
             if(club.requiresRefresh()) {
-                log.info("-- Club {} has no active event, reached refresh threshold, updating.", club.getName());
+                log.info("-- Club {} has no active event,   reached refresh threshold, updating.", club.getName());
                 racenetSyncService.fullRefreshClub(club.getReferenceId());
             }
 
