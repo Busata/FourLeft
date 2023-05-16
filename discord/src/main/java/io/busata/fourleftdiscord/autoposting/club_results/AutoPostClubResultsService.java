@@ -87,7 +87,7 @@ public class AutoPostClubResultsService {
                 return autoPostEntry;
             });
         }).forEach(autoPostEntryRepository::save);
-        
+
         log.info("Saved {} entries without posting for {}", unpostedEntries.size(), configuration.clubView().description());
     }
 

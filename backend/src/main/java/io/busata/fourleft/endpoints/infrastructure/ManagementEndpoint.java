@@ -15,11 +15,11 @@ public class ManagementEndpoint {
 
     private final ApplicationEventPublisher eventPublisher;
     private  final WRCTickerImportService wrcTickerImportService;
-    @PostMapping("/api/management/update_leaderboard")
+    @PostMapping("/api/internal/management/update_leaderboard")
     public void updateLeaderboard(@RequestBody LeaderboardUpdated leaderboardUpdated) {
         eventPublisher.publishEvent(leaderboardUpdated);
     }
-    @PostMapping("/api/management/import_ticker")
+    @PostMapping("/api/internal/management/import_ticker")
     public void importTickerEntries() {
         this.wrcTickerImportService.importTickerEntries(true);
     }
