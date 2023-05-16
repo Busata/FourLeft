@@ -12,6 +12,7 @@ import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubRecentR
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.standings.DR2ChampionshipStandingEntry;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.standings.DR2ChampionshipStandings;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class RacenetClubSyncService {
 
@@ -75,6 +77,7 @@ public class RacenetClubSyncService {
     private void syncStandings(Club club) {
         List<DR2ChampionshipStandingEntry> entries = getStandingEntries(club);
 
+        try {
         club.findActiveChampionship().or(club::findPreviousChampionship).ifPresent(championship -> {
             championship.updateEntries(
                     entries.stream()
@@ -82,7 +85,9 @@ public class RacenetClubSyncService {
                             .peek(standingEntry -> standingEntry.setChampionship(championship))
                             .collect(Collectors.toList())
             );
-        });
+        }); } catch (Exception ex) {
+            log.warn("Failed to sync standings for club {}", club.getName(), ex);
+        }
     }
 
     private List<DR2ChampionshipStandingEntry> getStandingEntries(Club club) {
