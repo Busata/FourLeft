@@ -8,12 +8,14 @@ import io.busata.fourleft.domain.dirtrally2.clubs.ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMembers;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class RacenetClubMemberSyncService {
 
@@ -21,6 +23,11 @@ public class RacenetClubMemberSyncService {
     private final ClubMemberFactory clubMemberFactory;
 
     public void syncWithRacenet(Club club) {
+        if(club.getMembers() > 1500) {
+            log.warn("Warning, club too large to sync members for. Club: {}", club.getReferenceId());
+            return;
+        }
+
         List<ClubMember> members = getAllMembers(club).stream().map(clubMemberFactory::create).map(member -> {
             member.setClub(club);
             return member;
