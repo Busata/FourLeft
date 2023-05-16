@@ -111,7 +111,7 @@ public class AutopostClubResultsMessageService {
     }
 
 
-    private static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, String eventKey) {
+    public static void createAutopostEntry(AutoPostEntry autoPostEntry, DriverEntryTo entry, Long messageId, String eventKey) {
         autoPostEntry.setName(entry.racenet());
         autoPostEntry.setTotalTime(entry.activityTotalTime());
         autoPostEntry.setNationality(entry.nationality());
