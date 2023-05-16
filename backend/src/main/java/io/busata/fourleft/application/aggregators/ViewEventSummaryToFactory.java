@@ -54,6 +54,8 @@ public class ViewEventSummaryToFactory {
 
             return new ViewEventEntryTo(country,
                     event.getName(),
+                    event.getStartTime(),
+                    event.getEndTime(),
                     event.getStages().stream().map(Stage::getName).collect(Collectors.toList()),
                     firstStageCondition,
                     vehicleClass,

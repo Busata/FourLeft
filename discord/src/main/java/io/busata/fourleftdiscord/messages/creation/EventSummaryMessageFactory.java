@@ -11,6 +11,7 @@ import io.busata.fourleftdiscord.helpers.ListHelpers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
@@ -39,11 +40,13 @@ public class EventSummaryMessageFactory {
 
     public String createEntries(List<ViewEventEntryTo> events) {
         return events.stream().map(entry ->
-               String.format("**%s** • **%s**%s%s %s",
+               String.format("**%s** • **%s** • **Started <t:%s:R>** • **Ends <t:%s:R>**%s%s %s",
                        fieldMapper.createEmoticon(entry.countryId()),
                        fieldMapper.createHumanReadable(entry.vehicleClass()),
+                       entry.startTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
+                       entry.endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                        entry.stageNames().size() > 1 ? "\n" : " • ",
-                       String.join(", ", entry.stageNames()),
+                       entry.stageNames().size() > 1 ? "" : String.join(", ", entry.stageNames()),
                        entry.stageNames().size() == 1 ? "• " + fieldMapper.createEmoticon(entry.stageCondition()) : ""
                 )
        ).collect(Collectors.joining("\n"));
