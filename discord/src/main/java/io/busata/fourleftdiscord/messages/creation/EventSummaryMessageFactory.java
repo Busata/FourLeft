@@ -40,12 +40,12 @@ public class EventSummaryMessageFactory {
 
     public String createEntries(List<ViewEventEntryTo> events) {
         return events.stream().map(entry ->
-               String.format("**%s** • **%s** • **Started <t:%s:R>** • **Ends <t:%s:R>**%s%s %s",
+               String.format("**%s** • **%s** • **Ends <t:%s:R>**%s%s %s",
                        fieldMapper.createEmoticon(entry.countryId()),
                        fieldMapper.createHumanReadable(entry.vehicleClass()),
                        entry.startTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                        entry.endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
-                       entry.stageNames().size() > 1 ? "\n" : " • ",
+                       entry.stageNames().size() > 1 ? "" : " • ",
                        entry.stageNames().size() > 1 ? "" : String.join(", ", entry.stageNames()),
                        entry.stageNames().size() == 1 ? "• " + fieldMapper.createEmoticon(entry.stageCondition()) : ""
                 )
