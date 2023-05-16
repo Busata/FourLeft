@@ -35,6 +35,7 @@ public class ClubSyncUsecase {
                 updateClubLeaderboards(club);
             } catch (Exception ex) {
                 log.warn("Error updating club {} - {}", club.getName(), club.getReferenceId(), ex);
+                club.markRefreshed();
             }
         });
     }
