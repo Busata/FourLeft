@@ -87,8 +87,9 @@ public class ClubSyncUsecase {
 
     private boolean shouldUpdateLeaderboards(Club club, Event event) {
         if (club.getMembers() > 1500) {
-            log.warn("-- Club {} has too many members, skipping periodic leaderboards update.", club.getName());
-            return false;
+            log.warn("-- Club {} has too many members, checking if hourly update required.", club.getName());
+            return event.getLastResultCheckedTime() == null ||
+                    Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 60;
         }
 
         return event.getLastResultCheckedTime() == null ||
