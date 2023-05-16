@@ -39,11 +39,21 @@ public class AutoPostResultMessageFactory {
             .withRecurringTemplate(
                     "entries",
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platform}${controllerType} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+    MessageTemplate PERCENTAGE_BADGE_TEMPLATE = BASE.copy()
+            .withRecurringTemplate(
+                    "entries",
+                    "*${percentageRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platform}${controllerType} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
     MessageTemplate POWERSTAGE_AND_RANKED_BADGE_TEMPLATE = BASE.copy()
             .withRecurringTemplate(
                     "entries",
                     "${powerStageBadge}*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platform}${controllerType} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
+
+
+    MessageTemplate POWERSTAGE_AND_PERCENTAGE_BADGE_TEMPLATE = BASE.copy()
+            .withRecurringTemplate(
+                    "entries",
+                    "${powerStageBadge}*${percentageRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** •${platform}${controllerType} ${totalTime} *(${totalDiff})* • *${vehicleName}*");
 
 
     public String createAutopostMessage(AutoPostableView view) {
@@ -61,13 +71,13 @@ public class AutoPostResultMessageFactory {
         if (properties.powerStage()) {
             return switch (properties.badgeType()) {
                 case NONE -> POWERSTAGE_TEMPLATE;
-                case PERCENTAGE -> NORMAL_TEMPLATE;
+                case PERCENTAGE -> POWERSTAGE_AND_PERCENTAGE_BADGE_TEMPLATE;
                 case RANKED -> POWERSTAGE_AND_RANKED_BADGE_TEMPLATE;
             };
         } else {
             return switch (properties.badgeType()) {
                 case NONE -> NORMAL_TEMPLATE;
-                case PERCENTAGE -> NORMAL_TEMPLATE;
+                case PERCENTAGE -> PERCENTAGE_BADGE_TEMPLATE;
                 case RANKED -> RANKED_BADGE_TEMPLATE;
             };
         }

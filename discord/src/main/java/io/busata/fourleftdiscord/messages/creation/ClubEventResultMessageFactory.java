@@ -38,6 +38,9 @@ public class ClubEventResultMessageFactory {
     MessageTemplate RANKED_BADGE_TEMPLATE =  messageTemplate(
                     "*${badgeRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
 
+    MessageTemplate PERCENTAGE_BADGE_TEMPLATE =  messageTemplate(
+                    "*${percentageRank}* **${rank}** • **${nationalityEmoticon}** • **${name}** • ${totalTime} *(${totalDiff})*");
+
     MessageTemplate META_NORMAL_TEMPLATE =  messageTemplate(
                     "**${rank}** • **${name}** • ${platform} • ${controllerType} • *${vehicle}*");
     MessageTemplate META_RANKED_BADGE_TEMPLATE =  messageTemplate(
@@ -60,7 +63,7 @@ public class ClubEventResultMessageFactory {
     private MessageTemplate getTemplate(ViewPropertiesTo properties) {
         return switch (properties.badgeType()) {
             case NONE -> NORMAL_TEMPLATE;
-            case PERCENTAGE -> NORMAL_TEMPLATE;
+            case PERCENTAGE -> PERCENTAGE_BADGE_TEMPLATE;
             case RANKED -> RANKED_BADGE_TEMPLATE;
         };
     }

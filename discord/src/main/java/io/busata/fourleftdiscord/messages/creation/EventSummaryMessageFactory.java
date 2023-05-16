@@ -43,7 +43,6 @@ public class EventSummaryMessageFactory {
                String.format("**%s** • **%s** • **Ends <t:%s:R>**%s%s %s",
                        fieldMapper.createEmoticon(entry.countryId()),
                        fieldMapper.createHumanReadable(entry.vehicleClass()),
-                       entry.startTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                        entry.endTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                        entry.stageNames().size() > 1 ? "" : " • ",
                        entry.stageNames().size() > 1 ? "" : String.join(", ", entry.stageNames()),

@@ -37,6 +37,9 @@ public record DriverEntryTo(
     public Long activityRank() {
         return relative.activityRank();
     }
+    public float percentageRank() {
+        return relative.activityPercentageRank();
+    }
 
     public String activityTotalDiff() {
         return relative.activityTotalDiff();

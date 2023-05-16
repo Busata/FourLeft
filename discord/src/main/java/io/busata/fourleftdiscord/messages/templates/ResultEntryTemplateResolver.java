@@ -27,6 +27,7 @@ public class ResultEntryTemplateResolver implements TemplateResolver<DriverEntry
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("rank",String.valueOf(entry.activityRank()));
         valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.activityRank(), entry.isDnf()));
+        valueMap.put("percentageRank", BadgeMapper.createPercentageBasedIcon(entry.percentageRank(), entry.isDnf()));
         valueMap.put("nationalityEmoticon",fieldMapper.createEmoticon(entry.nationality()));
         valueMap.put("vehicle",entry.vehicles().stream().map(VehicleEntryTo::vehicleName).collect(Collectors.joining(",")));
         valueMap.put("name",entry.racenet());

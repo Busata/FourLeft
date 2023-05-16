@@ -104,6 +104,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("rank", String.valueOf(entry.activityRank()));
         valueMap.put("badgeRank", BadgeMapper.createRankBasedIcon(entry.activityRank(), entry.isDnf()));
+        valueMap.put("percentageRank", BadgeMapper.createPercentageBasedIcon(entry.percentageRank(), entry.isDnf()));
         valueMap.put("nationalityEmoticon", fieldMapper.createEmoticon(entry.nationality()));
         valueMap.put("name", entry.racenet());
         valueMap.put("totalTime", entry.activityTotalTime());
