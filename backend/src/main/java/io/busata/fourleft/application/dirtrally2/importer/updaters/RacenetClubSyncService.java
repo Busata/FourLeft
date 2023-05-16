@@ -75,9 +75,10 @@ public class RacenetClubSyncService {
     }
 
     private void syncStandings(Club club) {
+        try {
+
         List<DR2ChampionshipStandingEntry> entries = getStandingEntries(club);
 
-        try {
         club.findActiveChampionship().or(club::findPreviousChampionship).ifPresent(championship -> {
             championship.updateEntries(
                     entries.stream()
@@ -86,7 +87,7 @@ public class RacenetClubSyncService {
                             .collect(Collectors.toList())
             );
         }); } catch (Exception ex) {
-            log.warn("Failed to sync standings for club {}", club.getName(), ex);
+            log.warn("Failed to sync standings for club {}", club.getName());
         }
     }
 
