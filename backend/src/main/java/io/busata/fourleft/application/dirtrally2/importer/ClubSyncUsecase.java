@@ -89,7 +89,7 @@ public class ClubSyncUsecase {
         if (club.getMembers() > 1500) {
             log.warn("-- Club {} has too many members, checking if hourly update required.", club.getName());
             return event.getLastResultCheckedTime() == null ||
-                    Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 60;
+                    Duration.between(event.getLastResultCheckedTime(), LocalDateTime.now()).toMinutes() >= 30;
         }
 
         return event.getLastResultCheckedTime() == null ||
