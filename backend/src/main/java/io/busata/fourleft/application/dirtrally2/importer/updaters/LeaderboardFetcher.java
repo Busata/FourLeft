@@ -246,7 +246,7 @@ public class LeaderboardFetcher {
                 "None",
                 true,
                 page,
-                100,
+                50,
                 platformFilter.getValue(),
                 "Everyone",
                 0,
