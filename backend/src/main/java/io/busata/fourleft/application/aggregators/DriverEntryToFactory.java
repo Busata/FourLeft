@@ -99,7 +99,7 @@ public class DriverEntryToFactory {
                 {
                     DriverRelativeResultTo driverRelativeResultTo = new DriverRelativeResultTo(
                             sortedByTotalTime.indexOf(entry) + 1L,
-                            ((float) sortedByTotalTime.indexOf(entry) + 1L / (float) sortedByTotalTime.size()) * 100f,
+                            (((float) sortedByTotalTime.indexOf(entry) + 1L) / (float) sortedByTotalTime.size()) * 100f,
                             stageTimeParser.getDiff(fastestTotalTime, entry.activityTotalTime()),
                             sortedByPowerStageTime.indexOf(entry) + 1L,
                             stageTimeParser.getDiff(fastestPowerStageTime, entry.powerStageTotalTime())
