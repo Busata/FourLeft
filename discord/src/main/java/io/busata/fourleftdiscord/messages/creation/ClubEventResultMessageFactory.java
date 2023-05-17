@@ -102,7 +102,7 @@ public class ClubEventResultMessageFactory {
 
 
         List<ResultListTo> multiListResults = clubResult.getMultiListResults();
-        int totalEntries = clubResult.getMultiListResults().stream().mapToInt(ResultListTo::totalUniqueEntries).sum();
+        int totalEntries = clubResult.getMultiListResults().stream().mapToInt(ResultListTo::totalUniqueEntries).max().orElse(0);
 
         for (int i = 0; i < multiListResults.size(); i++) {
             ResultListTo resultList = multiListResults.get(i);

@@ -66,7 +66,7 @@ public class AutoPostableViewTemplateResolver implements TemplateResolver<AutoPo
                     .collect(Collectors.joining("\n"));
             valueMap.put("multiList", multiList);
 
-            int totalEntries = value.getMultiListResults().stream().mapToInt(AutoPostResultList::totalUniqueEntries).sum();
+            int totalEntries = value.getMultiListResults().stream().mapToInt(AutoPostResultList::totalUniqueEntries).max().orElse(0);
             valueMap.put("totalEntries", " • *%s entries*".formatted(totalEntries));
 
         }
