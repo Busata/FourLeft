@@ -69,7 +69,7 @@ public class DriverEntryToFactory {
         List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
 
         if (racenetFilter != null && racenetFilter.getFilterMode() == RacenetFilterMode.FILTER) {
-            if (racenetFilter.getName().equals("$TRACKED$")) {
+            if (racenetFilter.getName().contains("$TRACKED$")) {
                 List<String> names = communityEventService.getTrackedUsers().stream().map(CommunityLeaderboardTrackingTo::alias).distinct().toList();
                 driverEntryTos = filterNames(driverEntryTos, names);
 
