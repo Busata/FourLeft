@@ -32,7 +32,7 @@ export class RacenetFilterFormComponent {
   public demote = new EventEmitter();
 
   updatePlayers() {
-    if(this.racenetFilterFormGroup.filterMode.value == 'NONE') {
+    if(["NONE","TRACK_COMMUNITY"].indexOf(this.racenetFilterFormGroup.filterMode.value) !== -1) {
       this.racenetFilterFormGroup.racenetNames.clear();
     }
   }

@@ -19,7 +19,7 @@ public class ResultListPartitioner {
 
             FilteredEntryList<DriverEntryTo> filteredList = factory.filterResultsByFilter(resultList.results().stream().map(DriverEntryTo::result).toList(), partition);
 
-            return new ResultListTo(partition.getName().replace("$TRACKED$", ""), resultList.activityInfoTo(), filteredList.totalBeforeExclude(), filteredList.entries());
+            return new ResultListTo(partition.getName(), resultList.activityInfoTo(), filteredList.totalBeforeExclude(), filteredList.entries());
         }).collect(Collectors.toList());
     }
 

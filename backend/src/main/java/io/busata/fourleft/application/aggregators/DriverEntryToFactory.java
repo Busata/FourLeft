@@ -78,6 +78,11 @@ public class DriverEntryToFactory {
             }
         }
 
+        if (racenetFilter != null && racenetFilter.getFilterMode() == RacenetFilterMode.TRACK_COMMUNITY) {
+            List<String> names = communityEventService.getTrackedUsers().stream().map(CommunityLeaderboardTrackingTo::alias).distinct().toList();
+            driverEntryTos = filterNames(driverEntryTos, names);
+        }
+
         return new FilteredEntryList<>(driverEntryTos, totalEntries);
     }
 
