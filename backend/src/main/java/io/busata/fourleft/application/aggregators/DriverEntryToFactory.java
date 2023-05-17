@@ -1,9 +1,11 @@
 package io.busata.fourleft.application.aggregators;
 
+import io.busata.fourleft.api.models.CommunityLeaderboardTrackingTo;
 import io.busata.fourleft.api.models.DriverEntryTo;
 import io.busata.fourleft.api.models.DriverRelativeResultTo;
 import io.busata.fourleft.api.models.DriverResultTo;
 import io.busata.fourleft.api.models.VehicleEntryTo;
+import io.busata.fourleft.application.dirtrally2.CommunityEventService;
 import io.busata.fourleft.infrastructure.common.Factory;
 import io.busata.fourleft.infrastructure.common.StageTimeParser;
 import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
@@ -35,6 +37,8 @@ public class DriverEntryToFactory {
     private final PlatformToFactory platformToFactory;
     private final LeaderboardRepository leaderboardRepository;
     private final ViewEventRestrictionsRepository restrictionsRepository;
+    private final CommunityEventService communityEventService;
+
 
     public FilteredEntryList<DriverEntryTo> create(SingleClubView view, Event event) {
         Stream<DriverResultTo> stream = getEntries(event, event.getLastStage()).stream()
@@ -65,7 +69,13 @@ public class DriverEntryToFactory {
         List<DriverEntryTo> driverEntryTos = calculateRelativeData(driverResults);
 
         if (racenetFilter != null && racenetFilter.getFilterMode() == RacenetFilterMode.FILTER) {
-            driverEntryTos = filterNames(driverEntryTos, racenetFilter.getRacenetNames());
+            if (racenetFilter.getName().equals("$TRACKED$")) {
+                List<String> names = communityEventService.getTrackedUsers().stream().map(CommunityLeaderboardTrackingTo::alias).distinct().toList();
+                driverEntryTos = filterNames(driverEntryTos, names);
+
+            } else {
+                driverEntryTos = filterNames(driverEntryTos, racenetFilter.getRacenetNames());
+            }
         }
 
         return new FilteredEntryList<>(driverEntryTos, totalEntries);
