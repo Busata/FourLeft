@@ -18,7 +18,7 @@ public class ViewSummaryService {
 
     public ViewEventSummaryTo getEventSummary(UUID viewId) {
         final var clubView = repository.findById(viewId).orElseThrow();
-        return viewEventSummaryToFactory.create(clubView);
+        return viewEventSummaryToFactory.create(clubView.getResultsView());
 
     }
 }

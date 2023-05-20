@@ -2,6 +2,8 @@ package io.busata.fourleft.application.aggregators;
 
 import io.busata.fourleft.api.models.views.ViewEventEntryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
+import io.busata.fourleft.domain.aggregators.results.PartitionView;
+import io.busata.fourleft.domain.aggregators.results.ResultsView;
 import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
@@ -22,10 +24,11 @@ import java.util.stream.Collectors;
 public class ViewEventSummaryToFactory {
     private final ClubService clubService;
 
-    public ViewEventSummaryTo create(ClubView view) {
-        return switch (view.getResultsView()) {
+    public ViewEventSummaryTo create(ResultsView view) {
+        return switch (view) {
             case SingleClubView resultsView -> createSingleClub(resultsView.getClubId());
             case MergeResultsView resultsView -> createMergedView(resultsView.getResultViews());
+            case PartitionView resultsView -> create(resultsView.getResultsView());
             default -> throw new UnsupportedOperationException("View not supported");
         };
     }
