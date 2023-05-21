@@ -10,8 +10,4 @@ deploy_job:
     - eval "$(ssh-agent -s)"
     - ssh-add ~/.ssh/id_rsa
   script:
-<<<<<<< Updated upstream
-    - ssh -vvo StrictHostKeyChecking=no -p 19870 busata@busata.io "./deploy-fourleft-server.sh && exit"
-=======
-    - ssh -v -o StrictHostKeyChecking=no -p 19870 busata@178.79.180.237 "./deploy-fourleft-server.sh && exit"
->>>>>>> Stashed changes
+    - ssh -vo StrictHostKeyChecking=no -p 19870 busata@178.79.180.237 "./deploy-fourleft-server.sh && exit"
