@@ -82,6 +82,7 @@ public class RoutesTo {
     public static final String DISCORD_CHANNEL_SINGLE_CONFIGURATION = "/api/internal/discord/configurations/{configurationId}";
 
     public static final String DISCORD_CALLBACK = "/api/external/discord/callback";
+    public static final String POSTMARK_WEBHOOK = "/api/external/hooks/postmark";
     public static final String DISCORD_INTEGRATION_AUTH = "/api/internal/discord/integration/auth";
 
     public static final String DISCORD_GUILDS = "/api/internal/discord/integration/guilds";
