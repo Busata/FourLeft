@@ -28,6 +28,7 @@ import { ViewRestrictionsContainerComponent } from './configure-channel/core/vie
 import { ViewRestrictionsFormComponent } from './configure-channel/core/view-restrictions-form/view-restrictions-form.component';
 import { PlayerSearchComponent } from './configure-channel/results/player-search/player-search.component';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {NgIconComponent} from '@ng-icons/core';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
     ReactiveFormsModule,
     NgOptimizedImage,
     FormsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    NgIconComponent
   ]
 })
 export class DiscordModule { }

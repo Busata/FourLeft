@@ -6,6 +6,7 @@ import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildPermissionTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
+import io.busata.fourleft.api.models.discord.DiscordMemberTo;
 import io.busata.fourleft.application.discord.DiscordIntegrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,10 @@ public class DiscordIntegrationEndpoint {
     @GetMapping(RoutesTo.DISCORD_GUILD_CHANNELS)
     public List<DiscordChannelSummaryTo> getChannels(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuildChannels(guildId);
+    }
+    @GetMapping(RoutesTo.DISCORD_GUILD_MEMBERS)
+    public List<DiscordMemberTo> getMembers(@PathVariable(name="guildId") String guildId) {
+        return this.discordIntegrationService.getMembers(guildId);
     }
 
 }

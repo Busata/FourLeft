@@ -1,6 +1,19 @@
 <div class="channels">
   <div class="g-header-h1">{{guild.name}} <div class="g-header-label">Channels</div></div>
 
+  <div class="user-access-list">
+    <div class="g-header-h2">Users with access</div>
+    A list of users that can configure this server:
+
+    <div>
+    <select>
+      <option *ngFor="let member of members">{{member.user.username}}</option>
+    </select>
+    <button disabled>Add user</button>
+    </div>
+  </div>
+
+
   <div class="channels-list">
     <div class="g-header-h2">Configured channels <div class="g-header-label">Channels with a configuration present</div></div>
 

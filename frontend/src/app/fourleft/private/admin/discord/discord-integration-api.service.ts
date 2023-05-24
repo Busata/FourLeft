@@ -1,10 +1,12 @@
 import {Inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {DiscordChannelSummaryTo} from '@server-models';
+import {DiscordChannelSummaryTo, DiscordMemberTo} from '@server-models';
 
 
 @Injectable()
 export class DiscordIntegrationApiService {
+
+  public isAuthenticated$ = this.httpClient.get('/api/internal/discord/integration/authentication_status')
   constructor(private httpClient: HttpClient) {
   }
 
@@ -18,6 +20,9 @@ export class DiscordIntegrationApiService {
 
   public getDiscordChannels(guildId: string) {
     return this.httpClient.get<DiscordChannelSummaryTo>(`/api/internal/discord/integration/guilds/${guildId}/channels`);
+  }
+  public getDiscordMembers(guildId: string) {
+    return this.httpClient.get<DiscordMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/members`);
   }
 
   public canManageServer(guildId: string) {

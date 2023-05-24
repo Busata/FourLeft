@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {DiscordIntegrationApiService} from "../../discord-integration-api.service";
-import {DiscordChannelSummaryTo} from '@server-models';
+import {DiscordChannelSummaryTo, DiscordMemberTo} from '@server-models';
 
 @Component({
   selector: 'app-manage-discord-server',
@@ -12,6 +12,7 @@ export class ManageDiscordServerComponent implements OnInit {
   @Input() guild: any;
 
   channels: DiscordChannelSummaryTo[] = [];
+  members: DiscordMemberTo[] = [];
   public filter: any = '';
 
   constructor(private discordIntegrationApiService: DiscordIntegrationApiService) {
@@ -21,6 +22,10 @@ export class ManageDiscordServerComponent implements OnInit {
     this.discordIntegrationApiService.getDiscordChannels(this.guild.id).subscribe((channels: any) => {
       this.channels = channels;
     });
+
+    this.discordIntegrationApiService.getDiscordMembers(this.guild.id).subscribe((members: any) => {
+      this.members = members;
+    })
   }
 
 

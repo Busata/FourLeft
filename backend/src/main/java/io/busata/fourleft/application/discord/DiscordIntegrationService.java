@@ -3,6 +3,7 @@ package io.busata.fourleft.application.discord;
 import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
+import io.busata.fourleft.api.models.discord.DiscordMemberTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
 import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
@@ -49,7 +50,6 @@ public class DiscordIntegrationService {
     private final UserDiscordGuildAccessRepository userDiscordGuildAccessRepository;
 
     private final DiscordGuildSummaryToFactory discordGuildSummaryToFactory;
-
 
 
     public String enrichInviteUrl(String guildId) {
@@ -196,12 +196,16 @@ public class DiscordIntegrationService {
                 .toList();
     }
 
+    public List<DiscordMemberTo> getMembers(String guildId) {
+        return this.discordBotClient.getMembers(guildId);
+    }
+
     public boolean canManage(String guildId) {
         final var isAdmin = securityService.userHasRole(FourLeftRole.ADMIN);
 
         final var userAccess = userDiscordGuildAccessRepository.findById(securityService.getUserId());
 
-        return userAccess.map(user -> user.getGuildIds().contains(guildId)).orElse(false) || isAdmin;
+        return isAdmin || userAccess.map(user -> user.getGuildIds().contains(guildId)).orElse(false);
 
     }
 }

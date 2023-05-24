@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-05-15 11:38:14.
+// Generated using typescript-generator version 2.35.1025 on 2023-05-24 14:02:51.
 
 export interface RoutesTo {
 }
@@ -131,6 +131,7 @@ export interface DriverEntryTo {
 
 export interface DriverRelativeResultTo {
     activityRank: number;
+    activityPercentageRank: number;
     activityTotalDiff: string;
     powerStageRank: number;
     powerStageTotalDiff: string;
@@ -492,6 +493,8 @@ export interface VehicleTo {
 export interface ViewEventEntryTo {
     countryId: string;
     eventName: string;
+    startTime: Date;
+    endTime: Date;
     stageNames: string[];
     stageCondition: string;
     vehicleClass: string;
@@ -536,7 +539,7 @@ export type BadgeType = "NONE" | "PERCENTAGE" | "RANKED";
 
 export type MergeMode = "ADD_TIMES" | "TAKE_BEST";
 
-export type RacenetFilterMode = "NONE" | "INCLUDE" | "FILTER";
+export type RacenetFilterMode = "NONE" | "INCLUDE" | "FILTER" | "TRACK_COMMUNITY";
 
 export type MessageType = "AUTO_POST" | "RESULTS_POST" | "CURRENT_RESULTS_POST" | "PREVIOUS_RESULTS_POST" | "COMMUNITY_EVENT" | "AUTOMATED_CLUB_POST";
 

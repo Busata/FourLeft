@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {DiscordIntegrationApiService} from "../discord-integration-api.service";
 import {DiscordStateService} from "../discord-state.service";
+import {map} from 'rxjs';
+import {DiscordIntegrationApiService} from '../discord-integration-api.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-discord-home',
@@ -9,12 +11,17 @@ import {DiscordStateService} from "../discord-state.service";
 })
 export class DiscordHomeComponent implements OnInit{
 
+  public authenticated = false;
 
-  constructor(public discordStateService: DiscordStateService) {
-  }
+  constructor(public discordStateService: DiscordStateService,
+              private router: Router,
+              private discordIntegrationService: DiscordIntegrationApiService) {}
 
   ngOnInit(): void {
     this.discordStateService.getGuilds();
+    this.discordIntegrationService.isAuthenticated$.subscribe((status: any) => {
+      this.authenticated = status.authenticated;
+    });
   }
 
   getGuildIcon(guild: any) {
@@ -29,5 +36,17 @@ export class DiscordHomeComponent implements OnInit{
         this.discordStateService.getGuilds();
       }
     }, 1000);
+  }
+
+  authenticateDiscord() {
+    return this.discordIntegrationService.isAuthenticated$.pipe(map((status: any) => {
+      if(!status.authenticated) {
+        this.router.navigate(["/private/discord/authenticate"]);
+        return true;
+      }
+      return status.authenticated;
+    })).subscribe(authenticated => {
+    this.authenticated = authenticated;
+    });
   }
 }

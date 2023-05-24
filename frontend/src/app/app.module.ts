@@ -9,6 +9,7 @@ import {Oauth2Interceptor} from "./fourleft/private/services/security/oauth2-int
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import { NgIconsModule } from '@ng-icons/core';
 import { tablerSteeringWheel,
+  tablerCheck,
   tablerBrandXbox,
   tablerBrandSteam,
   tablerPlaystationTriangle,
@@ -41,6 +42,7 @@ const authConfig: AuthConfig = {
       tablerBrandSteam,
       tablerPlaystationTriangle,
       tablerPlaystationSquare,
+      tablerCheck,
       tablerPlaystationCircle,
       tablerQuestionMark,
       tablerPlaystationX,
