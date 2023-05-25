@@ -197,7 +197,7 @@ public class DiscordIntegrationService {
     }
 
     public List<DiscordMemberTo> getMembers(String guildId) {
-        return this.discordBotClient.getMembers(guildId);
+        return this.discordBotClient.getMembers(guildId).stream().filter(member -> !member.user().bot()).toList();
     }
 
     public boolean canManage(String guildId) {

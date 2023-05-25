@@ -15,6 +15,8 @@ public class UserDiscordGuildAccess {
     @Id
     UUID userId;
 
+    Long discordId;
+
     @ElementCollection
     List<String> guildIds;
 }

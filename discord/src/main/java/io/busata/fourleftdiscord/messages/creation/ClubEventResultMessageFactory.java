@@ -121,7 +121,7 @@ public class ClubEventResultMessageFactory {
             }
 
             if (!powerstageOnly) {
-                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(50).collect(Collectors.toList());
+                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(45).collect(Collectors.toList());
 
 
                 int groupSize = 10;
