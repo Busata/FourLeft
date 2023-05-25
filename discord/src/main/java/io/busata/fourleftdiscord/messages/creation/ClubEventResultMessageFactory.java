@@ -104,6 +104,10 @@ public class ClubEventResultMessageFactory {
         List<ResultListTo> multiListResults = clubResult.getMultiListResults();
         int totalEntries = clubResult.getMultiListResults().stream().mapToInt(ResultListTo::totalUniqueEntries).max().orElse(0);
 
+        int maxEntries = 50 / multiListResults.size();
+
+        log.warn("Max entries: {}", maxEntries);
+
         for (int i = 0; i < multiListResults.size(); i++) {
             ResultListTo resultList = multiListResults.get(i);
             log.info("Process result list {}", resultList.name());
@@ -121,7 +125,7 @@ public class ClubEventResultMessageFactory {
             }
 
             if (!powerstageOnly) {
-                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(50).collect(Collectors.toList());
+                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(maxEntries).collect(Collectors.toList());
 
 
                 int groupSize = 10;
