@@ -93,7 +93,7 @@ public class ClubEventResultMessageFactory {
 
         builder.addField("Country", "%s".formatted(country), true);
         builder.addField("Car", vehicleClass, true);
-        builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", String.join(", ", stageNames), true);
+        builder.addField( stageNames.size() > 0 ? "Stages" : "Stage", createStageNameSummary(stageNames), true);
 
         if(clubResult.getMultiListResults().size() > 1) {
             specs.add(builder.build());
@@ -121,7 +121,7 @@ public class ClubEventResultMessageFactory {
             }
 
             if (!powerstageOnly) {
-                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(45).collect(Collectors.toList());
+                final var sortedEntries = resultList.results().stream().sorted(Comparator.comparing(DriverEntryTo::activityRank)).limit(50).collect(Collectors.toList());
 
 
                 int groupSize = 10;
@@ -158,6 +158,11 @@ public class ClubEventResultMessageFactory {
         }
 
         return specs;
+    }
+
+    private static String createStageNameSummary(List<String> stageNames) {
+        long differentStages = stageNames.stream().distinct().count();
+        return differentStages == 12 ? "*All*" : String.join(", ", stageNames);
     }
 
     private static String getVehicleRestrictions(ResultListTo resultList) {
