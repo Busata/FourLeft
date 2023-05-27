@@ -28,6 +28,14 @@ public class RacenetLeaderboardSyncService {
         }
 
         try {
+            club.findActiveChampionship().stream().flatMap(championship -> championship.getEvents().stream())
+                    .filter(event -> event.getLastResultCheckedTime() == null)
+                    .forEach(this::updateEventLeaderboards);
+        } catch (Exception ex) {
+            log.error("-- -- Error while updating unsynced events of championship", ex);
+        }
+
+        try {
             club.getPreviousEvent()
                     .filter(event -> event.getLastResultCheckedTime() == null)
                     .ifPresent(this::updateEventLeaderboards);
