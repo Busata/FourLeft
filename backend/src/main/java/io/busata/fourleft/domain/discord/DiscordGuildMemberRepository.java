@@ -1,0 +1,17 @@
+package io.busata.fourleft.domain.discord;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuildMember, String> {
+
+    void deleteByGuildId(String id);
+
+    List<DiscordGuildMember> findByGuildId(String guildId);
+
+    @Query(value = "select * from discord_guild_member where id in (select user_discord_guild_access_discord_id as \"id\" from user_discord_guild_access_guild_ids where guild_ids = :guildId)", nativeQuery = true)
+    List<DiscordGuildMember> findGuildAdministrators(@Param("guildId") String guildId);
+}

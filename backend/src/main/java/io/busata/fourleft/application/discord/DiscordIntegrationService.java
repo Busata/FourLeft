@@ -1,13 +1,18 @@
 package io.busata.fourleft.application.discord;
 
 import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
+import io.busata.fourleft.api.models.discord.DiscordGuildMemberTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordMemberTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
+import io.busata.fourleft.api.models.discord.DiscordUserTo;
 import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
+import io.busata.fourleft.domain.discord.DiscordGuildMember;
+import io.busata.fourleft.domain.discord.DiscordGuildMemberRepository;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessToken;
 import io.busata.fourleft.domain.discord.integration.models.DiscordIntegrationAccessTokensRepository;
+import io.busata.fourleft.domain.discord.integration.models.UserDiscordGuildAccess;
 import io.busata.fourleft.domain.discord.integration.models.UserDiscordGuildAccessRepository;
 import io.busata.fourleft.infrastructure.configuration.properties.DiscordIntegrationConfigurationProperties;
 import io.busata.fourleft.domain.discord.DisordChannelType;
@@ -29,14 +34,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DiscordIntegrationService {
-    private final DiscordIntegrationConfigurationProperties discordProperties;
-
     private final DiscordChannelConfigurationRepository discordChannelConfigurationRepository;
     private final DiscordIntegrationAccessTokensRepository discordIntegrationAccessTokensRepository;
     private final DiscordOauth2Client discordOauth2Client;
@@ -50,7 +54,7 @@ public class DiscordIntegrationService {
     private final UserDiscordGuildAccessRepository userDiscordGuildAccessRepository;
 
     private final DiscordGuildSummaryToFactory discordGuildSummaryToFactory;
-
+    private final DiscordGuildMemberRepository discordGuildMemberRepository;
 
     public String enrichInviteUrl(String guildId) {
         return discordIntegrationConfigurationProperties.getBotInviteUrl()
@@ -153,19 +157,6 @@ public class DiscordIntegrationService {
         return this.discordOauth2Client.requestToken(body);
     }
 
-    public DiscordTokenTo getBotToken() {
-        String body = Map.of(
-                            "client_id", discordIntegrationConfigurationProperties.getClientId(),
-                        "client_secret", discordIntegrationConfigurationProperties.getClientSecret(),
-                        "grant_type", "client_credentials",
-                        "scope", "identify guilds"
-                ).entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
-                .reduce((s, s2) -> s + "&" + s2).orElseThrow();
-
-        return this.discordOauth2Client.requestToken(body);
-    }
     private DiscordTokenTo refreshToken(String refreshToken) {
         String body = Map.of(
                             "client_id", discordIntegrationConfigurationProperties.getClientId(),
@@ -196,16 +187,70 @@ public class DiscordIntegrationService {
                 .toList();
     }
 
-    public List<DiscordMemberTo> getMembers(String guildId) {
-        return this.discordBotClient.getMembers(guildId).stream().filter(member -> !member.user().bot()).toList();
+    public List<DiscordGuildMember> getMembers(String guildId) {
+        return discordGuildMemberRepository.findByGuildId(guildId);
     }
 
     public boolean canManage(String guildId) {
-        final var isAdmin = securityService.userHasRole(FourLeftRole.ADMIN);
+        if(isAdmin()) {
+            return true;
+        }
 
-        final var userAccess = userDiscordGuildAccessRepository.findById(securityService.getUserId());
+        if(canManageServer(guildId)) {
+            return true;
+        }
 
-        return isAdmin || userAccess.map(user -> user.getGuildIds().contains(guildId)).orElse(false);
+        return hasAccessRights(guildId);
 
+    }
+
+    private Boolean hasAccessRights(String guildId) {
+        DiscordUserTo me = discordUserClient.getMe();
+
+        final var userAccess = userDiscordGuildAccessRepository.findById(me.id());
+
+        return userAccess.map(user -> user.getGuildIds().contains(guildId)).orElse(false);
+    }
+
+    private boolean isAdmin() {
+        return securityService.userHasRole(FourLeftRole.ADMIN);
+    }
+
+    private boolean canManageServer(String guildId) {
+        List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
+
+        boolean canManageServer = userGuilds.stream()
+                .filter(DiscordGuildTo::canManageServer)
+                .anyMatch(guild -> guild.id().equals(guildId));
+        return canManageServer;
+    }
+
+    public List<DiscordGuildMember> getAdministrators(String guildId) {
+        return discordGuildMemberRepository.findGuildAdministrators(guildId);
+    }
+
+    public DiscordGuildMember addAccess(String guildId, String userId) {
+        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(userId).map(existingAccess -> {
+            existingAccess.getGuildIds().add(guildId);
+            return existingAccess;
+        }).orElseGet(() -> {
+            return new UserDiscordGuildAccess(userId, List.of(guildId));
+        });
+
+        this.userDiscordGuildAccessRepository.save(userDiscordGuildAccess);
+
+        return this.discordGuildMemberRepository.findById(userId).orElseThrow();
+    }
+
+    public DiscordGuildMember removeAccess(String guildId, String userId) {
+        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(userId).map(existingAccess -> {
+            existingAccess.getGuildIds().remove(guildId);
+            return existingAccess;
+        }).orElseThrow();
+
+
+        this.userDiscordGuildAccessRepository.save(userDiscordGuildAccess);
+
+        return this.discordGuildMemberRepository.findById(userId).orElseThrow();
     }
 }

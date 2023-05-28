@@ -27,5 +27,6 @@
     <exclude-change idName="wrcticker_entry#ticker_entry_image_url" tagName="modifyDataType" />
     <exclude-change idName="wrcticker_entry#ticker_event_key" tagName="modifyDataType" />
     <exclude-change idName="wrcticker_entry#title" tagName="modifyDataType" />
+    <exclude-change idName="field_mapping#context" tagName="modifyDataType" />
   </component>
 </project>

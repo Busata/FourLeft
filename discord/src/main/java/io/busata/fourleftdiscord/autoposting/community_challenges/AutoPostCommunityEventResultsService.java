@@ -1,7 +1,7 @@
 package io.busata.fourleftdiscord.autoposting.community_challenges;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
-import io.busata.fourleftdiscord.commands.DiscordChannels;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import io.busata.fourleft.common.MessageType;
 import io.busata.fourleftdiscord.messages.ResultsFetcher;
@@ -16,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AutoPostCommunityEventResultsService
 {
+    public static final Snowflake DIRTY_MAIN_CHAT = Snowflake.of("892369709780070410");
     private final ResultsFetcher resultsFetcher;
     private final DiscordMessageGateway discordMessageGateway;
 
@@ -25,7 +26,7 @@ public class AutoPostCommunityEventResultsService
         messages.forEach(message -> {
             try {
                 discordMessageGateway.postMessage(
-                        DiscordChannels.DIRTY_MAIN_CHAT,
+                        DIRTY_MAIN_CHAT,
                         message,
                         MessageType.COMMUNITY_EVENT
                 );

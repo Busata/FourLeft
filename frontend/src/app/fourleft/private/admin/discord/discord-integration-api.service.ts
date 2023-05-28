@@ -1,6 +1,6 @@
 import {Inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {DiscordChannelSummaryTo, DiscordMemberTo} from '@server-models';
+import {DiscordChannelSummaryTo, DiscordGuildMemberTo, DiscordMemberTo} from '@server-models';
 
 
 @Injectable()
@@ -22,7 +22,10 @@ export class DiscordIntegrationApiService {
     return this.httpClient.get<DiscordChannelSummaryTo>(`/api/internal/discord/integration/guilds/${guildId}/channels`);
   }
   public getDiscordMembers(guildId: string) {
-    return this.httpClient.get<DiscordMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/members`);
+    return this.httpClient.get<DiscordGuildMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/members`);
+  }
+  public getDiscordAdministrators(guildId: string) {
+    return this.httpClient.get<DiscordGuildMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/administrators`);
   }
 
   public canManageServer(guildId: string) {
@@ -35,5 +38,14 @@ export class DiscordIntegrationApiService {
 
   public getDiscordGuilds() {
     return this.httpClient.get("/api/internal/discord/integration/guilds");
+  }
+
+  grantAccess(guildId: string, memberId: string) {
+    return this.httpClient.post<DiscordGuildMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/administrators/${memberId}`, {});
+  }
+
+  removeAccess(guildId: string, memberId: string) {
+    return this.httpClient.delete<DiscordGuildMemberTo>(`/api/internal/discord/integration/guilds/${guildId}/administrators/${memberId}`);
+
   }
 }

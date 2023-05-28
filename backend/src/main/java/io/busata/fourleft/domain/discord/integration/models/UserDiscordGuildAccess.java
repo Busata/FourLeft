@@ -1,6 +1,8 @@
 package io.busata.fourleft.domain.discord.integration.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -10,10 +12,12 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDiscordGuildAccess {
 
     @Id
-    UUID userId;
+    String discordId;
 
     @ElementCollection
     List<String> guildIds;

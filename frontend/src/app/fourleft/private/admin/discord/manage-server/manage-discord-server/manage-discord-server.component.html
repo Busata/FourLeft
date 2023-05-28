@@ -3,13 +3,20 @@
 
   <div class="user-access-list">
     <div class="g-header-h2">Users with access</div>
-    A list of users that can configure this server:
+    <ul>
+      <li *ngFor="let admin of administrators">
+        {{admin.username}}
+        <button class="g-button g-button-danger" (click)="removeAccess(guild.id, admin.id)">Remove</button>
+      </li>
+    </ul>
+
+
 
     <div>
-    <select>
-      <option *ngFor="let member of members">{{member.user.username}}</option>
+    <select #memberSelect [(ngModel)]="selectedMember">
+      <option [ngValue]="member" *ngFor="let member of members">{{member.username}}</option>
     </select>
-    <button disabled>Add user</button>
+    <button [disabled]="!selectedMember" (click)="grantAccess(guild.id, selectedMember!.id)">Add user</button>
     </div>
   </div>
 
