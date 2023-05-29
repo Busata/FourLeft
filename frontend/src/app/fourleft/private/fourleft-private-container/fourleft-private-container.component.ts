@@ -9,7 +9,7 @@ import {UserStoreService} from "../services/security/user-store.service";
 })
 export class FourleftPrivateContainerComponent implements OnInit{
 
-  constructor(private authenticationService: LoginService, private userStoreStore: UserStoreService) { }
+  constructor(public authenticationService: LoginService, private userStoreStore: UserStoreService) { }
 
   ngOnInit(): void {
     this.authenticationService.configure();
