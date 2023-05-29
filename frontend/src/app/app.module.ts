@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import {AppRoutingModule} from "./app-routing.module";
-import {AuthConfig, OAuthModule} from "angular-oauth2-oidc";
+import {AuthConfig, OAuthModule, OAuthStorage} from "angular-oauth2-oidc";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {Oauth2Interceptor} from "./fourleft/private/services/security/oauth2-interceptor.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
@@ -20,6 +20,10 @@ import { tablerSteeringWheel,
   tablerDeviceGamepad,
   tablerKeyboard
 } from '@ng-icons/tabler-icons';
+
+export function storageFactory(): OAuthStorage {
+  return localStorage;
+}
 
 const authConfig: AuthConfig = {
   issuer: 'https://heimdall.busata.io/realms/FourLeft',
@@ -52,6 +56,7 @@ const authConfig: AuthConfig = {
     BrowserAnimationsModule,
   ],
   providers: [
+    { provide: OAuthStorage, useFactory: storageFactory },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: Oauth2Interceptor,
