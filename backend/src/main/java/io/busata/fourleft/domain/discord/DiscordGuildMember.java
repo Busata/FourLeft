@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -24,4 +25,17 @@ public class DiscordGuildMember {
     String userName;
 
     String guildId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DiscordGuildMember that = (DiscordGuildMember) o;
+        return Objects.equals(discordId, that.discordId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(discordId);
+    }
 }

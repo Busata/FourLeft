@@ -245,7 +245,7 @@ public class DiscordIntegrationService {
     }
 
     public List<DiscordGuildMember> getAdministrators(String guildId) {
-        return discordGuildMemberRepository.findGuildAdministrators(guildId);
+        return discordGuildMemberRepository.findGuildAdministrators(guildId).stream().distinct().toList();
     }
 
     public DiscordGuildMember addAccess(String guildId, UUID userId) {
