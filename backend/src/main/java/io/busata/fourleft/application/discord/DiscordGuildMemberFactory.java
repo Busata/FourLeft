@@ -1,4 +1,4 @@
-package io.busata.fourleft.endpoints.discord;
+package io.busata.fourleft.application.discord;
 
 import io.busata.fourleft.api.models.discord.DiscordGuildMemberTo;
 import io.busata.fourleft.domain.discord.DiscordGuildMember;
