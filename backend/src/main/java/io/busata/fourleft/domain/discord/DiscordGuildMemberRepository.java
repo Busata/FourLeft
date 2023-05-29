@@ -13,6 +13,6 @@ public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuild
 
     List<DiscordGuildMember> findByGuildId(String guildId);
 
-    @Query(value = "select * from discord_guild_member where id in (select user_discord_guild_access_discord_id as \"id\" from user_discord_guild_access_guild_ids where guild_ids = :guildId)", nativeQuery = true)
+    @Query(value = "select * from discord_guild_member where discord_id in (select user_discord_guild_access_discord_id as \"id\" from user_discord_guild_access_guild_ids where guild_ids = :guildId)", nativeQuery = true)
     List<DiscordGuildMember> findGuildAdministrators(@Param("guildId") String guildId);
 }
