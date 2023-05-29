@@ -9,6 +9,7 @@ import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordMemberTo;
 import io.busata.fourleft.application.discord.DiscordIntegrationService;
+import io.busata.fourleft.application.discord.DiscordMemberUpdater;
 import io.busata.fourleft.domain.discord.DiscordGuildMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,15 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 public class DiscordIntegrationEndpoint {
     private final DiscordIntegrationService discordIntegrationService;
     private final DiscordGuildMemberFactory discordGuildMemberFactory;
+    private final DiscordMemberUpdater discordMemberUpdater;
 
 
     @GetMapping(RoutesTo.DISCORD_MANAGE_SERVER)
@@ -57,7 +61,8 @@ public class DiscordIntegrationEndpoint {
     }
 
     @GetMapping(RoutesTo.DISCORD_GUILDS)
-    public List<DiscordGuildSummaryTo> getGuildSummary() {
+    public List<DiscordGuildSummaryTo> getGuildSummary(@RequestParam(value = "sync", required = false) Optional<String> guildId) {
+        guildId.ifPresent(discordMemberUpdater::syncGuild);
         return this.discordIntegrationService.getGuildSummaries();
     }
 
@@ -78,13 +83,13 @@ public class DiscordIntegrationEndpoint {
         return this.discordIntegrationService.getAdministrators(guildId).stream().map(discordGuildMemberFactory::create).toList();
     }
     @PostMapping(RoutesTo.DISCORD_GUILD_ADMINISTRATORS_CRUD)
-    public DiscordGuildMemberTo addAccess(@PathVariable(name="guildId") String guildId, @PathVariable(name="userId") String userId) {
+    public DiscordGuildMemberTo addAccess(@PathVariable(name="guildId") String guildId, @PathVariable(name="userId") UUID userId) {
         final var discordGuildMember = this.discordIntegrationService.addAccess(guildId, userId);
         return this.discordGuildMemberFactory.create(discordGuildMember);
     }
 
     @DeleteMapping(RoutesTo.DISCORD_GUILD_ADMINISTRATORS_CRUD)
-    public DiscordGuildMemberTo removeAccess(@PathVariable(name="guildId") String guildId, @PathVariable(name="userId") String userId) {
+    public DiscordGuildMemberTo removeAccess(@PathVariable(name="guildId") String guildId, @PathVariable(name="userId") UUID userId) {
         final var discordGuildMember = this.discordIntegrationService.removeAccess(guildId, userId);
         return this.discordGuildMemberFactory.create(discordGuildMember);
     }

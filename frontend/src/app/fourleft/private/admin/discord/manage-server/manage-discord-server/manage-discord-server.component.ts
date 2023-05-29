@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {DiscordIntegrationApiService} from "../../discord-integration-api.service";
-import {DiscordChannelSummaryTo, DiscordGuildMemberTo, DiscordMemberTo} from '@server-models';
+import {DiscordChannelSummaryTo, DiscordGuildMemberTo} from '@server-models';
 
 @Component({
   selector: 'app-manage-discord-server',
@@ -63,10 +63,5 @@ export class ManageDiscordServerComponent implements OnInit {
       this.administrators = this.administrators.filter(member => member.id !== memberId);
       this.members.push(member);
     });
-
-  }
-
-  updateSelectedMember(member: any) {
-    this.selectedMember = member;
   }
 }

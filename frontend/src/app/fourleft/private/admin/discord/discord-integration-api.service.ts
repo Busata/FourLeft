@@ -36,8 +36,8 @@ export class DiscordIntegrationApiService {
     return this.httpClient.post("/api/internal/discord/integration/auth", token);
   }
 
-  public getDiscordGuilds() {
-    return this.httpClient.get("/api/internal/discord/integration/guilds");
+  public getDiscordGuilds(guildId: string) {
+    return this.httpClient.get(`/api/internal/discord/integration/guilds?syncGuild=${guildId}`);
   }
 
   grantAccess(guildId: string, memberId: string) {

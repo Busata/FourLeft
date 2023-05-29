@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {DiscordIntegrationApiService} from "../discord-integration-api.service";
 
 @Component({
   selector: 'app-discord-integration-container',
@@ -9,10 +8,7 @@ import {DiscordIntegrationApiService} from "../discord-integration-api.service";
 })
 export class DiscordPageComponent {
 
-  constructor(private discordIntegrationApiService: DiscordIntegrationApiService) {
+  constructor() {
   }
 
-  getGuilds() {
-    this.discordIntegrationApiService.getDiscordGuilds();
-  }
 }

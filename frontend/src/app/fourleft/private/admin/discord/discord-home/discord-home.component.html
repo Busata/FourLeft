@@ -1,11 +1,12 @@
 <div class="guilds">
+  <div class="g-card discord-card" *ngIf="!authenticated">
+    <p>To configure servers, please authenticate with Discord first</p>
+    <button class="g-button g-button-primary" (click)="authenticateDiscord()">Authenticate</button>
+  </div>
+  <ng-container *ngIf="authenticated">
   <div class="g-header-h1">
     Available discord servers
     <span class="g-header-label">A list of servers that you can configure or invite the bot to.</span>
-  </div>
-  <div class="g-card discord-card" *ngIf="!authenticated">
-      <p>To see the servers for which you are the owner, please first authenticate with Discord.</p>
-      <button class="g-button g-button-primary" (click)="authenticateDiscord()">Authenticate</button>
   </div>
   <div class="pure-g">
     <div class="g-card server-card" [title]="guild.name" *ngFor="let guild of (this.discordStateService.guildSummaries | async)">
@@ -29,4 +30,5 @@
       </div>
     </div>
   </div>
+  </ng-container>
 </div>

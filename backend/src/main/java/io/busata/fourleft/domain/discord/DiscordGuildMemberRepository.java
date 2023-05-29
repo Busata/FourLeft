@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuildMember, String> {
+public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuildMember, UUID> {
 
     void deleteByGuildId(String id);
 

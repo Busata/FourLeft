@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-05-28 23:58:31.
+// Generated using typescript-generator version 2.35.1025 on 2023-05-29 08:06:48.
 
 export interface RoutesTo {
 }
@@ -356,6 +356,7 @@ export interface DiscordChannelTo {
 
 export interface DiscordGuildMemberTo {
     id: string;
+    discordId: string;
     username: string;
 }
 

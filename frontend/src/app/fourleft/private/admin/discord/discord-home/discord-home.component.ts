@@ -33,7 +33,7 @@ export class DiscordHomeComponent implements OnInit{
     let timer = setInterval(() => {
       if(botInvite.closed) {
         clearInterval(timer);
-        this.discordStateService.getGuilds();
+        this.discordStateService.getGuilds(guild.id);
       }
     }, 1000);
   }

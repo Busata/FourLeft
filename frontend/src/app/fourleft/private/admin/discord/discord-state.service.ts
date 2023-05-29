@@ -13,8 +13,8 @@ export class DiscordStateService {
   }
 
 
-  public getGuilds() {
-    this.discordIntegrationApiService.getDiscordGuilds().subscribe((guilds:any) => {
+  public getGuilds(guildId: string = "") {
+    this.discordIntegrationApiService.getDiscordGuilds(guildId).subscribe((guilds:any) => {
       this._guildSummarySubject.next(guilds);
     });
   }

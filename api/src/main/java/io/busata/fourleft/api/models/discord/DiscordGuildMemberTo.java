@@ -1,4 +1,6 @@
 package io.busata.fourleft.api.models.discord;
 
-public record DiscordGuildMemberTo(String id, String username) {
+import java.util.UUID;
+
+public record DiscordGuildMemberTo(UUID id, String discordId, String username) {
 }

@@ -1,10 +1,8 @@
 package io.busata.fourleft.application.discord;
 
 import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
-import io.busata.fourleft.api.models.discord.DiscordGuildMemberTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
-import io.busata.fourleft.api.models.discord.DiscordMemberTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
 import io.busata.fourleft.api.models.discord.DiscordUserTo;
 import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
@@ -34,7 +32,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -69,7 +67,9 @@ public class DiscordIntegrationService {
     public List<DiscordGuildSummaryTo> getGuildSummaries() {
         List<DiscordGuildTo> botGuilds = this.discordBotClient.getGuilds();
 
-        List<DiscordGuildSummaryTo> discordGuildSummaryTos = Stream.of(isAuthenticated())
+        boolean isUserAuthenticated = isAuthenticated();
+
+        List<DiscordGuildSummaryTo> discordGuildSummaryTos = Stream.of(isUserAuthenticated)
                 .filter(x -> x)
                 .flatMap(authenticated -> {
                     List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
@@ -82,9 +82,25 @@ public class DiscordIntegrationService {
                             });
                 }).toList();
 
+        Optional<UserDiscordGuildAccess> userAccess = Optional.of(isUserAuthenticated).filter(x -> x).flatMap(x -> {
+            DiscordUserTo me = discordUserClient.getMe();
+            return userDiscordGuildAccessRepository.findById(me.id());
+        });
+
         return Stream.concat(
                 botGuilds.stream()
-                        .filter(guild -> canManage(guild.id()))
+                        .filter(guild -> {
+                            if(!isUserAuthenticated) {
+                                return false;
+                            }
+
+                            if(isAdmin()) {
+                                return true;
+                            }
+
+                            return userAccess.map(user -> user.getGuildIds().contains(guild.id())).orElse(false);
+
+                        })
                         .map(guild -> discordGuildSummaryToFactory.create(guild, true))
                 ,discordGuildSummaryTos.stream()
         ).distinct().toList();
@@ -192,6 +208,10 @@ public class DiscordIntegrationService {
     }
 
     public boolean canManage(String guildId) {
+        if(!isAuthenticated()) {
+            return false;
+        }
+
         if(isAdmin()) {
             return true;
         }
@@ -219,22 +239,23 @@ public class DiscordIntegrationService {
     private boolean canManageServer(String guildId) {
         List<DiscordGuildTo> userGuilds = this.discordUserClient.getGuilds();
 
-        boolean canManageServer = userGuilds.stream()
+        return userGuilds.stream()
                 .filter(DiscordGuildTo::canManageServer)
                 .anyMatch(guild -> guild.id().equals(guildId));
-        return canManageServer;
     }
 
     public List<DiscordGuildMember> getAdministrators(String guildId) {
         return discordGuildMemberRepository.findGuildAdministrators(guildId);
     }
 
-    public DiscordGuildMember addAccess(String guildId, String userId) {
-        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(userId).map(existingAccess -> {
+    public DiscordGuildMember addAccess(String guildId, UUID userId) {
+        final var member = this.discordGuildMemberRepository.findById(userId).orElseThrow();
+
+        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(member.getDiscordId()).map(existingAccess -> {
             existingAccess.getGuildIds().add(guildId);
             return existingAccess;
         }).orElseGet(() -> {
-            return new UserDiscordGuildAccess(userId, List.of(guildId));
+            return new UserDiscordGuildAccess(member.getDiscordId(), List.of(guildId));
         });
 
         this.userDiscordGuildAccessRepository.save(userDiscordGuildAccess);
@@ -242,8 +263,10 @@ public class DiscordIntegrationService {
         return this.discordGuildMemberRepository.findById(userId).orElseThrow();
     }
 
-    public DiscordGuildMember removeAccess(String guildId, String userId) {
-        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(userId).map(existingAccess -> {
+    public DiscordGuildMember removeAccess(String guildId, UUID userId) {
+        final var member = this.discordGuildMemberRepository.findById(userId).orElseThrow();
+
+        UserDiscordGuildAccess userDiscordGuildAccess = this.userDiscordGuildAccessRepository.findById(member.getDiscordId()).map(existingAccess -> {
             existingAccess.getGuildIds().remove(guildId);
             return existingAccess;
         }).orElseThrow();

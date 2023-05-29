@@ -11,6 +11,11 @@ export const routes: Routes = [
     component: FourleftPrivateContainerComponent,
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'discord'
+      },
+      {
         path: 'discord',
         loadChildren: () => import('./admin/discord/discord.module').then(m => m.DiscordModule)
       },

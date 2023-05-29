@@ -10,6 +10,7 @@ public class DiscordGuildMemberFactory {
     public DiscordGuildMemberTo create(DiscordGuildMember member) {
         return new DiscordGuildMemberTo(
                 member.getId(),
+                member.getDiscordId(),
                 member.getUserName()
         );
     }

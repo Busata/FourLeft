@@ -1,5 +1,6 @@
 package io.busata.fourleft.application.discord;
 
+import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.domain.discord.DiscordGuildMember;
 import io.busata.fourleft.domain.discord.DiscordGuildMemberRepository;
 import io.busata.fourleft.infrastructure.clients.discord.bot.DiscordBotClient;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -21,38 +23,35 @@ public class DiscordMemberUpdater {
 
     @Transactional
     public void sync() {
+        discordBotClient.getGuilds().stream().map(DiscordGuildTo::id).forEach(this::syncGuild);
+    }
 
-        discordBotClient.getGuilds().forEach(guild -> {
-            log.info("Syncing discord guild members for {}", guild.name());
-            guildMemberRepository.deleteByGuildId(guild.id());
+    public void syncGuild(String guildId) {
+        log.info("Syncing discord guild members for {}", guildId);
+        guildMemberRepository.deleteByGuildId(guildId);
 
-            boolean keepFetching = true;
-            String after = null;
-            List<DiscordGuildMember> members = new ArrayList<>();
+        boolean keepFetching = true;
+        String after = null;
+        List<DiscordGuildMember> members = new ArrayList<>();
 
-            while(keepFetching) {
+        while(keepFetching) {
 
-                final var fetchedMembers =  this.discordBotClient.getMembers(guild.id(), memberLimit, after);
+            final var fetchedMembers =  this.discordBotClient.getMembers(guildId, memberLimit, after);
 
-                if(fetchedMembers.size() < memberLimit) {
-                    keepFetching = false;
-                } else {
-                    after = fetchedMembers.get(fetchedMembers.size() - 1).user().id();
-                }
-
-                List<DiscordGuildMember> list = fetchedMembers.stream().map(memberTo -> {
-                    return new DiscordGuildMember(memberTo.user().id(), memberTo.user().username(), guild.id());
-                }).toList();
-
-                members.addAll(list);
+            if(fetchedMembers.size() < memberLimit) {
+                keepFetching = false;
+            } else {
+                after = fetchedMembers.get(fetchedMembers.size() - 1).user().id();
             }
 
-            log.info("Saving {} members for {}", members.size(), guild.name());
-            guildMemberRepository.saveAll(members);
+            List<DiscordGuildMember> list = fetchedMembers.stream().map(memberTo -> {
+                return new DiscordGuildMember(UUID.randomUUID(), memberTo.user().id(), memberTo.user().username(), guildId);
+            }).toList();
 
+            members.addAll(list);
+        }
 
-
-        });
-
+        log.info("Saving {} members for {}", members.size(), guildId);
+        guildMemberRepository.saveAll(members);
     }
 }
