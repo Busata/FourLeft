@@ -1,7 +1,7 @@
 package io.busata.fourleft.application.dirtrally2.championshipcreator;
 
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
-import io.busata.fourleft.application.dirtrally2.importer.updaters.RacenetSyncService;
+import io.busata.fourleft.application.dirtrally2.importer.clubs.RacenetSyncFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class ChampionshipCreator {
     private final DailyChampionshipCreator dailyChampionshipCreator;
     private final WeeklyChampionshipCreator weeklyChampionshipCreator;
 
-    private final RacenetSyncService clubSyncService;
+    private final RacenetSyncFacade clubSyncService;
 
     public void createDailyChampionship(long clubId) {
         log.info("Creating daily championship");

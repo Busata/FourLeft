@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer.clubs;
 
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.ClubRepository;
@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class RacenetSyncService {
+public class RacenetSyncFacade {
 
     private final ClubRepository clubRepository;
     private final RacenetClubSyncService racenetClubSyncService;

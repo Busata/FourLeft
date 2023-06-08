@@ -1,8 +1,9 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer.clubs;
 
 import com.google.common.collect.ImmutableList;
 import feign.FeignException;
 import feign.RetryableException;
+import io.busata.fourleft.application.dirtrally2.importer.LeaderboardFetcher;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.EventRepository;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RacenetLeaderboardSyncService {
+class RacenetLeaderboardSyncService {
 
     private final EventRepository eventRepository;
     private final LeaderboardFetcher leaderboardFetcher;

@@ -23,9 +23,6 @@ public class ResultsViewFixedPointsFactory {
 
     public ViewPointsTo createFixedPoints(ClubView clubView, FixedPointsCalculator calc, ResultsView resultsView) {
         ViewResultTo viewResult = viewResultToFactory.createViewResultFromResultsView(clubView, resultsView, (club) -> {
-
-
-
             return fixedPointChampionshipFetcher.filterChampionships(club.getChampionships(), calc)
                     .stream()
                     .flatMap(championship -> championship.getEvents().stream())

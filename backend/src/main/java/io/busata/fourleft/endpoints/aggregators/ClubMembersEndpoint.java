@@ -3,7 +3,7 @@ package io.busata.fourleft.endpoints.aggregators;
 import io.busata.fourleft.api.RoutesTo;
 import io.busata.fourleft.application.aggregators.ClubMembersService;
 import io.busata.fourleft.api.models.ClubMemberTo;
-import io.busata.fourleft.application.dirtrally2.importer.racenet.ClubMemberFactory;
+import io.busata.fourleft.application.dirtrally2.importer.factory.ClubMemberFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer;
 
 import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;

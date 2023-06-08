@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer;
 
 
 import io.busata.fourleft.domain.dirtrally2.clubs.PlatformInfo;
@@ -13,7 +13,7 @@ import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2Lead
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2LeaderboardResults;
 import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.PlatformFilter;
-import io.busata.fourleft.application.dirtrally2.importer.racenet.BoardEntryFactory;
+import io.busata.fourleft.application.dirtrally2.importer.factory.BoardEntryFactory;
 import io.busata.fourleft.domain.dirtrally2.clubs.Leaderboard;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

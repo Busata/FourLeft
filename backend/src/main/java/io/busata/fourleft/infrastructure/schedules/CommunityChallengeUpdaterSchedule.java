@@ -1,6 +1,6 @@
 package io.busata.fourleft.infrastructure.schedules;
 
-import io.busata.fourleft.application.dirtrally2.importer.updaters.RacenetChallengesSyncService;
+import io.busata.fourleft.application.dirtrally2.importer.challenges.RacenetChallengesSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

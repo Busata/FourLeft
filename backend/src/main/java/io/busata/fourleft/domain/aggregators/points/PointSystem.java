@@ -8,8 +8,10 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Entity
 @AllArgsConstructor
@@ -33,18 +35,23 @@ public class PointSystem {
     private List<PointPair> powerStagePoints;
 
     public Integer getPoints(int rank) {
-        if(rank > rankingPoints.size()) {
+
+        final var sortedPoints = rankingPoints.stream().sorted(Comparator.comparing(PointPair::getRank)).toList();
+
+        if(rank > sortedPoints.size()) {
             return defaultRankingPoint;
         } else {
-            return rankingPoints.get(rank - 1).getPoint();
+            return sortedPoints.get(rank - 1).getPoint();
         }
     }
 
     public Integer getPowerStagePoints(int rank) {
-        if(rank > powerStagePoints.size()) {
+        final var sortedPoints = powerStagePoints.stream().sorted(Comparator.comparing(PointPair::getRank)).toList();
+
+        if(rank > sortedPoints.size()) {
             return defaultPowerstagePoint;
         } else {
-            return powerStagePoints.get(rank - 1).getPoint();
+            return sortedPoints.get(rank - 1).getPoint();
         }
     }
 }

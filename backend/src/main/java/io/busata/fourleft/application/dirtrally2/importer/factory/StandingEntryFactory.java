@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.racenet;
+package io.busata.fourleft.application.dirtrally2.importer.factory;
 
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.standings.DR2ChampionshipStandingEntry;
 import io.busata.fourleft.domain.dirtrally2.clubs.StandingEntry;

@@ -1,8 +1,9 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer.challenges;
 
+import io.busata.fourleft.application.dirtrally2.importer.LeaderboardFetcher;
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.communityevents.DR2Challenge;
-import io.busata.fourleft.application.dirtrally2.importer.racenet.CommunityChallengeFactory;
+import io.busata.fourleft.application.dirtrally2.importer.factory.CommunityChallengeFactory;
 import io.busata.fourleft.infrastructure.common.TransactionHandler;
 import io.busata.fourleft.domain.dirtrally2.community.CommunityChallenge;
 import io.busata.fourleft.domain.dirtrally2.community.CommunityEvent;

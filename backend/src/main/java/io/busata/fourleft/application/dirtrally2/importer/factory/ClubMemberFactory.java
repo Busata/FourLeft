@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.racenet;
+package io.busata.fourleft.application.dirtrally2.importer.factory;
 
 import io.busata.fourleft.api.models.ClubMemberTo;
 import io.busata.fourleft.domain.dirtrally2.clubs.ClubMember;

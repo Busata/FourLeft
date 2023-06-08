@@ -4,8 +4,7 @@ import io.busata.fourleft.api.events.ClubEventEnded;
 import io.busata.fourleft.api.events.ClubEventStarted;
 import io.busata.fourleft.api.events.ClubInactive;
 import io.busata.fourleft.api.events.LeaderboardUpdated;
-import io.busata.fourleft.application.dirtrally2.importer.updaters.EventCleanService;
-import io.busata.fourleft.application.dirtrally2.importer.updaters.RacenetSyncService;
+import io.busata.fourleft.application.dirtrally2.importer.clubs.RacenetSyncFacade;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.ClubRepository;
@@ -25,7 +24,7 @@ public class ClubSyncUsecase {
     private final EventCleanService eventCleanService;
     private final ClubRepository clubRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final RacenetSyncService racenetSyncService;
+    private final RacenetSyncFacade racenetSyncFacade;
 
     public void updateLeaderboards() {
         cleanArchived();
@@ -48,7 +47,7 @@ public class ClubSyncUsecase {
          club.getCurrentEvent().ifPresentOrElse(event -> {
             if (event.hasEnded()) {
                 log.info("-- Club {} has active event that ended, updating.", club.getName());
-                racenetSyncService.fullRefreshClub(club.getReferenceId());
+                racenetSyncFacade.fullRefreshClub(club.getReferenceId());
 
                 applicationEventPublisher.publishEvent(new ClubEventEnded(club.getReferenceId()));
 
@@ -61,7 +60,7 @@ public class ClubSyncUsecase {
         }, () -> {
             if(club.requiresRefresh()) {
                 log.info("-- Club {} has no active event,   reached refresh threshold, updating.", club.getName());
-                racenetSyncService.fullRefreshClub(club.getReferenceId());
+                racenetSyncFacade.fullRefreshClub(club.getReferenceId());
             }
 
             club.getCurrentEvent().ifPresentOrElse(newEvent -> {
@@ -76,7 +75,7 @@ public class ClubSyncUsecase {
         club.getCurrentEvent().ifPresent(event -> {
             if(shouldUpdateLeaderboards(club, event)) {
                 log.info("-- Updating leaderboards for {}", club.getName());
-                racenetSyncService.refreshLeaderboards(club.getReferenceId());
+                racenetSyncFacade.refreshLeaderboards(club.getReferenceId());
 
                 log.info("-- Update done.");
 

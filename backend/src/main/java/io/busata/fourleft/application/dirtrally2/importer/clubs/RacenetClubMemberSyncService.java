@@ -1,8 +1,8 @@
-package io.busata.fourleft.application.dirtrally2.importer.updaters;
+package io.busata.fourleft.application.dirtrally2.importer.clubs;
 
 
 import io.busata.fourleft.infrastructure.clients.racenet.RacenetGateway;
-import io.busata.fourleft.application.dirtrally2.importer.racenet.ClubMemberFactory;
+import io.busata.fourleft.application.dirtrally2.importer.factory.ClubMemberFactory;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.ClubMember;
 import io.busata.fourleft.infrastructure.clients.racenet.dto.club.DR2ClubMember;
@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RacenetClubMemberSyncService {
+class RacenetClubMemberSyncService {
 
     private final RacenetGateway client;
     private final ClubMemberFactory clubMemberFactory;

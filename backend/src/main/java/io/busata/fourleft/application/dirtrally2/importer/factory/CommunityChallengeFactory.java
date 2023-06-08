@@ -1,4 +1,4 @@
-package io.busata.fourleft.application.dirtrally2.importer.racenet;
+package io.busata.fourleft.application.dirtrally2.importer.factory;
 
 import io.busata.fourleft.domain.dirtrally2.community.CommunityChallenge;
 import io.busata.fourleft.domain.dirtrally2.community.CommunityEvent;
