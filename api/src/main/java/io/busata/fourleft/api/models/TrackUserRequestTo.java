@@ -1,7 +1,7 @@
 package io.busata.fourleft.api.models;
 
 public record TrackUserRequestTo(
-        String nickName,
+        String racenet,
         String alias
 ) {
 

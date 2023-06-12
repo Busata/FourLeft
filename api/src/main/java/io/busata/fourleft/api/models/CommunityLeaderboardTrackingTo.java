@@ -5,7 +5,7 @@ import java.util.UUID;
 public record CommunityLeaderboardTrackingTo(
         UUID id,
 
-        String nickName,
+        String racenet,
         String alias,
 
         boolean trackRallyCross,

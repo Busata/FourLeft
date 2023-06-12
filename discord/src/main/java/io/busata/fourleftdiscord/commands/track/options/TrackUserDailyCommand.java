@@ -44,8 +44,8 @@ public class TrackUserDailyCommand implements BotCommandOptionHandler {
                 .description("Track user for the daily weekly monthly")
                 .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("username")
-                        .description("Nickname to be displayed in the results post")
+                        .name("alias")
+                        .description("Alias to be displayed in the results post")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
@@ -71,8 +71,8 @@ public class TrackUserDailyCommand implements BotCommandOptionHandler {
     }
 
     private Mono<Void> trackUser(ChatInputInteractionEvent event) {
-            String username = event.getOption(getOption())
-                    .flatMap(subCommand -> subCommand.getOption("username"))
+            String alias = event.getOption(getOption())
+                    .flatMap(subCommand -> subCommand.getOption("alias"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
             String racenet = event.getOption(getOption())
@@ -81,15 +81,13 @@ public class TrackUserDailyCommand implements BotCommandOptionHandler {
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
             List<String> closestMatches = api.queryUsername(racenet);
-            String closestMatch = closestMatches.get(0);
 
-
-            api.trackUser(new TrackUserRequestTo(username, closestMatch));
+            api.trackUser(new TrackUserRequestTo(racenet, alias));
 
             return event.createFollowup(
-                    "Registered with **%s** as display name and **%s** as Racenet name.\n*Closest Racenet matches were:\n%s\nIf this is incorrect, Consult https://dr2.today leaderboards to find your correct Racenet nick & register again*\n*Still having issues? Contact @Busata*".formatted(
-                            username,
-                            closestMatch,
+                    "Registered racenet user **%s** with alias **%s**.\n*Closest Racenet matches were:\n%s\nIf this is incorrect, Consult https://dr2.today leaderboards to find your correct Racenet nick & register again*\n*Still having issues? Contact @Busata*".formatted(
+                            racenet,
+                            alias,
                             String.join("\n", closestMatches)
                     )
             ).withEphemeral(true).then();

@@ -32,11 +32,11 @@ public class CommunityEventService {
     private final CommunityChallengeRepository challengeRepository;
 
     private final LeaderboardRepository leaderboardRepository;
-    public CommunityLeaderboardTrackingTo trackUser(String racenetName, String alias) {
+    public CommunityLeaderboardTrackingTo trackUser(String racenet, String alias) {
 
         CommunityLeaderboardTracking tracking = new CommunityLeaderboardTracking();
-        log.info("{} has requested to be tracked for results", racenetName);
-        tracking.setNickName(racenetName);
+        log.info("{} has requested to be tracked for results", racenet);
+        tracking.setRacenet(racenet);
         tracking.setAlias(alias);
 
         return create(trackingRepository.save(tracking));
@@ -47,7 +47,7 @@ public class CommunityEventService {
     }
 
     public CommunityLeaderboardTrackingTo create(CommunityLeaderboardTracking tracking) {
-        return new CommunityLeaderboardTrackingTo(tracking.getId(), tracking.getNickName(), tracking.getAlias(),
+        return new CommunityLeaderboardTrackingTo(tracking.getId(), tracking.getRacenet(), tracking.getAlias(),
                 true, true, true, true);
     }
 
@@ -81,10 +81,10 @@ public class CommunityEventService {
         final var topOnePercentEntry = sortedEntries.get((int) onePercentRank);
 
         List<CommunityChallengeBoardEntryTo> entries = sortedEntries.stream()
-                .filter(boardEntry -> trackedUsers.stream().anyMatch(trackedUser -> trackedUser.getAlias().equalsIgnoreCase(boardEntry.getName())))
+                .filter(boardEntry -> trackedUsers.stream().anyMatch(trackedUser -> trackedUser.getRacenet().equalsIgnoreCase(boardEntry.getName())))
                 .map(boardEntry -> {
-                    final var trackedUser = trackedUsers.stream().filter(user -> user.getAlias().equalsIgnoreCase(boardEntry.getName())).findFirst().orElseThrow();
-                    return createEntry(totalRanks, boardEntry, trackedUser.getNickName());
+                    final var trackedUser = trackedUsers.stream().filter(user -> user.getRacenet().equalsIgnoreCase(boardEntry.getName())).findFirst().orElseThrow();
+                    return createEntry(totalRanks, boardEntry, trackedUser.getAlias());
                 }).collect(Collectors.toList());
 
 

@@ -16,7 +16,7 @@ public class CommunityLeaderboardTracking {
     @GeneratedValue
     UUID id;
 
-    String nickName;
+    String racenet;
     String alias;
 
     boolean trackRallyCross;
