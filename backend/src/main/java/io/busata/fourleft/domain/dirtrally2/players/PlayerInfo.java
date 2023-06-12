@@ -27,12 +27,11 @@ public class PlayerInfo {
     String racenet;
 
     @Enumerated(EnumType.STRING)
-            @Setter
+    @Setter
     Platform platform;
 
     @Enumerated(EnumType.STRING)
     @Setter
-
     ControllerType controller;
 
     @Setter
@@ -40,6 +39,9 @@ public class PlayerInfo {
 
     @Setter
     boolean isOutdated;
+
+
+    boolean createdBeforeRacenetChange = false;
 
     public PlayerInfo(String racenet) {
         this.racenet = racenet;
