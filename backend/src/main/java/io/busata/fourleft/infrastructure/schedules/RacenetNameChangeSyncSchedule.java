@@ -17,12 +17,6 @@ import java.util.concurrent.TimeUnit;
 public class RacenetNameChangeSyncSchedule {
 
     private final RacenetNameSyncService syncService;
-    @PostConstruct
-    public void init() {
-      log.info("RACENET NAME SYNC SCHEDULE -- ACTIVE");
-    }
-
-    @Scheduled(fixedRate = 60, timeUnit = TimeUnit.SECONDS)
     public void syncRacenetNames() {
         syncService.sync();
     }
