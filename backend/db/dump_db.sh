@@ -1,7 +1,7 @@
 echo "Create remote backup...."
 ssh veevi /bin/bash << EOF
 docker exec -t db.fourleft pg_dumpall --no-owner --no-role-passwords -w -x -c -U postgres > dump_fourleft.sql;
-gzip dump_fourleft.sql;
+gzip -f dump_fourleft.sql;
 EOF
 
 echo "Copying to local machine..."

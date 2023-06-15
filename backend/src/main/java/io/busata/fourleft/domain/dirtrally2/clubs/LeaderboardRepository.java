@@ -17,6 +17,11 @@ public interface LeaderboardRepository extends JpaRepository<Leaderboard, UUID> 
         return findLeaderboardByChallengeIdAndEventIdAndStageId(leaderboardKey.challengeId(), leaderboardKey.eventId(), String.valueOf(leaderboardKey.stageId()));
     }
 
+
+
+    @Query("select l from Leaderboard l join BoardEntry be on l.id = be.leaderboard.id where be.name=:racenet and l.challengeId in (select e.challengeId from Event e where e.eventStatus='Finished' and e.endTime < '2023-07-10T00:00:00Z') group by l.id")
+    List<Leaderboard> findLeaderboardsWhereRacenetPresent(@Param("racenet") String racenet);
+
     @Query(value = """
                      select be.rank, be.is_dnf as isDnf, be.name, cc.end_time as challengeDate, lo.count as total, cc.type from board_entry be
                               join leaderboard l on be.leaderboard_id = l.id

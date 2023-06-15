@@ -90,7 +90,7 @@ public class LeaderboardFetcher {
         playerInfoRepository.saveAll(playerInfos);
     }
 
-    private List<BoardEntry> getBoardEntries(Leaderboard board) {
+    public List<BoardEntry> getBoardEntries(Leaderboard board) {
         boolean done = false;
         int page = 1;
 

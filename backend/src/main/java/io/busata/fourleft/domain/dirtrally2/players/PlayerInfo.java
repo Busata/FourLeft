@@ -24,7 +24,12 @@ public class PlayerInfo {
     UUID id;
 
     @Column(unique = true)
+    @Setter
     String racenet;
+
+    @Column(unique = true)
+    @Setter
+    String platformName;
 
     @Enumerated(EnumType.STRING)
     @Setter
@@ -40,7 +45,7 @@ public class PlayerInfo {
     @Setter
     boolean isOutdated;
 
-
+    @Setter
     boolean createdBeforeRacenetChange = false;
 
     public PlayerInfo(String racenet) {
