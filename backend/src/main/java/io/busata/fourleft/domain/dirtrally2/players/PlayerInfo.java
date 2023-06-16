@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor()
 public class PlayerInfo {
 
     @Id
@@ -29,7 +29,7 @@ public class PlayerInfo {
 
     @Column(unique = true)
     @Setter
-    String platformName;
+    String platformName = "";
 
     @Enumerated(EnumType.STRING)
     @Setter
@@ -52,6 +52,7 @@ public class PlayerInfo {
         this.racenet = racenet;
         this.platform = Platform.UNKNOWN;
         this.controller = ControllerType.UNKNOWN;
+        this.platformName = "";
         this.syncedPlatform = false;
         this.isOutdated = false;
     }
