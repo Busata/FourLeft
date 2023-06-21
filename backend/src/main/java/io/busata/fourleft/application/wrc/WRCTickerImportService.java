@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class WRCTickerImportService {
-    private static final String activeEventId = "2133";
+    private static final String activeEventId = "2136";
     private final WRCApiClient client;
     private final WRCTickerEntryRepository wrcTickerEntryRepository;
 

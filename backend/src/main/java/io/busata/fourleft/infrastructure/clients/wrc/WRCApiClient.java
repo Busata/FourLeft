@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name="wrc", url = "https://api.wrc.com/sdb")
 public interface WRCApiClient {
-    @GetMapping("/rallyevent/{rallyEventId}/contelPageId/310817/ticker-entries")
+    @GetMapping("/rallyevent/{rallyEventId}/contelPageId/310819/ticker-entries")
     WRCTickerSummaryTo getTickerSummary(@PathVariable String rallyEventId);
 }

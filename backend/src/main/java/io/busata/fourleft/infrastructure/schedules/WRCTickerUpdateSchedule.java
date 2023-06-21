@@ -15,11 +15,11 @@ public class WRCTickerUpdateSchedule {
 
     private final WRCTickerImportService tickerImportService;
 
-    //@Scheduled(initialDelay = 30, fixedDelay=Long.MAX_VALUE, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 30, fixedDelay=Long.MAX_VALUE, timeUnit = TimeUnit.SECONDS)
     public void initialUpdate() {
         tickerImportService.importTickerEntries(false);
     }
-    //@Scheduled(initialDelay = 60, fixedDelay=30, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 60, fixedDelay=30, timeUnit = TimeUnit.SECONDS)
     public void updateTickers() {
         tickerImportService.importTickerEntries(true);
     }
