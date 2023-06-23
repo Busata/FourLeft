@@ -73,7 +73,8 @@ public class WRCTickerImportService {
                 newEntry.getTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                 newEntry.getTextMarkdown(),
                 Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> {
-                    return "https://www.wrc.com/" + sanitizeUrl(url);
+                    String wrcUrl = "https://www.wrc.com/" + sanitizeUrl(url);
+                    return String.format("%s%s", "https://rendercache.busata.io/fit_height/300?url=", wrcUrl);
                 }).orElse(null)
         )).toList();
 
