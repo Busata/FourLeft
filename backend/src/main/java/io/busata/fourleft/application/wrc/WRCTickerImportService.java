@@ -72,7 +72,9 @@ public class WRCTickerImportService {
                 newEntry.getTickerEventKey(),
                 newEntry.getTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                 newEntry.getTextMarkdown(),
-                Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> "https://www.wrc.com/" + url).orElse(null)
+                Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> {
+                    return "https://www.wrc.com/" + sanitizeUrl(url);
+                }).orElse(null)
         )).toList();
 
         if(triggerEvents) {
@@ -80,6 +82,14 @@ public class WRCTickerImportService {
             eventPublisher.publishEvent(new WRCTickerUpdateEvent(list));
         }
         wrcTickerEntryRepository.saveAll(newEntries);
+    }
+
+    private static String sanitizeUrl(String url) {
+        if (url.startsWith("/")) {
+            return url.substring(1);
+        } else {
+            return url;
+        }
     }
 
     String convertTextToMarkdown(String textHtml) {
