@@ -88,7 +88,8 @@ public class RacenetNameSyncService {
                 });
             }
 
-            playerInfoRepository.saveAll(infos);
+            List<PlayerInfo> playerInfos = playerInfoRepository.saveAll(infos);
+            log.info("Saved {} player infos", playerInfos.size());
         }, () -> {
             log.info("No boards found");
         });
