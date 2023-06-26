@@ -93,6 +93,7 @@ public class RacenetNameSyncService {
         }, () -> {
             log.info("No boards found");
         });
+        log.info("Comparing done.");
     }
 
 }
