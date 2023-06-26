@@ -77,10 +77,6 @@ public class RacenetNameSyncService {
                 var oldEntry = oldEntries.get(i);
                 var newEntry = newEntries.get(i);
 
-                if (!oldEntry.getName().equals(newEntry.getName())) {
-                    log.info("-- Update names for {} to {}", oldEntry.getName(), newEntry.getName());
-                }
-
                 playerInfoRepository.findByRacenetAndCreatedBeforeRacenetChange(oldEntry.getName(), true).ifPresentOrElse(playerInfo -> {
                     log.info("-- Update names for {} to {}", playerInfo.getRacenet(), newEntry.getName());
                     playerInfo.setPlatformName(newEntry.getName());
