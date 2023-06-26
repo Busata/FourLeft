@@ -33,7 +33,7 @@ public class RacenetNameSyncService {
     public Optional<Leaderboard> findMostCommonBoard() {
         Map<UUID, Integer> boardByCount = new HashMap<>();
 
-        List<String> unsyncedPlayers = playerInfoRepository.findByCreatedBeforeRacenetChange(true).stream().map(PlayerInfo::getRacenet).limit(500).toList();
+        List<String> unsyncedPlayers = playerInfoRepository.findByCreatedBeforeRacenetChange().stream().map(PlayerInfo::getRacenet).limit(500).toList();
 
         for (int i = 0; i < unsyncedPlayers.size(); i++) {
             log.info("Checking player {}/{}", i + 1, unsyncedPlayers.size());
@@ -77,7 +77,7 @@ public class RacenetNameSyncService {
                 var oldEntry = oldEntries.get(i);
                 var newEntry = newEntries.get(i);
 
-                playerInfoRepository.findByRacenetAndCreatedBeforeRacenetChange(oldEntry.getName(), true).ifPresentOrElse(playerInfo -> {
+                playerInfoRepository.findByRacenetAndCreatedBeforeRacenetChange(oldEntry.getName()).ifPresentOrElse(playerInfo -> {
                     log.info("-- Update names for {} to {}", playerInfo.getRacenet(), newEntry.getName());
                     playerInfo.setPlatformName(newEntry.getName());
                     playerInfo.setCreatedBeforeRacenetChange(false);
