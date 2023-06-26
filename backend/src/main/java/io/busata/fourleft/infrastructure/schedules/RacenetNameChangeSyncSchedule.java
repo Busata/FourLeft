@@ -17,7 +17,6 @@ public class RacenetNameChangeSyncSchedule {
 
     private final RacenetNameSyncService syncService;
 
-    @Scheduled(initialDelay = 60, timeUnit = TimeUnit.SECONDS, fixedDelay = 60)
     public void syncRacenetNames() {
         syncService.sync();
     }
