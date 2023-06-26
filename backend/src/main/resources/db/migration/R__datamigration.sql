@@ -1,1 +1,1 @@
-DELETE from field_mapping where mapped_by_user=false;
+update player_info set platform_name='';

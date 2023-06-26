@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -17,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class RacenetNameChangeSyncSchedule {
 
     private final RacenetNameSyncService syncService;
+
+    @Scheduled(initialDelay = 60, timeUnit = TimeUnit.SECONDS, fixedDelay = 60)
     public void syncRacenetNames() {
         syncService.sync();
     }
