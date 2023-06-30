@@ -29,7 +29,7 @@ public class ClubSyncUsecase {
 
     public void updateLeaderboards() {
         cleanArchived();
-        findClubs().forEach(club -> {
+        findClubs().stream().filter(club -> club.getErrorCount() < 5).forEach(club -> {
             try {
                 updateClubDetails(club);
                 updateClubLeaderboards(club);
