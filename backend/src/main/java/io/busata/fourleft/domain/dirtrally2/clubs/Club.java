@@ -30,6 +30,8 @@ public class Club {
     private String description;
     private long members;
 
+    private long errorCount = 0;
+
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("referenceId asc")
     private List<Championship> championships = new ArrayList<>();
@@ -117,5 +119,9 @@ public class Club {
         final var updated = getChampionships().stream().filter(current -> !current.getId().equals(championship.getId())).collect(Collectors.toList());
 
         updateChampionships(updated);
+    }
+
+    public void increaseErrorCount() {
+        this.errorCount += 1;
     }
 }
