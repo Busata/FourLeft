@@ -1,6 +1,7 @@
 package io.busata.fourleft;
 
 import io.busata.fourleft.infrastructure.configuration.AsyncConfig;
+import io.busata.fourleft.infrastructure.configuration.InterceptorsConfig;
 import io.busata.fourleft.infrastructure.configuration.FeignConfig;
 import io.busata.fourleft.infrastructure.configuration.ImageGenerationConfig;
 import io.busata.fourleft.infrastructure.configuration.KeycloakConfig;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Import;
         AsyncConfig.class,
         FeignConfig.class,
         ImageGenerationConfig.class,
+        InterceptorsConfig.class,
         KeycloakConfig.class,
         MessagingConfig.class,
         SchedulingConfig.class,
