@@ -1,6 +1,7 @@
 package io.busata.fourleft.endpoints.infrastructure;
 
 
+import io.busata.fourleft.api.events.CommunityChallengeUpdateEvent;
 import io.busata.fourleft.api.events.LeaderboardUpdated;
 import io.busata.fourleft.application.wrc.WRCTickerImportService;
 import lombok.RequiredArgsConstructor;
