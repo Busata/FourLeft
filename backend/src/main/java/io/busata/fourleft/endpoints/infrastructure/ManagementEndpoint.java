@@ -20,7 +20,7 @@ public class ManagementEndpoint {
         eventPublisher.publishEvent(leaderboardUpdated);
     }
     @PostMapping("/api/internal/management/update_community")
-    public void updateLeaderboard() {
+    public void updateCommunity() {
         eventPublisher.publishEvent(new CommunityChallengeUpdateEvent());
     }
     @PostMapping("/api/internal/management/import_ticker")
