@@ -2,14 +2,14 @@
   <h2>Users</h2>
   <ul>
     <li *ngFor="let user of users">
-      {{user.nickName}} ({{user.alias}})
+      {{user.racenet}} ({{user.alias}})
       <button (click)="deleteUser(user)">Delete</button>
     </li>
   </ul>
 
   <div class="user-create-form">
-    <input type="text" [(ngModel)]="nickName" placeholder="Nickname"/>
-    <input type="text" [(ngModel)]="alias" placeholder="Racenet Alias"/>
-    <button (click)="createUser(nickName, alias)">Create</button>
+    <input type="text" [(ngModel)]="racenet" placeholder="Racenet"/>
+    <input type="text" [(ngModel)]="alias" placeholder="Alias"/>
+    <button (click)="createUser(racenet, alias)">Create</button>
   </div>
 </div>

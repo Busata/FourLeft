@@ -6,6 +6,7 @@ import io.busata.fourleft.api.events.LeaderboardUpdated;
 import io.busata.fourleft.api.events.MessageEvent;
 import io.busata.fourleft.api.events.QueueNames;
 import io.busata.fourleft.api.events.WRCTickerUpdateEvent;
+import io.busata.fourleft.endpoints.infrastructure.CommunityChallengeUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
@@ -26,6 +27,10 @@ public class EventPublisher {
     @EventListener
     public void handleClubUpdate(ClubEventStarted clubEventStarted) {
         rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, clubEventStarted);
+    }
+    @EventListener
+    public void handleCommunityUpdate(CommunityChallengeUpdateEvent clubEventStarted) {
+        rabbitMQ.convertAndSend(QueueNames.COMMUNITY_UPDATED, "OK");
     }
 
     @EventListener

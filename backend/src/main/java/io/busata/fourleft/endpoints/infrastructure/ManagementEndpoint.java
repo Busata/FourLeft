@@ -19,6 +19,10 @@ public class ManagementEndpoint {
     public void updateLeaderboard(@RequestBody LeaderboardUpdated leaderboardUpdated) {
         eventPublisher.publishEvent(leaderboardUpdated);
     }
+    @PostMapping("/api/internal/management/update_community")
+    public void updateLeaderboard() {
+        eventPublisher.publishEvent(new CommunityChallengeUpdateEvent());
+    }
     @PostMapping("/api/internal/management/import_ticker")
     public void importTickerEntries() {
         this.wrcTickerImportService.importTickerEntries(true);

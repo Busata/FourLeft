@@ -16,6 +16,9 @@ export class ManagementContainerComponent implements OnInit {
   triggerUpdate(value: string) {
     this.http.post('/api/internal/management/update_leaderboard', {clubId: value}).subscribe();
   }
+  triggerCommunity() {
+    this.http.post('/api/internal/management/update_community', {}).subscribe();
+  }
 
   ngOnInit(): void {
     this.http.get<DiscordChannelConfigurationTo[]>('/api/internal/discord/configurations').subscribe(configurations => {

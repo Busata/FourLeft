@@ -1,5 +1,5 @@
 export interface User {
   id: string;
-  nickName: string;
+  racenet: string;
   alias: string;
 }

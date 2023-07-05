@@ -11,7 +11,7 @@ export class UsersListComponent implements OnInit {
 
   public users: User[] = [];
 
-  public nickName: string = "";
+  public racenet: string = "";
   public alias: string = "";
 
   constructor(private userService: UsersService) {
@@ -31,8 +31,8 @@ export class UsersListComponent implements OnInit {
     }
   }
 
-  createUser(nickName: string, alias: string) {
-    this.userService.createUser(nickName, alias).subscribe(user => {
+  createUser(racenet: string, alias: string) {
+    this.userService.createUser(racenet, alias).subscribe(user => {
       this.users = [...this.users, user];
 
       this.reset();
@@ -40,7 +40,7 @@ export class UsersListComponent implements OnInit {
   }
 
   public reset() {
-    this.nickName = '';
+    this.racenet = '';
     this.alias = '';
   }
 

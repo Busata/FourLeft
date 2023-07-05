@@ -6,6 +6,7 @@
 <h2>Dirt Rally 2.0</h2>
 
 <input type="text" #clubId> <button (click)="triggerUpdate(clubId.value)">Trigger LEADERBOARD_UPDATED</button>
+<button (click)="triggerCommunity()">Trigger COMMUNITY_UPDATED</button>
 
 <div *ngFor="let configuration of configurations">
     {{configuration.channelId}} {{configuration.clubView.resultsView.associatedClubs}} <button (click)="removeConfiguration(configuration)">Remove</button>

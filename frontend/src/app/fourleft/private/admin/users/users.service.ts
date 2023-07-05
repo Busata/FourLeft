@@ -14,9 +14,9 @@ export class UsersService {
     return this.httpClient.get<User[]>("/api/internal/community/users");
   }
 
-  public createUser(nickName: string, alias: string): Observable<User> {
+  public createUser(racenet: string, alias: string): Observable<User> {
     return this.httpClient.post<User>("/api/internal/community/track_user", {
-      nickName,
+      racenet,
       alias
     });
   }
