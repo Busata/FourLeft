@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor
-public class WRCTickerEntry {
+public class FIATickerEntry {
 
     @Id
     @GeneratedValue
@@ -32,8 +32,10 @@ public class WRCTickerEntry {
     String tickerEntryImageUrl;
     String tickerEventKey;
 
+    TickerEntrySource source;
+
     @Builder
-    public WRCTickerEntry(String eventId, ZonedDateTime time, String referenceId, String textHtml, String textMarkdown, String title, String tickerEntryImageUrl, String tickerEventKey) {
+    public FIATickerEntry(String eventId, ZonedDateTime time, String referenceId, String textHtml, String textMarkdown, String title, String tickerEntryImageUrl, String tickerEventKey, TickerEntrySource source) {
         this.eventId = eventId;
         this.time = time;
         this.referenceId = referenceId;
@@ -42,5 +44,6 @@ public class WRCTickerEntry {
         this.title = title;
         this.tickerEntryImageUrl = tickerEntryImageUrl;
         this.tickerEventKey = tickerEventKey;
+        this.source = source;
     }
 }

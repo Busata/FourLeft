@@ -1,13 +1,14 @@
 package io.busata.fourleft.application.wrc;
 
 
-import io.busata.fourleft.api.events.WRCTickerUpdateEvent;
-import io.busata.fourleft.api.models.WRCTickerUpdateTo;
-import io.busata.fourleft.infrastructure.clients.wrc.WRCApiClient;
-import io.busata.fourleft.infrastructure.clients.wrc.WRCTickerEntryImageTo;
-import io.busata.fourleft.infrastructure.clients.wrc.WRCTickerSummaryTo;
-import io.busata.fourleft.domain.wrc.WRCTickerEntry;
-import io.busata.fourleft.domain.wrc.WRCTickerEntryRepository;
+import io.busata.fourleft.api.events.FIATickerUpdateEvent;
+import io.busata.fourleft.api.models.FIATickerUpdateTo;
+import io.busata.fourleft.domain.wrc.TickerEntrySource;
+import io.busata.fourleft.infrastructure.clients.wrc.ERCApiClient;
+import io.busata.fourleft.infrastructure.clients.wrc.TickerEntryImageTo;
+import io.busata.fourleft.infrastructure.clients.wrc.TickerSummaryTo;
+import io.busata.fourleft.domain.wrc.FIATickerEntry;
+import io.busata.fourleft.domain.wrc.FIATickerEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -27,18 +28,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WRCTickerImportService {
+public class FIATickerImportService {
     private static final String activeEventId = "2078";
-    private final WRCApiClient client;
-    private final WRCTickerEntryRepository wrcTickerEntryRepository;
+    private static final String activeContentPageId = "499746";
+
+    private final ERCApiClient client;
+
+    private final FIATickerEntryRepository fiaTickerEntryRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
 
     public void importTickerEntries(boolean triggerEvents) {
-        WRCTickerSummaryTo tickerSummary = client.getTickerSummary(activeEventId);
+        TickerSummaryTo tickerSummary = client.getTickerSummary(activeEventId, activeContentPageId);
 
-        Long currentTickerEntryCount = wrcTickerEntryRepository.countByEventId(activeEventId);
+        Long currentTickerEntryCount = fiaTickerEntryRepository.countByEventId(activeEventId);
 
         long tickerEntryDelta = tickerSummary.total() - currentTickerEntryCount;
 
@@ -49,40 +53,41 @@ public class WRCTickerImportService {
 
         log.info("Found {} new ticker entries", tickerEntryDelta);
 
-        final var existingEntries = wrcTickerEntryRepository.findByEventId(activeEventId);
-        final var existingEntryIds = existingEntries.stream().map(WRCTickerEntry::getReferenceId).collect(Collectors.toList());
+        final var existingEntries = fiaTickerEntryRepository.findByEventId(activeEventId);
+        final var existingEntryIds = existingEntries.stream().map(FIATickerEntry::getReferenceId).collect(Collectors.toList());
 
-        List<WRCTickerEntry> newEntries = tickerSummary.items().stream().filter(tickerEntry -> !existingEntryIds.contains(tickerEntry.id()))
+        List<FIATickerEntry> newEntries = tickerSummary.items().stream().filter(tickerEntry -> !existingEntryIds.contains(tickerEntry.id()))
                 .map(tickerEntry -> {
                     long dateTimeUnix = Long.parseLong(tickerEntry.datetimeUnix());
-                    return WRCTickerEntry.builder()
+                    return FIATickerEntry.builder()
                             .eventId(activeEventId)
                             .referenceId(tickerEntry.id())
                             .time(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUnix), ZoneOffset.UTC))
                             .title(tickerEntry.title())
                             .textHtml(tickerEntry.text())
                             .textMarkdown(convertTextToMarkdown(tickerEntry.text()))
-                            .tickerEntryImageUrl(tickerEntry.tickerEntryImage().map(WRCTickerEntryImageTo::image).orElse(null))
+                            .tickerEntryImageUrl(tickerEntry.tickerEntryImage().map(TickerEntryImageTo::image).orElse(null))
                             .tickerEventKey(tickerEntry.tickerEvent().typeKey())
+                            .source(TickerEntrySource.ERC)
                             .build();
                 }).collect(Collectors.toList());
 
-        List<WRCTickerUpdateTo> list = newEntries.stream().map(newEntry -> new WRCTickerUpdateTo(
+        List<FIATickerUpdateTo> list = newEntries.stream().map(newEntry -> new FIATickerUpdateTo(
                 newEntry.getTitle(),
                 newEntry.getTickerEventKey(),
                 newEntry.getTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                 newEntry.getTextMarkdown(),
                 Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> {
-                    String wrcUrl = "https://www.wrc.com/" + sanitizeUrl(url);
+                    String wrcUrl = "https://www.fiaerc.com/" + sanitizeUrl(url);
                     return String.format("%s%s", "https://rendercache.busata.io/fit_height/300?url=", wrcUrl);
                 }).orElse(null)
         )).toList();
 
         if(triggerEvents) {
             log.info("Triggering ticker {} events", list.size());
-            eventPublisher.publishEvent(new WRCTickerUpdateEvent(list));
+            eventPublisher.publishEvent(new FIATickerUpdateEvent(list));
         }
-        wrcTickerEntryRepository.saveAll(newEntries);
+        fiaTickerEntryRepository.saveAll(newEntries);
     }
 
     private static String sanitizeUrl(String url) {

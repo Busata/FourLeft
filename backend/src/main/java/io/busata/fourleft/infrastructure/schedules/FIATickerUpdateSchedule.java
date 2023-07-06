@@ -1,6 +1,6 @@
 package io.busata.fourleft.infrastructure.schedules;
 
-import io.busata.fourleft.application.wrc.WRCTickerImportService;
+import io.busata.fourleft.application.wrc.FIATickerImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @ConditionalOnProperty(prefix = "io.busata.fourleft.scheduling", name="wrc", havingValue="true", matchIfMissing = true)
 @RequiredArgsConstructor
-public class WRCTickerUpdateSchedule {
+public class FIATickerUpdateSchedule {
 
-    private final WRCTickerImportService tickerImportService;
+    private final FIATickerImportService tickerImportService;
 
     @Scheduled(initialDelay = 30, fixedDelay=Long.MAX_VALUE, timeUnit = TimeUnit.SECONDS)
     public void initialUpdate() {

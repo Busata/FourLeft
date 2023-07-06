@@ -2,8 +2,8 @@ package io.busata.fourleft.infrastructure.clients.wrc;
 
 import java.util.List;
 
-public record WRCTickerSummaryTo(
+public record TickerSummaryTo(
         int total,
-        List<WRCTickerEntryTo> items
+        List<TickerEntryTo> items
 ) {
 }
