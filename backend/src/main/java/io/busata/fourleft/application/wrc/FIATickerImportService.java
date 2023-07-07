@@ -79,7 +79,7 @@ public class FIATickerImportService {
                 newEntry.getTextMarkdown(),
                 Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> {
                     String wrcUrl = "https://www.fiaerc.com/" + sanitizeUrl(url);
-                    return String.format("%s%s", "https://rendercache.busata.io/fit_height/300?url=", wrcUrl);
+                    return String.format("%s%s", "https://rendercache.busata.io/fit_height/800?url=", wrcUrl);
                 }).orElse(null)
         )).toList();
 
