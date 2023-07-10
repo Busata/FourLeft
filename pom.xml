@@ -20,6 +20,7 @@
         <module>frontend</module>
         <module>devops</module>
         <module>common</module>
+        <module>desktop-app</module>
     </modules>
 
 </project>
