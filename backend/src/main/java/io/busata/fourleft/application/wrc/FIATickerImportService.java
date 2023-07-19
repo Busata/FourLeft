@@ -4,7 +4,7 @@ package io.busata.fourleft.application.wrc;
 import io.busata.fourleft.api.events.FIATickerUpdateEvent;
 import io.busata.fourleft.api.models.FIATickerUpdateTo;
 import io.busata.fourleft.domain.wrc.TickerEntrySource;
-import io.busata.fourleft.infrastructure.clients.wrc.ERCApiClient;
+import io.busata.fourleft.infrastructure.clients.wrc.WRCApiClient;
 import io.busata.fourleft.infrastructure.clients.wrc.TickerEntryImageTo;
 import io.busata.fourleft.infrastructure.clients.wrc.TickerSummaryTo;
 import io.busata.fourleft.domain.wrc.FIATickerEntry;
@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FIATickerImportService {
-    private static final String activeEventId = "2078";
-    private static final String activeContentPageId = "499746";
+    private static final String activeEventId = "2140";
+    private static final String activeContentPageId = "176146";
 
-    private final ERCApiClient client;
+    private final WRCApiClient client;
 
     private final FIATickerEntryRepository fiaTickerEntryRepository;
 
