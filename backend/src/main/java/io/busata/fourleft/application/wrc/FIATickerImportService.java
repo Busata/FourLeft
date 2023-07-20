@@ -68,7 +68,7 @@ public class FIATickerImportService {
                             .textMarkdown(convertTextToMarkdown(tickerEntry.text()))
                             .tickerEntryImageUrl(tickerEntry.tickerEntryImage().map(TickerEntryImageTo::image).orElse(null))
                             .tickerEventKey(tickerEntry.tickerEvent().typeKey())
-                            .source(TickerEntrySource.ERC)
+                            .source(TickerEntrySource.WRC)
                             .build();
                 }).collect(Collectors.toList());
 
@@ -78,7 +78,7 @@ public class FIATickerImportService {
                 newEntry.getTime().toInstant().atZone(ZoneOffset.UTC).toEpochSecond(),
                 newEntry.getTextMarkdown(),
                 Optional.ofNullable(newEntry.getTickerEntryImageUrl()).map(url -> {
-                    String wrcUrl = "https://www.fiaerc.com/" + sanitizeUrl(url);
+                    String wrcUrl = "https://www.wrc.com/" + sanitizeUrl(url);
                     return String.format("%s%s", "https://rendercache.busata.io/fit_height/1920?url=", wrcUrl);
                 }).orElse(null)
         )).toList();
