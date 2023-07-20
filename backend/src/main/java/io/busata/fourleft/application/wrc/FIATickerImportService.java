@@ -47,7 +47,7 @@ public class FIATickerImportService {
         long tickerEntryDelta = tickerSummary.total() - currentTickerEntryCount;
 
         if (tickerEntryDelta == 0) {
-            log.info("No new ticker entries found");
+            log.info("No new ticker entries found new: {} current: {} ", tickerSummary.total(), currentTickerEntryCount);
             return;
         }
 
