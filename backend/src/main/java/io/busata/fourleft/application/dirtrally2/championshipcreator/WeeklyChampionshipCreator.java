@@ -1,5 +1,6 @@
 package io.busata.fourleft.application.dirtrally2.championshipcreator;
 
+import com.google.common.collect.Lists;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
 import io.busata.fourleft.domain.dirtrally2.options.CountryOption;
@@ -43,8 +44,7 @@ public class WeeklyChampionshipCreator {
 
     @Transactional
     public DR2ChampionshipCreateRequestTo createEvent(long clubId) {
-        //CountryOption countryOption = generateCountry(clubId);
-        CountryOption countryOption = CountryOption.SCOTLAND;
+        CountryOption countryOption = generateCountry(clubId);
         VehicleClass vehicleClass = generateVehicle();
 
         List<DR2ChampionshipCreateStageBuilder> stages = generateStages(clubId, countryOption);
@@ -202,7 +202,7 @@ public class WeeklyChampionshipCreator {
     }
 
     public List<Event> getLastGeneratedEvents(long clubId) {
-        return clubRepository.findByReferenceId(clubId).map(club -> {
+        List<Event> events = clubRepository.findByReferenceId(clubId).map(club -> {
             var previouslyGeneratedEvents = club.getChampionships().stream()
                     .flatMap(championship -> championship.getEvents().stream())
                     .collect(Collectors.toList());
@@ -210,6 +210,20 @@ public class WeeklyChampionshipCreator {
 
             return previouslyGeneratedEvents;
         }).orElse(List.of());
+
+        List<List<Event>> partition = Lists.partition(events, 13);
+
+        if(partition.size() == 0) {
+            return List.of();
+        }
+
+        List<Event> lastEvents = partition.get(partition.size() - 1);
+
+        if(lastEvents.size() == 13) {
+            return List.of();
+        } else {
+            return lastEvents;
+        }
     }
 
 
