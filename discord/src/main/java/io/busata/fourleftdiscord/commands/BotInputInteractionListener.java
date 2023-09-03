@@ -65,7 +65,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
 
 
-        deleteExistingCommands(applicationId);
+        //deleteExistingCommands(applicationId);
 
         List<ImmutableApplicationCommandRequest> commands = commandProviders.stream().map(CommandProvider::create).collect(Collectors.toList());
 
