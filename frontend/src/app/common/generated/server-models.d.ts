@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-05-29 08:06:48.
+// Generated using typescript-generator version 2.35.1025 on 2023-09-03 21:42:47.
 
 export interface RoutesTo {
 }
@@ -107,7 +107,7 @@ export interface CommunityChallengeSummaryTo {
 
 export interface CommunityLeaderboardTrackingTo {
     id: string;
-    nickName: string;
+    racenet: string;
     alias: string;
     trackRallyCross: boolean;
     trackDaily: boolean;
@@ -145,6 +145,14 @@ export interface DriverResultTo {
     powerStageTotalTime: string;
     isDnf: boolean;
     vehicles: VehicleEntryTo[];
+}
+
+export interface FIATickerUpdateTo {
+    title: string;
+    tickerEventKey: string;
+    dateTime: number;
+    text: string;
+    imageUrl: string;
 }
 
 export interface FieldMappingRequestTo {
@@ -227,21 +235,13 @@ export interface StandingPointPairTo {
 }
 
 export interface TrackUserRequestTo {
-    nickName: string;
+    racenet: string;
     alias: string;
 }
 
 export interface VehicleEntryTo {
     vehicleName: string;
     vehicleAllowed: boolean;
-}
-
-export interface WRCTickerUpdateTo {
-    title: string;
-    tickerEventKey: string;
-    dateTime: number;
-    text: string;
-    imageUrl: string;
 }
 
 export interface ClubViewTo {

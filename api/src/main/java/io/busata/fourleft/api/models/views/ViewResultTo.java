@@ -22,7 +22,7 @@ public class ViewResultTo {
 
     @JsonIgnore
     public List<ActivityInfoTo> getEventInfo() {
-        return this.multiListResults.stream().flatMap(result -> getEventInfo().stream()).collect(Collectors.toList());
+        return this.multiListResults.stream().flatMap(result -> result.activityInfoTo().stream()).collect(Collectors.toList());
     }
     @JsonIgnore
     public List<DriverEntryTo> getResultEntries() {
