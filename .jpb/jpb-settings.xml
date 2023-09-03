@@ -29,4 +29,13 @@
     <exclude-change idName="wrcticker_entry#title" tagName="modifyDataType" />
     <exclude-change idName="field_mapping#context" tagName="modifyDataType" />
   </component>
+  <component name="PersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit name="Default">
+        <packages>
+          <package value="io.busata.fourleft" />
+        </packages>
+      </persistence-unit>
+    </persistence-units>
+  </component>
 </project>

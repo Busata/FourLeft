@@ -66,12 +66,14 @@ public class EventSummaryCommand implements BotCommandOptionHandler {
     }
 
     public Mono<Message> createSummary(ChatInputInteractionEvent event) {
-        try {
-            Button removeButton = Button.danger("remove", "Remove");
-            return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getEventSummary(event.getInteraction().getChannelId())).addComponent(ActionRow.of(removeButton)).build());
-        } catch (Exception ex) {
-            log.error("Error while loading the results", ex);
-            return event.createFollowup("*Something went wrong. Please try again later!*");
-        }
+        return Mono.just(event).flatMap(evt -> {
+            try {
+                Button removeButton = Button.danger("remove", "Remove");
+                return event.createFollowup(InteractionFollowupCreateSpec.builder().addEmbed(resultsFetcher.getEventSummary(event.getInteraction().getChannelId())).addComponent(ActionRow.of(removeButton)).build());
+            } catch (Exception ex) {
+                log.error("Error while loading the results", ex);
+                return event.createFollowup("*Something went wrong. Please try again later!*");
+            }
+        });
     }
 }
