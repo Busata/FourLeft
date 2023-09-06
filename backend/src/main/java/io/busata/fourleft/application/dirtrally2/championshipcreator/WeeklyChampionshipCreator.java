@@ -74,8 +74,8 @@ public class WeeklyChampionshipCreator {
 
             final var previousStages = getLastGeneratedEvents(clubId).stream().flatMap(event -> event.getStages().stream()).map(Stage::getName)
                 .map(StageOption::findByName)
-                .filter(stageOption -> stageOption.country().equals(countryOption))
                 .limit(16) // 4 x 4 stages, max
+                .filter(stageOption -> stageOption.country().equals(countryOption))
                 .toList();
 
             log.info("Previous stages: {} ", previousStages.stream().map(StageOption::getDisplayName).collect(Collectors.joining(", ")));
