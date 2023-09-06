@@ -44,7 +44,8 @@ public class WeeklyChampionshipCreator {
 
     @Transactional
     public DR2ChampionshipCreateRequestTo createEvent(long clubId) {
-        CountryOption countryOption = generateCountry(clubId);
+//        CountryOption countryOption = generateCountry(clubId);
+        CountryOption countryOption = CountryOption.FINLAND;
         VehicleClass vehicleClass = generateVehicle();
 
         List<DR2ChampionshipCreateStageBuilder> stages = generateStages(clubId, countryOption);
