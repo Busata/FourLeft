@@ -21,11 +21,7 @@ import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.busata.fourleft.infrastructure.clients.racenet.dto.club.championship.creation.DR2ChampionshipCreateBuilder.championship;
@@ -44,8 +40,7 @@ public class WeeklyChampionshipCreator {
 
     @Transactional
     public DR2ChampionshipCreateRequestTo createEvent(long clubId) {
-//        CountryOption countryOption = generateCountry(clubId);
-        CountryOption countryOption = CountryOption.FINLAND;
+        CountryOption countryOption = generateCountry(clubId);
         VehicleClass vehicleClass = generateVehicle();
 
         List<DR2ChampionshipCreateStageBuilder> stages = generateStages(clubId, countryOption);
@@ -80,6 +75,7 @@ public class WeeklyChampionshipCreator {
         final var previousStages = getLastGeneratedEvents(clubId).stream().flatMap(event -> event.getStages().stream()).map(Stage::getName)
                 .map(StageOption::findByName)
                 .filter(stageOption -> stageOption.country().equals(countryOption))
+                .limit(16) // 4 x 4 stages, max
                 .toList();
 
         final var remainingLongs = ListUtils.subtract(
@@ -135,7 +131,11 @@ public class WeeklyChampionshipCreator {
         if (requiresNewCountry(previouslyGeneratedEvents)) {
             List<CountryOption> previousCountryOptions = previouslyGeneratedEvents.stream()
                     .map(Event::getCountry).map(CountryOption::findById).toList();
-            return cycleOptionsSelector.generate(Arrays.asList(CountryOption.values()), previousCountryOptions);
+
+            int skip = 13 * (previousCountryOptions.size() / 13);
+            log.info("Skipping {} countries", skip);
+
+            return cycleOptionsSelector.generate(Arrays.asList(CountryOption.values()), previousCountryOptions.stream().skip(skip).toList());
         } else {
             Event lastEvent = previouslyGeneratedEvents.get(0);
             return CountryOption.findById(lastEvent.getCountry());
@@ -148,6 +148,7 @@ public class WeeklyChampionshipCreator {
 
     private boolean requiresNewCountry(List<Event> previouslyGeneratedEvents) {
         log.info("Checking if new country is required, previous: {}", previouslyGeneratedEvents.stream().map(Event::getCountry).collect(Collectors.joining(",")));
+
         if (previouslyGeneratedEvents.size() == 0) {
             log.info("No previous events, new country required");
             return true;
@@ -203,28 +204,15 @@ public class WeeklyChampionshipCreator {
     }
 
     public List<Event> getLastGeneratedEvents(long clubId) {
-        List<Event> events = clubRepository.findByReferenceId(clubId).map(club -> {
+        return clubRepository.findByReferenceId(clubId).map(club -> {
             var previouslyGeneratedEvents = club.getChampionships().stream()
-                    .flatMap(championship -> championship.getEvents().stream())
+                    .flatMap(championship -> championship.getEvents().stream().sorted(Comparator.comparing(Event::getReferenceId)))
                     .collect(Collectors.toList());
             Collections.reverse(previouslyGeneratedEvents);
 
             return previouslyGeneratedEvents;
         }).orElse(List.of());
 
-        List<List<Event>> partition = Lists.partition(events, 13);
-
-        if(partition.size() == 0) {
-            return List.of();
-        }
-
-        List<Event> lastEvents = partition.get(partition.size() - 1);
-
-        if(lastEvents.size() == 13) {
-            return List.of();
-        } else {
-            return lastEvents;
-        }
     }
 
 
