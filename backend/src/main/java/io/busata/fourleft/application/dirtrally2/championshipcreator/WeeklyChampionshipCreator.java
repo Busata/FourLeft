@@ -72,11 +72,13 @@ public class WeeklyChampionshipCreator {
     private List<DR2ChampionshipCreateStageBuilder> generateStages(long clubId, CountryOption countryOption) {
         final var uniqueStageOptions = Arrays.asList(StageOption.values()).stream().filter(stageOption -> stageOption.country().equals(countryOption)).toList();
 
-        final var previousStages = getLastGeneratedEvents(clubId).stream().flatMap(event -> event.getStages().stream()).map(Stage::getName)
+            final var previousStages = getLastGeneratedEvents(clubId).stream().flatMap(event -> event.getStages().stream()).map(Stage::getName)
                 .map(StageOption::findByName)
                 .filter(stageOption -> stageOption.country().equals(countryOption))
                 .limit(16) // 4 x 4 stages, max
                 .toList();
+
+            log.info("Previous stages: {} ", previousStages.stream().map(StageOption::getDisplayName).collect(Collectors.joining(", ")));
 
         final var remainingLongs = ListUtils.subtract(
                 uniqueStageOptions.stream().filter(StageOption::isLong).toList(),
