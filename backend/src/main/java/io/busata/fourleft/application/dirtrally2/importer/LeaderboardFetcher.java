@@ -52,6 +52,7 @@ public class LeaderboardFetcher {
     }
 
     private void updatePlatform(Leaderboard board, List<BoardEntry> entries) {
+        log.info("Updating platform");
 
         List<String> names = entries.stream().map(BoardEntry::getName).collect(Collectors.toList());
 
@@ -91,6 +92,7 @@ public class LeaderboardFetcher {
         List<BoardEntry> entries = new ArrayList<>();
 
         while (!done) {
+            log.info("-- -- Fetching page {}", page);
             DR2LeaderboardRequest request = buildLeaderboardRequest(
                     board.getChallengeId(),
                     board.getEventId(),
@@ -121,7 +123,10 @@ public class LeaderboardFetcher {
             boolean done = false;
             int page = 1;
 
+            log.info("-- Getting board for filter {}", platformFilter);
+
             while (!done) {
+                log.info("-- -- Fetching page {}", page);
                 DR2LeaderboardRequest request = buildLeaderboardRequest(
                         board.getChallengeId(),
                         board.getEventId(),
@@ -157,8 +162,10 @@ public class LeaderboardFetcher {
             boolean done = false;
             int page = 1;
 
+            log.info("-- Getting board for filter {}", controllerFilter);
 
             while (!done) {
+                log.info("-- -- Fetching page {}", page);
                 DR2LeaderboardRequest request = buildLeaderboardRequest(
                         board.getChallengeId(),
                         board.getEventId(),
