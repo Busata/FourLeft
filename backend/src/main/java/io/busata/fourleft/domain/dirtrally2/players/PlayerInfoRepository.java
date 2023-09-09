@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
 
-    @Query(value = "select * from player_info pi where pi.id in (select distinct player_info_id as id from player_info_racenets pir where pir.racenets = :name)", nativeQuery = true)
+    @Query(value = "select * from player_info pi where pi.id in (select distinct player_info_id as id from player_info_racenets pir where pir.racenets::varchar = :name)", nativeQuery = true)
     Optional<PlayerInfo> findByRacenet(@Param("name") String name);
 
 }

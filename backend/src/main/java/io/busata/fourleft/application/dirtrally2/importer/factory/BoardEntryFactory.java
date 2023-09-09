@@ -6,21 +6,24 @@ import io.busata.fourleft.infrastructure.clients.racenet.dto.leaderboard.DR2Lead
 import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
 
 @Factory
+@Slf4j
 @RequiredArgsConstructor
 public class BoardEntryFactory {
     private final PlayerInfoRepository playerInfoRepository;
 
     @Transactional
     public BoardEntry create(DR2LeaderboardEntry result) {
-
-        PlayerInfo playerInfo = playerInfoRepository.findByRacenet(result.name()).orElseGet(() -> playerInfoRepository.save(new PlayerInfo(result.name())));
+        String name = result.name();
+        log.info("Creating entry for {}", name);
+        PlayerInfo playerInfo = playerInfoRepository.findByRacenet(name).orElseGet(() -> playerInfoRepository.save(new PlayerInfo(name)));
 
         BoardEntry entry = new BoardEntry();
-        entry.setName(result.name());
+        entry.setName(name);
         entry.setPlayerInfo(playerInfo);
         entry.setRank(result.rank());
         entry.setNationality(result.nationality());
