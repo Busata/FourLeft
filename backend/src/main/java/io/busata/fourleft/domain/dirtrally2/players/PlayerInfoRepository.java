@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
 
-    @Query("Select p from PlayerInfo p where :name in p.racenets")
+    @Query("select p from PlayerInfo p where :name member of p.racenets")
     Optional<PlayerInfo> findByRacenet(String name);
 
 }
