@@ -1,1 +1,1 @@
-update player_in    fo set display_name=racenet;
+update player_info set display_name=racenet;
