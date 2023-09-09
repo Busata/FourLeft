@@ -52,21 +52,12 @@ public class LeaderboardFetcher {
     }
 
     private void updatePlatform(Leaderboard board, List<BoardEntry> entries) {
+
         List<String> names = entries.stream().map(BoardEntry::getName).collect(Collectors.toList());
 
-        List<String> existingNames = playerInfoRepository.findByRacenetIn(names).stream().map(PlayerInfo::getRacenet).toList();
-
-        if (existingNames.size() != names.size()) {
-            List<String> controlList = new ArrayList<>(names);
-            controlList.removeAll(existingNames);
-
-            List<PlayerInfo> playerInfos = controlList.stream().map(PlayerInfo::new).toList();
-            log.info("New players added: {}", playerInfos.size());
-
-            playerInfoRepository.saveAllAndFlush(playerInfos);
-        }
-
-        List<PlayerInfo> unsyncedEntries = playerInfoRepository.findBySyncedPlatformIsFalseAndRacenetIn(names);
+        List<PlayerInfo> unsyncedEntries = names.stream().flatMap(name -> playerInfoRepository.findByRacenet(name).stream())
+                .filter(playerInfo -> !playerInfo.isSyncedPlatform())
+                .toList();
 
         if (unsyncedEntries.isEmpty()) {
             return;
@@ -74,20 +65,23 @@ public class LeaderboardFetcher {
 
         HashMap<String, PlatformInfo> platformInfoPerPlayer = getPlatformInfo(board);
 
-        List<PlayerInfo> playerInfos = playerInfoRepository.findBySyncedPlatformIsFalseAndRacenetIn(platformInfoPerPlayer.keySet().stream().toList())
+        final var updatedPlayerInfos = unsyncedEntries
                 .stream()
-                .map(playerInfo -> {
-                    final var platformInfo = platformInfoPerPlayer.get(playerInfo.getRacenet());
+                .flatMap(playerInfo ->
+                        playerInfo.getRacenets().stream()
+                                .filter(platformInfoPerPlayer::containsKey)
+                                .findFirst()
+                                .map(platformInfoPerPlayer::get)
+                                .map(platformInfo -> {
+                                    playerInfo.setPlatform(platformInfo.getPlatform());
+                                    playerInfo.setController(platformInfo.getControllerType());
+                                    playerInfo.setSyncedPlatform(true);
+                                    return playerInfo;
+                }).stream()).toList();
 
-                    playerInfo.setPlatform(platformInfo.getPlatform());
-                    playerInfo.setController(platformInfo.getControllerType());
-                    playerInfo.setSyncedPlatform(true);
-                    return playerInfo;
-                }).toList();
+        log.info("Synced platforms for {} players.", updatedPlayerInfos.size());
 
-        log.info("Synced platforms for {} players.", playerInfos.size());
-
-        playerInfoRepository.saveAll(playerInfos);
+        playerInfoRepository.saveAll(updatedPlayerInfos);
     }
 
     public List<BoardEntry> getBoardEntries(Leaderboard board) {
@@ -97,7 +91,6 @@ public class LeaderboardFetcher {
         List<BoardEntry> entries = new ArrayList<>();
 
         while (!done) {
-            log.info("-- -- Fetching page {}", page);
             DR2LeaderboardRequest request = buildLeaderboardRequest(
                     board.getChallengeId(),
                     board.getEventId(),
@@ -128,10 +121,7 @@ public class LeaderboardFetcher {
             boolean done = false;
             int page = 1;
 
-            log.info("-- Getting board for filter {}", platformFilter);
-
             while (!done) {
-                log.info("-- -- Fetching page {}", page);
                 DR2LeaderboardRequest request = buildLeaderboardRequest(
                         board.getChallengeId(),
                         board.getEventId(),
@@ -167,10 +157,8 @@ public class LeaderboardFetcher {
             boolean done = false;
             int page = 1;
 
-            log.info("-- Getting board for filter {}", controllerFilter);
 
             while (!done) {
-                log.info("-- -- Fetching page {}", page);
                 DR2LeaderboardRequest request = buildLeaderboardRequest(
                         board.getChallengeId(),
                         board.getEventId(),

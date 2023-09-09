@@ -157,7 +157,7 @@ public class DriverEntryToFactory {
         return new DriverResultTo(
                 entry.getName(),
                 entry.getNationality(),
-                platformToFactory.createFromRacenet(entry.getName()),
+                platformToFactory.createFromRacenet(entry.getPlayerInfo()),
                 entry.getTotalTime(),
                 entry.getStageTime(),
                 entry.isDnf(),

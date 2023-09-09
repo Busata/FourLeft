@@ -1,5 +1,6 @@
 package io.busata.fourleft.domain.dirtrally2.clubs;
 
+import io.busata.fourleft.domain.dirtrally2.players.PlayerInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,8 +13,9 @@ import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
-@Getter
 @Setter
+@Getter
+
 public class BoardEntry {
     @Id
     @GeneratedValue
@@ -24,7 +26,17 @@ public class BoardEntry {
     private Leaderboard leaderboard;
 
     private long rank;
+
     private String name;
+
+    public String getName() {
+        return this.playerInfo.getDisplayName();
+    }
+
+    @ManyToOne()
+    @JoinColumn(name="player_info_id")
+    private PlayerInfo playerInfo;
+
     private String vehicleName;
 
     //Replace these with durations

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DatabaseMigrationSettings" lastSelectedDirectory="backend/src/main/resources/db/migration" />
   <component name="JpaLiquibaseChangesConfig">
     <exclude-change idName="event#archived" tagName="addNotNullConstraint" />
     <exclude-change idName="club_member#championship_bronzes" tagName="addNotNullConstraint" />
@@ -28,10 +29,18 @@
     <exclude-change idName="wrcticker_entry#ticker_event_key" tagName="modifyDataType" />
     <exclude-change idName="wrcticker_entry#title" tagName="modifyDataType" />
     <exclude-change idName="field_mapping#context" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#event_id" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#reference_id" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#source" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#text_html" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#text_markdown" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#ticker_entry_image_url" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#ticker_event_key" tagName="modifyDataType" />
+    <exclude-change idName="fiaticker_entry#title" tagName="modifyDataType" />
   </component>
   <component name="PersistenceUnitSettings">
     <persistence-units>
-      <persistence-unit name="Default">
+      <persistence-unit moduleName="backend" name="Default">
         <packages>
           <package value="io.busata.fourleft" />
         </packages>

@@ -9,15 +9,7 @@ import java.util.UUID;
 
 public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
 
-    List<PlayerInfo> findByRacenetIn(List<String> names);
-    List<PlayerInfo> findBySyncedPlatformIsFalseAndRacenetIn(List<String> names);
+    @Query("Select p from PlayerInfo p where :name in p.racenets")
     Optional<PlayerInfo> findByRacenet(String name);
 
-
-    @Query("select p from PlayerInfo p where p.createdBeforeRacenetChange = true")
-    List<PlayerInfo> findByCreatedBeforeRacenetChange();
-
-    @Query("select p from PlayerInfo p where p.racenet = :name and p.createdBeforeRacenetChange = true")
-    Optional<PlayerInfo> findByRacenetAndCreatedBeforeRacenetChange(String name);
-    
 }

@@ -6,13 +6,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -25,11 +29,13 @@ public class PlayerInfo {
 
     @Column(unique = true)
     @Setter
-    String racenet;
+    String displayName;
 
-    @Column(unique = true)
-    @Setter
-    String platformName = "";
+    String discordId;
+
+    @Column
+    @ElementCollection
+    Set<String> racenets = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Setter
@@ -42,18 +48,11 @@ public class PlayerInfo {
     @Setter
     boolean syncedPlatform;
 
-    @Setter
-    boolean isOutdated;
-
-    @Setter
-    boolean createdBeforeRacenetChange = false;
-
     public PlayerInfo(String racenet) {
-        this.racenet = racenet;
+        this.displayName = racenet;
+        this.racenets.add(racenet);
         this.platform = Platform.UNKNOWN;
         this.controller = ControllerType.UNKNOWN;
-        this.platformName = "";
         this.syncedPlatform = false;
-        this.isOutdated = false;
     }
 }
