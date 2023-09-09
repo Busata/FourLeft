@@ -7,11 +7,14 @@ import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
+import javax.transaction.Transactional;
+
 @Factory
 @RequiredArgsConstructor
 public class BoardEntryFactory {
     private final PlayerInfoRepository playerInfoRepository;
 
+    @Transactional
     public BoardEntry create(DR2LeaderboardEntry result) {
 
         PlayerInfo playerInfo = playerInfoRepository.findByRacenet(result.name()).orElseGet(() -> playerInfoRepository.save(new PlayerInfo(result.name())));

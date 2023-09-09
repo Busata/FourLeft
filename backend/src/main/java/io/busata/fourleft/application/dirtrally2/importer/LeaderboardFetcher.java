@@ -100,6 +100,8 @@ public class LeaderboardFetcher {
                     page);
             DR2LeaderboardResults leaderboard = client.getLeaderboard(request);
 
+            log.info("-- -- -- Creating entries...");
+
             List<BoardEntry> pageEntries = leaderboard.entries().stream().map(boardEntryFactory::create)
                     .peek(entry -> entry.setLeaderboard(board))
                     .collect(Collectors.toList());

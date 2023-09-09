@@ -48,7 +48,7 @@ class RacenetLeaderboardSyncService {
     private void updateEventLeaderboards(Event event) {
         ImmutableList.copyOf(event.getStages()).forEach(stage -> {
             try {
-                log.debug("-- -- Updating for event {}, stage {}", event.getName(), stage.getName());
+                log.info("-- -- Updating for event {}, stage {}", event.getName(), stage.getName());
                 leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()), true);
                 event.setLastResultCheckedTime(LocalDateTime.now());
                 eventRepository.save(event);
