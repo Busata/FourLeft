@@ -56,7 +56,10 @@ public class LeaderboardFetcher {
 
         List<String> names = entries.stream().map(BoardEntry::getName).collect(Collectors.toList());
 
-        List<PlayerInfo> unsyncedEntries = names.stream().flatMap(name -> playerInfoRepository.findByRacenet(name).stream())
+        List<PlayerInfo> unsyncedEntries = names.stream().flatMap(name -> {
+            log.info("Searching player info for platform update - {}", name);
+                    return playerInfoRepository.findByRacenet(name).stream();
+                })
                 .filter(playerInfo -> !playerInfo.isSyncedPlatform())
                 .toList();
 
