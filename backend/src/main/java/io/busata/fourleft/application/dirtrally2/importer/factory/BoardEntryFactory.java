@@ -19,7 +19,6 @@ public class BoardEntryFactory {
     @Transactional
     public BoardEntry create(DR2LeaderboardEntry result) {
         String name = result.name();
-        log.info("Creating entry for {}", name);
         PlayerInfo playerInfo = playerInfoRepository.findByRacenet(name).orElseGet(() -> playerInfoRepository.save(new PlayerInfo(name)));
 
         BoardEntry entry = new BoardEntry();
