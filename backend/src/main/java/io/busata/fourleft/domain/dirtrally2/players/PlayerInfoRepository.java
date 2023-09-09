@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
 
-    @Query("select p from PlayerInfo p where :name member of p.racenets")
+    @Query(value = "select * from player_info pi where id in (select distinct player_info_id from player_info_racenets where racenets = :name)", nativeQuery = true)
     Optional<PlayerInfo> findByRacenet(String name);
 
 }
