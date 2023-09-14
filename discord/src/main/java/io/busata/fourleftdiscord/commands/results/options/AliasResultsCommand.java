@@ -35,7 +35,7 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
     }
     @Override
     public String getOption() {
-        return CommandOptions.PERSONAL;
+        return CommandOptions.ALIAS;
     }
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
 
