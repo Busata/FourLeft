@@ -11,6 +11,8 @@ public class RoutesTo {
     public static final String CLUB_VIEWS_CURRENT_STANDINGS_BY_VIEW_ID = "/api/external/views/{viewId}/standings/current";
     public static final String CLUB_VIEWS_PREVIOUS_STANDINGS_BY_VIEW_ID = "/api/external/views/{viewId}/standings/previous";
 
+    public static final String QUERY_NAME = "/api/external/query/name";
+
     public static final String RESULT_VIEW_EVENT_RESTRICTION = "/api/internal/views/{resultViewId}/restrictions";
     public static final String CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID = "/api/internal/views/{viewId}/event_summary";
 
@@ -32,9 +34,12 @@ public class RoutesTo {
         Query
      */
     public static final String QUERY_TRACK = "/api/internal/query/track";
-    public static final String QUERY_NAME = "/api/internal/query/name";
 
     public static final String QUERY_VEHICLE_CLASS = "/api/internal/query/vehicle_class/{vehicleClass}";
+
+
+    public static final String REQUEST_ALIAS_UPDATE = "/api/internal/aliases/request";
+    public static final String REQUEST_ALIAS_GET= "/api/external/aliases/{requestId}";
 
     /*
         Field Mappings

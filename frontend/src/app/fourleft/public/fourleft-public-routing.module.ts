@@ -5,6 +5,9 @@ import {HomeComponent} from './home/home.component';
 import {ResultsContainerComponent} from './results/results-container/results-container.component';
 import {UserCommunityProgressComponent} from './user-community-progress/user-community-progress.component';
 import {ResultDetailsComponent} from './results/result-details/result-details.component';
+import {AliasContainerComponent} from "./alias/alias-container/alias-container.component";
+import {AliasPageComponent} from "./alias/alias-page/alias-page.component";
+import {AliasRedirectComponent} from "./alias/alias-redirect/alias-redirect.component";
 
 export const routes: Routes = [
   {
@@ -25,6 +28,21 @@ export const routes: Routes = [
         path: 'community',
         pathMatch: 'full',
         component: UserCommunityProgressComponent
+      },
+      {
+        path: 'alias',
+        component: AliasPageComponent,
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            component: AliasRedirectComponent
+          },
+          {
+            path: ':requestId',
+            pathMatch: 'full',
+            component: AliasContainerComponent
+          }]
       },
       {
         path: 'results',

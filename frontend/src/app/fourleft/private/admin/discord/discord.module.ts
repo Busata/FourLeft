@@ -26,43 +26,44 @@ import { PointPairFormComponent } from './configure-channel/points/point-pair-fo
 import { ConcatenationViewFormComponent } from './configure-channel/results/concatenation-view-form/concatenation-view-form.component';
 import { ViewRestrictionsContainerComponent } from './configure-channel/core/view-restrictions-container/view-restrictions-container.component';
 import { ViewRestrictionsFormComponent } from './configure-channel/core/view-restrictions-form/view-restrictions-form.component';
-import { PlayerSearchComponent } from './configure-channel/results/player-search/player-search.component';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {NgIconComponent} from '@ng-icons/core';
+import {SharedModule} from "../../../shared/shared.module";
 
 @NgModule({
-  declarations: [
-    DiscordPageComponent,
-    DiscordAuthenticationComponent,
-    DiscordHomeComponent,
-    ManageDiscordServerComponent,
-    ManageDiscordServerContainerComponent,
-    ConfigureChannelContainerComponent,
-    ClubViewFormComponent,
-    MergeViewClubFormComponent,
-    SingleClubViewFormComponent,
-    PartitionClubViewFormComponent,
-    RacenetFilterFormComponent,
-    FixedPointsFormComponent,
-    DiscordChannelConfigurationFormComponent,
-    PreviewChannelConfigurationComponent,
-    PointPairFormComponent,
-    ConcatenationViewFormComponent,
-    ViewRestrictionsContainerComponent,
-    ViewRestrictionsFormComponent,
-    PlayerSearchComponent,
-  ],
-  providers: [DiscordStateService, DiscordIntegrationApiService],
-  imports: [
-    DiscordRoutingModule,
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    NgOptimizedImage,
-    FormsModule,
-    MatSnackBarModule,
-    NgIconComponent
-  ]
+    declarations: [
+        DiscordPageComponent,
+        DiscordAuthenticationComponent,
+        DiscordHomeComponent,
+        ManageDiscordServerComponent,
+        ManageDiscordServerContainerComponent,
+        ConfigureChannelContainerComponent,
+        ClubViewFormComponent,
+        MergeViewClubFormComponent,
+        SingleClubViewFormComponent,
+        PartitionClubViewFormComponent,
+        RacenetFilterFormComponent,
+        FixedPointsFormComponent,
+        DiscordChannelConfigurationFormComponent,
+        PreviewChannelConfigurationComponent,
+        PointPairFormComponent,
+        ConcatenationViewFormComponent,
+        ViewRestrictionsContainerComponent,
+        ViewRestrictionsFormComponent,
+    ],
+    providers: [DiscordStateService, DiscordIntegrationApiService],
+    exports: [],
+    imports: [
+        SharedModule,
+        DiscordRoutingModule,
+        CommonModule,
+        MatButtonModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        NgOptimizedImage,
+        FormsModule,
+        MatSnackBarModule,
+        NgIconComponent
+    ]
 })
 export class DiscordModule { }

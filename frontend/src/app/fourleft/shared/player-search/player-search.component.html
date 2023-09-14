@@ -1,15 +1,15 @@
 <div class="player-search">
   <div class="form-group inline">
-    <label>Players</label>
-    <input #query [value]="this.searchSubject.getValue()" type="text" placeholder="Search racenet names" (keyup)="queryPlayers($event.target.value)">
+    <label *ngIf="showLabel">Players</label>
+    <input #query [value]="this.searchSubject.getValue()" type="text" [placeholder]="placeholder" (keyup)="queryPlayers($event.target.value)">
     <button class="g-button g-button-secondary" (click)="addPlayer(query.value)">Add</button>
   </div>
   <div>
     <div class="pure-g" *ngFor="let suggestedPlayer of suggestedPlayers">
-      <div class="pure-u-1-2">
+      <div class="pure-u-1-8">
         {{suggestedPlayer}}
       </div>
-      <div class="pure-u-1-2">
+      <div class="">
         <button class="g-button g-button-secondary" (click)="addPlayer(suggestedPlayer)">Add</button>
       </div>
     </div>

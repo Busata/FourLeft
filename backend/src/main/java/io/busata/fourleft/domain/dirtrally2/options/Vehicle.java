@@ -2,8 +2,6 @@ package io.busata.fourleft.domain.dirtrally2.options;
 
 import lombok.Getter;
 
-import java.util.Arrays;
-
 public enum Vehicle {
     MINI_COOPER_S("MINI Cooper S"),
     BMW_M1_PROCAR_RALLY("BMW M1 Procar Rally"),

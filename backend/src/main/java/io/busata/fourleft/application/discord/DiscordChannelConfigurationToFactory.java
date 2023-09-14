@@ -57,13 +57,18 @@ public class DiscordChannelConfigurationToFactory {
     }
 
     private ResultsViewTo createResultsViewTo(ResultsView resultsView) {
-        ResultsViewTo resultsViewTo = switch (resultsView) {
-            case SingleClubView view -> createSingleClubViewTo(view);
-            case MergeResultsView view -> createMergeResultsViewTo(view);
-            case PartitionView view -> createPartitionViewTo(view);
-            case ConcatenationView view -> createConcatenationViewTo(view);
-            default -> throw new UnsupportedOperationException("Unexpected value");
-        };
+        ResultsViewTo resultsViewTo;
+        if (resultsView instanceof SingleClubView view) {
+            resultsViewTo = createSingleClubViewTo(view);
+        } else if (resultsView instanceof MergeResultsView view) {
+            resultsViewTo = createMergeResultsViewTo(view);
+        } else if (resultsView instanceof PartitionView view) {
+            resultsViewTo = createPartitionViewTo(view);
+        } else if (resultsView instanceof ConcatenationView view) {
+            resultsViewTo = createConcatenationViewTo(view);
+        } else {
+            throw new UnsupportedOperationException("Unexpected value");
+        }
         resultsViewTo.setId(resultsView.getId());
         resultsViewTo.setAssociatedClubs(resultsView.getAssociatedClubs());
         return resultsViewTo;
@@ -122,11 +127,12 @@ public class DiscordChannelConfigurationToFactory {
 
     private PointsCalculatorTo createPointsViewTo(PointsCalculator pointsCalculator) {
 
-        return switch(pointsCalculator) {
-            case DefaultPointsCalculator $ -> new DefaultPointsCalculatorTo();
-            case FixedPointsCalculator fixedPointsCalculator -> createFixedPointsTo(fixedPointsCalculator);
-            default -> throw new IllegalStateException("Unexpected value: ");
-        };
+        if (pointsCalculator instanceof DefaultPointsCalculator) {
+            return new DefaultPointsCalculatorTo();
+        } else if (pointsCalculator instanceof FixedPointsCalculator fixedPointsCalculator) {
+            return createFixedPointsTo(fixedPointsCalculator);
+        }
+        throw new IllegalStateException("Unexpected value: ");
     }
 
     private PointsCalculatorTo createFixedPointsTo(FixedPointsCalculator fixedPointsCalculator) {

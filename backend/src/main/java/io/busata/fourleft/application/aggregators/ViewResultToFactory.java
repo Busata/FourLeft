@@ -19,11 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.Cacheable;
 
 import javax.transaction.Transactional;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -46,13 +42,16 @@ public class ViewResultToFactory {
     }
 
     public Optional<ViewResultTo> createViewResultFromResultsView(ClubView clubView, ResultsView resultsView, EventSupplier type) {
-        return switch (resultsView) {
-            case SingleClubView typedResultsView -> createSingleClubViewResult(clubView, typedResultsView, type);
-            case MergeResultsView typedResultsView -> createMergedView(clubView, typedResultsView, type);
-            case ConcatenationView typedResultsView -> createConcatenationView(clubView, typedResultsView, type);
-            case PartitionView typedResultsView -> createPartitionedView(clubView, typedResultsView, type);
-            default -> throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
-        };
+        if (resultsView instanceof SingleClubView typedResultsView) {
+            return createSingleClubViewResult(clubView, typedResultsView, type);
+        } else if (resultsView instanceof MergeResultsView typedResultsView) {
+            return createMergedView(clubView, typedResultsView, type);
+        } else if (resultsView instanceof ConcatenationView typedResultsView) {
+            return createConcatenationView(clubView, typedResultsView, type);
+        } else if (resultsView instanceof PartitionView typedResultsView) {
+            return createPartitionedView(clubView, typedResultsView, type);
+        }
+        throw new IllegalStateException("Unexpected value: " + clubView.getResultsView());
     }
 
 

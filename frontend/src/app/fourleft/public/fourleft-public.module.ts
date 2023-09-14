@@ -4,7 +4,7 @@ import { FourleftPublicContainerComponent } from './fourleft-public-container/fo
 import { UserCommunityProgressComponent } from './user-community-progress/user-community-progress.component';
 import {MatCardModule} from "@angular/material/card";
 import {MatInputModule} from "@angular/material/input";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatButtonModule} from "@angular/material/button";
@@ -19,6 +19,11 @@ import {SharedModule} from '../shared/shared.module';
 import { ControllerTypeComponent } from './results/controller-type/controller-type.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {PlatformTypeComponent} from './results/platform-type/platform-type.component';
+import { AliasContainerComponent } from './alias/alias-container/alias-container.component';
+import { AliasFormComponent } from './alias/alias-form/alias-form.component';
+import {DiscordModule} from "../private/admin/discord/discord.module";
+import { AliasPageComponent } from './alias/alias-page/alias-page.component';
+import { AliasRedirectComponent } from './alias/alias-redirect/alias-redirect.component';
 
 @NgModule({
   declarations: [
@@ -28,26 +33,32 @@ import {PlatformTypeComponent} from './results/platform-type/platform-type.compo
     HomeComponent,
     ResultDetailsComponent,
     ControllerTypeComponent,
-    PlatformTypeComponent
+    PlatformTypeComponent,
+    AliasContainerComponent,
+    AliasFormComponent,
+    AliasPageComponent,
+    AliasRedirectComponent
   ],
-  imports: [
-    FourleftPublicRoutingModule,
-    MatCardModule,
-    MatInputModule,
-    FormsModule,
-    MatCheckboxModule,
-    MatSlideToggleModule,
-    MatButtonModule,
-    NgIf,
-    MatSnackBarModule,
-    ClipboardModule,
-    MatIconModule,
-    NgOptimizedImage,
-    NgForOf,
-    SharedModule,
-    NgIconComponent,
-    DatePipe,
-  ],
+    imports: [
+        FourleftPublicRoutingModule,
+        MatCardModule,
+        MatInputModule,
+        FormsModule,
+        MatCheckboxModule,
+        MatSlideToggleModule,
+        MatButtonModule,
+        NgIf,
+        MatSnackBarModule,
+        ClipboardModule,
+        MatIconModule,
+        NgOptimizedImage,
+        NgForOf,
+        SharedModule,
+        NgIconComponent,
+        DatePipe,
+        DiscordModule,
+        ReactiveFormsModule,
+    ],
   providers:[]
 })
 export class FourleftPublicModule { }

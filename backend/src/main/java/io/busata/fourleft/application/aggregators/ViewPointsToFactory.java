@@ -8,6 +8,8 @@ import io.busata.fourleft.domain.aggregators.results.SingleClubView;
 import io.busata.fourleft.infrastructure.common.Factory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
+
 @Factory
 @RequiredArgsConstructor
 public class ViewPointsToFactory {
@@ -16,11 +18,12 @@ public class ViewPointsToFactory {
     private final SingleClubViewDefaultPointsFactory defaultPointsFactory;
 
     public ViewPointsTo create(ClubView view) {
-        return switch(view.getPointsCalculator()) {
-            case DefaultPointsCalculator $ -> createDefaultPoints(view);
-            case FixedPointsCalculator fixedPointsCalculator -> createFixedPoints(fixedPointsCalculator, view);
-            default -> throw new IllegalStateException("Unexpected value: " + view.getPointsCalculator());
-        };
+        if (view.getPointsCalculator() instanceof DefaultPointsCalculator) {
+            return createDefaultPoints(view);
+        } else if (view.getPointsCalculator() instanceof FixedPointsCalculator fixedPointsCalculator) {
+            return createFixedPoints(fixedPointsCalculator, view);
+        }
+        throw new IllegalStateException("Unexpected value: " + view.getPointsCalculator());
     }
 
     private ViewPointsTo createDefaultPoints(ClubView view) {

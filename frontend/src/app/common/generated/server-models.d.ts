@@ -1,8 +1,22 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-09-09 23:29:56.
+// Generated using typescript-generator version 2.35.1025 on 2023-09-15 00:04:45.
 
 export interface RoutesTo {
+}
+
+export interface AliasUpdateDataTo {
+    id: string;
+    displayName: string;
+    controller: ControllerType;
+    platform: Platform;
+    racenet: string;
+    aliases: string[];
+}
+
+export interface AliasUpdateRequestTo {
+    racenet: string;
+    discordId: string;
 }
 
 export interface ChampionshipEventEntryTo {
@@ -529,6 +543,10 @@ export interface ViewResultTo {
     multiListResults: ResultListTo[];
 }
 
+export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "UNKNOWN";
+
+export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
+
 export type ChampionshipPointsType = "DEFAULT" | "JRC";
 
 export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
@@ -536,10 +554,6 @@ export type DR2CommunityEventType = "Daily" | "Weekly" | "Monthly";
 export type FieldMappingType = "HUMAN_READABLE" | "FLAG" | "EMOTE" | "IMAGE" | "COLOUR";
 
 export type FieldMappingContext = "BACKEND" | "FRONTEND";
-
-export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
-
-export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "UNKNOWN";
 
 export type BadgeType = "NONE" | "PERCENTAGE" | "RANKED";
 

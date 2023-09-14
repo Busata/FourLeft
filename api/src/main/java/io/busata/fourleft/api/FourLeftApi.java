@@ -1,17 +1,12 @@
 package io.busata.fourleft.api;
 
+import io.busata.fourleft.api.models.*;
 import io.busata.fourleft.common.MessageType;
-import io.busata.fourleft.api.models.ClubMemberTo;
-import io.busata.fourleft.api.models.CommunityChallengeSummaryTo;
-import io.busata.fourleft.api.models.FieldMappingRequestTo;
-import io.busata.fourleft.api.models.FieldMappingTo;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
 import io.busata.fourleft.api.models.views.ViewEventSummaryTo;
 import io.busata.fourleft.api.models.views.ViewPointsTo;
 import io.busata.fourleft.api.models.views.ViewResultTo;
-import io.busata.fourleft.api.models.QueryTrackResultsTo;
-import io.busata.fourleft.api.models.TrackUserRequestTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +26,9 @@ public interface FourLeftApi {
 
     @GetMapping(RoutesTo.COMMUNITY_RESULTS)
     List<CommunityChallengeSummaryTo> getCommunityResults();
+
+    @PostMapping(RoutesTo.REQUEST_ALIAS_UPDATE)
+    UUID requestAliasUpdate(@RequestBody AliasUpdateRequestTo aliasUpdateRequestTo);
 
     @GetMapping(RoutesTo.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
     ViewEventSummaryTo getViewEventSummary(@PathVariable UUID viewId);

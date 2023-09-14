@@ -8,7 +8,6 @@ import io.busata.fourleft.domain.dirtrally2.clubs.Championship;
 import io.busata.fourleft.domain.dirtrally2.clubs.Club;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
-import io.busata.fourleft.domain.aggregators.ClubView;
 import io.busata.fourleft.domain.aggregators.results.MergeResultsView;
 import io.busata.fourleft.domain.aggregators.results.SingleClubView;
 import io.busata.fourleft.application.dirtrally2.ClubService;
@@ -25,12 +24,14 @@ public class ViewEventSummaryToFactory {
     private final ClubService clubService;
 
     public ViewEventSummaryTo create(ResultsView view) {
-        return switch (view) {
-            case SingleClubView resultsView -> createSingleClub(resultsView.getClubId());
-            case MergeResultsView resultsView -> createMergedView(resultsView.getResultViews());
-            case PartitionView resultsView -> create(resultsView.getResultsView());
-            default -> throw new UnsupportedOperationException("View not supported");
-        };
+        if (view instanceof SingleClubView resultsView) {
+            return createSingleClub(resultsView.getClubId());
+        } else if (view instanceof MergeResultsView resultsView) {
+            return createMergedView(resultsView.getResultViews());
+        } else if (view instanceof PartitionView resultsView) {
+            return create(resultsView.getResultsView());
+        }
+        throw new UnsupportedOperationException("View not supported");
     }
 
     private ViewEventSummaryTo createMergedView(List<SingleClubView> tiers) {

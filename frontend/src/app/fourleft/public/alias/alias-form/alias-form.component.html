@@ -1,0 +1,48 @@
+<div [formGroup]="form">
+  <div class="form-group">
+    <label>Display name</label>
+    <input [formControl]="form.displayName" type="text">
+  </div>
+  <div class="form-group">
+    <label>Platform</label>
+    <select [formControl]="form.platform">
+      <option value="PC">Steam</option>
+      <option value="PLAYSTATION">Playstation</option>
+      <option value="XBOX">Xbox</option>
+      <option value="UNKNOWN">Other</option>
+
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Controller</label>
+    <select [formControl]="form.controller">
+      <option value="WHEEL">Wheel</option>
+      <option value="CONTROLLER">Gamepad</option>
+      <option value="KEYBOARD">Keyboard</option>
+      <option value="UNKNOWN">Other</option>
+    </select>
+  </div>  <div class="form-group">
+    <label>Racenet (Cannot be changed)</label>
+    <input type="text"  [formControl]="form.racenet"/>
+  </div>
+
+  <div class="form-group">
+    <label>Aliases</label>
+    <app-player-search [placeholder]="'Add alias'" [showLabel]="false" [limit]="5"
+                       (added)="addAlias($event)"></app-player-search>
+  </div>
+
+  <div>
+    <ul>
+      <ng-container [formArrayName]="'aliases'">
+        <li *ngFor="let form of form.aliases.controls;let i=index">
+          {{form.getRawValue()}}
+          <button (click)="removeAlias(i)" class="g-button g-button-danger">Remove</button>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+</div>
+<button class="g-button g-button-primary" (click)="saveAliases()">Save</button>
+&nbsp;
+<button class="g-button g-button-tertiary" (click)="cancel()">Reset</button>

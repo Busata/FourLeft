@@ -17,6 +17,6 @@ export class QueryService {
   }
 
   public getPlayers(playerName: string) :Observable<string[]> {
-    return this.http.get<string[]>(`/api/internal/query/name?query=${playerName}`)
+    return this.http.get<string[]>(`/api/external/query/name?query=${playerName}`)
   }
 }

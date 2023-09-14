@@ -8,6 +8,7 @@ public class CommandOptions {
     public static final String STANDINGS = "standings";
 
     public static final String PERSONAL = "personal";
+    public static final String ALIAS = "alias";
 
     public static final String POWER_STAGE = "powerstage";
 

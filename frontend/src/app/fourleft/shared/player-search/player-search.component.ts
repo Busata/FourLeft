@@ -1,6 +1,6 @@
-import {Component, EventEmitter,  OnInit, Output} from '@angular/core';
-import {QueryService} from '../../services/query-service';
-import {BehaviorSubject, debounceTime, Subject} from 'rxjs';
+  import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {QueryService} from '../../private/admin/discord/configure-channel/services/query-service';
+import {BehaviorSubject, debounceTime} from 'rxjs';
 
 @Component({
   selector: 'app-player-search',
@@ -8,6 +8,15 @@ import {BehaviorSubject, debounceTime, Subject} from 'rxjs';
   styleUrls: ['./player-search.component.scss']
 })
 export class PlayerSearchComponent implements OnInit {
+
+  @Input()
+  public showLabel: boolean = true;
+
+  @Input()
+  public placeholder: string = "Search racenet";
+
+  @Input()
+  public limit = 10;
 
   @Output()
   public added = new EventEmitter<string>();
@@ -22,7 +31,7 @@ export class PlayerSearchComponent implements OnInit {
   ngOnInit(): void {
     this.searchSubject.pipe(debounceTime(50)).subscribe(value => {
       this.queryService.getPlayers(value).subscribe(players => {
-        this.suggestedPlayers = players;
+        this.suggestedPlayers = players.slice(0, this.limit);
       });
     })
   }

@@ -59,23 +59,27 @@ public class DiscordChannelConfigurationFactory {
     }
 
     private ResultsView createResultsView(ResultsViewTo resultsView) {
-        return switch(resultsView) {
-            case (SingleClubViewTo clubViewTo) -> createSingleClubView(clubViewTo);
-            case (MergedViewTo clubViewTo) -> createMergedResultsView(clubViewTo);
-            case (PartitionViewTo clubViewTo) -> createPartitionView(clubViewTo);
-            case (ConcatenationViewTo clubViewTo) -> createConcatenationView(clubViewTo);
-            default -> throw new IllegalArgumentException("Unsupported");
-        };
+        if (resultsView instanceof SingleClubViewTo clubViewTo) {
+            return createSingleClubView(clubViewTo);
+        } else if (resultsView instanceof MergedViewTo clubViewTo) {
+            return createMergedResultsView(clubViewTo);
+        } else if (resultsView instanceof PartitionViewTo clubViewTo) {
+            return createPartitionView(clubViewTo);
+        } else if (resultsView instanceof ConcatenationViewTo clubViewTo) {
+            return createConcatenationView(clubViewTo);
+        }
+        throw new IllegalArgumentException("Unsupported");
     }
 
 
 
     private PointsCalculator createPointsView(PointsCalculatorTo pointsView) {
-        return switch(pointsView) {
-            case (DefaultPointsCalculatorTo $) -> createDefaultPointsCalculator();
-            case (FixedPointsCalculatorTo pointsCalculatorTo) -> createFixedPointsCalculator(pointsCalculatorTo);
-            default -> throw new IllegalArgumentException("Unsupported");
-        };
+        if (pointsView instanceof DefaultPointsCalculatorTo) {
+            return createDefaultPointsCalculator();
+        } else if (pointsView instanceof FixedPointsCalculatorTo pointsCalculatorTo) {
+            return createFixedPointsCalculator(pointsCalculatorTo);
+        }
+        throw new IllegalArgumentException("Unsupported");
     }
 
     private PointsCalculator createFixedPointsCalculator(FixedPointsCalculatorTo pointsCalculatorTo) {

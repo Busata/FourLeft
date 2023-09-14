@@ -57,7 +57,7 @@ public class LeaderboardFetcher {
         List<String> names = entries.stream().map(BoardEntry::getName).collect(Collectors.toList());
 
         List<PlayerInfo> unsyncedEntries = names.stream().flatMap(name -> {
-                    return playerInfoRepository.findByRacenet(name).stream();
+                    return playerInfoRepository.findByRacenetOrAliases(name).stream();
                 })
                 .filter(playerInfo -> !playerInfo.isSyncedPlatform())
                 .toList();
@@ -71,7 +71,7 @@ public class LeaderboardFetcher {
         final var updatedPlayerInfos = unsyncedEntries
                 .stream()
                 .flatMap(playerInfo ->
-                        playerInfo.getRacenets().stream()
+                        playerInfo.getAllNames().stream()
                                 .filter(platformInfoPerPlayer::containsKey)
                                 .findFirst()
                                 .map(platformInfoPerPlayer::get)
@@ -102,7 +102,6 @@ public class LeaderboardFetcher {
                     page);
             DR2LeaderboardResults leaderboard = client.getLeaderboard(request);
 
-            log.info("-- -- -- Creating entries...");
 
             List<BoardEntry> pageEntries = leaderboard.entries().stream().map(boardEntryFactory::create)
                     .peek(entry -> entry.setLeaderboard(board))
