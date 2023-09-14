@@ -70,7 +70,7 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event, MessageChannel channel) {
         return Mono.just(event).flatMap(evt -> {
-            return evt.deferReply().then(createAliasUpdateRequest(event));
+            return evt.deferReply().withEphemeral(true).then(createAliasUpdateRequest(event));
         }).then();
     }
 
