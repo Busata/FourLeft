@@ -9,6 +9,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
+import io.busata.fourleft.api.models.AliasRequestResultTo;
 import io.busata.fourleft.api.models.AliasUpdateRequestTo;
 import io.busata.fourleft.api.models.configuration.create.DiscordChannelConfigurationTo;
 import io.busata.fourleftdiscord.channel_configuration.DiscordChannelConfigurationService;
@@ -33,10 +34,12 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
     public String getCommand() {
         return CommandNames.RESULTS;
     }
+
     @Override
     public String getOption() {
         return CommandOptions.ALIAS;
     }
+
     private final DiscordChannelConfigurationService discordChannelConfigurationService;
 
     private final FourLeftClient api;
@@ -60,7 +63,7 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
     @Override
     public List<Snowflake> getResponseChannels() {
         return discordChannelConfigurationService.getConfigurations().stream().map(DiscordChannelConfigurationTo::channelId).map(Snowflake::of).toList();
-   }
+    }
 
     @Override
     public boolean canRespond(Snowflake channelId) {
@@ -82,10 +85,12 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
-            UUID uuid = api.requestAliasUpdate(new AliasUpdateRequestTo(username, event.getInteraction().getUser().getId().asString()));
-
-
-            return evt.createFollowup("Update the alias [here](https://fourleft.busata.io/alias/" + uuid+").").withEphemeral(true);
+            AliasRequestResultTo aliasRequestResultTo = api.requestAliasUpdate(new AliasUpdateRequestTo(username, event.getInteraction().getUser().getId().asString()));
+            if (aliasRequestResultTo.aliasExists()) {
+                return evt.createFollowup("Update the alias [here](https://fourleft.busata.io/alias/" + aliasRequestResultTo.requestId() + ").").withEphemeral(true);
+            } else {
+                return evt.createFollowup("No racenet or alias was found for this request.");
+            }
         });
     }
 }

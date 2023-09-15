@@ -28,7 +28,7 @@ public interface FourLeftApi {
     List<CommunityChallengeSummaryTo> getCommunityResults();
 
     @PostMapping(RoutesTo.REQUEST_ALIAS_UPDATE)
-    UUID requestAliasUpdate(@RequestBody AliasUpdateRequestTo aliasUpdateRequestTo);
+    AliasRequestResultTo requestAliasUpdate(@RequestBody AliasUpdateRequestTo aliasUpdateRequestTo);
 
     @GetMapping(RoutesTo.CLUB_VIEWS_EVENT_SUMMARY_BY_VIEW_ID)
     ViewEventSummaryTo getViewEventSummary(@PathVariable UUID viewId);

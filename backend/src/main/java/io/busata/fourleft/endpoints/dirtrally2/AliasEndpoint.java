@@ -4,6 +4,7 @@ package io.busata.fourleft.endpoints.dirtrally2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.busata.fourleft.api.RoutesTo;
+import io.busata.fourleft.api.models.AliasRequestResultTo;
 import io.busata.fourleft.api.models.AliasUpdateDataTo;
 import io.busata.fourleft.api.models.AliasUpdateRequestTo;
 import io.busata.fourleft.application.dirtrally2.alias.AliasService;
@@ -20,8 +21,10 @@ public class AliasEndpoint {
 
 
     @RequestMapping(method = RequestMethod.POST, value=RoutesTo.REQUEST_ALIAS_UPDATE)
-    public UUID requestAliasUpdate(@RequestBody AliasUpdateRequestTo request) {
-        return aliasService.requestUpdate(request.discordId(), request.racenet());
+    public AliasRequestResultTo requestAliasUpdate(@RequestBody AliasUpdateRequestTo request) {
+        return aliasService.requestUpdate(request.discordId(), request.racenet()).map(uuid -> {
+            return new AliasRequestResultTo(true, uuid);
+        }).orElse(new AliasRequestResultTo(false, null));
     }
 
     @RequestMapping(method = RequestMethod.GET, value=RoutesTo.REQUEST_ALIAS_GET)

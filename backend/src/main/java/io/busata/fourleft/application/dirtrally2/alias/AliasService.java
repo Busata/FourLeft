@@ -28,10 +28,11 @@ public class AliasService {
     private final BoardEntryRepository boardEntryRepository;
 
 
-    public UUID requestUpdate(String discordId, String racenet) {
-        AliasUpdateRequest save = aliasUpdateRequestRepository.save(new AliasUpdateRequest(discordId, racenet));
-
-        return save.getId();
+    public Optional<UUID> requestUpdate(String discordId, String racenet) {
+        return playerInfoRepository.findByRacenetOrAliases(racenet).map(playerInfo -> {
+            AliasUpdateRequest request = aliasUpdateRequestRepository.save(new AliasUpdateRequest(discordId, racenet));
+            return request.getId();
+        });
    }
 
 
@@ -42,7 +43,7 @@ public class AliasService {
     public Optional<PlayerInfo> getPlayerInfo(UUID requestId) {
         AliasUpdateRequest aliasUpdateRequest = aliasUpdateRequestRepository.findById(requestId).orElseThrow();
 
-        return playerInfoRepository.findByRacenet(aliasUpdateRequest.getRequestedAlias());
+        return playerInfoRepository.findByRacenetOrAliases(aliasUpdateRequest.getRequestedAlias());
     }
 
     @Transactional
