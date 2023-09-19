@@ -1,3 +1,5 @@
 spring:
   application:
     name: racenet-authenticator
+  config:
+    import: "optional:configserver:"
