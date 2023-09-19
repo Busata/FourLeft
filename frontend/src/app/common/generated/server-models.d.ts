@@ -1,8 +1,13 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-09-15 00:04:45.
+// Generated using typescript-generator version 2.35.1025 on 2023-09-19 09:45:40.
 
 export interface RoutesTo {
+}
+
+export interface AliasRequestResultTo {
+    aliasExists: boolean;
+    requestId: string;
 }
 
 export interface AliasUpdateDataTo {
