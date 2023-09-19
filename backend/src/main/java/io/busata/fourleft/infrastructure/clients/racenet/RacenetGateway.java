@@ -62,7 +62,7 @@ public class RacenetGateway {
     }
 
     public List<DR2CommunityEvent> getCommunityEvents() {
-        return doAuthorizedCall((headers) -> api.getCommunity(headers));
+        return doAuthorizedCall(api::getCommunity);
     }
 
     private <T> T doAuthorizedCall(Function<HttpHeaders, T> supplier) {
@@ -70,8 +70,11 @@ public class RacenetGateway {
     }
 
     public HttpHeaders getHeaders() {
-        Map<String, String> headers = authorizationApi.getHeaders();
+        Map<String, String> rawHeaders = authorizationApi.getHeaders();
 
-        return new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        rawHeaders.forEach(headers::set);
+
+        return headers;
     }
 }

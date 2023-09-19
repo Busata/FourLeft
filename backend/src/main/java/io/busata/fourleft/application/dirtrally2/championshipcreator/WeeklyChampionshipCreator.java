@@ -1,6 +1,5 @@
 package io.busata.fourleft.application.dirtrally2.championshipcreator;
 
-import com.google.common.collect.Lists;
 import io.busata.fourleft.domain.dirtrally2.clubs.Event;
 import io.busata.fourleft.domain.dirtrally2.clubs.Stage;
 import io.busata.fourleft.domain.dirtrally2.options.CountryOption;

@@ -1,8 +1,6 @@
 package io.busata.fourleft.application.dirtrally2.alias;
 
-import com.beust.ah.A;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.dockerjava.api.exception.BadRequestException;
 import io.busata.fourleft.api.models.AliasUpdateDataTo;
 import io.busata.fourleft.domain.dirtrally2.alias.AliasUpdateLog;
 import io.busata.fourleft.domain.dirtrally2.alias.AliasUpdateRequest;
@@ -49,7 +47,7 @@ public class AliasService {
     @Transactional
     public PlayerInfo updatePlayerInfo(UUID requestId, AliasUpdateDataTo data) {
         if(!requestExists(requestId, data.racenet())) {
-            throw new BadRequestException("Request does not exist or does not match given racenet");
+            throw new RuntimeException("Request does not exist or does not match given racenet");
         }
 
         PlayerInfo existingPlayerInfo = this.playerInfoRepository.getById(data.id());
