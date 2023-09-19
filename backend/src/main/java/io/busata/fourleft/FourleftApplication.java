@@ -1,13 +1,6 @@
 package io.busata.fourleft;
 
-import io.busata.fourleft.infrastructure.configuration.AsyncConfig;
-import io.busata.fourleft.infrastructure.configuration.InterceptorsConfig;
-import io.busata.fourleft.infrastructure.configuration.FeignConfig;
-import io.busata.fourleft.infrastructure.configuration.ImageGenerationConfig;
-import io.busata.fourleft.infrastructure.configuration.KeycloakConfig;
-import io.busata.fourleft.infrastructure.configuration.MessagingConfig;
-import io.busata.fourleft.infrastructure.configuration.SchedulingConfig;
-import io.busata.fourleft.infrastructure.configuration.SecurityConfig;
+import io.busata.fourleft.infrastructure.configuration.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -16,6 +9,7 @@ import org.springframework.context.annotation.Import;
 @Import({
         AsyncConfig.class,
         FeignConfig.class,
+        CachingConfig.class,
         ImageGenerationConfig.class,
         InterceptorsConfig.class,
         KeycloakConfig.class,
