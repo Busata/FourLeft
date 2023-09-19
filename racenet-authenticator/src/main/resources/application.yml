@@ -3,3 +3,6 @@ spring:
     name: racenet-authenticator
   config:
     import: "optional:configserver:"
+
+selenium:
+  url: "http://se-firefox:4444/wd/hub"

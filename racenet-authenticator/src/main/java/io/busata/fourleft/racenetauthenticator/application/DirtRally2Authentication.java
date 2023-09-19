@@ -40,6 +40,9 @@ public class DirtRally2Authentication {
     @Value("${codemasters.pass}")
     private String password;
 
+    @Value("${selenium.url}")
+    private String seleniumUrl;
+
     private LocalDateTime lastCookieRefresh;
 
     public void refreshLogin() {
@@ -78,10 +81,10 @@ public class DirtRally2Authentication {
         }
     }
 
-    private static WebDriver createDriver() {
+    private WebDriver createDriver() {
         WebDriver driver;
         try {
-            driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), new FirefoxOptions());
+            driver = new RemoteWebDriver(new URL(this.seleniumUrl), new FirefoxOptions());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
