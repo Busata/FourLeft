@@ -31,8 +31,6 @@ import java.util.List;
 
 @FeignClient(name="racenetapi", url="https://dirtrally2.dirtgame.com/", configuration = FeignConfiguration.class)
 interface RacenetApi {
-    @GetMapping(value = "api/ClientStore/GetInitialState", produces = MediaType.APPLICATION_JSON_VALUE)
-    DR2InitialState getInitialState(@RequestHeader HttpHeaders headers);
 
     @GetMapping("api/Club/{clubId}")
     DR2ClubDetails getClubDetails(@RequestHeader HttpHeaders headers, @PathVariable("clubId") long clubId);

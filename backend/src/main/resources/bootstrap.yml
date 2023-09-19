@@ -19,3 +19,5 @@ feign:
     disable-ssl-validation: true
 
 
+racenetauthentication:
+  url: "http://racenet-authenticator/"
