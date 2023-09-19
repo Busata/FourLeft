@@ -58,14 +58,10 @@ public class DirtRally2Authentication {
                 }
             }
 
-            log.info("Creating firefox driver");
 
-
-            log.info("Logging in manually, creating headers");
             Map<String, Cookie> authCookies = getAuthCookies(driver);
             apiHeaders = buildApiHeaders(authCookies);
 
-            log.info("Getting XSRFH token");
 
             updateXSRFHToken();
 
@@ -130,7 +126,6 @@ public class DirtRally2Authentication {
 
     private HttpHeaders buildApiHeaders(Map<String,Cookie> cookieMap) {
 
-        log.info("Cookiemap: {}", cookieMap.size());
         HttpHeaders httpHeaders = new HttpHeaders();
         String cookieHeader = Stream.of("RaceNet", "RaceNet.XSRFC")
                 .map(cookieMap::get)
@@ -138,7 +133,6 @@ public class DirtRally2Authentication {
                 .collect(Collectors.joining("; "));
 
         httpHeaders.add("Cookie", cookieHeader);
-        log.info("Cookie: {}", cookieHeader);
 
         return httpHeaders;
     }
