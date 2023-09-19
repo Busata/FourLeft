@@ -69,6 +69,8 @@ public class RacenetGateway {
         return supplier.apply(getHeaders());
     }
 
+
+    @Cacheable("authorization_headers")
     public HttpHeaders getHeaders() {
         Map<String, String> rawHeaders = authorizationApi.getHeaders();
 

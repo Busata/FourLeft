@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class CachingConfig {
     @Bean
     public CacheManager cacheManager() {
-        final var cacheManager = new CaffeineCacheManager("authorization_headers", "channel_configurations", "view_results","discord-user-guilds");
+        final var cacheManager = new CaffeineCacheManager("authorization_headers");
         cacheManager.setCaffeine(caffeineCacheBuilder());
         return cacheManager;
     }
