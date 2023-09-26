@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>backend</module>
+        <module>backend-dirtrally2</module>
         <module>api</module>
         <module>discord</module>
         <module>frontend</module>

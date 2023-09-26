@@ -114,6 +114,7 @@ public class DirtRally2Authentication {
 
         driver.findElement(By.xpath("/html/body/div[1]/div[1]/div/main/div[1]/div/h3"));
 
+
         Set<Cookie> cookies = driver.manage().getCookies();
 
         Map<String, Cookie> cookieMap = new HashMap<>();
