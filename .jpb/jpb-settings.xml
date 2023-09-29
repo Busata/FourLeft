@@ -45,6 +45,11 @@
           <package value="io.busata.fourleft" />
         </packages>
       </persistence-unit>
+      <persistence-unit moduleName="backend-wrc" name="Default">
+        <packages>
+          <package value="io.busata.fourleft.backendwrc" />
+        </packages>
+      </persistence-unit>
     </persistence-units>
   </component>
 </project>
