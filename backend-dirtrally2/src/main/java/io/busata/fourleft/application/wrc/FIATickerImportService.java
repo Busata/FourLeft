@@ -9,6 +9,7 @@ import io.busata.fourleft.infrastructure.clients.wrc.TickerEntryImageTo;
 import io.busata.fourleft.infrastructure.clients.wrc.TickerSummaryTo;
 import io.busata.fourleft.domain.wrc.FIATickerEntry;
 import io.busata.fourleft.domain.wrc.FIATickerEntryRepository;
+import io.busata.fourleft.infrastructure.clients.wrc.WRCLiveUpdatesTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,8 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FIATickerImportService {
-    private static final String activeEventId = "2150";
-    private static final String activeContentPageId = "310826";
+    private static final String activeEventId = "363";
 
     private final WRCApiClient client;
 
@@ -40,14 +41,16 @@ public class FIATickerImportService {
 
 
     public void importTickerEntries(boolean triggerEvents) {
-        TickerSummaryTo tickerSummary = client.getTickerSummary(activeEventId, activeContentPageId);
+        WRCLiveUpdatesTo tickerSummary = client.getLiveUpdates(activeEventId);
 
         Long currentTickerEntryCount = fiaTickerEntryRepository.countByEventId(activeEventId);
 
-        long tickerEntryDelta = tickerSummary.total() - currentTickerEntryCount;
+        int total = tickerSummary.items().size();
+
+        long tickerEntryDelta = total - currentTickerEntryCount;
 
         if (tickerEntryDelta == 0) {
-            log.info("No new ticker entries found new: {} current: {} ", tickerSummary.total(), currentTickerEntryCount);
+            log.info("No new ticker entries found new: {} current: {} ", total, currentTickerEntryCount);
             return;
         }
 
@@ -56,20 +59,33 @@ public class FIATickerImportService {
         final var existingEntries = fiaTickerEntryRepository.findByEventId(activeEventId);
         final var existingEntryIds = existingEntries.stream().map(FIATickerEntry::getReferenceId).collect(Collectors.toList());
 
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+
+
         List<FIATickerEntry> newEntries = tickerSummary.items().stream().filter(tickerEntry -> !existingEntryIds.contains(tickerEntry.id()))
-                .map(tickerEntry -> {
-                    long dateTimeUnix = Long.parseLong(tickerEntry.datetimeUnix());
-                    return FIATickerEntry.builder()
-                            .eventId(activeEventId)
-                            .referenceId(tickerEntry.id())
-                            .time(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUnix), ZoneOffset.UTC))
-                            .title(tickerEntry.title())
-                            .textHtml(tickerEntry.text())
-                            .textMarkdown(convertTextToMarkdown(tickerEntry.text()))
-                            .tickerEntryImageUrl(tickerEntry.tickerEntryImage().map(TickerEntryImageTo::image).orElse(null))
-                            .tickerEventKey(tickerEntry.tickerEvent().typeKey())
-                            .source(TickerEntrySource.WRC)
-                            .build();
+                .flatMap(tickerEntry -> {
+                    ZonedDateTime dateTime = ZonedDateTime.parse(tickerEntry.eventTime(), formatter);
+
+                    var textEntries = tickerEntry.contents().stream().filter(contentsTo -> contentsTo.type().equals("RICHTEXT"))
+                            .map(contentsTo -> {
+                                return FIATickerEntry.builder()
+                                        .eventId(activeEventId)
+                                        .referenceId(tickerEntry.id())
+                                        .time(dateTime)
+                                        .title(tickerEntry.title())
+                                        .textHtml(contentsTo.value())
+                                        .textMarkdown(convertTextToMarkdown(contentsTo.value()))
+                                        .tickerEventKey(tickerEntry.category().title())
+                                        .source(TickerEntrySource.WRC);
+                            }).toList();
+
+                    tickerEntry.contents().stream().filter(contentsTo -> contentsTo.type().equals("IMAGE")).findFirst().ifPresent(imageContents -> {
+                        textEntries.get(0).tickerEntryImageUrl(imageContents.media().fileName());
+                    });
+
+                    return textEntries.stream().map(FIATickerEntry.FIATickerEntryBuilder::build);
+
                 }).collect(Collectors.toList());
 
         List<FIATickerUpdateTo> list = newEntries.stream().map(newEntry -> new FIATickerUpdateTo(
