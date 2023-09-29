@@ -16,6 +16,7 @@
     <modules>
         <module>backend-dirtrally2</module>
         <module>backend-wrc</module>
+        <module>backend-eawrc</module>
         <module>api</module>
         <module>discord</module>
         <module>frontend</module>
