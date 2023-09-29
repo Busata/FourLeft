@@ -41,7 +41,7 @@ public class FIATickerImportService {
 
 
     public void importTickerEntries(boolean triggerEvents) {
-        WRCLiveUpdatesTo tickerSummary = client.getLiveUpdates(activeEventId);
+        WRCLiveUpdatesTo tickerSummary = client.getLiveUpdates();
 
         Long currentTickerEntryCount = fiaTickerEntryRepository.countByEventId(activeEventId);
 

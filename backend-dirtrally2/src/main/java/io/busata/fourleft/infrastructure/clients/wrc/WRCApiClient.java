@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name="wrc", url = "https://api.wrc.com/")
 public interface WRCApiClient {
-    @GetMapping("/content/result/liveUpdates?eventId={eventId}")
-    WRCLiveUpdatesTo getLiveUpdates(@Param String eventId);
+    @GetMapping("/content/result/liveUpdates?eventId=363")
+    WRCLiveUpdatesTo getLiveUpdates();
 }
