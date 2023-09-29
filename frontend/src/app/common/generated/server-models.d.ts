@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-09-29 11:27:54.
+// Generated using typescript-generator version 2.35.1025 on 2023-09-29 12:59:16.
 
 export interface RoutesTo {
 }
