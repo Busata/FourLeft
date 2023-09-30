@@ -28,7 +28,7 @@ export class UserCommunityProgressComponent implements OnInit {
 
   public generateUrl() {
     let encoded = encodeURIComponent(this.racenet);
-    this.generatedUrl = `https://fourleft.busata.io/api/external/users/community/progression?query=${encoded}`;
+    this.generatedUrl = `https://fourleft.io/api/external/users/community/progression?query=${encoded}`;
     if (this.includeNickname) {
       this.generatedUrl += "&includeName=true";
     }

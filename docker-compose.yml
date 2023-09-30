@@ -5,8 +5,8 @@ services:
     container_name: fourleft-reverse-proxy
     restart: always
     environment:
-      - VIRTUAL_HOST=fourleft.busata.io
-      - LETSENCRYPT_HOST=fourleft.busata.io
+      - VIRTUAL_HOST=fourleft.io
+      - LETSENCRYPT_HOST=fourleft.io
 networks:
   default:
     name: veevi

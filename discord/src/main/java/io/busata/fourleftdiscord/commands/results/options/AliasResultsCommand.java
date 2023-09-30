@@ -87,7 +87,7 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
 
             AliasRequestResultTo aliasRequestResultTo = api.requestAliasUpdate(new AliasUpdateRequestTo(username, event.getInteraction().getUser().getId().asString()));
             if (aliasRequestResultTo.aliasExists()) {
-                return evt.createFollowup("Update the alias [here](https://fourleft.busata.io/alias/" + aliasRequestResultTo.requestId() + ").").withEphemeral(true);
+                return evt.createFollowup("Update the alias [here](https://fourleft.io/alias/" + aliasRequestResultTo.requestId() + ").").withEphemeral(true);
             } else {
                 return evt.createFollowup("No racenet or alias was found for this request.");
             }

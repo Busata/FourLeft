@@ -77,7 +77,7 @@ public class ClubEventResultMessageFactory {
 
     protected List<EmbedCreateSpec> create(UUID viewId, ViewResultTo clubResult, MessageTemplate entryTemplate, boolean powerstageOnly) {
         List<EmbedCreateSpec> specs = new ArrayList<>();
-        String resultsUrl = "https://fourleft.busata.io/results/%s".formatted(viewId);
+        String resultsUrl = "https://fourleft.io/results/%s".formatted(viewId);
 
         var builder = EmbedCreateSpec.builder();
 
