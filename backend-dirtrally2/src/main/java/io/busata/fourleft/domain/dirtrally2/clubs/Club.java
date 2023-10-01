@@ -101,7 +101,18 @@ public class Club {
 
     public void merge(List<Championship> championships) {
         var replacedWithUpdated = getChampionships().stream()
-                .map(current -> championships.stream().filter(updated -> updated.equals(current)).findFirst().orElse(current))
+                .map(current -> {
+                    Championship championship = championships.stream().filter(updated -> updated.equals(current)).findFirst().orElse(current);
+
+                    if(championship != current){
+                        championship.getEvents().forEach(updatedEvent -> {
+                            current.getEvents().stream().filter(e -> e.getReferenceId().equals(updatedEvent.getReferenceId())).findFirst().ifPresent(currentEvt -> {
+                                updatedEvent.setLastResultCheckedTime(currentEvt.getLastResultCheckedTime());
+                            });
+                        });
+                    }
+                    return championship;
+                })
                 .collect(Collectors.toList());
 
         for (Championship updated : championships) {
