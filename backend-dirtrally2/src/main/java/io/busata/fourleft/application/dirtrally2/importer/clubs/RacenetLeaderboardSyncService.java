@@ -46,10 +46,12 @@ class RacenetLeaderboardSyncService {
     }
 
     private void updateEventLeaderboards(Event event) {
+        var stagesSize = event.getStages().size();
         ImmutableList.copyOf(event.getStages()).forEach(stage -> {
             try {
                 log.info("-- -- Updating for event {}, stage {}", event.getName(), stage.getName());
-                leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()), true);
+                boolean updatePlatform = (stagesSize - 1) == stage.getReferenceId();
+                leaderboardFetcher.upsertBoard(event.getChallengeId(), event.getReferenceId(), String.valueOf(stage.getReferenceId()), updatePlatform);
                 event.setLastResultCheckedTime(LocalDateTime.now());
                 eventRepository.save(event);
             } catch (FeignException.InternalServerError | RetryableException ex) {
