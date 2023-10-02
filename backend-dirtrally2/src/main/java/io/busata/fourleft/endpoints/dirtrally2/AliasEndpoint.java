@@ -36,6 +36,7 @@ public class AliasEndpoint {
                        playerInfo.getController(),
                        playerInfo.getPlatform(),
                      playerInfo.getRacenet(),
+                       playerInfo.isTrackCommunity(),
                      playerInfo.getAliases().stream().toList());
         }).orElseThrow();
     }
@@ -50,6 +51,7 @@ public class AliasEndpoint {
                 playerInfo.getController(),
                 playerInfo.getPlatform(),
                 playerInfo.getRacenet(),
+                playerInfo.isTrackCommunity(),
                 playerInfo.getAliases().stream().toList());
     }
 

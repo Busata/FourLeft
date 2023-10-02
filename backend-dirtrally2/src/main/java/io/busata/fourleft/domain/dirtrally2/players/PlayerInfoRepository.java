@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,5 +15,9 @@ public interface PlayerInfoRepository extends JpaRepository<PlayerInfo, UUID> {
 
     @Query(value = "select pi from PlayerInfo pi where pi.racenet=:racenet")
     Optional<PlayerInfo> findByRacenet(@Param("racenet") String racenet);
+
+
+    @Query(value = "select pi from PlayerInfo pi where pi.trackCommunity=true")
+    List<PlayerInfo> findTrackedPlayers();
 
 }

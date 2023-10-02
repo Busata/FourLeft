@@ -50,6 +50,10 @@ public class PlayerInfo {
     ControllerType controller;
 
     @Setter
+    boolean trackCommunity;
+
+
+    @Setter
     boolean syncedPlatform;
 
     public PlayerInfo(String racenet) {
@@ -58,6 +62,7 @@ public class PlayerInfo {
         this.platform = Platform.UNKNOWN;
         this.controller = ControllerType.UNKNOWN;
         this.syncedPlatform = false;
+        this.trackCommunity = false;
     }
 
 
@@ -71,5 +76,9 @@ public class PlayerInfo {
     public void updateAliases(List<String> aliases) {
         this.aliases.clear();
         this.aliases.addAll(aliases);
+    }
+
+    public boolean matchesName(String name) {
+        return this.racenet.equals(name) || this.aliases.contains(name);
     }
 }

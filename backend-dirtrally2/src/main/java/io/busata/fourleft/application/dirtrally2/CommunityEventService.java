@@ -11,10 +11,13 @@ import io.busata.fourleft.domain.dirtrally2.community.CommunityChallengeReposito
 import io.busata.fourleft.domain.dirtrally2.community.CommunityLeaderboardTrackingRepository;
 import io.busata.fourleft.domain.dirtrally2.clubs.BoardEntry;
 import io.busata.fourleft.domain.dirtrally2.clubs.LeaderboardRepository;
+import io.busata.fourleft.domain.dirtrally2.players.PlayerInfo;
+import io.busata.fourleft.domain.dirtrally2.players.PlayerInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
@@ -32,23 +35,25 @@ public class CommunityEventService {
     private final CommunityChallengeRepository challengeRepository;
 
     private final LeaderboardRepository leaderboardRepository;
-    public CommunityLeaderboardTrackingTo trackUser(String racenet, String alias) {
 
-        CommunityLeaderboardTracking tracking = new CommunityLeaderboardTracking();
-        log.info("{} has requested to be tracked for results", racenet);
-        tracking.setRacenet(racenet);
-        tracking.setAlias(alias);
+    private final PlayerInfoRepository playerInfoRepository;
 
-        return create(trackingRepository.save(tracking));
+
+    @Transactional
+    public CommunityLeaderboardTrackingTo trackUser(String racenet) {
+
+        PlayerInfo playerInfo = playerInfoRepository.findByRacenetOrAliases(racenet).orElseThrow();
+        playerInfo.setTrackCommunity(true);
+
+        return create(playerInfoRepository.save(playerInfo));
     }
 
     public List<CommunityLeaderboardTrackingTo> getTrackedUsers() {
-        return trackingRepository.findAll().stream().map(this::create).toList();
+        return playerInfoRepository.findTrackedPlayers().stream().map(this::create).toList();
     }
 
-    public CommunityLeaderboardTrackingTo create(CommunityLeaderboardTracking tracking) {
-        return new CommunityLeaderboardTrackingTo(tracking.getId(), tracking.getRacenet(), tracking.getAlias(),
-                true, true, true, true);
+    public CommunityLeaderboardTrackingTo create(PlayerInfo tracking) {
+        return new CommunityLeaderboardTrackingTo(tracking.getId(), tracking.getRacenet(), tracking.getDisplayName(), true, true, true, true);
     }
 
     public void deleteTrackedUser(UUID id) {
@@ -56,21 +61,17 @@ public class CommunityEventService {
     }
 
     public List<CommunityChallengeSummaryTo> getResults() {
-        final var trackedUsers = trackingRepository.findAll();
         return challengeRepository.findBySyncedTrueAndEndedTrue().stream()
                 .filter(challenge -> challenge.getEndTime().toLocalDate().equals(LocalDate.now(ZoneId.systemDefault())))
-                .map(challenge -> createCommunityChallengeSummary(trackedUsers, challenge)).collect(Collectors.toList());
+                .map(this::createCommunityChallengeSummary).collect(Collectors.toList());
     }
 
-    private CommunityChallengeSummaryTo createCommunityChallengeSummary(List<CommunityLeaderboardTracking> trackedUsers, CommunityChallenge challenge) {
+    private CommunityChallengeSummaryTo createCommunityChallengeSummary( CommunityChallenge challenge) {
         final var leaderboard = challenge.getLeaderboardKey()
                 .flatMap(leaderboardRepository::findLeaderboard)
                 .orElseThrow();
 
         int totalRanks = leaderboard.getEntries().size();
-
-
-
 
         final var sortedEntries = leaderboard
                 .getEntries()
@@ -81,11 +82,9 @@ public class CommunityEventService {
         final var topOnePercentEntry = sortedEntries.get((int) onePercentRank);
 
         List<CommunityChallengeBoardEntryTo> entries = sortedEntries.stream()
-                .filter(boardEntry -> trackedUsers.stream().anyMatch(trackedUser -> trackedUser.getRacenet().equalsIgnoreCase(boardEntry.getName())))
-                .map(boardEntry -> {
-                    final var trackedUser = trackedUsers.stream().filter(user -> user.getRacenet().equalsIgnoreCase(boardEntry.getName())).findFirst().orElseThrow();
-                    return createEntry(totalRanks, boardEntry, trackedUser.getAlias());
-                }).collect(Collectors.toList());
+                .filter(boardEntry -> boardEntry.getPlayerInfo().isTrackCommunity())
+                .map(boardEntry -> createEntry(totalRanks, boardEntry, boardEntry.getPlayerInfo().getDisplayName()))
+                .collect(Collectors.toList());
 
 
         return new CommunityChallengeSummaryTo(
@@ -146,6 +145,6 @@ public class CommunityEventService {
                     }
                     return present;
                 })
-                .map(challenge -> createCommunityChallengeSummary(trackedUsers, challenge)).collect(Collectors.toList());
+                .map(this::createCommunityChallengeSummary).collect(Collectors.toList());
     }
 }

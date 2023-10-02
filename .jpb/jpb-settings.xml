@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DatabaseMigrationSettings" lastSelectedDirectory="backend/src/main/resources/db/migration" />
+  <component name="DatabaseMigrationSettings" lastSelectedDirectory="backend-dirtrally2/src/main/resources/db/migration/" />
   <component name="JpaLiquibaseChangesConfig">
     <exclude-change idName="event#archived" tagName="addNotNullConstraint" />
     <exclude-change idName="club_member#championship_bronzes" tagName="addNotNullConstraint" />
@@ -37,6 +37,11 @@
     <exclude-change idName="fiaticker_entry#ticker_entry_image_url" tagName="modifyDataType" />
     <exclude-change idName="fiaticker_entry#ticker_event_key" tagName="modifyDataType" />
     <exclude-change idName="fiaticker_entry#title" tagName="modifyDataType" />
+    <exclude-change idName="player_info_aliases#aliases" tagName="modifyDataType" />
+    <exclude-change idName="alias_update_log#changes" tagName="modifyDataType" />
+    <exclude-change idName="alias_update_log#discord_id" tagName="modifyDataType" />
+    <exclude-change idName="alias_update_request#discord_id" tagName="modifyDataType" />
+    <exclude-change idName="alias_update_request#requested_alias" tagName="modifyDataType" />
   </component>
   <component name="PersistenceUnitSettings">
     <persistence-units>
@@ -48,6 +53,11 @@
       <persistence-unit moduleName="backend-wrc" name="Default">
         <packages>
           <package value="io.busata.fourleft.backendwrc" />
+        </packages>
+      </persistence-unit>
+      <persistence-unit moduleName="backend-dirtrally2" name="Default">
+        <packages>
+          <package value="io.busata.fourleft" />
         </packages>
       </persistence-unit>
     </persistence-units>

@@ -7,6 +7,7 @@ export class AliasForm extends FormGroup {
   readonly displayName = this.get('displayName') as FormControl;
   readonly platform = this.get('platform') as FormControl;
   readonly controller = this.get('controller') as FormControl;
+  readonly trackCommunity = this.get('trackCommunity') as FormControl;
   readonly racenet = this.get('racenet') as FormControl;
   readonly aliases = this.get('aliases') as FormArray;
 
@@ -18,6 +19,7 @@ export class AliasForm extends FormGroup {
       platform: new FormControl(data?.platform, {}),
       controller: new FormControl(data?.controller, {}),
       racenet: new FormControl(data?.racenet, {}),
+      trackCommunity: new FormControl(data?.trackCommunity, {}),
       aliases: new FormArray(data?.aliases?.map(alias => new FormControl(alias, {})) || []),
     });
 

@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-10-01 12:37:20.
+// Generated using typescript-generator version 2.35.1025 on 2023-10-02 22:24:03.
 
 export interface RoutesTo {
 }
@@ -16,6 +16,7 @@ export interface AliasUpdateDataTo {
     controller: ControllerType;
     platform: Platform;
     racenet: string;
+    trackCommunity: boolean;
     aliases: string[];
 }
 
@@ -255,7 +256,6 @@ export interface StandingPointPairTo {
 
 export interface TrackUserRequestTo {
     racenet: string;
-    alias: string;
 }
 
 export interface VehicleEntryTo {

@@ -21,7 +21,13 @@
       <option value="KEYBOARD">Keyboard</option>
       <option value="UNKNOWN">Other</option>
     </select>
-  </div>  <div class="form-group">
+  </div>
+  <div class="form-group">
+    <label>Track community challenges?</label>
+    <input type="checkbox" [formControl]="form.trackCommunity">
+  </div>
+
+  <div class="form-group">
     <label>Racenet (Cannot be changed)</label>
     <input type="text"  [formControl]="form.racenet"/>
   </div>

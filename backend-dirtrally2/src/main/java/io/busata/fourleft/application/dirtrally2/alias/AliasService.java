@@ -94,6 +94,7 @@ public class AliasService {
         existingPlayerInfo.setPlatform(data.platform());
         existingPlayerInfo.setDisplayName(data.displayName());
         existingPlayerInfo.setSyncedPlatform(true);
+        existingPlayerInfo.setTrackCommunity(data.trackCommunity());
         existingPlayerInfo.updateAliases(data.aliases());
 
         return this.playerInfoRepository.save(existingPlayerInfo);

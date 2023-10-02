@@ -26,7 +26,7 @@ public class CommunityEventsEndpoint {
 
     @PostMapping(RoutesTo.COMMUNITY_TRACK_USER)
     CommunityLeaderboardTrackingTo trackUserRequest(@RequestBody TrackUserRequestTo userRequestTo) {
-        return communityEventService.trackUser(userRequestTo.racenet(), userRequestTo.alias());
+        return communityEventService.trackUser(userRequestTo.racenet());
     }
 
     @GetMapping(RoutesTo.GET_TRACKED_USERS)

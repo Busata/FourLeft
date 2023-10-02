@@ -12,6 +12,7 @@ public record AliasUpdateDataTo (
         ControllerType controller,
         Platform platform,
         String racenet,
+        boolean trackCommunity,
         List<String> aliases
 
 ) {
