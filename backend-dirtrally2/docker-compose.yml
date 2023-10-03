@@ -16,6 +16,7 @@ services:
       - db.fourleft
   db.fourleft:
     container_name: db.fourleft
+    restart: always
     image: postgres:15
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -29,3 +30,4 @@ volumes:
 networks:
   default:
     name: veevi
+    external: true

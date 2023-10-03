@@ -14,7 +14,8 @@ services:
       - db.fourleft_discord
   db.fourleft_discord:
     container_name: db.fourleft_discord
-    image: postgres
+    restart: always
+    image: postgres:10
     volumes:
       - pgdatafourleftdiscord:/var/lib/postgresql/data
     environment:
@@ -27,3 +28,4 @@ volumes:
 networks:
   default:
     name: veevi
+    external: true

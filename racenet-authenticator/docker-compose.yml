@@ -22,3 +22,4 @@ services:
 networks:
   default:
     name: veevi
+    external: true
