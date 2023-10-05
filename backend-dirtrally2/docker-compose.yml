@@ -17,9 +17,9 @@ services:
   db.fourleft:
     container_name: db.fourleft
     restart: always
-    image: postgres:15
+    image: postgres:16
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - /mnt/docker-data/backend-dirtrally2:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
       - POSTGRES_USER=${POSTGRES_USER}

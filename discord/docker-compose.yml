@@ -17,7 +17,7 @@ services:
     restart: always
     image: postgres:10
     volumes:
-      - pgdatafourleftdiscord:/var/lib/postgresql/data
+      - /mnt/docker-data/discord:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
       - POSTGRES_USER=${POSTGRES_USER}
