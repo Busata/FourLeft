@@ -20,4 +20,4 @@ feign:
 
 
 racenetauthentication:
-  url: "http://racenet-authenticator:8082/"
+  url: "http://spring.racenet-authenticator:8082/"

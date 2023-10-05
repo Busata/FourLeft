@@ -16,9 +16,9 @@ services:
       - db.backend-wrc
   db.backend-wrc:
     container_name: db.backend-wrc
-    image: postgres:15
+    image: postgres:16
     volumes:
-      - backendwrcdata:/var/lib/postgresql/data
+      - /mnt/docker-data/backend-wrc:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
       - POSTGRES_USER=${POSTGRES_USER}

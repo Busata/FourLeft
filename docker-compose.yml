@@ -1,6 +1,115 @@
 version: '3.5'
 services:
-  fourleft-reverse-proxy:
+  db.rabbitmq:
+    image: rabbitmq:management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - /mnt/docker-data/rabbitmq:/var/lib/rabbitmq
+  db.fourleft:
+    container_name: db.fourleft
+    restart: always
+    image: postgres:16
+    volumes:
+      - /mnt/docker-data/backend-dirtrally2:/var/lib/postgresql/data
+    environment:
+      - DB_FOURLEFT_POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - DB_FOURLEFT_POSTGRES_USER=${POSTGRES_USER}
+      - DB_FOURLEFT_POSTGRES_DB=${POSTGRES_DB}
+  db.fourleft_discord:
+    container_name: db.fourleft_discord
+    restart: always
+    image: postgres:10
+    volumes:
+      - /mnt/docker-data/discord:/var/lib/postgresql/data
+    environment:
+      - DB_FOURLEFT_DISCORD_POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - DB_FOURLEFT_DISCORD_POSTGRES_USER=${POSTGRES_USER}
+      - DB_FOURLEFT_DISCORD_POSTGRES_DB=${POSTGRES_DB}
+  db.backend-wrc:
+    container_name: db.backend-wrc
+    image: postgres:16
+    volumes:
+      - /mnt/docker-data/backend-wrc:/var/lib/postgresql/data
+    environment:
+      - DB_BACKEND_WRC_POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - DB_BACKEND_WRC_POSTGRES_USER=${POSTGRES_USER}
+      - DB_BACKEND_WRC_POSTGRES_DB=${POSTGRES_DB}
+  spring.fourleft.backend-wrc:
+    build: backend-wrc
+    container_name: spring.backend-wrc
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=db.rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db.backend-wrc
+  spring.fourleft.backend-dirtrally2:
+    build: backend-dirtrally2
+    container_name: spring.fourleft.backend-dirtrally2
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=db.rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db.fourleft
+      - db.rabbitmq
+      - spring.racenet-authenticator
+  spring.fourleft.discord:
+    build: discord
+    container_name: spring.fourleft.discord
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=db.rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    depends_on:
+      - db.fourleft_discord
+      - db.rabbitmq
+      - spring.fourleft.backend-dirtrally2
+  proxy.fourleft_frontend:
+    build: frontend
+    ports:
+      - target: 80
+        published: 9080
+        protocol: tcp
+        mode: host
+    restart: always
+    container_name: proxy.fourleft_frontend
+  spring.racenet-authenticator:
+    build: racenet-authenticator
+    container_name: spring.racenet-authenticator
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8082:8082"
+    depends_on:
+      - helper.se-firefox
+  helper.se-firefox:
+    build: firefox
+    restart: always
+    container_name: helper.se-firefox
+    ports:
+      - "4444:4444"
+  proxy.fourleft-reverse-proxy:
     build: devops/reverse-proxy
     container_name: fourleft-reverse-proxy
     restart: always
