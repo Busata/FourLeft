@@ -1,17 +1,13 @@
 package io.busata.fourleft.endpoints.discord;
 
 import io.busata.fourleft.api.RoutesTo;
-import io.busata.fourleft.api.models.discord.DiscordAuthenticationStatusTo;
-import io.busata.fourleft.api.models.discord.DiscordChannelSummaryTo;
-import io.busata.fourleft.api.models.discord.DiscordGuildMemberTo;
-import io.busata.fourleft.api.models.discord.DiscordGuildPermissionTo;
-import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
-import io.busata.fourleft.api.models.discord.DiscordGuildTo;
+import io.busata.fourleft.api.models.discord.*;
 import io.busata.fourleft.application.discord.DiscordGuildMemberFactory;
 import io.busata.fourleft.application.discord.DiscordIntegrationService;
 import io.busata.fourleft.application.discord.DiscordMemberUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -73,6 +69,12 @@ public class DiscordIntegrationEndpoint {
     public List<DiscordChannelSummaryTo> getChannels(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getGuildChannels(guildId);
     }
+
+    @PostMapping(RoutesTo.DISCORD_MEMBER_EVENT)
+    public void handleMemberEvent(@PathVariable(name="guildId") String guildId, @RequestBody DiscordGuildMemberEventTo memberEvent) {
+        this.discordIntegrationService.handleMemberEvent(guildId, memberEvent.discordId(), memberEvent.username(), memberEvent.memberEvent());
+    }
+
     @GetMapping(RoutesTo.DISCORD_GUILD_MEMBERS)
     public List<DiscordGuildMemberTo> getMembers(@PathVariable(name="guildId") String guildId) {
         return this.discordIntegrationService.getMembers(guildId).stream().map(discordGuildMemberFactory::create).toList();

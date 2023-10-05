@@ -2,6 +2,8 @@ package io.busata.fourleftdiscord.commands;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
+import discord4j.core.event.domain.guild.MemberLeaveEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
@@ -9,6 +11,10 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
+import io.busata.fourleft.api.models.discord.DiscordGuildMemberEventTo;
+import io.busata.fourleft.common.MemberEvent;
+import io.busata.fourleft.common.MessageType;
+import io.busata.fourleftdiscord.client.FourLeftClient;
 import io.busata.fourleftdiscord.messages.DiscordMessageGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +40,12 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
     private final DiscordMessageGateway discordMessageGateway;
 
+    private final FourLeftClient fourLeftClient;
+
     @PostConstruct
     public void createCommand() {
-
         client.on(ButtonInteractionEvent.class, event -> {
-            if(event.getCustomId().equals("remove")) {
+            if (event.getCustomId().equals("remove")) {
                 return event.getInteraction().getMessageId().map(messageId -> {
 
                     Snowflake channelId = event.getInteraction().getChannelId();
@@ -50,7 +57,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
                     log.info("Original message user: {}, Button user: {} (ids: {}, {})", messageAuthor.getUsername(), buttonUser.getUsername(), messageAuthor.getId(), buttonUser.getId());
 
-                    if(messageAuthor.getId().equals(buttonUser.getId())) {
+                    if (messageAuthor.getId().equals(buttonUser.getId())) {
                         discordMessageGateway.removeMessage(channelId, messageId);
                         return Mono.empty();
                     } else {
@@ -61,8 +68,35 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
                 return Mono.empty();
             }
         }).subscribe();
-        long applicationId = client.getRestClient().getApplicationId().block();
 
+        client.on(MemberJoinEvent.class, event -> {
+            return Mono.just(event).flatMap(MemberJoinEvent::getGuild).map(guild -> {
+                fourLeftClient.notifyMemberEvent(new DiscordGuildMemberEventTo(
+                        event.getMember().getId().toString(),
+                        event.getMember().getDisplayName(),
+                        MemberEvent.JOINED
+                ));
+
+                return Mono.empty();
+            });
+        }).subscribe();
+
+        client.on(MemberLeaveEvent.class, event -> {
+            return Mono.just(event).flatMap(MemberLeaveEvent::getGuild).map(guild -> {
+                event.getMember().ifPresent(member -> {
+                    fourLeftClient.notifyMemberEvent(new DiscordGuildMemberEventTo(
+                            member.getId().toString(),
+                            member.getDisplayName(),
+                            MemberEvent.JOINED
+                    ));
+                });
+
+                return Mono.empty();
+            });
+        }).subscribe();
+
+
+        long applicationId = client.getRestClient().getApplicationId().block();
 
 
         //deleteExistingCommands(applicationId);
@@ -71,25 +105,25 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
 //        List.of(DiscordGuilds.BUSATA_DISCORD).forEach(guild -> {
 //            commands.forEach(commandRequest -> {
-            commands.forEach(commandRequest -> {
-                client.getRestClient().getApplicationService()
-                        .createGlobalApplicationCommand(applicationId, commandRequest)
-                        .subscribe();
-            });
+//        commands.forEach(commandRequest -> {
+//            client.getRestClient().getApplicationService()
+//                    .createGlobalApplicationCommand(applicationId, commandRequest)
+//                    .subscribe();
+//        });
 //        });
     }
 
     private void deleteExistingCommands(long applicationId) {
 //        List.of(DiscordGuilds.DIRTY_DISCORD, DiscordGuilds.BUSATA_DISCORD, DiscordGuilds.GRF_DISCORD, DiscordGuilds.SCOTTISH_RALLY_GROUP).forEach(guild -> {
-            List<Id> discordCommands = client.getRestClient()
-                    .getApplicationService()
-                    .getGlobalApplicationCommands(applicationId)
-                    .map(ApplicationCommandData::id)
-                    .collectList().block();
+        List<Id> discordCommands = client.getRestClient()
+                .getApplicationService()
+                .getGlobalApplicationCommands(applicationId)
+                .map(ApplicationCommandData::id)
+                .collectList().block();
 
-            discordCommands.forEach(commandId -> {
-                client.getRestClient().getApplicationService().deleteGlobalApplicationCommand(applicationId, commandId.asLong()).subscribe();
-            });
+        discordCommands.forEach(commandId -> {
+            client.getRestClient().getApplicationService().deleteGlobalApplicationCommand(applicationId, commandId.asLong()).subscribe();
+        });
     }
 
     @Override
@@ -105,7 +139,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
                         evt.getInteraction()
                                 .getChannel()
                                 .flatMap(channel -> {
-                                    if(handler.canRespond(channel.getId())) {
+                                    if (handler.canRespond(channel.getId())) {
                                         return handler.handle(evt, channel);
                                     } else {
                                         return event.reply("Sorry, I'm not listening to this command in this channel.").withEphemeral(true).then();

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuildMember, UUID> {
@@ -12,6 +13,7 @@ public interface DiscordGuildMemberRepository extends JpaRepository<DiscordGuild
     void deleteByGuildId(String id);
 
     List<DiscordGuildMember> findByGuildId(String guildId);
+    void deleteByGuildIdAAndDiscordId(String guildId, String discordId);
 
     @Query(value = "select * from discord_guild_member where discord_id in (select user_discord_guild_access_discord_id as \"id\" from user_discord_guild_access_guild_ids where guild_ids = :guildId)", nativeQuery = true)
     List<DiscordGuildMember> findGuildAdministrators(@Param("guildId") String guildId);

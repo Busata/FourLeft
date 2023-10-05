@@ -17,10 +17,4 @@ public class DiscordUpdateSchedule {
         log.info("Startup update of discord server members");
         updater.sync();
     }
-
-    @Scheduled(cron = "0 0 */6 * * *", zone="UTC")
-    public void updateChallenges() {
-        log.info("Updating discord members");
-        updater.sync();
-    }
 }

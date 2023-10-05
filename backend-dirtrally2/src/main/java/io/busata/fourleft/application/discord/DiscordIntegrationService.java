@@ -5,6 +5,7 @@ import io.busata.fourleft.api.models.discord.DiscordGuildSummaryTo;
 import io.busata.fourleft.api.models.discord.DiscordGuildTo;
 import io.busata.fourleft.api.models.discord.DiscordTokenTo;
 import io.busata.fourleft.api.models.discord.DiscordUserTo;
+import io.busata.fourleft.common.MemberEvent;
 import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
 import io.busata.fourleft.domain.discord.DiscordGuildMember;
 import io.busata.fourleft.domain.discord.DiscordGuildMemberRepository;
@@ -25,6 +26,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -90,11 +92,11 @@ public class DiscordIntegrationService {
         return Stream.concat(
                 botGuilds.stream()
                         .filter(guild -> {
-                            if(!isUserAuthenticated) {
+                            if (!isUserAuthenticated) {
                                 return false;
                             }
 
-                            if(isAdmin()) {
+                            if (isAdmin()) {
                                 return true;
                             }
 
@@ -102,13 +104,13 @@ public class DiscordIntegrationService {
 
                         })
                         .map(guild -> discordGuildSummaryToFactory.create(guild, true))
-                ,discordGuildSummaryTos.stream()
+                , discordGuildSummaryTos.stream()
         ).distinct().toList();
 
     }
 
     public boolean isAuthenticated() {
-       return Optional.ofNullable(SecurityContextHolder.getContext())
+        return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .map(Principal::getName)
                 .flatMap(this.discordIntegrationAccessTokensRepository::findByUserName)
@@ -159,7 +161,7 @@ public class DiscordIntegrationService {
 
     private DiscordTokenTo getAccessToken(String code) {
         String body = Map.of(
-                            "client_id", discordIntegrationConfigurationProperties.getClientId(),
+                        "client_id", discordIntegrationConfigurationProperties.getClientId(),
                         "client_secret", discordIntegrationConfigurationProperties.getClientSecret(),
                         "code", code,
                         "grant_type", "authorization_code",
@@ -175,7 +177,7 @@ public class DiscordIntegrationService {
 
     private DiscordTokenTo refreshToken(String refreshToken) {
         String body = Map.of(
-                            "client_id", discordIntegrationConfigurationProperties.getClientId(),
+                        "client_id", discordIntegrationConfigurationProperties.getClientId(),
                         "client_secret", discordIntegrationConfigurationProperties.getClientSecret(),
                         "refresh_token", refreshToken,
                         "grant_type", "refresh_token"
@@ -208,15 +210,15 @@ public class DiscordIntegrationService {
     }
 
     public boolean canManage(String guildId) {
-        if(!isAuthenticated()) {
+        if (!isAuthenticated()) {
             return false;
         }
 
-        if(isAdmin()) {
+        if (isAdmin()) {
             return true;
         }
 
-        if(canManageServer(guildId)) {
+        if (canManageServer(guildId)) {
             return true;
         }
 
@@ -275,5 +277,18 @@ public class DiscordIntegrationService {
         this.userDiscordGuildAccessRepository.save(userDiscordGuildAccess);
 
         return this.discordGuildMemberRepository.findById(userId).orElseThrow();
+    }
+
+    @Transactional
+    public void handleMemberEvent(String guildId, String discordId, String username, MemberEvent memberEvent) {
+        log.info("Member event: {} joined {} (id: {}", username, guildId, discordId);
+        switch (memberEvent) {
+            case JOINED -> {
+                this.discordGuildMemberRepository.save(new DiscordGuildMember(discordId, username, guildId));
+            }
+            case LEFT -> {
+                this.discordGuildMemberRepository.deleteByGuildIdAAndDiscordId(guildId, discordId);
+            }
+        }
     }
 }

@@ -28,6 +28,9 @@ public class ClubSyncUsecase {
     private final RacenetSyncFacade racenetSyncFacade;
 
     public void updateLeaderboards() {
+
+
+
         cleanArchived();
         findClubs().stream().filter(club -> club.getErrorCount() < 5).forEach(club -> {
             try {

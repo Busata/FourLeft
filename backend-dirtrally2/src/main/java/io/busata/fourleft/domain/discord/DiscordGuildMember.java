@@ -26,6 +26,12 @@ public class DiscordGuildMember {
 
     String guildId;
 
+    public DiscordGuildMember(String discordId, String username, String guildId) {
+        this.discordId = discordId;
+        this.userName = username;
+        this.guildId = guildId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
