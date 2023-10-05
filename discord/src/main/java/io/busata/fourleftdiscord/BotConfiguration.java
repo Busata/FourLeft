@@ -4,6 +4,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
+import discord4j.gateway.intent.IntentSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ public class BotConfiguration {
         GatewayDiscordClient client =  DiscordClientBuilder.create(discordToken)
                 .build()
                 .gateway().setInitialPresence(shard -> ClientPresence.online(ClientActivity.watching("the leaderboards")))
+                .setEnabledIntents(IntentSet.all())
                 .login().block();
 
         return client;
