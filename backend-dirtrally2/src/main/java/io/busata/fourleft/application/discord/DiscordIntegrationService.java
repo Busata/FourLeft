@@ -287,7 +287,7 @@ public class DiscordIntegrationService {
                 this.discordGuildMemberRepository.save(new DiscordGuildMember(discordId, username, guildId));
             }
             case LEFT -> {
-                this.discordGuildMemberRepository.deleteByGuildIdAAndDiscordId(guildId, discordId);
+                this.discordGuildMemberRepository.deleteByGuildIdAndDiscordId(guildId, discordId);
             }
         }
     }
