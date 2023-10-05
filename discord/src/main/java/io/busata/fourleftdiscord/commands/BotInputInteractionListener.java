@@ -71,7 +71,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
 
         client.on(MemberJoinEvent.class, event -> {
             return Mono.just(event).flatMap(MemberJoinEvent::getGuild).map(guild -> {
-                fourLeftClient.notifyMemberEvent(new DiscordGuildMemberEventTo(
+                fourLeftClient.notifyMemberEvent(guild.getId().toString(), new DiscordGuildMemberEventTo(
                         event.getMember().getId().toString(),
                         event.getMember().getDisplayName(),
                         MemberEvent.JOINED
@@ -84,7 +84,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
         client.on(MemberLeaveEvent.class, event -> {
             return Mono.just(event).flatMap(MemberLeaveEvent::getGuild).map(guild -> {
                 event.getMember().ifPresent(member -> {
-                    fourLeftClient.notifyMemberEvent(new DiscordGuildMemberEventTo(
+                    fourLeftClient.notifyMemberEvent(guild.getId().toString(), new DiscordGuildMemberEventTo(
                             member.getId().toString(),
                             member.getDisplayName(),
                             MemberEvent.LEFT
