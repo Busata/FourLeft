@@ -100,6 +100,7 @@ public class RoutesTo {
 
     public static final String DISCORD_GUILD_CHANNELS = "/api/internal/discord/integration/guilds/{guildId}/channels";
     public static final String DISCORD_GUILD_MEMBERS = "/api/internal/discord/integration/guilds/{guildId}/members";
+    public static final String DISCORD_MEMBER_EVENT = "/api/internal/discord/integration/guilds/{guildId}/members/event";
     public static final String DISCORD_GUILD_ADMINISTRATORS = "/api/internal/discord/integration/guilds/{guildId}/administrators";
     public static final String DISCORD_GUILD_ADMINISTRATORS_CRUD = "/api/internal/discord/integration/guilds/{guildId}/administrators/{userId}";
 

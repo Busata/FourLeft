@@ -1,4 +1,7 @@
 package io.busata.fourleft.common;
 
-public interface MemberEvent {
+public enum MemberEvent {
+
+    JOINED,
+    LEFT
 }

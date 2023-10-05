@@ -1,6 +1,7 @@
 package io.busata.fourleft.api;
 
 import io.busata.fourleft.api.models.*;
+import io.busata.fourleft.api.models.discord.DiscordGuildMemberEventTo;
 import io.busata.fourleft.common.MessageType;
 import io.busata.fourleft.api.models.messages.MessageLogTo;
 import io.busata.fourleft.api.models.overview.UserResultSummaryTo;
@@ -38,6 +39,9 @@ public interface FourLeftApi {
 
     @GetMapping(RoutesTo.FIELD_MAPPINGS)
     List<FieldMappingTo> getFieldMappings();
+
+    @PostMapping(RoutesTo.DISCORD_MEMBER_EVENT)
+    void notifyMemberEvent(DiscordGuildMemberEventTo memberEventTo);
 
     @PostMapping(RoutesTo.FIELD_MAPPINGS)
     FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request);
