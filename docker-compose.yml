@@ -104,7 +104,7 @@ services:
     depends_on:
       - helper.se-firefox
   helper.se-firefox:
-    build: firefox
+    build: racenet-authenticator/firefox
     restart: always
     container_name: helper.se-firefox
     ports:
