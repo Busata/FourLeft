@@ -15,9 +15,9 @@ services:
     volumes:
       - /mnt/docker-data/backend-dirtrally2:/var/lib/postgresql/data
     environment:
-      - DB_FOURLEFT_POSTGRES_PASSWORD=${POSTGRES_PASS}
-      - DB_FOURLEFT_POSTGRES_USER=${POSTGRES_USER}
-      - DB_FOURLEFT_POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${DB_FOURLEFT_POSTGRES_PASS}
+      - POSTGRES_USER=${DB_FOURLEFT_POSTGRES_USER}
+      - POSTGRES_DB=${DB_FOURLEFT_POSTGRES_DB}
   db.fourleft_discord:
     container_name: db.fourleft_discord
     restart: always
@@ -25,18 +25,18 @@ services:
     volumes:
       - /mnt/docker-data/discord:/var/lib/postgresql/data
     environment:
-      - DB_FOURLEFT_DISCORD_POSTGRES_PASSWORD=${POSTGRES_PASS}
-      - DB_FOURLEFT_DISCORD_POSTGRES_USER=${POSTGRES_USER}
-      - DB_FOURLEFT_DISCORD_POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${DB_FOURLEFT_DISCORD_POSTGRES_PASS}
+      - POSTGRES_USER=${DB_FOURLEFT_DISCORD_POSTGRES_USER}
+      - POSTGRES_DB=${DB_FOURLEFT_DISCORD_POSTGRES_DB}
   db.backend-wrc:
     container_name: db.backend-wrc
     image: postgres:16
     volumes:
       - /mnt/docker-data/backend-wrc:/var/lib/postgresql/data
     environment:
-      - DB_BACKEND_WRC_POSTGRES_PASSWORD=${POSTGRES_PASS}
-      - DB_BACKEND_WRC_POSTGRES_USER=${POSTGRES_USER}
-      - DB_BACKEND_WRC_POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${DB_BACKEND_WRC_POSTGRES_PASS}
+      - POSTGRES_USER=${DB_BACKEND_WRC_POSTGRES_USER}
+      - POSTGRES_DB=${DB_BACKEND_WRC_POSTGRES_DB}
   spring.fourleft.backend-wrc:
     build: backend-wrc
     container_name: spring.backend-wrc
