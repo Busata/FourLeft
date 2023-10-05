@@ -41,7 +41,7 @@ public interface FourLeftApi {
     List<FieldMappingTo> getFieldMappings();
 
     @PostMapping(RoutesTo.DISCORD_MEMBER_EVENT)
-    void notifyMemberEvent(DiscordGuildMemberEventTo memberEventTo);
+    void notifyMemberEvent(@PathVariable String guildId, DiscordGuildMemberEventTo memberEventTo);
 
     @PostMapping(RoutesTo.FIELD_MAPPINGS)
     FieldMappingTo createFieldMapping(@RequestBody FieldMappingRequestTo request);
