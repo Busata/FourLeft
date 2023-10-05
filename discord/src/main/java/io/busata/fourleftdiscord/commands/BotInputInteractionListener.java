@@ -87,7 +87,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
                     fourLeftClient.notifyMemberEvent(new DiscordGuildMemberEventTo(
                             member.getId().toString(),
                             member.getDisplayName(),
-                            MemberEvent.JOINED
+                            MemberEvent.LEFT
                     ));
                 });
 
