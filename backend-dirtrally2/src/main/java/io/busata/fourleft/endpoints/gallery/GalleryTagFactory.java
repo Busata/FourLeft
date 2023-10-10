@@ -20,8 +20,6 @@ public class GalleryTagFactory {
 
     @SneakyThrows
     public List<GalleryTagNodeTo> create() {
-        File file = ResourceUtils.getFile("backend-dirtrally2/src/main/resources/tags/tag_graph.json");
-
-        return objectMapper.readValue(file, new TypeReference<>() {});
+        return objectMapper.readValue(ResourceUtils.getURL("classpath:tags/tag_graph.json").openStream(), new TypeReference<>() {});
     }
 }
