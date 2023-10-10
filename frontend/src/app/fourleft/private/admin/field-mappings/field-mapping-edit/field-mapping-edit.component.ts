@@ -37,7 +37,6 @@ export class FieldMappingEditComponent implements OnInit {
   }
 
   saveMapping() {
-    console.log("Saving", this.form.getRawValue());
     this.save.emit(this.form.getRawValue());
   }
 }

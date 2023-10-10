@@ -4,7 +4,7 @@ import {
 } from '../../../private/admin/discord/configure-channel/services/view-results-store.service';
 import {ActivatedRoute} from '@angular/router';
 import {mergeMap} from 'rxjs';
-import {DriverEntryTo, ResultListTo, ViewResultTo} from '@server-models';
+import {DriverEntryTo, ViewResultTo} from '@server-models';
 
 @Component({
   selector: 'app-result-details',

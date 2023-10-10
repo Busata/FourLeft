@@ -1,0 +1,37 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 15px;
+  z-index: 10;
+
+  width: 100%;
+  height: 100%;
+  background-color: rgba(33, 35, 38, 0.8);
+
+  display: flex;
+  justify-content: center;
+
+}
+
+.tag-editor {
+  position: absolute;
+  border-radius: 5px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  background-color: white;
+
+  .photo {
+    align-self: center;
+    margin-right: 15px;
+
+  }
+
+  top: 10%;
+
+  .editor-controls {
+  }
+}

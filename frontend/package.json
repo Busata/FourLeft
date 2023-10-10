@@ -24,6 +24,7 @@
     "@ng-icons/tabler-icons": "^24.0.0",
     "angular-oauth2-oidc": "^15.0.1",
     "flag-icons": "^6.6.6",
+    "ngx-infinite-scroll": "^15.0.0",
     "purecss": "^3.0.0",
     "roboto-fontface": "^0.10.0",
     "rxjs": "~7.4.0",

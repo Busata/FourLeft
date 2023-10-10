@@ -1,0 +1,1213 @@
+[
+  {
+    "id": "#gen.uuid#",
+    "label": "Context",
+    "nodes": [
+      {
+        "id": "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid.dirt-rally-2#",
+        "label": "Dirt Rally 2.0"
+      },
+      {
+        "id": "#gen.uuid.ea-wrc#",
+        "label": "EA WRC"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Country (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-monte-carlo#",
+        "label": "Monte Carlo"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-sweden#",
+        "label": "Sweden"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-mexico#",
+        "label": "Mexico"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-croatia#",
+        "label": "Croatia"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-portugal#",
+        "label": "Portugal"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-sardegna#",
+        "label": "Sardegna"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-kenya#",
+        "label": "Kenya"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-estonia#",
+        "label": "Estonia"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-finland#",
+        "label": "Finland"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-greece#",
+        "label": "Greece"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-chile#",
+        "label": "Chile"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-japan#",
+        "label": "Japan"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-mediterraneo#",
+        "label": "Mediterraneo"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-pacifico#",
+        "label": "Pacifico"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-oceania#",
+        "label": "Oceania"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-scandia#",
+        "label": "Scandia"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-country-iberia#",
+        "label": "Iberia"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Country (DR2.0)",
+    "showOn": "#gen.uuid.dirt-rally-2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-argentina#",
+        "label": "Argentina"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-australia#",
+        "label": "Australia"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-finland#",
+        "label": "Finland"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-germany#",
+        "label": "Germany"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-greece#",
+        "label": "Greece"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-monaco#",
+        "label": "Monaco"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-new-zealand#",
+        "label": "New Zealand"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-poland#",
+        "label": "Poland"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-scotland#",
+        "label": "Scotland"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-spain#",
+        "label": "Spain"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-sweden#",
+        "label": "Sweden"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-usa#",
+        "label": "USA"
+      },
+      {
+        "id" : "#gen.uuid.dr2-country-wales#",
+        "label": "Wales"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Car class (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-builder#",
+        "label": "Builder"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-h1-fwd#",
+        "label": "H1 FWD"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-h2-fwd#",
+        "label": "H2 FWD"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-h2-rwd#",
+        "label": "H2 RWD"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-h3-rwd#",
+        "label": "H3 RWD"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-b-rwd#",
+        "label": "Group B (RWD)"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-b-4wd#",
+        "label": "Group B (4WD)"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-group-a#",
+        "label": "Group A"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-f2#",
+        "label": "F2 Kit Cars"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-S1600#",
+        "label": "S1600"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-S2000#",
+        "label": "S2000"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-nr4#",
+        "label": "NR4 / R4"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-rally4#",
+        "label": "Rally4"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-rally2#",
+        "label": "Rally 2"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-1997-2011#",
+        "label": "World Rally Cars 1997-2011"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-2017-2021#",
+        "label": "World Rally Cars 2017-2021"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-junior-wrc#",
+        "label": "Junior WRC"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-wrc2#",
+        "label": "WRC2"
+      },
+      {
+        "id" : "#gen.uuid.ea-wrc-wrc#",
+        "label": "WRC"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H1 FWD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-h1-fwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "MINI Cooper S"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Fulvia HF"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Vauxhall Nova Sport"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H2 FWD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-h2-fwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 205 GTI"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 309 GTI"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Golf GTI"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H2 RWD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-h2-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Alpine Renault A110 1600 S"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Fiat 131 Abarth Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort MK2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Hillman Avenger"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Kadett C GT/E"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Talbot Sunbeam Lotus"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H3 RWD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-h3-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "BMW M3 Evo Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort MK2 McRae Motorsport"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Sierra Cosworth RS500"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Stratos"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Ascona 400"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Renault 5 Turbo"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group B RWD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-b-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "BMW M1 Procar Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia 037 Evo 2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Manta 400"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Porsche 911 SC RS"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group B 4WD) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-b-4wd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Audi Sport quattro S1 (E2)"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford RS200"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Delta S4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "MG Metro 6R4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 205 T16 Evo 2"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group A) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-group-a#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort RS Cosworth"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Delta HF Integrale"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Galant VR4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU Impreza 1995"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU Legacy RS"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (F2 Kit Cars) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-f2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort Mk 6 Maxi"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 306 Maxi"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Renault Maxi Mégane"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Seat Ibiza Kit Car"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Vauxhall Astra Rally Car"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Golf IV Kit Car"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (S1600) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-S1600#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën C2 Super 1600"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën Saxo Super 1600"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Puma S1600"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Renault Clio S1600"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (S2000) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-S2000#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Fiat Grande Punto Abarth S2000"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Corsa S2000"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 207 S2000"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (NR4 / R4) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-nr4#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "McRae R4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Lancer Evolution X"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU WRX STI NR4"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Rally 4) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-rally4#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta MK8 Rally4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Adam R2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 208 Rally4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Renault Twingo II"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Rally 2) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-rally2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta R5 MK7 Evo 2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 208 T16 R5"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (World Rally Cars 1997-2011) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-1997-2011#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën C4 WRC"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën Xsara WRC"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Focus RS Rally 2001"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Focus RS Rally 2008"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "MINI Countryman Rally Edition"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Lancer Evolution VI"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 206 Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Seat Córdoba WRC"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Škoda Fabia WRC"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU Impreza 1998"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU Impreza 2001"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SUBARU Impreza 2008"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (World Rally Cars 2017-2021) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-2017-2021#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta WRC"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Polo 2017"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Junior WRC) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-junior-wrc#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta Rally3"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (WRC 2) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-wrc2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën C3 Rally2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta Rally2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Hyundai i20 N Rally2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Škoda Fabia Rally2 Evo"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Škoda Fabia RS Rally2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Polo GTI R5"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (WRC) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-wrc#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Puma Rally1 HYBRID"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Hyundai i20 N Rally1 HYBRID"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Toyota GR Yaris Rally1 HYBRID"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Builder) (EA WRC)",
+    "showOn": "#gen.uuid.ea-wrc-builder#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "WRC Builder Car"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "WRC2 Builder Car"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Junior WRC Builder Car"
+      }
+    ]
+  },
+
+  {
+    "id": "#gen.uuid#",
+    "label": "Car class (DR2.0)",
+    "showOn": "#gen.uuid.dirt-rally-2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id" : "#gen.uuid.dr2-h1-fwd#",
+        "label": "H1 FWD"
+      },
+      {
+        "id" : "#gen.uuid.dr2-h2-fwd#",
+        "label": "H2 FWD"
+      },
+      {
+        "id" : "#gen.uuid.dr2-h2-rwd#",
+        "label": "H2 RWD"
+      },
+      {
+        "id" : "#gen.uuid.dr2-h3-rwd#",
+        "label": "H3 RWD"
+      },
+      {
+        "id" : "#gen.uuid.dr2-b-rwd#",
+        "label": "Group B (RWD)"
+      },
+      {
+        "id" : "#gen.uuid.dr2-b-4wd#",
+        "label": "Group B (4WD)"
+      },
+      {
+        "id" : "#gen.uuid.dr2-r2#",
+        "label": "R2"
+      },
+      {
+        "id" : "#gen.uuid.dr2-f2#",
+        "label": "F2 Kit Cars"
+      },
+      {
+        "id" : "#gen.uuid.dr2-group-a#",
+        "label": "Group A"
+      },
+      {
+        "id" : "#gen.uuid.dr2-nr4#",
+        "label": "NR4 / R4"
+      },
+      {
+        "id" : "#gen.uuid.dr2-2000cc#",
+        "label": "Up to 2000cc (4WD)"
+      },
+      {
+        "id" : "#gen.uuid.dr2-r5#",
+        "label": "R5"
+      },
+      {
+        "id" : "#gen.uuid.dr2-rgt#",
+        "label": "Rally GT"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H1 FWD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-h1-fwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "MINI Cooper S"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Fulvia HF"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "DS 21"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H2 FWD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-h2-fwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Golf GTI 16V"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 205 GTI"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H2 RWD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-h2-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort Mk II"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Alpine Renault A110 1600 S"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Fiat 131 Abarth"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Kadett C GT/E"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (H3 RWD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-h3-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "BMW E30 M3 Evo Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Ascona 400"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Stratos"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Renault 5 Turbo"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Datsun 240Z"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Sierra Cosworth RS500"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group B - RWD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-b-rwd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia 037 Evo 2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Manta 400"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "BMW M1 Procar"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Porsche 911 SC RS"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group B - 4WD) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-b-4wd#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Audi Sport quattro S1 E2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 205 T16 Evo 2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Delta S4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford RS200"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "MG Metro 6R4"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (R2) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-r2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta R2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Opel Adam R2"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 208 R2"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (F2 Kit Cars) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-f2#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 306 Maxi"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "SEAT Ibiza Kitcar"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Golf Kitcar"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (Group A) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-group-a#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Lancer Evolution VI"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru Impreza 1995"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Lancia Delta HF Integrale"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Escort RS Cosworth"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru Legacy RS"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (NR4 / R4) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-nr4#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru WRX STI NR4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Lancer Evolution X"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (2000 cc) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-2000cc#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Focus RS Rally 2001"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru Impreza (2001)"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën C4 Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Focus RS Rally 2007"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru Impreza"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 206 Rally"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Subaru Impreza S4 Rally"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (R5) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-r5#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta R5"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Fiesta R5 MKII"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Peugeot 208 R5 T16"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Mitsubishi Space Star R5"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "ŠKODA Fabia R5"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Citroën C3 R5"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Volkswagen Polo GTI R5"
+      }
+    ]
+  },
+  {
+    "id": "#gen.uuid#",
+    "label": "Cars (RGT) (DR2.0)",
+    "showOn": "#gen.uuid.dr2-rgt#",
+    "nodes": [
+      {
+        "id" : "#gen.uuid#",
+        "label": "Unspecified"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Chevrolet Camaro GT4-R"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Porsche 911 RGT Rally Spec"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Aston Martin V8 Vantage GT4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "Ford Mustang GT4"
+      },
+      {
+        "id": "#gen.uuid#",
+        "label": "BMW M2 Competition"
+      }
+    ]
+  }
+]

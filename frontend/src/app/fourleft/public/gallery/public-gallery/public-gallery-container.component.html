@@ -1,0 +1,18 @@
+
+<div class="public-photos">
+  <ng-container *ngIf="selectedPhoto">
+    <app-gallery-photo-light-box [photoId]="this.selectedPhoto.id" (close)="deselectPhoto()"></app-gallery-photo-light-box>
+  </ng-container>
+  <input class="g-full-width" type="search" [value]="this.query" (keyup)="updateQuery($event.target.value)" [placeholder]="'Search images by keyword, title'"/>
+  <div class="containerw3 containerw3-margin" infiniteScroll (scrolled)="onScroll()" [scrollWindow]="false" [infiniteScrollDistance]="2" [infiniteScrollThrottle]="50">
+    <div class="public-photo" *ngFor="let photo of photos" (click)="selectPhoto(photo)">
+      <img [src]="getUrl(photo)">
+      <div class="overlay">
+        <strong>{{photo.title}}</strong>
+      </div>
+    </div>
+    <div *ngIf="photos.length == 0">
+      No pictures found.
+    </div>
+  </div>
+</div>

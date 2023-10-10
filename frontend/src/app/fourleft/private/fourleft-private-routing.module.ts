@@ -29,6 +29,11 @@ export const routes: Routes = [
       {
         path: 'management',
         component: ManagementContainerComponent
+      },
+      {
+        path: 'gallery',
+        loadChildren: () => import('./admin/gallery/gallery.module').then(m => m.GalleryModule)
+
       }
     ]
   },

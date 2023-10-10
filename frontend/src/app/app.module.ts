@@ -10,6 +10,10 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import { NgIconsModule } from '@ng-icons/core';
 import { tablerSteeringWheel,
   tablerCheck,
+    tablerX,
+    tablerEyeClosed,
+  tablerBookmark,
+  tablerTrashFilled,
   tablerBrandXbox,
   tablerBrandSteam,
   tablerPlaystationTriangle,
@@ -20,6 +24,7 @@ import { tablerSteeringWheel,
   tablerDeviceGamepad,
   tablerKeyboard
 } from '@ng-icons/tabler-icons';
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
 
 export function storageFactory(): OAuthStorage {
   return localStorage;
@@ -41,14 +46,19 @@ const authConfig: AuthConfig = {
     OAuthModule.forRoot(),
     AppRoutingModule,
     BrowserModule,
+    InfiniteScrollModule,
     NgIconsModule.withIcons({ tablerSteeringWheel,
       tablerBrandXbox,
+      tablerX,
       tablerBrandSteam,
       tablerPlaystationTriangle,
+      tablerEyeClosed,
       tablerPlaystationSquare,
       tablerCheck,
+      tablerTrashFilled,
       tablerPlaystationCircle,
       tablerQuestionMark,
+      tablerBookmark,
       tablerPlaystationX,
       tablerDeviceGamepad,
       tablerKeyboard

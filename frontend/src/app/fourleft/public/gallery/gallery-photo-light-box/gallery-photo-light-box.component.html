@@ -1,0 +1,11 @@
+<div class="lightbox-container">
+
+    <div class="lightbox-image">
+        <img class="pure-img" [src]="getUrl()">
+
+        <div class="close-control" (click)="close.emit()">
+            <ng-icon name="tablerX" size="3em"  strokeWidth="4"></ng-icon>
+        </div>
+    </div>
+</div>
+

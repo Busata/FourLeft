@@ -1,0 +1,30 @@
+<div class="g-card tag-editor">
+    <div class="photo">
+        <img class="pure-img g-image-h-300 g-image-rounded" [src]="getImageUrl()">
+    </div>
+    <div class="editor">
+        <div class="form-group">
+            <label>Title</label>
+            <input class="g-full-width" type="text" placeholder="Photo title" [value]="_photo.title" (change)="setTitle($event.target.value)">
+        </div>
+        <div class="form-group">
+            <label>Published</label>
+            <input type="checkbox" [checked]="_photo.published" (change)="setPublished($event.target.checked)">
+        </div>
+        <ng-container *ngIf="nodes">
+          <div class="form-group" *ngFor="let node of visibleNodes">
+            <label>{{node.label}}</label>
+            <select (change)="selectOption(node, $event.target.value)">
+              <option *ngFor="let option of node.nodes" [value]="option.id" [selected]="getSelected(node) == option.id">{{option.label}}</option>
+            </select>
+          </div>
+
+        </ng-container>
+    </div>
+
+    <div class="editor-controls">
+        <button class="g-button g-button-primary" (click)="saveData()">Save</button>
+        <button class="g-button g-button-tertiary" (click)="close.emit()">Cancel</button>
+    </div>
+
+</div>

@@ -105,4 +105,11 @@ public class RoutesTo {
     public static final String DISCORD_GUILD_ADMINISTRATORS_CRUD = "/api/internal/discord/integration/guilds/{guildId}/administrators/{userId}";
 
     public static final String SECURITY_USER = "/api/internal/security/user";
+    public static final String GALLERY_UPLOAD = "/api/internal/gallery/_upload";
+    public static final String GALLER_USER_PHOTOS = "/api/internal/gallery/photos";
+    public static final String GALLER_USER_PHOTOS_BY_ID = "/api/internal/gallery/photos/{photoId}";
+    public static final String GALLERY_TAG_GRAPH = "/api/internal/gallery/tag_graph";
+
+    public static final String GALLERY_PUBLIC_PHOTOS = "/api/external/gallery/photos";
+
 }

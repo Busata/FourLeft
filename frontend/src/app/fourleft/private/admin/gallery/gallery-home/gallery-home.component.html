@@ -1,0 +1,8 @@
+<div class="controls">
+<app-gallery-upload-button (uploaded)="onPictureUpload($event)"></app-gallery-upload-button>
+</div>
+
+<app-photo-stream [images]="pictures" [enableControls]="true"
+                  (deleteRequest)="onPictureDelete($event)"
+                  (save)="onPictureSave($event)"
+></app-photo-stream>

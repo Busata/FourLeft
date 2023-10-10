@@ -1,3 +1,6 @@
+.results {
+  max-width:1080px;
+}
 .results-row {
   padding: 10px;
   border: 1px solid transparent;
@@ -26,7 +29,7 @@
   display: none;
 
 }
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 768px) {
   .extra-info {
     display: block;
   }

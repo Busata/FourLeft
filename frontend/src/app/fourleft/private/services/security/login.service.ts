@@ -21,7 +21,7 @@ export class LoginService {
   public configure() {
       this.oauthService.events.subscribe(e => e instanceof OAuthErrorEvent ? console.error(e) : console.warn(e));
       this.oauthService.setupAutomaticSilentRefresh();
-      this.oauthService.loadDiscoveryDocumentAndTryLogin().then((event) => {
+      this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
 
         if(!this.oauthService.hasValidAccessToken()) {
           this._loggedIn.next(false);

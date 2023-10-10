@@ -24,6 +24,9 @@ import { AliasFormComponent } from './alias/alias-form/alias-form.component';
 import {DiscordModule} from "../private/admin/discord/discord.module";
 import { AliasPageComponent } from './alias/alias-page/alias-page.component';
 import { AliasRedirectComponent } from './alias/alias-redirect/alias-redirect.component';
+import {PublicGalleryContainerComponent} from "./gallery/public-gallery/public-gallery-container.component";
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import { GalleryPhotoLightBoxComponent } from './gallery/gallery-photo-light-box/gallery-photo-light-box.component';
 
 @NgModule({
   declarations: [
@@ -37,28 +40,31 @@ import { AliasRedirectComponent } from './alias/alias-redirect/alias-redirect.co
     AliasContainerComponent,
     AliasFormComponent,
     AliasPageComponent,
-    AliasRedirectComponent
+    AliasRedirectComponent,
+    PublicGalleryContainerComponent,
+    GalleryPhotoLightBoxComponent
   ],
-    imports: [
-        FourleftPublicRoutingModule,
-        MatCardModule,
-        MatInputModule,
-        FormsModule,
-        MatCheckboxModule,
-        MatSlideToggleModule,
-        MatButtonModule,
-        NgIf,
-        MatSnackBarModule,
-        ClipboardModule,
-        MatIconModule,
-        NgOptimizedImage,
-        NgForOf,
-        SharedModule,
-        NgIconComponent,
-        DatePipe,
-        DiscordModule,
-        ReactiveFormsModule,
-    ],
+  imports: [
+    FourleftPublicRoutingModule,
+    MatCardModule,
+    MatInputModule,
+    FormsModule,
+    MatCheckboxModule,
+    MatSlideToggleModule,
+    MatButtonModule,
+    NgIf,
+    MatSnackBarModule,
+    ClipboardModule,
+    MatIconModule,
+    NgOptimizedImage,
+    NgForOf,
+    SharedModule,
+    NgIconComponent,
+    DatePipe,
+    DiscordModule,
+    ReactiveFormsModule,
+    InfiniteScrollModule,
+  ],
   providers:[]
 })
 export class FourleftPublicModule { }

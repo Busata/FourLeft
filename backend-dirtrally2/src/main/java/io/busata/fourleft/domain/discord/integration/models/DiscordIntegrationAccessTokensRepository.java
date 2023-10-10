@@ -7,6 +7,5 @@ import java.util.UUID;
 
 public interface DiscordIntegrationAccessTokensRepository extends JpaRepository<DiscordIntegrationAccessToken, UUID> {
 
-
     Optional<DiscordIntegrationAccessToken> findByUserName(String username);
 }

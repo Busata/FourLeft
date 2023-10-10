@@ -1,0 +1,19 @@
+
+<div class="g-center">
+  <app-photo-tag-editor *ngIf="editingPhoto" [photo]="editingPhoto" (save)="this.update(editingPhoto, $event)" (close)="this.stopEdit()"></app-photo-tag-editor>
+
+  <div class="g-photo-stream">
+    <div class="image-wrapper" [ngClass]="{'controls': enableControls}" *ngFor="let image of images">
+      <img class="pure-img g-image-h-300" alt="Image" [src]="getImageUrl(image)">
+      <div class="controls-hover" *ngIf="enableControls">
+        <div class="control-buttons">
+          <ng-icon (click)="editTags(image)" size="2em" name="tablerBookmark" [color]="'white'"></ng-icon>
+          <ng-icon (click)="delete(image)" size="2em" name="tablerTrashFilled" [color]="'red'"></ng-icon>
+        </div>
+      </div>
+      <div class="published-indicator" *ngIf="!image.published">
+        <ng-icon name="tablerEyeClosed" [color]="'red'" size="2em"></ng-icon>
+      </div>
+    </div>
+  </div>
+</div>

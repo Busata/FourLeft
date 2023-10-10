@@ -51,10 +51,6 @@ export class DiscordChannelConfigurationFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = new DiscordChannelConfigurationForm();
-
-    this.form.valueChanges.subscribe((value) => {
-      console.log(value);
-    })
   }
 
   configureBasic() {

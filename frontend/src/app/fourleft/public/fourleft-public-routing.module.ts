@@ -8,6 +8,7 @@ import {ResultDetailsComponent} from './results/result-details/result-details.co
 import {AliasContainerComponent} from "./alias/alias-container/alias-container.component";
 import {AliasPageComponent} from "./alias/alias-page/alias-page.component";
 import {AliasRedirectComponent} from "./alias/alias-redirect/alias-redirect.component";
+import {PublicGalleryContainerComponent} from "./gallery/public-gallery/public-gallery-container.component";
 
 export const routes: Routes = [
   {
@@ -23,6 +24,11 @@ export const routes: Routes = [
         path: 'home',
         pathMatch: 'full',
         component: HomeComponent
+      },
+      {
+        path: 'gallery',
+        pathMatch: 'full',
+        component: PublicGalleryContainerComponent
       },
       {
         path: 'community',

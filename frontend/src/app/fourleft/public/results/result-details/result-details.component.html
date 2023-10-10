@@ -1,4 +1,4 @@
-<ng-container *ngIf="results">
+<div class="results" *ngIf="results">
   <div class="g-header-h1">
     <span *ngIf="resultsMode == 'current'">Current results</span>
     <span *ngIf="resultsMode == 'previous'">Previous results</span>
@@ -60,31 +60,31 @@
           Results
         </div>
         <div class="pure-g results-row" *ngFor="let driverEntry of getResultsSortedByActivityRank(singleList.results)">
-          <div class="pure-u-1-12 pure-u-sm-1-24">
+          <div class="pure-u-1-24 pure-u-md-1-24 g-center">
             {{driverEntry.relative.activityRank}}
           </div>
-          <div class="pure-u-1-12 pure-u-sm-1-24">
+          <div class="pure-u-1-12 pure-u-md-1-24 g-center">
             <app-field-map [value]="driverEntry.result.nationality" [type]="'FLAG'"></app-field-map>
           </div>
-          <div class="pure-u-1-3 pure-u-sm-1-12">
+          <div class="pure-u-1-3 pure-u-md-1-6 g-center">
             {{driverEntry.result.racenet}}
           </div>
-          <div class="pure-u-1-8 extra-info">
+          <div class="pure-u-1-8 pure-u-md-1-4 extra-info">
             <span *ngFor="let vehicle of driverEntry.result.vehicles">{{vehicle.vehicleName}}</span>
           </div>
-          <div class="pure-u-1-12 platform-icons extra-info">
+          <div class="pure-u-1-12 pure-u-md-1-6 g-center platform-icons extra-info">
            <app-controller-type [value]="driverEntry.result.platform.controller"></app-controller-type>
            <app-platform-type [value]="driverEntry.result.platform.platform"></app-platform-type>
           </div>
-          <div class="pure-u-1-4 pure-u-sm-1-12">
+          <div class="pure-u-1-4 pure-u-md-1-6">
             {{driverEntry.result.activityTotalTime}}
           </div>
-          <div class="pure-u-1-4 pure-u-sm-1-12">
-            {{driverEntry.relative.activityTotalDiff}}
+          <div class="pure-u-1-8 pure-u-md-1-6">
+            ({{driverEntry.relative.activityTotalDiff}})
           </div>
         </div>
       </div>
     </ng-container>
 
   </div>
-</ng-container>
+</div>

@@ -1,12 +1,28 @@
+
+
 <div class="pure-g">
-  <div class="buttons pure-u-1-12">
-  <button class="menu-button" routerLinkActive="menu-button-active" routerLink="/home">Home</button>
-  <button class="menu-button" routerLinkActive="menu-button-active" routerLink="discord">Discord </button>
-  <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['field_mappings']">Field Mappings</button>
-  <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['users']">Users</button>
-  <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['management']">Management</button>
+  <div class="buttons pure-u-1">
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="">Fourleft.io</button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/home">Home</button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/results">Dirt Rally 2
+    </button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/community">Community
+    </button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/gallery">Gallery
+    </button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/alias">Alias</button>
+    <button class="menu-button dark" routerLinkActive="menu-button-active" routerLink="/private">Manage</button>
   </div>
-<div class="private-container pure-u-7-8" *ngIf="authenticationService.loggedIn | async">
-  <router-outlet></router-outlet>
-</div>
+  <div class="buttons pure-u-1">
+    <button class="menu-button" routerLinkActive="menu-button-active" [routerLink]="'discord'">Servers</button>
+    <button class="menu-button" routerLinkActive="menu-button-active" [routerLink]="'gallery'">Gallery</button>
+    <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['field_mappings']">Field Mappings</button>
+    <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['users']">Users</button>
+    <button class="menu-button" routerLinkActive="menu-button-active" hasPermission="admin" [routerLink]="['management']">Management</button>
+  </div>
+  <div class="wrapper" *ngIf="authenticationService.loggedIn | async">
+    <div class=" main" >
+      <router-outlet></router-outlet>
+    </div>
+  </div>
 </div>

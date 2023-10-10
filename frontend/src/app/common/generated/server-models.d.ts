@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-10-02 22:35:20.
+// Generated using typescript-generator version 2.35.1025 on 2023-10-10 12:30:08.
 
 export interface RoutesTo {
 }
@@ -373,6 +373,12 @@ export interface DiscordChannelTo {
     name: string;
 }
 
+export interface DiscordGuildMemberEventTo {
+    discordId: string;
+    username: string;
+    memberEvent: MemberEvent;
+}
+
 export interface DiscordGuildMemberTo {
     id: string;
     discordId: string;
@@ -420,6 +426,37 @@ export interface DiscordUserTo {
 
 export interface GuildMemberTo {
     nick: string;
+}
+
+export interface GalleryPhotoTo {
+    id: string;
+    title: string;
+    published: boolean;
+    tags: string[];
+}
+
+export interface GalleryPhotoUpdateTo {
+    title: string;
+    published: boolean;
+    tags: string[];
+}
+
+export interface GalleryPublicPhotoTo {
+    id: string;
+    title: string;
+    tags: string[];
+}
+
+export interface GalleryTagNodeTo {
+    id: string;
+    label: string;
+    showOn: string;
+    nodes: GalleryTagOptionTo[];
+}
+
+export interface GalleryTagOptionTo {
+    id: string;
+    label: string;
 }
 
 export interface MessageLogTo {
@@ -566,7 +603,9 @@ export type MergeMode = "ADD_TIMES" | "TAKE_BEST";
 
 export type RacenetFilterMode = "NONE" | "INCLUDE" | "FILTER" | "TRACK_COMMUNITY";
 
-export type MessageType = "AUTO_POST" | "RESULTS_POST" | "CURRENT_RESULTS_POST" | "PREVIOUS_RESULTS_POST" | "COMMUNITY_EVENT" | "AUTOMATED_CLUB_POST";
+export type MemberEvent = "JOINED" | "LEFT";
+
+export type MessageType = "AUTO_POST" | "RESULTS_POST" | "JOIN_POST" | "LEAVE_POST" | "CURRENT_RESULTS_POST" | "PREVIOUS_RESULTS_POST" | "COMMUNITY_EVENT" | "AUTOMATED_CLUB_POST";
 
 export type ViewType = "STANDARD" | "EXTRA";
 
