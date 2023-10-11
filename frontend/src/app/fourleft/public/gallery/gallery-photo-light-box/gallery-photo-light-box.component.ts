@@ -10,6 +10,9 @@ export class GalleryPhotoLightBoxComponent {
   @Input()
   photoId!: String;
 
+  @Input()
+  preview!: boolean;
+
   @Output()
   close = new EventEmitter();
 

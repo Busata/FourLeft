@@ -42,7 +42,7 @@ public class GalleryEndpoint {
     @PreAuthorize("permitAll()")
     @PutMapping(value= RoutesTo.GALLER_USER_PHOTOS_BY_ID)
     public GalleryPhotoTo updateImage(@PathVariable UUID photoId, @RequestBody GalleryPhotoUpdateTo update) {
-        return galleryPhotoFactory.create(galleryService.updatePhoto(photoId, update.title(), update.published(), update.tags()));
+        return galleryPhotoFactory.create(galleryService.updatePhoto(photoId, update.title(), update.published(), update.preview(), update.tags()));
     }
 
     @PreAuthorize("permitAll()")

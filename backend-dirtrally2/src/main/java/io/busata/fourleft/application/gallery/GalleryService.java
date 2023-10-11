@@ -32,7 +32,7 @@ public class GalleryService {
         UUID uuid = this.rendercacheApi.storeImage(multipartFile);
         String authenticatedUser = getAuthenticatedUser();
 
-        return this.photoRepository.save(new GalleryPhoto(uuid, authenticatedUser, true));
+        return this.photoRepository.save(new GalleryPhoto(uuid, authenticatedUser, false, false));
 
     }
 
@@ -74,11 +74,12 @@ public class GalleryService {
         });
     }
 
-    public GalleryPhoto updatePhoto(UUID photoId, String title, boolean isPublished, List<UUID> uuids) {
+    public GalleryPhoto updatePhoto(UUID photoId, String title, boolean isPublished, boolean isPreview, List<UUID> uuids) {
         return this.photoRepository.findById(photoId).map((photo) -> {
             photo.setTitle(title);
             photo.setPublished(isPublished);
             photo.updateTags(uuids);
+            photo.setPreview(isPreview);
 
             return this.photoRepository.save(photo);
         }).orElseThrow();

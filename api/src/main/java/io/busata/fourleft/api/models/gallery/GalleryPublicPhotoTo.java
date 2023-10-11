@@ -6,6 +6,7 @@ import java.util.UUID;
 public record GalleryPublicPhotoTo(
         UUID id,
         String title,
+        boolean preview,
         List<String> tags
 ) {
 }

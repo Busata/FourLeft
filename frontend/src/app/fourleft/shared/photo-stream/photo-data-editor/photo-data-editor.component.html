@@ -11,6 +11,10 @@
             <label>Published</label>
             <input type="checkbox" [checked]="_photo.published" (change)="setPublished($event.target.checked)">
         </div>
+        <div class="form-group">
+            <label>Preview</label>
+            <input type="checkbox" [checked]="_photo.preview" (change)="setPreview($event.target.checked)">
+        </div>
         <ng-container *ngIf="nodes">
           <div class="form-group" *ngFor="let node of visibleNodes">
             <label>{{node.label}}</label>

@@ -1,7 +1,7 @@
 
 <div class="public-photos">
   <ng-container *ngIf="selectedPhoto">
-    <app-gallery-photo-light-box [photoId]="this.selectedPhoto.id" (close)="deselectPhoto()"></app-gallery-photo-light-box>
+    <app-gallery-photo-light-box [photoId]="this.selectedPhoto.id" [preview]="this.selectedPhoto.preview" (close)="deselectPhoto()"></app-gallery-photo-light-box>
   </ng-container>
   <input class="g-full-width" type="search" [value]="this.query" (keyup)="updateQuery($event.target.value)" [placeholder]="'Search images by keyword, title'"/>
   <div class="containerw3 containerw3-margin" infiniteScroll (scrolled)="onScroll()" [scrollWindow]="false" [infiniteScrollDistance]="2" [infiniteScrollThrottle]="50">
@@ -9,6 +9,9 @@
       <img [src]="getUrl(photo)">
       <div class="overlay">
         <strong>{{photo.title}}</strong>
+        <div class="preview-warning" *ngIf="photo.preview">
+          <strong>#Preview build</strong>
+        </div>
       </div>
     </div>
     <div *ngIf="photos.length == 0">

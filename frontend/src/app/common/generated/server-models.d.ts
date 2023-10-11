@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-10-10 14:38:34.
+// Generated using typescript-generator version 2.35.1025 on 2023-10-11 22:37:15.
 
 export interface RoutesTo {
 }
@@ -432,18 +432,21 @@ export interface GalleryPhotoTo {
     id: string;
     title: string;
     published: boolean;
+    preview: boolean;
     tags: string[];
 }
 
 export interface GalleryPhotoUpdateTo {
     title: string;
     published: boolean;
+    preview: boolean;
     tags: string[];
 }
 
 export interface GalleryPublicPhotoTo {
     id: string;
     title: string;
+    preview: boolean;
     tags: string[];
 }
 

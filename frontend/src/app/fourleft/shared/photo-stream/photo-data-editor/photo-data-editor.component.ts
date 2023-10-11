@@ -18,6 +18,7 @@ export class PhotoDataEditor {
 
     this.title = value.title;
     this.published = value.published;
+    this.preview = value.preview;
   }
 
   @Output()
@@ -28,6 +29,7 @@ export class PhotoDataEditor {
 
   public title: string = "";
   public published = false;
+  public preview = false;
 
   public nodes!: GalleryTagNodeTo[];
 
@@ -103,6 +105,7 @@ export class PhotoDataEditor {
     this.save.emit({
       title: this.title,
       published: this.published,
+      preview: this.preview,
       tags: Array.from(this.selections.values())
     })
 
@@ -113,6 +116,9 @@ export class PhotoDataEditor {
   }
   setPublished(value: any) {
     this.published = value;
+  }
+  setPreview(value: any) {
+    this.preview = value;
   }
 
   getSelected(node: GalleryTagNodeTo) {

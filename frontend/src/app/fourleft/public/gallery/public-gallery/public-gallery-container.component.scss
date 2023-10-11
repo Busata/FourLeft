@@ -54,6 +54,11 @@
   height: 100%;
   color: white;
 
+  .preview-warning {
+    position: absolute;
+    right: 15px;
+  }
+
   align-items: end;
   padding: 15px;
 }

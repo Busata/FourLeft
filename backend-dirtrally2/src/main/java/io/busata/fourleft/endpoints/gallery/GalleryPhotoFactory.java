@@ -27,6 +27,7 @@ public class GalleryPhotoFactory {
                 photo.getId(),
                 photo.getTitle(),
                 photo.isPublished(),
+                photo.isPreview(),
                 photo.getSelectedTags()
         );
     }
@@ -45,6 +46,7 @@ public class GalleryPhotoFactory {
            return new GalleryPublicPhotoTo(
                     photo.getId(),
                     photo.getTitle(),
+                   photo.isPreview(),
                    tags
             );
         }).toList();
