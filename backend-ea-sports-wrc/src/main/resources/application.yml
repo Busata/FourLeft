@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: backend-easportswrc
+  config:
+    import: "optional:configserver:"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8084
+

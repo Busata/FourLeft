@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.busata.fourleft</groupId>
-    <artifactId>backend-eawrc</artifactId>
+    <artifactId>backend-ea-sports-wrc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>backend-eawrc</name>
     <description>backend-eawrc</description>

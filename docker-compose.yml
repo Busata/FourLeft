@@ -31,12 +31,23 @@ services:
   db.backend-wrc:
     container_name: db.backend-wrc
     image: postgres:16
+    restart: always
     volumes:
       - /mnt/docker-data/backend-wrc:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${DB_BACKEND_WRC_POSTGRES_PASS}
       - POSTGRES_USER=${DB_BACKEND_WRC_POSTGRES_USER}
       - POSTGRES_DB=${DB_BACKEND_WRC_POSTGRES_DB}
+  db.backend-ea-sports-wrc:
+    container_name: db.backend-ea-sports-wrc
+    image: postgres:16
+    restart: always
+    volumes:
+      - /mnt/docker-data/backend-ea-sports-wrc:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_PASS}
+      - POSTGRES_USER=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_USER}
+      - POSTGRES_DB=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_DB}
   spring.fourleft.backend-wrc:
     build: backend-wrc
     container_name: spring.backend-wrc
@@ -49,6 +60,20 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
     ports:
       - "8083:8083"
+    depends_on:
+      - db.backend-wrc
+  spring.fourleft.backend-ea-sports-wrc:
+    build: backend-ea-sports-wrc
+    container_name: spring.backend-ea-sports-wrc
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_RABBITMQ_HOST=db.rabbitmq
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8084:8084"
     depends_on:
       - db.backend-wrc
   spring.fourleft.backend-dirtrally2:

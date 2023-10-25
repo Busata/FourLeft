@@ -7,3 +7,6 @@ server:
   port: 8082
 selenium:
   url: "http://helper.se-firefox:4444/wd/hub"
+racenet-authenticator:
+  enable-dirt-rally2: true
+  enable-ea-wrc: true
