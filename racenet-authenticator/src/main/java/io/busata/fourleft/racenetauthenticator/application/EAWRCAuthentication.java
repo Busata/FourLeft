@@ -46,8 +46,9 @@ public class EAWRCAuthentication {
     private EAWRCToken token;
 
     public void refreshLogin() {
+        System.setProperty("webdriver.chrome.whitelistedIps", "");
+        
         WebDriverManager manager = WebDriverManager.chromedriver();
-
         ChromeOptions capabilities = new ChromeOptions();
 
         capabilities.addArguments("--disable-dev-shm-usage", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
