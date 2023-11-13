@@ -123,7 +123,7 @@ services:
     container_name: spring.racenet-authenticator
     restart: always
     volumes:
-      - /mnt/docker-data/racenet-authenticator:/tmp/
+      - /mnt/docker-data/racenet-authenticator:/racenet-authentication/
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
