@@ -49,6 +49,8 @@ public class EAWRCAuthentication {
         System.setProperty("webdriver.chrome.whitelistedIps", "");
 
         WebDriverManager manager = WebDriverManager.chromedriver();
+        manager.driverVersion("118.0.5993.70");
+        
         ChromeOptions capabilities = new ChromeOptions();
 
         capabilities.addArguments("--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
