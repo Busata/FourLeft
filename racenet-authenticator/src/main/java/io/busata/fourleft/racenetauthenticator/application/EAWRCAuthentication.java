@@ -12,8 +12,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v110.network.Network;
-import org.openqa.selenium.devtools.v110.network.model.ResponseReceived;
+import org.openqa.selenium.devtools.v119.network.Network;
+import org.openqa.selenium.devtools.v119.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
