@@ -1,0 +1,55 @@
+<div [formGroup]="form">
+  <div class="form-group">
+    <label>Display name</label>
+    <input [formControl]="form.displayName" type="text">
+  </div>
+  <div class="form-group">
+    <label>Platform</label>
+    <select [formControl]="form.platform">
+      <option value="PC">Steam</option>
+      <option value="PLAYSTATION">Playstation</option>
+      <option value="STEAM">Steam</option>
+      <option value="XBOX">Xbox</option>
+      <option value="OTHER">Other</option>
+      <option value="UNKNOWN">Unknown</option>
+
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Controller</label>
+    <select [formControl]="form.controller">
+      <option value="WHEEL">Wheel</option>
+      <option value="CONTROLLER">Gamepad</option>
+      <option value="KEYBOARD">Keyboard</option>
+      <option value="OTHER">Other</option>
+      <option value="UNKNOWN">Unknown</option>
+    </select>
+  </div>
+<!--  <div class="form-group">-->
+<!--    <label>Peripheral</label>-->
+<!--    <select [formControl]="form.controller">-->
+<!--      <option value="MONITOR">Single Monitor</option>-->
+<!--      <option value="TRIPLES">Triples</option>-->
+<!--      <option value="WIDESCREEN">Widescreen</option>-->
+<!--      <option value="VR">VR</option>-->
+<!--      <option value="OTHER">Other</option>-->
+<!--      <option value="UNKNOWN">Unknown</option>-->
+<!--    </select>-->
+<!--  </div>-->
+
+  <div class="form-group">
+    <label>Racenet (Cannot be changed)</label>
+    <input type="text"  [formControl]="form.racenet"/>
+  </div>
+
+  <div class="form-group">
+    <label>Track results (Official clubs, big clubs, ...)</label>
+    <div class="checkbox-group">
+      <app-slide-toggle [formControl]="form.trackDiscord"></app-slide-toggle>
+    </div>
+  </div>
+
+
+<button class="g-button g-button-primary" (click)="saveProfile()">Save</button>
+<button class="g-button g-button-tertiary" (click)="cancel()">Reset</button>
+</div>

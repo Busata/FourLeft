@@ -1,7 +1,5 @@
 package io.busata.fourleft.application.discord;
 
-
-import io.busata.fourleft.domain.aggregators.ClubViewRepository;
 import io.busata.fourleft.domain.discord.DiscordChannelConfiguration;
 import io.busata.fourleft.domain.discord.DiscordChannelConfigurationRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +14,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DiscordChannelConfigurationService {
     private final DiscordChannelConfigurationRepository discordChannelConfigurationRepository;
-    private final ClubViewRepository clubViewRepository;
 
 
     public List<DiscordChannelConfiguration> findAll() {

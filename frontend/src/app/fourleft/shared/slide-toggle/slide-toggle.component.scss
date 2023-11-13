@@ -1,0 +1,44 @@
+.slide-toggle {
+  display: inline-block;
+  position: relative;
+  width: 3em;
+  height: 1.5em;
+  border-radius: 50px;
+
+
+
+  .toggle-button {
+    border-radius: 99px;
+    height: 1.5em;
+    width: 1.5em;
+    background-color: white;
+    transition: margin 25ms linear;
+
+  }
+
+  &.active {
+    background-color: #3FB6A3;
+
+    .toggle-button {
+      border: 3px solid #3FB6A3;
+      margin-left: 1.5em;
+    }
+  }
+
+  &.inactive {
+    background-color: #a8a3a3;
+
+    .toggle-button {
+      border: 3px solid #a8a3a3;
+    }
+  }
+
+
+
+
+  &:hover {
+    cursor: pointer;
+
+  }
+
+}

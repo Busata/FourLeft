@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class DiscordChannelConfigurationService {
     private final DiscordChannelConfigurationClient api;
 
-    //@Cacheable("channel_configurations")
     public List<DiscordChannelConfigurationTo> getConfigurations() {
         return this.api.getConfigurations();
     }

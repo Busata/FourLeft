@@ -27,6 +27,12 @@ import { AliasRedirectComponent } from './alias/alias-redirect/alias-redirect.co
 import {PublicGalleryContainerComponent} from "./gallery/public-gallery/public-gallery-container.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import { GalleryPhotoLightBoxComponent } from './gallery/gallery-photo-light-box/gallery-photo-light-box.component';
+import {
+  EASportsWRCProfileRedirectComponent
+} from "./easportswrc/profile/easports-wrc-profile-redirect/easportswrc-profile-redirect.component";
+import {EASportsWRCPageComponent} from "./easportswrc/easports-wrcpage/easports-wrcpage.component";
+import { EASportsWRCProfileContainerComponent } from './easportswrc/profile/easports-wrc-profile-container/easports-wrcprofile-container.component';
+import { EASportsWRCProfileFormComponent } from './easportswrc/profile/easports-wrcprofile-form/easports-wrcprofile-form.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +48,11 @@ import { GalleryPhotoLightBoxComponent } from './gallery/gallery-photo-light-box
     AliasPageComponent,
     AliasRedirectComponent,
     PublicGalleryContainerComponent,
-    GalleryPhotoLightBoxComponent
+    GalleryPhotoLightBoxComponent,
+    EASportsWRCPageComponent,
+    EASportsWRCProfileRedirectComponent,
+    EASportsWRCProfileContainerComponent,
+    EASportsWRCProfileFormComponent
   ],
   imports: [
     FourleftPublicRoutingModule,

@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: backend-easportswrc
+  config:
+    import: "optional:configserver:"
+  jpa:
+    open-in-view: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8084
+
+racenet-api:
+  url: https://web-api.racenet.com

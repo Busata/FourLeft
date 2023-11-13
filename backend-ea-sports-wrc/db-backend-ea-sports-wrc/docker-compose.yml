@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db.fourleft_local:
+   container_name: db.fourleft.backend-ea-sports-wrc.local
+   image: postgres
+   ports:
+     - "17001:5432"
+   environment:
+     - POSTGRES_PASSWORD=backendeasportswrc
+     - POSTGRES_USER=backendeasportswrc
+     - POSTGRES_DB=backendeasportswrc

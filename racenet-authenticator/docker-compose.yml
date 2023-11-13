@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  helper.local.se-chrome:
+    build: chrome
+    restart: always
+    container_name: helper.local.se-chrome
+    ports:
+      - "8888:4444"
+      - "7900:7900"
+
+networks:
+  default:
+    name: veevi
+    external: true
