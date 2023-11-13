@@ -48,8 +48,8 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v115</artifactId>
-            <version>4.11.0</version>
+            <artifactId>selenium-devtools-v119</artifactId>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
