@@ -23,17 +23,17 @@ public class ResultsEndpoint {
     private final ClubStandingsMessageFactory standingsMessageFactory;
 
 
-    @GetMapping("/api/results/{clubId}/current")
+    @GetMapping("/api_v2/results/{clubId}/current")
     String getCurrentResults(@PathVariable String clubId) {
         return clubResultsService.getCurrentResults(clubId).map(clubResultsMessageFactory::createResultPost).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
-    @GetMapping("/api/results/{clubId}/previous")
+    @GetMapping("/api_v2/results/{clubId}/previous")
     String getPreviousResults(@PathVariable String clubId) {
         return clubResultsService.getPreviousResults(clubId).map(clubResultsMessageFactory::createResultPost).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
-    @GetMapping("/api/results/{clubId}/standings")
+    @GetMapping("/api_v2/results/{clubId}/standings")
     String getStandings(@PathVariable String clubId) {
         List<ChampionshipStanding> standings = clubResultsService.getStandings(clubId).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).limit(50).toList();
         return standingsMessageFactory.createStandingsPost(standings).toData().toString();

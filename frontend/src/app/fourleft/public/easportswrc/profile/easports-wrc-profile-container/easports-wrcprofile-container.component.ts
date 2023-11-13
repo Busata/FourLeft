@@ -19,7 +19,7 @@ export class EASportsWRCProfileContainerComponent {
 
   ngOnInit(): void {
     this.activatedRoute.params.pipe(map((params: Params) => params['requestId']), switchMap(requestId => {
-      return this.httpClient.get<ProfileTo>(`/easportswrc/api/profile/${requestId}`);
+      return this.httpClient.get<ProfileTo>(`/api_v2/profile/${requestId}`);
     })).subscribe(data => {
       this.data = data;
     })
@@ -27,7 +27,7 @@ export class EASportsWRCProfileContainerComponent {
 
   saveForm($event: any) {
     this.activatedRoute.params.pipe(map((params: Params) => params['requestId']), switchMap(requestId => {
-      return this.httpClient.post<ProfileTo>(`/easportswrc/api/profile/${requestId}`, $event);
+      return this.httpClient.post<ProfileTo>(`/api_v2/api/profile/${requestId}`, $event);
     })).subscribe(data => {
       this.data = data;
       this.snackBar.open("Profile updated.", "Close");

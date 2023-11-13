@@ -20,7 +20,7 @@ public class ProfileEndpoint {
     private final ProfileService service;
     private final DiscordGateway discordGateway;
 
-    @PostMapping("/api/profile/request")
+    @PostMapping("/api_v2/profile/request")
     public ProfileUpdateRequestResultTo requestTrackingUpdate(@RequestBody ProfileUpdateRequestTo request) {
         discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("**%s** (%s) requested profile update for racenet: **%s**".formatted(request.userName(), request.discordId(), request.racenet()), List.of()));
 
@@ -30,7 +30,7 @@ public class ProfileEndpoint {
 
     }
 
-    @GetMapping("/api/profile/{requestId}")
+    @GetMapping("/api_v2/profile/{requestId}")
     public Optional<ProfileTo> getProfile(@PathVariable UUID requestId) {
         return service.getProfile(requestId).map(profile -> new ProfileTo(
                 profile.getId(),
@@ -43,7 +43,7 @@ public class ProfileEndpoint {
         ));
     }
 
-    @PostMapping("/api/profile/{requestId}")
+    @PostMapping("/api_v2/profile/{requestId}")
     public ProfileTo updateProfile(@PathVariable UUID requestId, @RequestBody ProfileTo profile) {
         Profile updatedProfile = service.updateProfile(requestId, profile);
 

@@ -16,7 +16,7 @@ public class ConfigurationEndpoint {
     private final DiscordClubConfigurationService clubConfigurationService;
     private final DiscordClubConfigurationFactory discordClubConfigurationFactory;
 
-    @GetMapping("/api/configuration/channels")
+    @GetMapping("/api_v2/configuration/channels")
     public List<DiscordClubConfigurationTo> getConfigurations() {
         return clubConfigurationService.getConfigurations().stream().map(discordClubConfigurationFactory::create).toList();
 
