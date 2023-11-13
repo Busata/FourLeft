@@ -51,7 +51,7 @@ public class EAWRCAuthentication {
         WebDriverManager manager = WebDriverManager.chromedriver();
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--disable-dev-shm-usage", "--remote-debugging-pipe", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
+        capabilities.addArguments("--disable-dev-shm-usage","--disable-gpu", "--remote-debugging-pipe", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
