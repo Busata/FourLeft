@@ -27,7 +27,7 @@ public class BadgeMapper {
         } else if (percentageRank <= 50) {
             return "<:Rank_D:971454722244497410>";
         } else {
-            return ":blank:";
+            return "<:blank:894976571406966814>";
         }
     }
     public static String createRankBasedIcon(long rank, boolean isDnf) {
@@ -44,7 +44,7 @@ public class BadgeMapper {
         } else if (rank <= 50) {
             return "<:Rank_D:971454722244497410>";
         } else {
-            return ":blank:";
+            return "<:blank:894976571406966814>";
         }
     }
 
