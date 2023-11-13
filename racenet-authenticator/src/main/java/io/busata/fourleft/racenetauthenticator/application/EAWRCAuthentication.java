@@ -12,8 +12,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v119.network.Network;
-import org.openqa.selenium.devtools.v119.network.model.ResponseReceived;
+import org.openqa.selenium.devtools.v118.network.Network;
+import org.openqa.selenium.devtools.v118.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +51,7 @@ public class EAWRCAuthentication {
         WebDriverManager manager = WebDriverManager.chromedriver();
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--disable-dev-shm-usage","--disable-gpu",  "--remote-allow-origins=*","--window-size=1920,1080","--headless");
+        capabilities.addArguments("--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
@@ -79,6 +79,7 @@ public class EAWRCAuthentication {
 
         try {
             triggerAuthCall(driver);
+            log.info("Done");
         } catch (Exception ex) {
             log.error("Something went wrong while refreshing the login", ex);
             throw ex;
