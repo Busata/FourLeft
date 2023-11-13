@@ -19,7 +19,6 @@ public class CommandCreator {
     @PostConstruct
     public void createCommands() {
         long applicationId = client.getRestClient().getApplicationId().block();
-        long guildId = 961645025010266142L;
 
 
         ApplicationCommandRequest eaWrcSportsCommand = ApplicationCommandRequest.builder()
@@ -71,7 +70,7 @@ public class CommandCreator {
 
         Map<String, ApplicationCommandData> discordCommands = client.getRestClient()
                 .getApplicationService()
-                .getGuildApplicationCommands(applicationId, guildId)
+                .getGlobalApplicationCommands(applicationId)
                 .collectMap(ApplicationCommandData::name).block();
 
         if (discordCommands.containsKey(eaWrcSportsCommand.name())) {
@@ -80,12 +79,12 @@ public class CommandCreator {
 
             client.getRestClient()
                     .getApplicationService()
-                    .modifyGuildApplicationCommand(applicationId, guildId, discordGreetCmdId, eaWrcSportsCommand)
+                    .modifyGlobalApplicationCommand(applicationId, discordGreetCmdId, eaWrcSportsCommand)
                     .subscribe();
 
         } else {
             client.getRestClient().getApplicationService()
-                    .createGuildApplicationCommand(applicationId, guildId , eaWrcSportsCommand)
+                    .createGlobalApplicationCommand(applicationId, eaWrcSportsCommand)
                     .subscribe();
         }
 
