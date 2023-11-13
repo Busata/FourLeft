@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.infrastructure.rabbitmq;
 import io.busata.fourleft.api.easportswrc.EASportsWRCQueueNames;
 import io.busata.fourleft.api.easportswrc.events.ChannelUpdatedEvent;
 import io.busata.fourleft.api.easportswrc.events.LeaderboardUpdatedEvent;
+import io.busata.fourleft.api.easportswrc.events.ProfileUpdatedEvent;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,6 +19,12 @@ public class EventRelayer {
 
     @EventListener(ApplicationReadyEvent.class)
     public void sendBootEvent() {
+        rabbitMQ.convertAndSend(EASportsWRCQueueNames.EA_SPORTS_WRC_READY, true);
+
+    }
+
+    @EventListener
+    public void handleProfileUpdate(ProfileUpdatedEvent event) {
         rabbitMQ.convertAndSend(EASportsWRCQueueNames.EA_SPORTS_WRC_READY, true);
 
     }

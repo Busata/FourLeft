@@ -38,7 +38,7 @@ public class TrackCommandHandler {
                     if (response.foundProfile()) {
                         return event.reply("Update the alias [here](https://fourleft.io/easportswrc/profile/" + response.requestId() + ").").withEphemeral(true).then();
                     } else {
-                        return event.reply("Please ensure you've participated in an event and check for case sensitivity in your Racenet ID before using this command. Stuck? Contact @busata");
+                        return event.reply("Please ensure you've participated in an event and check for case sensitivity in your Racenet ID before using this command. Stuck? Contact @busata").withEphemeral(true);
                     }
 
 
