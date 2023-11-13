@@ -26,7 +26,7 @@
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
-            <version>5.5.3</version>
+            <version>5.6.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v118</artifactId>
+            <artifactId>selenium-devtools-v119</artifactId>
             <version>4.15.0</version>
         </dependency>
         <dependency>

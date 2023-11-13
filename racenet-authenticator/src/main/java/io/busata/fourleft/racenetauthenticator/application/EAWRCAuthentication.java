@@ -12,8 +12,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v118.network.Network;
-import org.openqa.selenium.devtools.v118.network.model.ResponseReceived;
+import org.openqa.selenium.devtools.v119.network.Network;
+import org.openqa.selenium.devtools.v119.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +49,7 @@ public class EAWRCAuthentication {
         System.setProperty("webdriver.chrome.whitelistedIps", "");
 
         WebDriverManager manager = WebDriverManager.chromedriver();
-        manager.driverVersion("118.0.5993.70");
+        manager.driverVersion("119.0.6045.105");
         
         ChromeOptions capabilities = new ChromeOptions();
 
@@ -75,13 +75,12 @@ public class EAWRCAuthentication {
                     }
                 }
             } catch(Exception ex) {
-                //Evil but perhaps hides the crashing
             }
         });
 
         try {
             triggerAuthCall(driver);
-            log.info("Done");
+            log.info("done");
         } catch (Exception ex) {
             log.error("Something went wrong while refreshing the login", ex);
             throw ex;
