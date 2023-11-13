@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DatabaseMigrationSettings" lastSelectedDirectory="backend-dirtrally2/src/main/resources/db/migration/" />
+  <component name="DatabaseMigrationSettings" lastSelectedDirectory="backend-easportswrc/src/main/resources/db/migration/" />
   <component name="JpaLiquibaseChangesConfig">
     <exclude-change idName="event#archived" tagName="addNotNullConstraint" />
     <exclude-change idName="club_member#championship_bronzes" tagName="addNotNullConstraint" />
@@ -43,9 +43,12 @@
     <exclude-change idName="alias_update_request#discord_id" tagName="modifyDataType" />
     <exclude-change idName="alias_update_request#requested_alias" tagName="modifyDataType" />
   </component>
+  <component name="JpaPluginProjectSettings">
+    <option name="lastSelectedLanguage" value="Java" />
+  </component>
   <component name="PersistenceUnitSettings">
     <persistence-units>
-      <persistence-unit moduleName="backend" name="Default">
+      <persistence-unit moduleName="backend" name="Default" defaultSearchScope="Project">
         <packages>
           <package value="io.busata.fourleft" />
         </packages>
@@ -58,6 +61,16 @@
       <persistence-unit moduleName="backend-dirtrally2" name="Default">
         <packages>
           <package value="io.busata.fourleft" />
+        </packages>
+      </persistence-unit>
+      <persistence-unit moduleName="backend-ea-sports-wrc" name="EA SPORTS WRC" defaultSearchScope="Project">
+        <packages>
+          <package value="io.busata.fourleft.backendeasportswrc" />
+        </packages>
+      </persistence-unit>
+      <persistence-unit moduleName="backend-ea-sports-wrc" name="Default">
+        <packages>
+          <package value="io.busata.fourleft.backendeasportswrc" />
         </packages>
       </persistence-unit>
     </persistence-units>

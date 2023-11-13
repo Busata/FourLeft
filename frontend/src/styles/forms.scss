@@ -11,6 +11,10 @@
     color: #767575;
   }
 
+  input[type=checkbox] {
+    width: 2em;
+    height: 2em;
+  }
   margin-bottom: 5px;
 
 }
@@ -27,3 +31,11 @@ select {
   padding-right: 15px;
 }
 
+.checkbox-group {
+  .info {
+    font-weight: 800;
+    color: #767575;
+  }
+  display: flex;
+  align-items: center;
+}

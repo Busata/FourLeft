@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.busata.fourleft.racenetauthenticator.infrastructure.clients.dirtrally2.DirtRally2AuthenticationApi;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -16,15 +16,13 @@ import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.v110.network.Network;
 import org.openqa.selenium.devtools.v110.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -37,6 +35,9 @@ public class EAWRCAuthentication {
 
     @Value("${codemasters.email}")
     private String userName;
+
+    @Value("${code-file}")
+    private String codeFilePath;
 
     @Value("${codemasters.pass}")
     private String password;
@@ -61,14 +62,18 @@ public class EAWRCAuthentication {
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
 
         devTools.addListener(Network.responseReceived(), (ResponseReceived event) -> {
-            if(event.getResponse().getUrl().equals(tokenUrl)) {
-                Network.GetResponseBodyResponse send = devTools.send(Network.getResponseBody(event.getRequestId()));
+            try {
+                if (event.getResponse().getUrl().equals(tokenUrl)) {
+                    Network.GetResponseBodyResponse send = devTools.send(Network.getResponseBody(event.getRequestId()));
 
-                try {
-                    token = objectMapper.readValue(send.getBody(),EAWRCToken.class);
-                } catch (JsonProcessingException e) {
-                    log.error("Something went wrong reading the EA WRC token.");
+                    try {
+                        token = objectMapper.readValue(send.getBody(), EAWRCToken.class);
+                    } catch (JsonProcessingException e) {
+                        log.error("Something went wrong reading the EA WRC token.");
+                    }
                 }
+            } catch(Exception ex) {
+                //Evil but perhaps hides the crashing
             }
         });
 
@@ -82,6 +87,7 @@ public class EAWRCAuthentication {
         }
     }
 
+    @SneakyThrows
     private void triggerAuthCall(WebDriver driver) {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
 
@@ -99,11 +105,35 @@ public class EAWRCAuthentication {
         passwordField.sendKeys(password);
         loginButton.click();
 
+        if(this.buttonExists(driver, By.id("btnSendCode"))) {
+            driver.findElement(By.id("btnSendCode")).click();
+
+            log.info("Waiting until {} appears", codeFilePath);
+
+            while(!Files.exists(Path.of(codeFilePath))) {
+                Thread.sleep(1000);
+            }
+
+            String s = Files.readString(Path.of(codeFilePath));
+
+
+            driver.findElement(By.id("twoFactorCode")).sendKeys(s);
+            driver.findElement(By.id("btnSubmit")).click();
+        }
+
         WebElement eaWrcButton = driver.findElement(By.cssSelector("a[href=\"/ea_sports_wrc\""));
         eaWrcButton.click();
 
 
 
+    }
+
+
+    public boolean buttonExists(WebDriver driver, By id) {
+        driver.manage().timeouts().implicitlyWait(0, TimeUnit.MILLISECONDS);
+        boolean exists = !driver.findElements(id).isEmpty();
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+        return exists;
     }
 
     public EAWRCToken getHeaders() {

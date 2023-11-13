@@ -1,0 +1,13 @@
+racenet-api:
+  url: https://racenetapi
+
+racenetauthentication:
+  url: https://racenetauthentication
+
+discord:
+  bot-token: MTAxNjIyMTUzMTM5NjkwNzAzOA.GRH-Z2.D7MVjMzMMUQ91ZkysqlDR0nKcDSxTAAwGaPQ10
+
+spring:
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:16:///integration-tests-db

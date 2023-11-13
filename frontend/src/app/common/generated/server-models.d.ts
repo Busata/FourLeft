@@ -1,8 +1,34 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2023-10-11 22:37:15.
+// Generated using typescript-generator version 2.35.1025 on 2023-11-13 11:37:55.
 
 export interface RoutesTo {
+}
+
+export interface DiscordClubConfigurationTo {
+    channelId: number;
+    clubId: string;
+}
+
+export interface ProfileTo {
+    id: string;
+    displayName: string;
+    controller: ControllerType;
+    platform: Platform;
+    peripheral: PeripheralType;
+    racenet: string;
+    trackDiscord: boolean;
+}
+
+export interface ProfileUpdateRequestResultTo {
+    requestId: string;
+    foundProfile: boolean;
+}
+
+export interface ProfileUpdateRequestTo {
+    racenet: string;
+    discordId: string;
+    userName: string;
 }
 
 export interface AliasRequestResultTo {
@@ -588,9 +614,11 @@ export interface ViewResultTo {
     multiListResults: ResultListTo[];
 }
 
-export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "UNKNOWN";
+export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "OTHER" | "UNKNOWN";
 
-export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "UNKNOWN";
+export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "EPIC" | "EA_APP" | "STEAM" | "STEAM_DECK" | "OTHER" | "UNKNOWN";
+
+export type PeripheralType = "MONITOR" | "TRIPLES" | "WIDESCREEN" | "VR" | "OTHER" | "UNKNOWN";
 
 export type ChampionshipPointsType = "DEFAULT" | "JRC";
 

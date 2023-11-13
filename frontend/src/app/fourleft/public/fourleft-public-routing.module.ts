@@ -9,6 +9,13 @@ import {AliasContainerComponent} from "./alias/alias-container/alias-container.c
 import {AliasPageComponent} from "./alias/alias-page/alias-page.component";
 import {AliasRedirectComponent} from "./alias/alias-redirect/alias-redirect.component";
 import {PublicGalleryContainerComponent} from "./gallery/public-gallery/public-gallery-container.component";
+import {EASportsWRCPageComponent} from "./easportswrc/easports-wrcpage/easports-wrcpage.component";
+import {
+  EASportsWRCProfileRedirectComponent
+} from "./easportswrc/profile/easports-wrc-profile-redirect/easportswrc-profile-redirect.component";
+import {
+  EASportsWRCProfileContainerComponent
+} from "./easportswrc/profile/easports-wrc-profile-container/easports-wrcprofile-container.component";
 
 export const routes: Routes = [
   {
@@ -49,6 +56,27 @@ export const routes: Routes = [
             pathMatch: 'full',
             component: AliasContainerComponent
           }]
+      },
+      {
+        path: 'easportswrc',
+        component: EASportsWRCPageComponent,
+        children: [
+          {
+            path: 'profile',
+            children: [
+              {
+                path: '',
+                pathMatch:'full',
+                component: EASportsWRCProfileRedirectComponent
+              },
+              {
+                path: ':requestId',
+                pathMatch: 'full',
+                component: EASportsWRCProfileContainerComponent
+              }
+            ]
+          }
+        ]
       },
       {
         path: 'results',

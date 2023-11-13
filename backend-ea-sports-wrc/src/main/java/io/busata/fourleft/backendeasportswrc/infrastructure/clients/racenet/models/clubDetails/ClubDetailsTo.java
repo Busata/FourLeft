@@ -1,11 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails;
 
-import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.CurrentChampionshipTo;
+import lombok.Builder;
 
 import java.util.List;
+import java.util.Optional;
 
+@Builder()
 public record ClubDetailsTo(
-        String clubId,
+        String clubID,
         String officialClubType,
         String accessCode,
         Long status,
@@ -26,7 +28,7 @@ public record ClubDetailsTo(
         String clubCreatedAt,
         List<SocialMediaLinkTo> socialMediaLinks,
         List<String> championshipIDs,
-        CurrentChampionshipTo currentChampionship
+        Optional<ChampionshipTo> currentChampionship
 
 ) {
 
