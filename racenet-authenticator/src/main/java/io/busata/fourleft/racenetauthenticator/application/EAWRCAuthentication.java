@@ -2,7 +2,6 @@ package io.busata.fourleft.racenetauthenticator.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.busata.fourleft.racenetauthenticator.infrastructure.clients.dirtrally2.DirtRally2AuthenticationApi;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
