@@ -47,6 +47,7 @@ public class EAWRCAuthentication {
     private EAWRCToken token;
 
     public void refreshLogin() {
+        log.info("refreshing login for EA Sports WRC");
         WebDriverManager manager = WebDriverManager.chromedriver();
 
         ChromeOptions capabilities = new ChromeOptions();
