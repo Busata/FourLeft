@@ -47,11 +47,11 @@ public class EAWRCAuthentication {
 
     public void refreshLogin() {
         System.setProperty("webdriver.chrome.whitelistedIps", "");
-        
+
         WebDriverManager manager = WebDriverManager.chromedriver();
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--disable-dev-shm-usage", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
+        capabilities.addArguments("--disable-dev-shm-usage", "--remote-debugging-pipe", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
