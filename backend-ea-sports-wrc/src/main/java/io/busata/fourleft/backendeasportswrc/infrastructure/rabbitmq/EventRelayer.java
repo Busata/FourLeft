@@ -1,8 +1,9 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.rabbitmq;
 
 import io.busata.fourleft.api.easportswrc.EASportsWRCQueueNames;
+import io.busata.fourleft.api.easportswrc.events.ChannelUpdatedEvent;
 import io.busata.fourleft.api.easportswrc.events.LeaderboardUpdatedEvent;
-import jakarta.annotation.PostConstruct;
+import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EventRelayer {
     private final RabbitTemplate rabbitMQ;
+    private final DiscordClubConfigurationService clubConfigurationService;
 
     @EventListener(ApplicationReadyEvent.class)
     public void sendBootEvent() {
@@ -22,7 +24,9 @@ public class EventRelayer {
 
     @EventListener
     public void handleLeaderboardUpdate(LeaderboardUpdatedEvent updated) {
-        rabbitMQ.convertAndSend(EASportsWRCQueueNames.EA_SPORTS_WRC_LEADERBOARD_UPDATE, updated);
+        clubConfigurationService.findByClubId(updated.clubId()).forEach(configuration -> {
+            rabbitMQ.convertAndSend(EASportsWRCQueueNames.EA_SPORTS_WRC_CHANNEL_UPDATE, new ChannelUpdatedEvent(configuration.getChannelId()));
+        });
     }
 
 }

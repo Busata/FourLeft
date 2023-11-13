@@ -3,7 +3,7 @@ package io.busata.fourleftdiscord.eawrcsports;
 
 import discord4j.core.spec.EmbedCreateSpec;
 import io.busata.fourleft.api.easportswrc.EASportsWRCQueueNames;
-import io.busata.fourleft.api.easportswrc.events.LeaderboardUpdatedEvent;
+import io.busata.fourleft.api.easportswrc.events.ChannelUpdatedEvent;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,7 +21,7 @@ public class MessageCache {
 
     private final EAWRCBackendApi api;
 
-    private final Map<String, Map<MessageCacheType, EmbedCreateSpec>> cachedData = new HashMap<>();
+    private final Map<Long, Map<MessageCacheType, EmbedCreateSpec>> cachedData = new HashMap<>();
 
     private final EmbedFactory embedFactory;
 
@@ -32,28 +32,26 @@ public class MessageCache {
     }
 
     public Optional<EmbedCreateSpec> getMessage(Long channelId, MessageCacheType type) {
-        return this.configurationService.getClubId(channelId).flatMap(clubId -> {
-            if (this.cachedData.containsKey(clubId)) {
-                Map<MessageCacheType, EmbedCreateSpec> messageCacheTypeEmbedCreateSpecMap = this.cachedData.get(clubId);
-                if (messageCacheTypeEmbedCreateSpecMap.containsKey(type)) {
-                    return Optional.ofNullable(messageCacheTypeEmbedCreateSpecMap.get(type));
-                }
+        if (this.cachedData.containsKey(channelId)) {
+            Map<MessageCacheType, EmbedCreateSpec> messageCacheTypeEmbedCreateSpecMap = this.cachedData.get(channelId);
+            if (messageCacheTypeEmbedCreateSpecMap.containsKey(type)) {
+                return Optional.ofNullable(messageCacheTypeEmbedCreateSpecMap.get(type));
             }
+        }
 
-            return Optional.empty();
-        });
+        return Optional.empty();
     }
 
-    private void updateMessages(String clubId) {
-        this.cachedData.putIfAbsent(clubId, new HashMap<>());
+    private void updateMessages(Long channelId) {
+        this.cachedData.putIfAbsent(channelId, new HashMap<>());
 
-        var currentResults = api.getCurrentResults(clubId);
-        var previousResults = api.getPreviousResults(clubId);
-        var standings = api.getStandings(clubId);
-        var summary = api.getSummary(clubId);
+        var currentResults = api.getCurrentResults(channelId);
+        var previousResults = api.getPreviousResults(channelId);
+        var standings = api.getStandings(channelId);
+        var summary = api.getSummary(channelId);
 
 
-        Map<MessageCacheType, EmbedCreateSpec> messages = this.cachedData.get(clubId);
+        Map<MessageCacheType, EmbedCreateSpec> messages = this.cachedData.get(channelId);
 
         currentResults.ifPresent(results -> {
             messages.put(MessageCacheType.RESULTS_CURRENT, embedFactory.create(results));
@@ -70,13 +68,13 @@ public class MessageCache {
     }
 
 
-    @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_LEADERBOARD_UPDATE)
-    public void updateCache(LeaderboardUpdatedEvent event) {
-        this.updateMessages(event.clubId());
+    @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_CHANNEL_UPDATE)
+    public void updateCache(ChannelUpdatedEvent event) {
+        this.updateMessages(event.channelId());
     }
 
     @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_READY)
     public void updateAll() {
-        this.configurationService.getConfigurations().stream().map(DiscordClubConfigurationTo::clubId).distinct().forEach(this::updateMessages);
+        this.configurationService.getConfigurations().stream().map(DiscordClubConfigurationTo::channelId).distinct().forEach(this::updateMessages);
     }
 }

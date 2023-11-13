@@ -21,6 +21,8 @@ public class DiscordClubConfiguration {
 
     boolean enabled;
 
+    boolean requiresTracking;
+
     boolean autopostingEnabled;
 
 

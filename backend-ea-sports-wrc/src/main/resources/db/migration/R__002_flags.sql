@@ -3,13 +3,13 @@ delete from field_mapping where name like 'eventFlag%';
 delete from field_mapping where name like 'platform%';
 
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#1', ':computer:', '', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#2', ':playstation:', '', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#3', ':steam:', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#2', '<:playstation:894882472788115456>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#3', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#6', ':computer:', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#7', ':computer:', '', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#14', ':ea:', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#14', '<:ea:894883713031225405>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#65', ':computer:', '', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#128', ':steam:', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#128', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
 
 
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#5', ':flag_fr:', 'Rally Mediterraneo', true, 'DISCORD', 'EMOTE');

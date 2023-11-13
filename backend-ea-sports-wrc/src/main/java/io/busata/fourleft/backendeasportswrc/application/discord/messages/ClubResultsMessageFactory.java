@@ -28,10 +28,10 @@ public class ClubResultsMessageFactory {
 
     String entryTemplate = "${badgeRank} **${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
 
-    public MessageEmbed createResultPost(ClubResults results) {
+    public MessageEmbed createResultPost(ClubResults results, boolean requiresTracking) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder, results);
-        buildEntries(embedBuilder, results);
+        buildEntries(embedBuilder, results, requiresTracking);
         buildFooter(embedBuilder, results);
         return embedBuilder.build();
     }
@@ -62,20 +62,14 @@ public class ClubResultsMessageFactory {
     }
 
 
-    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results) {
+    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, boolean requiresTracking) {
         int desiredGroupSize = 10;
 
         int totalEntries = results.entries().size();
 
 
         List<List<ClubLeaderboardEntry>> lists = ListHelpers.partitionInGroups(results.entries().stream()
-                .filter(entry -> {
-                    if(totalEntries <= 1000) {
-                        return true;
-                    } else {
-                        return entry.isTracked();
-                    }
-                })
+                .filter(entry -> requiresTracking && entry.isTracked())
                 .sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).limit(50).toList(), desiredGroupSize);
 
         for (int i = 0; i < lists.size(); i++) {

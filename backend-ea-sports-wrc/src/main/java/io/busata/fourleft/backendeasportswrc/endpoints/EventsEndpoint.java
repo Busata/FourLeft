@@ -18,7 +18,7 @@ public class EventsEndpoint {
     private final ClubEventsMessageFactory clubEventsMessageFactory;
     private final ChampionshipService championshipService;
 
-    @GetMapping("/api_v2/events/{clubId}/summary")
+    @GetMapping("/api_v2/events/{channelId}/summary")
     String getEventSummary(@PathVariable String clubId) {
         return clubService.getActiveChampionshipId(clubId)
                 .flatMap(championshipService::findChampionship)

@@ -43,13 +43,7 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
     }
 
     private String resolveEntries(String template, AutoPostMessageSummary summary) {
-        return summary.entries().stream().filter(entry -> {
-            if (summary.totalEntries() <= 1000) {
-                return true;
-            } else {
-                return entry.isTracked();
-            }
-        }).map(entry -> {
+        return summary.entries().stream().map(entry -> {
             Map<String, String> values = new HashMap<>();
 
             values.put("rankBadge", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries()));
