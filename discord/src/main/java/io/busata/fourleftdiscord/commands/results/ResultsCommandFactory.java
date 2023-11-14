@@ -1,6 +1,8 @@
 package io.busata.fourleftdiscord.commands.results;
 
 
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;
@@ -21,9 +23,11 @@ public class ResultsCommandFactory implements CommandProvider {
     private final List<BotCommandOptionHandler> commandHandlers;
 
     @Override
-    public ImmutableApplicationCommandRequest create() {
-        ImmutableApplicationCommandRequest.Builder weekly = ApplicationCommandRequest.builder()
+    public void modify(ImmutableApplicationCommandRequest.Builder rootCommand) {
+
+        var weekly = ApplicationCommandOptionData.builder()
                 .name(CommandNames.RESULTS)
+                .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
                 .description("Leaderboard results interaction");
 
         commandHandlers.stream()
@@ -33,6 +37,6 @@ public class ResultsCommandFactory implements CommandProvider {
                     weekly.addOption(handler.buildOption());
                 });
 
-        return weekly.build();
+        rootCommand.addOption(weekly.build());
     }
 }

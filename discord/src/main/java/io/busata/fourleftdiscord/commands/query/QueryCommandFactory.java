@@ -1,6 +1,8 @@
 package io.busata.fourleftdiscord.commands.query;
 
 
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;
@@ -21,9 +23,10 @@ public class QueryCommandFactory implements CommandProvider {
     private final List<BotCommandOptionHandler> commandHandlers;
 
     @Override
-    public ImmutableApplicationCommandRequest create() {
-        ImmutableApplicationCommandRequest.Builder commandBuilder = ApplicationCommandRequest.builder()
+    public void modify(ImmutableApplicationCommandRequest.Builder rootCommand) {
+       var commandBuilder = ApplicationCommandOptionData.builder()
                 .name(CommandNames.QUERY)
+                .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
                 .description("Query users");
 
         commandHandlers.stream()
@@ -33,6 +36,6 @@ public class QueryCommandFactory implements CommandProvider {
                     commandBuilder.addOption(handler.buildOption());
                 });
 
-        return commandBuilder.build();
+        rootCommand.addOption(commandBuilder.build());
     }
 }

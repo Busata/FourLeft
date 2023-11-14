@@ -1,6 +1,8 @@
 package io.busata.fourleftdiscord.commands.track;
 
 
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import io.busata.fourleftdiscord.commands.BotCommandOptionHandler;
@@ -21,10 +23,10 @@ public class TrackCommandFactory implements CommandProvider {
     private final List<BotCommandOptionHandler> commandHandlers;
 
     @Override
-    public ImmutableApplicationCommandRequest create() {
-        ImmutableApplicationCommandRequest.Builder commandBuilder = ApplicationCommandRequest.builder()
+    public void modify(ImmutableApplicationCommandRequest.Builder rootCommand) {
+        var commandBuilder = ApplicationCommandOptionData.builder()
                 .name(CommandNames.TRACK)
-                .defaultPermission(true)
+                .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
                 .description("Community event tracking");
 
         commandHandlers.stream()
@@ -34,6 +36,6 @@ public class TrackCommandFactory implements CommandProvider {
                     commandBuilder.addOption(handler.buildOption());
                 });
 
-        return commandBuilder.build();
+        rootCommand.addOption(commandBuilder.build());
     }
 }

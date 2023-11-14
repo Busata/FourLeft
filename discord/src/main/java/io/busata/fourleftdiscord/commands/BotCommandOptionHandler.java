@@ -27,8 +27,9 @@ public interface BotCommandOptionHandler {
 
     default boolean canHandle(ChatInputInteractionEvent event) {
         return
-                event.getCommandName().equalsIgnoreCase(getCommand()) &&
-                event.getOption(getOption()).isPresent();
+                event.getCommandName().equalsIgnoreCase("dr2") &&
+                event.getOption(getCommand()).isPresent() &&
+                        event.getOption(getCommand()).flatMap(e -> e.getOption(getOption())).isPresent();
     }
 
 

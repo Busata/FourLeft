@@ -60,7 +60,7 @@ public class CommandCreator {
                         .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .addOption(ApplicationCommandOptionData.builder()
                                 .name("racenet")
-                                .description("Racenet name")
+                                .description("EA Racenet account name, case sensitive")
                                 .type(ApplicationCommandOption.Type.STRING.getValue())
                                 .required(true)
                                 .build())

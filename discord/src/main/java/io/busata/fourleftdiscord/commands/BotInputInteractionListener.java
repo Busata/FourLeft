@@ -10,6 +10,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import io.busata.fourleft.api.models.discord.DiscordGuildMemberEventTo;
 import io.busata.fourleft.common.MemberEvent;
@@ -99,16 +100,19 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
         long applicationId = client.getRestClient().getApplicationId().block();
 
 
-        //deleteExistingCommands(applicationId);
+        deleteExistingCommands(applicationId);
+        ImmutableApplicationCommandRequest.Builder rootCommand = ApplicationCommandRequest.builder()
+                .name("dr2")
+                .description("All commands related to EA Sports WRC");
 
-        List<ImmutableApplicationCommandRequest> commands = commandProviders.stream().map(CommandProvider::create).collect(Collectors.toList());
+        commandProviders.forEach(provider -> provider.modify(rootCommand));
 
 //        List.of(DiscordGuilds.BUSATA_DISCORD).forEach(guild -> {
 //            commands.forEach(commandRequest -> {
 //        commands.forEach(commandRequest -> {
-//            client.getRestClient().getApplicationService()
-//                    .createGlobalApplicationCommand(applicationId, commandRequest)
-//                    .subscribe();
+            client.getRestClient().getApplicationService()
+                    .createGlobalApplicationCommand(applicationId, rootCommand.build())
+                    .subscribe();
 //        });
 //        });
     }

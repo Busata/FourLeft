@@ -26,7 +26,7 @@ public class ProfileEndpoint {
 
     @PostMapping("/api_v2/profile/request")
     public ProfileUpdateRequestResultTo requestTrackingUpdate(@RequestBody ProfileUpdateRequestTo request) {
-        discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("**%s** (%s) requested profile update for racenet: **%s**".formatted(request.userName(), request.discordId(), request.racenet()), List.of()));
+        discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("**%s** (%s) requested profile update for racenet: **%s** (tracking enabled)".formatted(request.userName(), request.discordId(), request.racenet()), List.of()));
 
         return service.requestUpdate(request.discordId(), request.racenet()).map(uuid -> {
             return new ProfileUpdateRequestResultTo(uuid, true);

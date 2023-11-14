@@ -36,7 +36,7 @@ public class TrackCommandHandler {
                     ProfileUpdateRequestResultTo response = api.requestTrackingUpdate(new ProfileUpdateRequestTo(username, event.getInteraction().getUser().getId().toString(), event.getInteraction().getUser().getUsername()));
 
                     if (response.foundProfile()) {
-                        return event.reply("Update the alias [here](https://fourleft.io/easportswrc/profile/" + response.requestId() + ").").withEphemeral(true).then();
+                        return event.reply("Update your nickname, controller and platform choice [here](https://fourleft.io/easportswrc/profile/" + response.requestId() + ").").withEphemeral(true).then();
                     } else {
                         return event.reply("Please ensure you've participated in an event and check for case sensitivity in your Racenet ID before using this command. Stuck? Contact @busata").withEphemeral(true);
                     }

@@ -43,7 +43,7 @@ public class Profile {
     @Setter
     boolean trackDiscord;
 
-    public Profile(String id, String racenet, String discordId, Platform platform) {
+    public Profile(String id, String racenet, String discordId, Platform platform, boolean tracking) {
         this.id = id;
         this.displayName = racenet;
         this.discordId = discordId;
@@ -51,6 +51,6 @@ public class Profile {
         this.controller = ControllerType.UNKNOWN;
         this.peripheral = PeripheralType.UNKNOWN;
         this.racenet = racenet;
-        this.trackDiscord = false;
+        this.trackDiscord = tracking;
     }
 }
