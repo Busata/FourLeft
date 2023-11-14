@@ -60,7 +60,7 @@ public class ChampionshipStanding {
         return this.pointsAccumulated - this.pointsAccumulatedPrevious;
     }
     public int getRankDifference() {
-        return this.rank - this.previousRank;
+        return this.previousRank - this.rank;
     }
 
 

@@ -6,6 +6,7 @@ import io.busata.fourleft.api.easportswrc.EASportsWRCQueueNames;
 import io.busata.fourleft.api.easportswrc.events.ChannelUpdatedEvent;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MessageCache {
     private final ConfigurationService configurationService;
@@ -43,6 +45,7 @@ public class MessageCache {
     }
 
     private void updateMessages(Long channelId) {
+        log.info("Updating messages for channel {}", channelId);
         this.cachedData.putIfAbsent(channelId, new HashMap<>());
 
         var currentResults = api.getCurrentResults(channelId);
