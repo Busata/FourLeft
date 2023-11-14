@@ -81,7 +81,8 @@ public class PersonalResultsCommand implements BotCommandOptionHandler {
 
     private Mono<Message> getPersonalResults(ChatInputInteractionEvent event) {
         try {
-            String username = event.getOption(getOption())
+            String username = event.getOption(getCommand())
+                    .flatMap(command -> command.getOption(getOption()))
                     .flatMap(subCommand -> subCommand.getOption("username"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();

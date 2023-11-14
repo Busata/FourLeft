@@ -80,7 +80,8 @@ public class AliasResultsCommand implements BotCommandOptionHandler {
     private Mono<Message> createAliasUpdateRequest(ChatInputInteractionEvent event) {
 
         return Mono.just(event).flatMap(evt -> {
-            String username = event.getOption(getOption())
+            String username = event.getOption(getCommand())
+                    .flatMap(command -> command.getOption(getOption()))
                     .flatMap(subCommand -> subCommand.getOption("racenet"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();

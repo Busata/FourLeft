@@ -100,7 +100,7 @@ public class BotInputInteractionListener implements EventListener<ChatInputInter
         long applicationId = client.getRestClient().getApplicationId().block();
 
 
-        deleteExistingCommands(applicationId);
+        //deleteExistingCommands(applicationId);
         ImmutableApplicationCommandRequest.Builder rootCommand = ApplicationCommandRequest.builder()
                 .name("dr2")
                 .description("All commands related to EA Sports WRC");

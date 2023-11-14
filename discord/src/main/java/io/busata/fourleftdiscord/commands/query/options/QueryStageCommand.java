@@ -61,7 +61,8 @@ public class QueryStageCommand implements BotCommandOptionHandler {
     public Mono<Void> queryStage(ChatInputInteractionEvent event) {
         return Mono.just(event).flatMap(evt -> {
 
-            String stageName = event.getOption(getOption())
+            String stageName = event.getOption(getCommand())
+                    .flatMap(command -> command.getOption(getOption()))
                     .flatMap(subCommand -> subCommand.getOption("stage"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();

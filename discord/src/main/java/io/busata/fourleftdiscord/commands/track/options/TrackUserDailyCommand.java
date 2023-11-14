@@ -64,7 +64,8 @@ TrackUserDailyCommand implements BotCommandOptionHandler {
     }
 
     private Mono<Void> trackUser(ChatInputInteractionEvent event) {
-            String racenet = event.getOption(getOption())
+            String racenet = event.getOption(getCommand())
+                    .flatMap(command -> command.getOption(getOption()))
                     .flatMap(subCommand -> subCommand.getOption("racenet"))
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
