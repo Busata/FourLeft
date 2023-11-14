@@ -59,6 +59,9 @@ public class ChampionshipStanding {
     public int getPointsDifference() {
         return this.pointsAccumulated - this.pointsAccumulatedPrevious;
     }
+    public int getRankDifference() {
+        return this.rank - this.previousRank;
+    }
 
 
     @Override

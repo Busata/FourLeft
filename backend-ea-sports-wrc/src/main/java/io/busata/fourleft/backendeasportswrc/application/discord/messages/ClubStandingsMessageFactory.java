@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class ClubStandingsMessageFactory {
     private final EAWRCFieldMapper fieldMapper;
 
-    String entryTemplate = "**${rank}** • **${flag}** • **${displayName}** • ${points}${deltaStandings}";
+    String entryTemplate = "**${rank}**${deltaRank} • *${points}*${deltaPoints} • ${flag} • **${displayName}**";
 
     public MessageEmbed createStandingsPost(List<ChampionshipStanding> standings) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -37,7 +37,7 @@ public class ClubStandingsMessageFactory {
 
 
     private void buildEntries(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings) {
-        var lists = ListHelpers.partitionInGroups(standings.stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 12, 10);
+        var lists = ListHelpers.partitionInGroups(standings.stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
 
         lists.forEach(groupOfEntries -> {
             String values = groupOfEntries.stream().map(entry -> {
@@ -53,21 +53,29 @@ public class ClubStandingsMessageFactory {
 
     private Map<String, String> buildTemplateMap(ChampionshipStanding entry) {
         Map<String, String> values = new HashMap<>();
-
         values.put("rank", String.valueOf(entry.getRank()));
-        values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityId(), FieldMappingType.EMOTE));
         values.put("displayName", entry.getDisplayName());
+        values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityId(), FieldMappingType.EMOTE));
         values.put("points", String.valueOf(entry.getPointsAccumulated()));
-        values.put("deltaStandings", createDeltaStandings(entry));
+
+        values.put("deltaRank", createDeltaRank(entry));
+        values.put("deltaPoints", createDeltaPoints(entry));
 
         return values;
     }
 
-    private String createDeltaStandings(ChampionshipStanding entry) {
+    private String createDeltaRank(ChampionshipStanding entry) {
         if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
             return "";
         }
-        return " *(%s +%s)*".formatted(entry.getPreviousRank(), entry.getPointsDifference());
+        return " **(%+d)**".formatted(entry.getRankDifference());
+    }
+
+    private String createDeltaPoints(ChampionshipStanding entry) {
+        if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
+            return "";
+        }
+        return " *(%+d)*".formatted(entry.getPointsDifference());
     }
 
 
