@@ -22,10 +22,10 @@ public class ClubStandingsMessageFactory {
 
     String entryTemplate = "**${rank}**${deltaRank} • *${points}*${deltaPoints} • ${flag} • **${displayName}**";
 
-    public MessageEmbed createStandingsPost(List<ChampionshipStanding> standings) {
+    public MessageEmbed createStandingsPost(List<ChampionshipStanding> standings, boolean requiresTracking) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder);
-        buildEntries(embedBuilder, standings);
+        buildEntries(embedBuilder, standings, requiresTracking);
         buildFooter(embedBuilder, standings);
         return embedBuilder.build();
     }
@@ -36,8 +36,10 @@ public class ClubStandingsMessageFactory {
     }
 
 
-    private void buildEntries(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings) {
-        var lists = ListHelpers.partitionInGroups(standings.stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
+    private void buildEntries(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings, boolean requiresTracking) {
+        var lists = ListHelpers.partitionInGroups(standings.stream()
+                        .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
+                .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
 
         lists.forEach(groupOfEntries -> {
             String values = groupOfEntries.stream().map(entry -> {

@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.domain.models;
 
+import io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter
@@ -23,7 +25,13 @@ public class ChampionshipStanding {
     @ManyToOne(fetch = FetchType.EAGER)
     private Championship championship;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ssid", updatable = false, insertable = false, referencedColumnName = "id")
+    Profile profile;
+
+    @Column()
     String ssid;
+
 
     String displayName;
 
@@ -62,7 +70,9 @@ public class ChampionshipStanding {
     public int getRankDifference() {
         return this.previousRank - this.rank;
     }
-
+    public boolean isTracked() {
+        return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
+    }
 
     @Override
     public boolean equals(Object o) {

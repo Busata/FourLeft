@@ -94,7 +94,7 @@ public class DiscordAutoPostingService {
     private List<ClubLeaderboardEntry> findToBePosted(Long messageId, List<ClubLeaderboardEntry> newEntries, List<AutopostEntry> postedEntries, boolean requiresTracking) {
         Set<String> postedIds = postedEntries.stream().map(AutopostEntry::getPlayerKey).collect(Collectors.toSet());
 
-        List<ClubLeaderboardEntry> unpostedEntries   = newEntries.stream().filter(entry -> !requiresTracking || entry.isTracked()).filter(newEntry -> !postedIds.contains(newEntry.getPlayerKey())).toList();
+        List<ClubLeaderboardEntry> unpostedEntries   = newEntries.stream().filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10).filter(newEntry -> !postedIds.contains(newEntry.getPlayerKey())).toList();
 
         List<AutopostEntry> postedLastTime = postedEntries.stream().filter(postedEntry -> postedEntry.getMessageId().equals(messageId)).toList();
         List<ClubLeaderboardEntry> toBeRepostedEntries = postedLastTime.stream().map(postedEntry -> {

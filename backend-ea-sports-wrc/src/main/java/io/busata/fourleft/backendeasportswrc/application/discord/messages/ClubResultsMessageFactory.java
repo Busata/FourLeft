@@ -69,7 +69,7 @@ public class ClubResultsMessageFactory {
 
 
         List<List<ClubLeaderboardEntry>> lists = ListHelpers.partitionInGroups(results.entries().stream()
-                .filter(entry -> !requiresTracking || entry.isTracked())
+                .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
                 .sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).limit(50).toList(), desiredGroupSize);
 
         for (int i = 0; i < lists.size(); i++) {
