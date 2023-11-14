@@ -66,14 +66,14 @@ public class ClubStandingsMessageFactory {
 
     private String createDeltaRank(ChampionshipStanding entry) {
         if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
-            return "";
+            return "**(+0)**";
         }
         return " **(%+d)**".formatted(entry.getRankDifference());
     }
 
     private String createDeltaPoints(ChampionshipStanding entry) {
         if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
-            return "";
+            return "*(+0)*";
         }
         return " *(%+d)*".formatted(entry.getPointsDifference());
     }
