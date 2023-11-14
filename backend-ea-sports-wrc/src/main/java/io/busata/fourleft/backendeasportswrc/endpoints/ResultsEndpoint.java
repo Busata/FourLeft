@@ -46,7 +46,7 @@ public class ResultsEndpoint {
     String getStandings(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        List<ChampionshipStanding> standings = clubResultsService.getStandings(discordClubConfiguration.getClubId()).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).limit(50).toList();
+        List<ChampionshipStanding> standings = clubResultsService.getStandings(discordClubConfiguration.getClubId()).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
         return standingsMessageFactory.createStandingsPost(standings, discordClubConfiguration.isRequiresTracking()).toData().toString();
     }
 }
