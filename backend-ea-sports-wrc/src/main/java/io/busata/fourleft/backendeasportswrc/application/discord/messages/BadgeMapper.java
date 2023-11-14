@@ -35,13 +35,13 @@ public class BadgeMapper {
             return "<:f_respects:894913859532496916>";
         } else if (rank <= 10) {
             return "<:Rank_S:971454722030600214>";
-        } else if (rank <= 20) {
+        } else if (rank <= 25) {
             return "<:Rank_A:971454722458411048>";
-        } else if (rank <= 30) {
-            return "<:Rank_B:971454722429046824>";
-        } else if (rank <= 40) {
-            return "<:Rank_C:971454722043150387>";
         } else if (rank <= 50) {
+            return "<:Rank_B:971454722429046824>";
+        } else if (rank <= 75) {
+            return "<:Rank_C:971454722043150387>";
+        } else if (rank <= 100) {
             return "<:Rank_D:971454722244497410>";
         } else {
             return "<:blank:894976571406966814>";
