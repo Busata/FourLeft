@@ -43,6 +43,6 @@ public class ResultsCommandHandler {
     private Mono<Void> getResultsFromCache(ChatInputInteractionEvent event, MessageCacheType resultsStandings) {
         return messageCache.getMessage(event.getInteraction().getChannelId().asLong(), resultsStandings).map(results -> {
             return event.reply(InteractionApplicationCommandCallbackSpec.builder().embeds(List.of(results)).build());
-        }).orElseGet(() -> event.reply("Could not find any results for this request."));
+        }).orElseGet(() -> event.reply("Could not find any results for this request.").withEphemeral(true));
     }
 }

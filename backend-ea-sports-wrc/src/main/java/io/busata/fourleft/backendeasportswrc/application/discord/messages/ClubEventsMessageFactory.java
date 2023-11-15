@@ -37,8 +37,6 @@ public class ClubEventsMessageFactory {
         return embedBuilder.build();
     }
 
-
-
     private void buildHeader(EmbedBuilder embedBuilder) {
         embedBuilder.setTitle("**Championship summary**");
     }
@@ -61,7 +59,6 @@ public class ClubEventsMessageFactory {
 
         });
     }
-
 
     private Map<String, String> buildTemplateMap(Event entry) {
 
