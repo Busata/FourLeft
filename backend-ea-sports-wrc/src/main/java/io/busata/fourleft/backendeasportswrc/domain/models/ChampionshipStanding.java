@@ -74,6 +74,10 @@ public class ChampionshipStanding {
         return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
     }
 
+    public String getDisplayName() {
+        return Optional.ofNullable(profile).map(Profile::getDisplayName).orElse(this.displayName);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
