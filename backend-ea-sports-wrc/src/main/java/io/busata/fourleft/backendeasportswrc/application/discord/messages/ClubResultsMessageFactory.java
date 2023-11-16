@@ -79,21 +79,23 @@ public class ClubResultsMessageFactory {
                 return StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, totalEntries));
             }).collect(Collectors.joining("\n"));
 
-            embedBuilder.addField(new MessageEmbed.Field(buildResultsHeader(i, desiredGroupSize).formatted(groupOfEntries.size()), values, false));
+            embedBuilder.addField(new MessageEmbed.Field(buildResultsHeader(i, desiredGroupSize, requiresTracking).formatted(groupOfEntries.size()), values, false));
 
         }
 
     }
 
     @NotNull
-    private static String buildResultsHeader(int idx, int groupSize) {
+    private static String buildResultsHeader(int idx, int groupSize, boolean requiresTracking) {
         if(idx == 0) {
             return "Top %s".formatted(groupSize);
-        } else {
+        } else if(!requiresTracking){
             var startBound = (idx * groupSize) + 1;
             var endBound = (idx * groupSize) + groupSize;
 
             return "Top %s-%s".formatted(startBound,endBound);
+        } else {
+            return EmbedBuilder.ZERO_WIDTH_SPACE;
         }
     }
 
