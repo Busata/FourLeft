@@ -20,6 +20,9 @@ public interface DiscordGateway {
     @PatchMapping("/channels/{channelId}/messages/{messageId}")
     DiscordMessageTo editMessage(@PathVariable Long channelId, @PathVariable Long messageId, @RequestBody SimpleDiscordMessageTo message);
 
+    @DeleteMapping("/channels/{channelId}/messages/{messageId}")
+    void deleteMessage(@PathVariable Long channelId, @PathVariable Long messageId);
+
 
     default Optional<DiscordMessageTo> getLastChannelMessage(Long channelId) {
 

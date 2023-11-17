@@ -1,0 +1,18 @@
+package io.busata.fourleft.backendeasportswrc.endpoints;
+
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import oracle.jdbc.proxy.annotation.Post;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+public class ManagementEndpoint {
+    private final DiscordGateway discordGateway;
+
+    @PostConstruct
+    public void setup() {
+        this.discordGateway.deleteMessage(1173281341073264745L, 1174980873796464650L);
+    }
+}
