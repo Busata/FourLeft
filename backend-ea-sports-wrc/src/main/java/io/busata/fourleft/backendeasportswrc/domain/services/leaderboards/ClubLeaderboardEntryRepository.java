@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 interface ClubLeaderboardEntryRepository extends JpaRepository<ClubLeaderboardEntry, UUID> {
 
 
-    @Query("select cle from ClubLeaderboardEntry cle where cle.displayName like CONCAT('%',:racenet,'%')")
+    @Query("select cle from ClubLeaderboardEntry cle where cle.displayName=:racenet")
     Stream<ClubLeaderboardEntry> findRacenet(@Param("racenet") String racenet);
 
 }
