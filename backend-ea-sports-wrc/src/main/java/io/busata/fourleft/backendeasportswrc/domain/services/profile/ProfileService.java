@@ -23,7 +23,8 @@ public class ProfileService {
     @Transactional
     public Optional<UUID> requestUpdate(String discordId, String racenet) {
         return leaderboardService.findRacenet(racenet).map(racenetInfo -> {
-            return profileRepository.save(new Profile(racenetInfo.ssid(), racenetInfo.racenet(), discordId, Platform.fromEASportsWRCId(racenetInfo.platform()), true));
+            return profileRepository.findById(racenetInfo.ssid())
+                    .orElseGet(() -> profileRepository.save(new Profile(racenetInfo.ssid(), racenetInfo.racenet(), discordId, Platform.fromEASportsWRCId(racenetInfo.platform()), true)));
         }).map(profile -> {
             return updateRequestRepository.save(new ProfileUpdateRequest(discordId, profile.getId()));
         }).map(ProfileUpdateRequest::getId);
