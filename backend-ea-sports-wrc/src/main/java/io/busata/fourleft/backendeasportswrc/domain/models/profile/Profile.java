@@ -21,7 +21,7 @@ public class Profile {
     String id;
 
     @Column(unique = true)
-            @Setter
+    @Setter
     String displayName;
 
     String discordId;
