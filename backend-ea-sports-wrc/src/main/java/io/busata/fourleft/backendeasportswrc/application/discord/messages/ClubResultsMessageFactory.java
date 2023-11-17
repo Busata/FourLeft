@@ -4,7 +4,6 @@ import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubRes
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
-import io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.ListHelpers;
 import lombok.RequiredArgsConstructor;
@@ -106,7 +105,7 @@ public class ClubResultsMessageFactory {
         values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries));
         values.put("rank", String.valueOf(entry.getRankAccumulated()));
         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
-        values.put("displayName", entry.getDisplayName());
+        values.put("displayName", entry.getAlias());
         values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));
         values.put("deltaTime", DurationHelper.formatDelta(entry.getDifferenceAccumulated()));
 

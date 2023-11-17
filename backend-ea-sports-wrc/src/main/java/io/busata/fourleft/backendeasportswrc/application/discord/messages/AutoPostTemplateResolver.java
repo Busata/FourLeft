@@ -48,12 +48,12 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
 
             values.put("rankBadge", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries()));
             values.put("rank", String.valueOf(entry.getRank()));
-            values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE, entry.getDisplayName()));
-            values.put("displayName", entry.getDisplayName());
+            values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE, entry.getAlias()));
+            values.put("displayName", entry.getAlias());
             values.put("totalTime", DurationHelper.formatTime(entry.getTimeAccumulated()));
             values.put("deltaTime", "(%s)".formatted(DurationHelper.formatDelta(entry.getDifferenceAccumulated())));
             values.put("vehicle", entry.getVehicle());
-            values.put("platform", fieldMapper.getDiscordField("platform#" + entry.getPlatform(), FieldMappingType.EMOTE, entry.getDisplayName()));
+            values.put("platform", fieldMapper.getDiscordField("platform#" + entry.getPlatform(), FieldMappingType.EMOTE, entry.getAlias()));
 
             String entryTemplate = StringSubstitutor.replace(template, values);
 

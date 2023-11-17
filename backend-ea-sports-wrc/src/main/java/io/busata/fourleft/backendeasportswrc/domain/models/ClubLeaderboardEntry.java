@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,10 +61,10 @@ public class ClubLeaderboardEntry {
     }
 
     public String getPlayerKey() {
-        return Optional.ofNullable(getSsid()).orElse(Optional.ofNullable(getWrcPlayerId()).orElse(getDisplayName()));
+        return Optional.ofNullable(getSsid()).orElse(Optional.ofNullable(getWrcPlayerId()).orElse(getAlias()));
     }
 
-    public String getDisplayName() {
+    public String getAlias() {
         return Optional.ofNullable(profile).map(Profile::getDisplayName).orElse(this.displayName);
     }
 
