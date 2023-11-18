@@ -98,6 +98,7 @@ public class Club {
 
     public void markUpdated() {
         this.lastDetailsUpdate = ApplicationClock.now();
+        this.updateDetailsRequired = false;
     }
 
     public Optional<Championship> getActiveChampionshipSnapshot() {
