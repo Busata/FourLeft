@@ -26,7 +26,7 @@ insert into field_mapping (id, name, value, note, mapped_by_user, context, type)
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#18', ':flag_se:', 'Rally Sweden', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#24', ':flag_gr:', 'Greece', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#25', ':flag_jp:', 'FORUM8 Rally Japan', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#26', ':flag_kn:', 'Safari Rally Kenya', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#26', ':flag_ke:', 'Safari Rally Kenya', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#27', ':flag_nz:', 'FANATEC Rally Oceania', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#28', ':flag_es:', 'Rally Iberia', true, 'DISCORD', 'EMOTE');
 

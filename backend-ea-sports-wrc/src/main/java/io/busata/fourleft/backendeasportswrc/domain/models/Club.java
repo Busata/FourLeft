@@ -91,7 +91,8 @@ public class Club {
     }
 
     public boolean requiresDetailsUpdate() {
-        boolean refreshLimitReached = Duration.between(lastDetailsUpdate, ApplicationClock.now()).toHours() >= 24;
+        int updateTime = this.getActiveChampionshipSnapshot().map(activeChampionship -> 24).orElse(1);
+        boolean refreshLimitReached = Duration.between(lastDetailsUpdate, ApplicationClock.now()).toHours() >= updateTime;
 
         return refreshLimitReached || updateDetailsRequired;
     }
