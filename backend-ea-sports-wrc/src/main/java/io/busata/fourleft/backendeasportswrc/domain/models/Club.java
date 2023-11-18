@@ -105,4 +105,8 @@ public class Club {
         return this.getChampionships().stream().filter(Championship::isActiveSnapshot).findFirst();
     }
 
+    public Optional<Championship> getUpcomingChampionshipSnapshot() {
+        return this.getChampionships().stream().filter(Championship::isUpcomingSnapshot).findFirst();
+    }
+
 }

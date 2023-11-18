@@ -104,6 +104,9 @@ public class Championship {
     public boolean isActiveSnapshot() {
         return this.status == EventStatus.OPEN;
     }
+    public boolean isUpcomingSnapshot() {
+        return this.status == EventStatus.NOT_STARTED;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -26,6 +26,7 @@ public class EventsEndpoint {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
         return clubService.getActiveChampionshipId(discordClubConfiguration.getClubId())
+                .or(() -> clubService.getUpcomingChampionshipId(discordClubConfiguration.getClubId()))
                 .flatMap(championshipService::findChampionship)
                 .map(clubEventsMessageFactory::createEventSummary)
                 .map(MessageEmbed::toData)

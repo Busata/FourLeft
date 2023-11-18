@@ -101,6 +101,16 @@ public class ClubService {
     }
 
 
+
+    @Transactional(readOnly = true)
+    public Optional<String> getUpcomingChampionshipId(String clubId) {
+        Club club = this.findById(clubId);
+        return club.getUpcomingChampionshipSnapshot().map(Championship::getId);
+    }
+
+
+
+
     @Transactional(readOnly = true)
     public Optional<Event> getActiveEvent(String clubId) {
         Club club = this.findById(clubId);
