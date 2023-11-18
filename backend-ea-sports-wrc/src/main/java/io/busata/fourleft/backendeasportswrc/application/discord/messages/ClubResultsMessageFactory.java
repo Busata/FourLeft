@@ -78,7 +78,7 @@ public class ClubResultsMessageFactory {
                 return StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, totalEntries));
             }).collect(Collectors.joining("\n"));
 
-            embedBuilder.addField(new MessageEmbed.Field(buildResultsHeader(i, desiredGroupSize, requiresTracking).formatted(groupOfEntries.size()), values, false));
+            embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, values, false);
 
         }
 
