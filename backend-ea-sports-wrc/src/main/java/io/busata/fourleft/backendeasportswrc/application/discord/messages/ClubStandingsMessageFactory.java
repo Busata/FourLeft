@@ -40,7 +40,7 @@ public class ClubStandingsMessageFactory {
         var lists = ListHelpers.partitionInGroups(standings.stream()
                         .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
                         .filter(entry -> entry.getPointsAccumulated() > 0)
-                        .limit(40)
+                        .limit(50)
                 .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
 
         lists.forEach(groupOfEntries -> {
