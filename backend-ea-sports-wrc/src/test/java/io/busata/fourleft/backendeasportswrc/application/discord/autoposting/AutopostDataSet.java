@@ -22,6 +22,7 @@ public class AutopostDataSet implements DataSetProvider {
                 .column("channel_id", 1098171035259506718L)
                 .column("enabled", true)
                 .column("autoposting_enabled", true)
+                .column("requires_tracking", false)
                 .build();
     }
 }

@@ -13,8 +13,6 @@ public class EAWRCFieldMapper {
 
     private final FieldMappingRepository fieldMappingRepository;
 
-
-
     public String getDiscordField(String name, FieldMappingType type) {
         return this.getDiscordField(name, type, "");
     }
@@ -24,14 +22,12 @@ public class EAWRCFieldMapper {
         });
     }
 
-
     private String saveMissingMapping(String name, FieldMappingType type, FieldMappingContext context, String note) {
         var fieldMapping = new FieldMapping(name, type, context);
         fieldMapping.setNote(note);
         fieldMapping = this.fieldMappingRepository.save(fieldMapping);
 
         return fieldMapping.getValue();
-
     }
 
 

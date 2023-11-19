@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.domain.models;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile;
+import io.busata.fourleft.common.Platform;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
