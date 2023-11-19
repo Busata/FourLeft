@@ -2,7 +2,7 @@ delete from field_mapping where name like 'nationalityFlag%';
 delete from field_mapping where name like 'eventFlag%';
 delete from field_mapping where name like 'platform%';
 
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#1', ':computer:', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#1', '<:xbox:894882459664138271>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#2', '<:playstation:894882472788115456>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#3', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#6', ':computer:', '', true, 'DISCORD', 'EMOTE');
@@ -10,6 +10,16 @@ insert into field_mapping (id, name, value, note, mapped_by_user, context, type)
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#14', '<:ea:894883713031225405>', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#65', ':computer:', '', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platform#128', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
+
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#PC', ':computer:', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#PLAYSTATION', '<:playstation:894882472788115456>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#XBOX', '<:xbox:894882459664138271>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#EPIC', '<:epic:1170397451186872320>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#EA_APP', '<:ea:894883713031225405>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#STEAM', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#STEAM_DECK', '<:steam:894882488726474793>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#OTHER', '<:blank:894976571406966814>', '', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'platformEnum#UNKNOWN', '<:blank:894976571406966814>', '', true, 'DISCORD', 'EMOTE');
 
 
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#5', ':flag_fr:', 'Rally Mediterraneo', true, 'DISCORD', 'EMOTE');

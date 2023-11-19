@@ -69,6 +69,10 @@ public class ClubLeaderboardEntry {
         return Optional.ofNullable(profile).map(Profile::getDisplayName).orElse(this.displayName);
     }
 
+    public Optional<Platform> getProfilePlatform() {
+        return Optional.ofNullable(profile).map(Profile::getPlatform);
+    }
+
     public boolean isTracked() {
         return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
     }

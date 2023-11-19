@@ -2,6 +2,7 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.projections.AutoPostMessageSummary;
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
+import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.EventSettings;
 import io.busata.fourleft.backendeasportswrc.domain.models.Stage;
 import io.busata.fourleft.backendeasportswrc.domain.models.StageSettings;
@@ -53,7 +54,11 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
             values.put("totalTime", DurationHelper.formatTime(entry.getTimeAccumulated()));
             values.put("deltaTime", "(%s)".formatted(DurationHelper.formatDelta(entry.getDifferenceAccumulated())));
             values.put("vehicle", entry.getVehicle());
-            values.put("platform", fieldMapper.getDiscordField("platform#" + entry.getPlatform(), FieldMappingType.EMOTE, entry.getAlias()));
+
+
+            String playerPlatform = getPlayerPlatform(entry);
+
+            values.put("platform", playerPlatform);
 
             String entryTemplate = StringSubstitutor.replace(template, values);
 
@@ -61,6 +66,12 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
 
             return entryTemplate;
         }).collect(Collectors.joining("\n"));
+    }
+
+    private String getPlayerPlatform(ClubLeaderboardEntry entry) {
+        return entry.getProfilePlatform()
+                .map(profilePlatform -> fieldMapper.getDiscordField("platformEnum#" + profilePlatform.name(), FieldMappingType.EMOTE))
+                .orElseGet(() -> fieldMapper.getDiscordField("platform#" + entry.getPlatform(), FieldMappingType.EMOTE, entry.getAlias()));
     }
 
 
