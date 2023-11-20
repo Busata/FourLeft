@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.springframework.core.annotation.Order;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class Championship {
     Club club;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OrderBy("absoluteCloseDate asc")
     @JoinColumn(name = "championship_id")
     List<Event> events = new ArrayList<>();
 
