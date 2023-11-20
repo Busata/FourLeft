@@ -220,6 +220,10 @@ public class ClubService {
             }
         }
 
-        return Optional.empty();
+        if(championships.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(championships.get(championships.size() - 1));
+        }
     }
 }
