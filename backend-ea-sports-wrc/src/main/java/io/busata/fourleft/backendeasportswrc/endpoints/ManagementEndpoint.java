@@ -12,6 +12,6 @@ public class ManagementEndpoint {
 
     @PostConstruct
     public void setup() {
-        this.discordGateway.deleteMessage(1173277555491622933L, 1176073681705893950L);
+        //this.discordGateway.deleteMessage(1173277555491622933L, 1176073681705893950L);
     }
 }
