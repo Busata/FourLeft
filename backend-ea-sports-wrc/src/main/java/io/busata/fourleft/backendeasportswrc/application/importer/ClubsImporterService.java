@@ -5,6 +5,8 @@ import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubIm
 import io.busata.fourleft.backendeasportswrc.application.importer.process.ProcessState;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.Map;
 @Slf4j
 public class ClubsImporterService {
 
+    private final DiscordGateway discordGateway;
     private final ClubConfigurationService clubConfigurationService;
 
     private final Map<String, ClubImportProcess> runningProcesses = new HashMap<>();
@@ -55,6 +58,8 @@ public class ClubsImporterService {
         //Error handling
         runningProcesses.values().stream().filter(process -> process.getState() == ProcessState.FAILED).forEach(process -> {
             log.error("Process failed, disabling sync for club {}", process.getClubId());
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Club {} disabled syncing due to errors.", List.of()));
+
             clubConfigurationService.setClubSync(process.getClubId(), false);
         });
 

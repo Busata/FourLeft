@@ -136,8 +136,8 @@ class ClubEventEndedIntegrationTest extends AbstractIntegrationTest {
                 .build());
 
         racenetApiWireMocks.createStandings(racenetApi, "11", "1", clubStandingsFixture.get().entries(List.of(
-                clubStandingsEntryFixture.get().displayName("Eventer 1").rank(1).pointsAccumulated(20).build(),
-                clubStandingsEntryFixture.get().displayName("Eventer 2").rank(2).pointsAccumulated(10).build()
+                clubStandingsEntryFixture.get().ssid("1").displayName("Eventer 1").rank(1).pointsAccumulated(20).build(),
+                clubStandingsEntryFixture.get().ssid("2").displayName("Eventer 2").rank(2).pointsAccumulated(10).build()
         )).build());
 
         setClock(ApplicationClock.now().plusDays(2));

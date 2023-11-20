@@ -2,18 +2,22 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.projections.AutoPostMessageSummary;
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
+import io.busata.fourleft.backendeasportswrc.test.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-class AutoPostTemplateResolverTest {
+class AutoPostTemplateResolverTest extends AbstractIntegrationTest {
 
+    @Autowired
+    AutoPostTemplateResolver autoPostTemplateResolver;
 
     @Test
     public void testResolver() {
-        AutoPostTemplateResolver autoPostTemplateResolver = new AutoPostTemplateResolver(null);
+
 
         Event event = new Event(
                 "1",
