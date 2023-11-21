@@ -1,12 +1,12 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.process.handlers;
+package io.busata.fourleft.backendeasportswrc.application.importer.process;
 
 import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubDetailsImporter;
 import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubLeaderboardsImporter;
 import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubStandingsImporter;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcess;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcessHandler;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ProcessState;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcess;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubDetailsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubImportResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.LeaderboardUpdatedResult;

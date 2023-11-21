@@ -135,6 +135,12 @@ public class ClubService {
     }
 
     @Transactional(readOnly = true)
+    public boolean hasUpcomingChampionshipThatStarted(String clubId) {
+        Club club = this.clubRepository.findById(clubId).orElseThrow();
+        return club.getUpcomingChampionshipSnapshot().map(Championship::isActiveNow).orElse(false);
+    }
+
+    @Transactional(readOnly = true)
     public Club findById(String id) {
         return this.clubRepository.findById(id).orElseThrow();
     }

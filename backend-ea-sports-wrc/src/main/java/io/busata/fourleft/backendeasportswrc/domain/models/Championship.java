@@ -99,6 +99,12 @@ public class Championship {
 
     }
 
+    public boolean isActiveNow() {
+        var now = ApplicationClock.now().plusMinutes(1); //Update buffer
+
+        return now.isAfter(absoluteOpenDate.toLocalDateTime()) && now.isBefore(absoluteCloseDate.toLocalDateTime());
+    }
+
     public Optional<Event> getActiveEventSnapshot() {
         return this.getEvents().stream().filter(Event::isActiveSnapshot).findFirst();
     }

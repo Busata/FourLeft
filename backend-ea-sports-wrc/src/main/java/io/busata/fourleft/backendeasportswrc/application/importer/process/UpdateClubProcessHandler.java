@@ -1,9 +1,9 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.process.handlers;
+package io.busata.fourleft.backendeasportswrc.application.importer.process;
 
 import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubDetailsImporter;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcess;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcessHandler;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ProcessState;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcess;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubDetailsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.FailedClubUpdateResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
@@ -32,8 +32,11 @@ public class UpdateClubProcessHandler implements ClubImportProcessHandler {
 
     private void processUpdateExistingClub(ClubImportProcess process) {
         boolean activeEventFinished = clubService.hasActiveEventThatFinished(process.getClubId());
+        boolean upcompingChampionshipStarted = clubService.hasUpcomingChampionshipThatStarted(process.getClubId());
 
-        if (activeEventFinished) {
+        if(upcompingChampionshipStarted) {
+            process.setState(ProcessState.UPCOMING_CHAMPIONSHIP_STARTED);
+        } else if (activeEventFinished) {
             process.setState(ProcessState.UPDATE_EVENT_ENDED);
         } else {
             process.setDetails(clubDetailsImporter.fetchDetails(process.getClubId()));

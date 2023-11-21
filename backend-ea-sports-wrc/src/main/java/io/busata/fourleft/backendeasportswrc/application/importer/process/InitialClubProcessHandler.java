@@ -1,8 +1,8 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.process.handlers;
+package io.busata.fourleft.backendeasportswrc.application.importer.process;
 
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcess;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcessHandler;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ProcessState;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcess;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

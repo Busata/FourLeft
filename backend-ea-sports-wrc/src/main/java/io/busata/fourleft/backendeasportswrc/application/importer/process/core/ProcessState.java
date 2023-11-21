@@ -1,4 +1,4 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.process;
+package io.busata.fourleft.backendeasportswrc.application.importer.process.core;
 
 import lombok.Getter;
 
@@ -20,6 +20,10 @@ public enum ProcessState {
     UPDATE_EVENT_ENDED(true),
     FETCHING_UPDATE_EVENT_ENDED(false),
     FETCHING_UPDATE_EVENT_ENDED_SUCCESS(true),
+
+    UPCOMING_CHAMPIONSHIP_STARTED(true),
+    FETCHING_CHAMPIONSHIP(false),
+    FETCHING_CHAMPIONSHIP_SUCCESS(true),
 
     UPDATE_HISTORY(true),
     FETCHING_HISTORY(false),

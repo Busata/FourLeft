@@ -1,4 +1,4 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.process;
+package io.busata.fourleft.backendeasportswrc.application.importer.process.core;
 
 import java.util.Map;
 import java.util.function.Consumer;

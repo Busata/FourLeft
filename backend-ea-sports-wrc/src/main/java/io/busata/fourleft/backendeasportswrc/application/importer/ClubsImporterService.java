@@ -1,8 +1,8 @@
 package io.busata.fourleft.backendeasportswrc.application.importer;
 
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcess;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ClubImportProcessHandler;
-import io.busata.fourleft.backendeasportswrc.application.importer.process.ProcessState;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcess;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
+import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
