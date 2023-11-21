@@ -43,7 +43,7 @@ public class ClubService {
     @Transactional(readOnly = true)
     public boolean requiresDetailUpdate(String clubId) {
         Club club = this.findById(clubId);
-        return club.requiresDetailsUpdate() || this.hasActiveEventThatFinished(clubId);
+        return club.requiresDetailsUpdate() || this.hasActiveEventThatFinished(clubId) || this.hasUpcomingChampionshipThatStarted(clubId);
     }
 
     @Transactional(readOnly = true)
