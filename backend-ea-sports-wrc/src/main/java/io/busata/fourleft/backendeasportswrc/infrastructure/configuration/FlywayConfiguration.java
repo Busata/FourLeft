@@ -29,6 +29,7 @@ public class FlywayConfiguration {
         return Flyway.configure()
                 .baselineOnMigrate(true)
                 .baselineVersion(MigrationVersion.fromVersion("000"))
+                .placeholderReplacement(false)
                 .createSchemas(false)
                 .dataSource(dataSource)
                 .encoding(StandardCharsets.UTF_8)
