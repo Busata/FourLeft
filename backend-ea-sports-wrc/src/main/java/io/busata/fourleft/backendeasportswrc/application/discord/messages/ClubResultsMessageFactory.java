@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
+import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.ListHelpers;
@@ -25,12 +26,12 @@ import java.util.stream.Collectors;
 public class ClubResultsMessageFactory {
     private final EAWRCFieldMapper fieldMapper;
 
-    String entryTemplate = "${badgeRank} **${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
+   public static String defaultTemplate = "**${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
 
-    public MessageEmbed createResultPost(ClubResults results, boolean requiresTracking) {
+    public MessageEmbed createResultPost(ClubResults results, DiscordClubConfiguration configuration) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder, results);
-        buildEntries(embedBuilder, results, requiresTracking);
+        buildEntries(embedBuilder, results, configuration.getResultsEntryTemplate(), configuration.isRequiresTracking());
         buildFooter(embedBuilder, results);
         return embedBuilder.build();
     }
@@ -61,7 +62,7 @@ public class ClubResultsMessageFactory {
     }
 
 
-    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, boolean requiresTracking) {
+    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking) {
         int desiredGroupSize = 10;
 
         int totalEntries = results.entries().size();
@@ -84,21 +85,6 @@ public class ClubResultsMessageFactory {
 
     }
 
-    @NotNull
-    private static String buildResultsHeader(int idx, int groupSize, boolean requiresTracking) {
-        if(idx == 0) {
-            return "Top %s".formatted(groupSize);
-        } else if(!requiresTracking){
-            var startBound = (idx * groupSize) + 1;
-            var endBound = (idx * groupSize) + groupSize;
-
-            return "Top %s-%s".formatted(startBound,endBound);
-        } else {
-            return EmbedBuilder.ZERO_WIDTH_SPACE;
-        }
-    }
-
-
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
         Map<String, String> values = new HashMap<>();
 
@@ -108,7 +94,6 @@ public class ClubResultsMessageFactory {
         values.put("displayName", entry.getAlias());
         values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));
         values.put("deltaTime", DurationHelper.formatDelta(entry.getDifferenceAccumulated()));
-
 
         return values;
     }

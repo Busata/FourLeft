@@ -43,7 +43,7 @@ public class ChampionshipStartedMessageService {
             });
 
             clubResultsService.getCurrentResults(championshipStarted.clubId()).ifPresent(results -> {
-                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration.isRequiresTracking());
+                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
             });
 

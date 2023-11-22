@@ -1,6 +1,7 @@
 package io.busata.fourleftdiscord.eawrcsports;
 
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestResultTo;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestTo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -33,5 +34,8 @@ public interface EAWRCBackendApi {
 
     @PostMapping("/api_v2/profile/request")
     ProfileUpdateRequestResultTo requestTrackingUpdate(@RequestBody ProfileUpdateRequestTo request);
+
+    @PostMapping("/api_v2/configuration/channels")
+    void createChannelConfiguration(@RequestBody DiscordClubCreateConfigurationTo request);
 
 }

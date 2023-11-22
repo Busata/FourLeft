@@ -43,6 +43,7 @@
     <exclude-change idName="alias_update_request#discord_id" tagName="modifyDataType" />
     <exclude-change idName="alias_update_request#requested_alias" tagName="modifyDataType" />
     <exclude-change idName="FK_CLUBLEADERBOARDENTRY_ON_SSID" tagName="addForeignKeyConstraint" />
+    <exclude-change idName="FK_CHAMPIONSHIP_STANDING_ON_SSID" tagName="addForeignKeyConstraint" />
   </component>
   <component name="JpaPluginProjectSettings">
     <option name="lastSelectedLanguage" value="Java" />

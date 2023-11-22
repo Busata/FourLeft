@@ -21,6 +21,35 @@ public class CommandCreator {
         long applicationId = client.getRestClient().getApplicationId().block();
 
 
+        ApplicationCommandRequest configureBotCommand = ApplicationCommandRequest.builder()
+                .name("fourleft")
+                .description("Commands related to the fourleft bot")
+                .defaultPermission(false)
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("configure")
+                        .description("Configuration for the bot")
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
+                        .addOption(ApplicationCommandOptionData.builder()
+                                .name("track")
+                                .description("Track a club in this channel")
+                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
+                                .addOption(ApplicationCommandOptionData.builder()
+                                        .name("clubid")
+                                        .description("The club id (found in the racenet url when navigating to your club)")
+                                        .required(true)
+                                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                                        .build())
+                                .addOption(ApplicationCommandOptionData.builder()
+                                        .name("autoposts")
+                                        .description("If the bot should autopost results for this club (defaults to true)")
+                                        .required(false)
+                                        .type(ApplicationCommandOption.Type.BOOLEAN.getValue())
+                                        .build())
+                                .build()
+                        )
+                        .build()
+                ).build();
+
         ApplicationCommandRequest eaWrcSportsCommand = ApplicationCommandRequest.builder()
                 .name("wrc")
                 .description("All commands related to EA Sports WRC")
@@ -73,22 +102,27 @@ public class CommandCreator {
                 .getGlobalApplicationCommands(applicationId)
                 .collectMap(ApplicationCommandData::name).block();
 
-        if (discordCommands.containsKey(eaWrcSportsCommand.name())) {
-            ApplicationCommandData discordGreetCmd = discordCommands.get(eaWrcSportsCommand.name());
-            long discordGreetCmdId = discordGreetCmd.id().asLong();
+        updateOrCreateCommand(applicationId, eaWrcSportsCommand, discordCommands);
+        updateOrCreateCommand(applicationId, configureBotCommand, discordCommands);
+
+
+    }
+
+    private void updateOrCreateCommand(long applicationId, ApplicationCommandRequest botCommand, Map<String, ApplicationCommandData> discordCommands) {
+        if (discordCommands.containsKey(botCommand.name())) {
+            ApplicationCommandData command = discordCommands.get(botCommand.name());
+            long commandId = command.id().asLong();
 
             client.getRestClient()
                     .getApplicationService()
-                    .modifyGlobalApplicationCommand(applicationId, discordGreetCmdId, eaWrcSportsCommand)
+                    .modifyGlobalApplicationCommand(applicationId, commandId, botCommand)
                     .subscribe();
 
         } else {
             client.getRestClient().getApplicationService()
-                    .createGlobalApplicationCommand(applicationId, eaWrcSportsCommand)
+                    .createGlobalApplicationCommand(applicationId, botCommand)
                     .subscribe();
         }
-
-
     }
 
 }

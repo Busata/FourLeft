@@ -19,6 +19,7 @@ public class DiscordClubConfigurationService {
     public List<DiscordClubConfiguration> findByClubId(String clubId) {
         return this.repository.findByClubId(clubId);
     }
+
     @Transactional(readOnly = true)
     public Optional<DiscordClubConfiguration> findByChannelId(Long channelId) {
         return this.repository.findByChannelId(channelId);
@@ -29,4 +30,12 @@ public class DiscordClubConfigurationService {
         return this.repository.findAll();
     }
 
+    @Transactional
+    public void createConfiguration(Long channelID, String clubId, boolean autoPostingEnabled) {
+        this.repository.save(new DiscordClubConfiguration(
+                channelID,
+                clubId,
+                autoPostingEnabled
+        ));
+    }
 }

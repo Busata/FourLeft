@@ -32,7 +32,7 @@ class AutoPostTemplateResolverTest extends AbstractIntegrationTest {
         event.updateStages(List.of(
                 new Stage("1","2",new StageSettings(0L, "Bio Bio", 0L, "", 0L, "", 0L, ""))
         ));
-        String render = autoPostTemplateResolver.render(AutoPostMessageService.baseTemplate, new AutoPostMessageSummary(
+        String render = autoPostTemplateResolver.render(AutoPostMessageService.defaultTemplate, new AutoPostMessageSummary(
                 event,2, List.of(
                 new ClubLeaderboardEntry("Busata", "1345", "1234", 1L, 1L,  1L, 0L, "Talbot Sunbeam", Duration.ofMinutes(5), Duration.ofSeconds(15), Duration.ofMinutes(10), Duration.ofMinutes(10), Duration.ofSeconds(5)),
                 new ClubLeaderboardEntry("JamesF890", "1345", "1234", 2L, 1L,  1L, 0L, "Talbot Sunbeam", Duration.ofMinutes(5), Duration.ofSeconds(15), Duration.ofMinutes(10),Duration.ofMinutes(10), Duration.ofSeconds(5))

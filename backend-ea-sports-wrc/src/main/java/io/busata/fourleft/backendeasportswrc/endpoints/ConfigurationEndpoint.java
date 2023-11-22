@@ -1,10 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,6 +22,12 @@ public class ConfigurationEndpoint {
     @GetMapping("/api_v2/configuration/channels")
     public List<DiscordClubConfigurationTo> getConfigurations() {
         return clubConfigurationService.getConfigurations().stream().map(discordClubConfigurationFactory::create).toList();
+    }
+
+
+    @PostMapping("/api_v2/configuration/channels")
+    public void requestConfiguration(@RequestBody DiscordClubCreateConfigurationTo createConfiguration) {
+        this.clubConfigurationService.createConfiguration(createConfiguration.channelId(), createConfiguration.clubId(), createConfiguration.autoPosting());
 
     }
 }

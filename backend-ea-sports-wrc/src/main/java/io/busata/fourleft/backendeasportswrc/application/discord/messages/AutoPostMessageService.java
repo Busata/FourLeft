@@ -1,8 +1,10 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.AutopostingEntryService;
+import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.events.AutoPostEditMessageEvent;
 import io.busata.fourleft.backendeasportswrc.domain.events.AutoPostNewMessageEvent;
+import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.autoposting.AutopostEntry;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordMessageTo;
@@ -21,17 +23,19 @@ import java.util.stream.Collectors;
 public class AutoPostMessageService {
     private final DiscordGateway discordGateway;
     private final AutopostingEntryService autopostingEntryService;
+    private final DiscordClubConfigurationService discordClubConfigurationService;
 
-    public static String baseTemplate = """
+    public static String defaultTemplate = """
             **Results** • ${eventCountryFlag} • **${lastStage}** • **${eventVehicleClass}** • *${totalEntries} entries*
-            |entries:${rankBadge} • **${rank}** • ${flag} • **${displayName}** • ${platform} • ${totalTime} *${deltaTime}* • *${vehicle}*|
+            |entries:**${rank}** • ${flag} • **${displayName}** • ${platform} • ${totalTime} *${deltaTime}* • *${vehicle}*|
             """;
 
     private final AutoPostTemplateResolver resolver;
 
     @EventListener
     public void handleNewMessage(AutoPostNewMessageEvent event) {
-        String message = resolver.render(baseTemplate, event.summary());
+        String template = discordClubConfigurationService.findByChannelId(event.channelId()).map(DiscordClubConfiguration::getAutoPostTemplate).orElse(defaultTemplate);
+        String message = resolver.render(template, event.summary());
 
         if (message.length() >= 2000) {
             log.warn("Message too large, not posting"); //TODO
@@ -53,7 +57,9 @@ public class AutoPostMessageService {
 
     @EventListener
     public void editExistingMessage(AutoPostEditMessageEvent event) {
-        String message = resolver.render(baseTemplate, event.summary());
+        String template = discordClubConfigurationService.findByChannelId(event.channelId()).map(DiscordClubConfiguration::getAutoPostTemplate).orElse(defaultTemplate);
+
+        String message = resolver.render(template, event.summary());
 
         if (message.length() >= 2000) {
             log.warn("Message too large, not posting"); //TODO

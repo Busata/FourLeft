@@ -3,7 +3,6 @@ package io.busata.fourleft.backendeasportswrc.endpoints;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStandingsMessageFactory;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
@@ -32,14 +31,14 @@ public class ResultsEndpoint {
     String getCurrentResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration.isRequiresTracking())).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")
     String getPreviousResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration.isRequiresTracking())).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/standings")

@@ -37,7 +37,7 @@ public class ClubEventEndedMessageService {
             List<MessageEmbed> embeds = new ArrayList<>();
             // Post previous results
             clubResultsService.getPreviousResults(eventEnded.clubId()).ifPresent(results -> {
-                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration.isRequiresTracking());
+                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
 
             });
@@ -50,7 +50,7 @@ public class ClubEventEndedMessageService {
 
             // Post new results
             clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
-                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration.isRequiresTracking());
+                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
             });
 

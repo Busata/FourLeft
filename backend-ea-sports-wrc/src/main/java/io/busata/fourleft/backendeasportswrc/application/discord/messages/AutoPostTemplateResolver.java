@@ -47,7 +47,7 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
         return summary.entries().stream().map(entry -> {
             Map<String, String> values = new HashMap<>();
 
-            values.put("rankBadge", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries()));
+            values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries()));
             values.put("rank", String.valueOf(entry.getRankAccumulated()));
             values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE, entry.getAlias()));
             values.put("displayName", entry.getAlias());
