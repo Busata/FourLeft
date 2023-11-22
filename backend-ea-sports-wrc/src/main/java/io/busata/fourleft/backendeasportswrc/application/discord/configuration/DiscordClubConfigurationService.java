@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DiscordClubConfigurationService {
 
+    private final ClubConfigurationService clubConfigurationService;
     private final DiscordClubConfigurationRepository repository;
 
 
@@ -32,6 +34,8 @@ public class DiscordClubConfigurationService {
 
     @Transactional
     public void createConfiguration(Long guildId, Long channelID, String clubId, boolean autoPostingEnabled) {
+        this.clubConfigurationService.addClubSync(clubId);
+
         this.repository.save(new DiscordClubConfiguration(
                 guildId,
                 channelID,

@@ -4,9 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class ClubConfiguration {
 
     @GeneratedValue
@@ -16,6 +18,11 @@ public class ClubConfiguration {
     String clubId;
 
     boolean keepSynced;
+
+    public ClubConfiguration(String clubId) {
+        this.clubId = clubId;
+        this.keepSynced = true;
+    }
 
     //Automate stuff
 

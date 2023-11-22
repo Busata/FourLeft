@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ public class ClubConfigurationService {
 
     }
 
+    @Transactional
     public void setClubSync(String clubId, boolean keepSynced) {
         List<ClubConfiguration> clubConfigurations = this.clubConfigurationRepository.findByClubId(clubId).stream().map(clubConfiguration -> {
             clubConfiguration.setKeepSynced(keepSynced);
@@ -30,5 +32,10 @@ public class ClubConfigurationService {
         }).collect(Collectors.toList());
 
         this.clubConfigurationRepository.saveAll(clubConfigurations);
+    }
+
+    @Transactional
+    public void addClubSync(String clubId) {
+        this.clubConfigurationRepository.save(new ClubConfiguration(clubId));
     }
 }
