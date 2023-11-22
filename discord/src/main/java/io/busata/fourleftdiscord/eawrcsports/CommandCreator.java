@@ -5,6 +5,8 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class CommandCreator {
                 .name("fourleft")
                 .description("Commands related to the fourleft bot")
                 .defaultPermission(false)
+                .defaultMemberPermissions(PermissionSet.of(Permission.ADMINISTRATOR).toString())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("configure")
                         .description("Configuration for the bot")
