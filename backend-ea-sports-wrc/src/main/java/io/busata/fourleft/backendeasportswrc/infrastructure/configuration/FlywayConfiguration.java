@@ -45,9 +45,17 @@ public class FlywayConfiguration {
     @Bean(initMethod = "migrate")
     public Flyway productionFlyway() {
         return Flyway.configure()
+                .baselineOnMigrate(true)
+                .baselineVersion(MigrationVersion.fromVersion("000"))
                 .placeholderReplacement(false)
+                .createSchemas(false)
+                .dataSource(dataSource)
+                .encoding(StandardCharsets.UTF_8)
+                .locations(DDL_FOLDER)
                 .placeholderPrefix("##{")
                 .placeholderSuffix("}#")
+                .schemas("public", "envers")
+                .table("schema_version")
                 .load();
     }
 
