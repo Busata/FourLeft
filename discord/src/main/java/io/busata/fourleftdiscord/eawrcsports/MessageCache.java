@@ -82,6 +82,7 @@ public class MessageCache {
 
     @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_READY)
     public void updateAll() {
+        this.cachedData.clear();
         this.configurationService.getConfigurations().stream().map(DiscordClubConfigurationTo::channelId).distinct().forEach(channelId -> {
             try {
                 updateMessages(channelId);

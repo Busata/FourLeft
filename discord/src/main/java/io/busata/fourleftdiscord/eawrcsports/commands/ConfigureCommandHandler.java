@@ -74,7 +74,7 @@ public class ConfigureCommandHandler {
                         );
 
 
-                        return event.reply("Club %s will be tracked for this channel".formatted(clubId)).withEphemeral(true).then();
+                        return event.reply("Club %s no longer tracked for this channel".formatted(clubId)).withEphemeral(true).then();
                     });
 
                 }).orElse(Mono.empty());
