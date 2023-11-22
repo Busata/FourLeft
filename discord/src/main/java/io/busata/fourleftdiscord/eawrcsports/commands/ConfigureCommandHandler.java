@@ -1,6 +1,7 @@
 package io.busata.fourleftdiscord.eawrcsports.commands;
 
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
@@ -40,6 +41,7 @@ public class ConfigureCommandHandler {
                                 .map(ApplicationCommandInteractionOptionValue::asBoolean).orElse(true);
 
                         api.createChannelConfiguration(new DiscordClubCreateConfigurationTo(
+                                event.getInteraction().getGuildId().map(Snowflake::asLong).orElse(-1L),
                                 event.getInteraction().getChannelId().asLong(),
                                 clubId,
                                 autoposts

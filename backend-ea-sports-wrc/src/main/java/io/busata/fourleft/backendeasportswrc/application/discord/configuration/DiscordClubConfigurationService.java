@@ -31,8 +31,9 @@ public class DiscordClubConfigurationService {
     }
 
     @Transactional
-    public void createConfiguration(Long channelID, String clubId, boolean autoPostingEnabled) {
+    public void createConfiguration(Long guildId, Long channelID, String clubId, boolean autoPostingEnabled) {
         this.repository.save(new DiscordClubConfiguration(
+                guildId,
                 channelID,
                 clubId,
                 autoPostingEnabled

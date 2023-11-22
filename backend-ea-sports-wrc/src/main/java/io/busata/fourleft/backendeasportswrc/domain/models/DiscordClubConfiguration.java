@@ -21,6 +21,7 @@ public class DiscordClubConfiguration {
 
     String clubId;
 
+    Long guildId;
     Long channelId;
 
     boolean enabled;
@@ -39,7 +40,8 @@ public class DiscordClubConfiguration {
     }
 
 
-    public DiscordClubConfiguration(Long channelId, String clubId, boolean autopostingEnabled) {
+    public DiscordClubConfiguration(Long guildId, Long channelId, String clubId, boolean autopostingEnabled) {
+        this.guildId = guildId;
         this.clubId = clubId;
         this.channelId = channelId;
         this.enabled = true;
