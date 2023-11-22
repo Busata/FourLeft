@@ -55,7 +55,6 @@ public class FlywayConfiguration {
                 .placeholderPrefix("##{")
                 .placeholderSuffix("}#")
                 .schemas("public", "envers")
-                .table("schema_version")
                 .load();
     }
 
