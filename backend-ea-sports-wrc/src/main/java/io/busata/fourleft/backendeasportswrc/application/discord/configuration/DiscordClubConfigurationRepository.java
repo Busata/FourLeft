@@ -2,6 +2,7 @@ package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,4 +17,8 @@ interface DiscordClubConfigurationRepository extends JpaRepository<DiscordClubCo
 
     @Query("select dcc from DiscordClubConfiguration dcc where dcc.channelId=:channelId")
     Optional<DiscordClubConfiguration> findByChannelId(@Param("channelId") Long channelId);
+
+    @Modifying
+    @Query("delete from DiscordClubConfiguration dcc where dcc.channelId=:channelId and dcc.clubId=:clubId")
+    void removeByChannelAndClubId(@Param("channelId") Long channelId, @Param("clubId") String clubId);
 }

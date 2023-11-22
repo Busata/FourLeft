@@ -7,6 +7,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.DiscordClubRemoveConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestResultTo;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestTo;
 import io.busata.fourleftdiscord.eawrcsports.EAWRCBackendApi;
@@ -46,6 +47,31 @@ public class ConfigureCommandHandler {
                                 clubId,
                                 autoposts
                         ));
+
+
+                        return event.reply("Club %s will be tracked for this channel".formatted(clubId)).withEphemeral(true).then();
+                    });
+
+                }).orElse(Mono.empty());
+            }
+            return Mono.empty();
+        }).subscribe();
+
+        client.on(ChatInputInteractionEvent.class, event -> {
+            if (event.getCommandName().equals("fourleft")) {
+
+                return event.getOption("configure").flatMap(subOption -> {
+                    return subOption.getOption("untrack").map(action -> {
+
+                        String clubId = action.getOption("clubid")
+                                .flatMap(ApplicationCommandInteractionOption::getValue)
+                                .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
+
+                        api.removeChannelConfiguration(new DiscordClubRemoveConfigurationTo(
+                                event.getInteraction().getGuildId().map(Snowflake::asLong).orElse(-1L),
+                                event.getInteraction().getChannelId().asLong(),
+                                clubId)
+                        );
 
 
                         return event.reply("Club %s will be tracked for this channel".formatted(clubId)).withEphemeral(true).then();

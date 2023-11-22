@@ -1,14 +1,8 @@
 package io.busata.fourleftdiscord.eawrcsports;
 
-import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
-import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
-import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestResultTo;
-import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestTo;
+import io.busata.fourleft.api.easportswrc.models.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,5 +31,8 @@ public interface EAWRCBackendApi {
 
     @PostMapping("/api_v2/configuration/channels")
     void createChannelConfiguration(@RequestBody DiscordClubCreateConfigurationTo request);
+
+    @DeleteMapping("/api_v2/configuration/channels")
+    void removeChannelConfiguration(@RequestBody DiscordClubRemoveConfigurationTo request);
 
 }

@@ -73,7 +73,11 @@ public class MessageCache {
 
     @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_CHANNEL_UPDATE)
     public void updateCache(ChannelUpdatedEvent event) {
-        this.updateMessages(event.channelId());
+        try {
+            this.updateMessages(event.channelId());
+        } catch (Exception ex) {
+            log.error("Could not update message for channelId: {}", event.channelId(), ex);
+        }
     }
 
     @RabbitListener(queues = EASportsWRCQueueNames.EA_SPORTS_WRC_READY)

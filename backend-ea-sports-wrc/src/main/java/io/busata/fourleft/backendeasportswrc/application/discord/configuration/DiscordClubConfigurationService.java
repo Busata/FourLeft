@@ -43,4 +43,9 @@ public class DiscordClubConfigurationService {
                 autoPostingEnabled
         ));
     }
+
+    @Transactional
+    public void removeConfiguration(Long channelId, String clubId) {
+        this.repository.removeByChannelAndClubId(channelId, clubId);
+    }
 }
