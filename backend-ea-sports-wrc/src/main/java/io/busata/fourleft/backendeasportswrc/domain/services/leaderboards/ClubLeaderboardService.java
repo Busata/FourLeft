@@ -42,11 +42,6 @@ public class ClubLeaderboardService {
 
     @Transactional
     public void updateLeaderboards(LeaderboardUpdatedResult list) {
-
-        if(list.getEntries().isEmpty()) {
-            log.warn("Results for Club {} was empty", list.getClubId());
-        }
-
         ClubLeaderboard clubLeaderboard = clubLeaderboardRepository.findById(list.getLeaderboardId()).orElse(new ClubLeaderboard(list.getLeaderboardId(), list.getEntries().size()));
 
         List<ClubLeaderboardEntryTo> uniqueEntriesSortedByAccumulatedTime = list.getEntries().stream().collect(Collectors.toMap(ClubLeaderboardEntryTo::displayName, e -> e, (e, v) -> e)).values().stream().sorted(Comparator.comparing(entry -> parseDuration(entry.timeAccumulated()).toNanos())).collect(Collectors.toList());
