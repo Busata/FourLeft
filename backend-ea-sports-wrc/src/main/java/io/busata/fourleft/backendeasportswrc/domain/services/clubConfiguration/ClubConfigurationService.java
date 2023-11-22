@@ -36,6 +36,8 @@ public class ClubConfigurationService {
 
     @Transactional
     public void addClubSync(String clubId) {
-        this.clubConfigurationRepository.save(new ClubConfiguration(clubId));
+        if(clubConfigurationRepository.findByClubId(clubId).isEmpty()) {
+            this.clubConfigurationRepository.save(new ClubConfiguration(clubId));
+        }
     }
 }
