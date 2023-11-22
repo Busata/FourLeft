@@ -27,7 +27,7 @@ public class CommandCreator {
                 .name("fourleft")
                 .description("Commands related to the fourleft bot")
                 .defaultPermission(false)
-                .defaultMemberPermissions(PermissionSet.of(Permission.ADMINISTRATOR).toString())
+                .defaultMemberPermissions(String.valueOf(PermissionSet.of(Permission.ADMINISTRATOR).getRawValue()))
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("configure")
                         .description("Configuration for the bot")
