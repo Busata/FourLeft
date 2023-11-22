@@ -34,8 +34,8 @@ public class FlywayConfiguration {
                 .dataSource(dataSource)
                 .encoding(StandardCharsets.UTF_8)
                 .locations(locations)
-                .placeholderPrefix("$${")
-                .placeholderSuffix("}$")
+                .placeholderPrefix("##{")
+                .placeholderSuffix("}#")
                 .schemas("public", "envers")
                 .table("schema_version")
                 .load();
