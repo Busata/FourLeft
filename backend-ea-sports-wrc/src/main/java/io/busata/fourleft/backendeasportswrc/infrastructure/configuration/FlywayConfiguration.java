@@ -40,4 +40,15 @@ public class FlywayConfiguration {
                 .table("schema_version")
                 .load();
     }
+
+    @Profile("prod")
+    @Bean(initMethod = "migrate")
+    public Flyway productionFlyway() {
+        return Flyway.configure()
+                .placeholderReplacement(false)
+                .placeholderPrefix("##{")
+                .placeholderSuffix("}#")
+                .load();
+    }
+
 }
