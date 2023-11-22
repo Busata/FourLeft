@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
     }
 
     private String resolveEntries(String template, AutoPostMessageSummary summary) {
-        return summary.entries().stream().map(entry -> {
+        return summary.entries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).map(entry -> {
             Map<String, String> values = new HashMap<>();
 
             values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries()));
