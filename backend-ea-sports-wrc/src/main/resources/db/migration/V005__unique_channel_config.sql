@@ -1,0 +1,2 @@
+ALTER TABLE discord_club_configuration DROP CONSTRAINT discord_club_configuration_unique_club_channel;
+ALTER TABLE discord_club_configuration ADD CONSTRAINT discord_club_configuration_unique_channel UNIQUE (channel_id);
