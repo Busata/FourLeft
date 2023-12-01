@@ -75,7 +75,7 @@ public class ClubStandingsMessageFactory {
     }
 
     private String createDeltaPoints(ChampionshipStanding entry) {
-        if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
+        if(Objects.equals(entry.getPointsAccumulated(), entry.getPointsAccumulatedPrevious())){
             return " *(+0)*";
         }
         return " *(%+d)*".formatted(entry.getPointsDifference());
