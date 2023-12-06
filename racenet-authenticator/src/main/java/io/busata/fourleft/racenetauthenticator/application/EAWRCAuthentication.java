@@ -95,7 +95,7 @@ public class EAWRCAuthentication {
 
         driver.get(url);
 
-        WebElement signinButton = driver.findElement(By.cssSelector("button[data-test-id=\"signInBtn\""));
+        WebElement signinButton = driver.findElement(By.xpath("//button[normalize-space()=\"SIGN IN\"]"));
 
         signinButton.click();
 
