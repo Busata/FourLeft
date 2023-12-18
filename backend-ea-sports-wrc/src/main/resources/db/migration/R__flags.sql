@@ -39,6 +39,7 @@ insert into field_mapping (id, name, value, note, mapped_by_user, context, type)
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#26', ':flag_ke:', 'Safari Rally Kenya', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#27', ':flag_nz:', 'FANATEC Rally Oceania', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#28', ':flag_es:', 'Rally Iberia', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'eventFlag#29', ':flag_eu:', 'CER', true, 'DISCORD', 'EMOTE');
 
 
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type) values (uuid_generate_v4(),'nationalityFlag#1', ':flag_hu:', 'Hungarian', true, 'DISCORD', 'EMOTE');
