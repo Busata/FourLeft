@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.application.importer;
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.*;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.standings.ClubStandingsResultEntryTo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class ClubFactory {
 
     public Club create(ClubDetailsTo clubDetailsTo, List<ChampionshipTo> championships) {
@@ -45,13 +47,15 @@ public class ClubFactory {
 
         existingClub.getChampionships().forEach(Championship::updateStatus);
 
-        //Close championships that don't exist in the details anymore, they're probably deleted ones.
+//        //Close championships that don't exist in the details anymore, they're probably deleted ones.
         final var uniqueChampionshipIds = championships.stream().map(ChampionshipTo::id).toList();
 
         existingClub.getChampionships()
                 .stream()
                 .filter(c -> !uniqueChampionshipIds.contains(c.getId()))
-                .forEach(Championship::markClosed);
+                .forEach(c -> {
+                    log.info("MARKING AS CLOSED?: {}, {}", c.getId(), uniqueChampionshipIds);
+                });
 
         return existingClub;
     }
