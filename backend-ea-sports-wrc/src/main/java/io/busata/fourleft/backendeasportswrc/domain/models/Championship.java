@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.core.annotation.Order;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +83,7 @@ public class Championship {
 
     public void markClosed() {
         this.status = EventStatus.FINISHED;
-
+        this.updatedAfterFinish = true;
 
         this.events.forEach(Event::markClosed);
     }

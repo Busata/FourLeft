@@ -48,14 +48,11 @@ public class ClubFactory {
         existingClub.getChampionships().forEach(Championship::updateStatus);
 
 //        //Close championships that don't exist in the details anymore, they're probably deleted ones.
-        final var uniqueChampionshipIds = championships.stream().map(ChampionshipTo::id).toList();
 
         existingClub.getChampionships()
                 .stream()
-                .filter(c -> !uniqueChampionshipIds.contains(c.getId()))
-                .forEach(c -> {
-                    log.info("MARKING AS CLOSED?: {}, {}", c.getId(), uniqueChampionshipIds);
-                });
+                .filter(c -> !clubDetails.championshipIDs().contains(c.getId()))
+                .forEach(Championship::markClosed);
 
         return existingClub;
     }
