@@ -64,6 +64,13 @@ public class ClubService {
                         .anyMatch(c -> c.getStandings().isEmpty());
     }
 
+    @Transactional
+    public void markHistoryUpdateDone(String clubId) {
+        Club club = this.findById(clubId);
+        club.getChampionships().stream().filter(c -> c.getStatus() == EventStatus.FINISHED).filter(c -> !c.isUpdatedAfterFinish()).forEach(championship -> championship.setUpdatedAfterFinish(true));
+        clubRepository.save(club);
+    }
+
     @Transactional(readOnly = true)
     public List<String> getLeaderboardsRequiringUpdate(String clubId) {
         Club club = this.findById(clubId);
@@ -168,12 +175,7 @@ public class ClubService {
         this.clubRepository.save(club);
     }
 
-    @Transactional
-    public void markHistoryUpdateDone(String clubId) {
-        Club club = this.findById(clubId);
-        club.getChampionships().stream().filter(c -> c.getStatus() == EventStatus.FINISHED).filter(c -> !c.isUpdatedAfterFinish()).forEach(championship -> championship.setUpdatedAfterFinish(true));
-        clubRepository.save(club);
-    }
+
 
     @Transactional
     public Optional<Event> findPreviousEvent(String clubId) {

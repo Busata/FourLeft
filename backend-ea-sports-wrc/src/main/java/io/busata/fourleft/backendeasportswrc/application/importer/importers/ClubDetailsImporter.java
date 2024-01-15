@@ -21,7 +21,7 @@ public class ClubDetailsImporter {
 
     public CompletableFuture<ClubImportResult> createNewClub(String clubId) {
         return this.racenetGateway.getClubDetail(clubId).thenCompose(clubDetails -> {
-            return getChampionships(clubDetails)
+            return getUniqueChampionships(clubDetails)
                     .thenApply(championships -> new ClubCreationResult(clubDetails, championships)).thenApply(clubCreationResult -> (ClubImportResult) clubCreationResult);
         }).exceptionally(ex -> {
             log.error("IMPORTER: Club creation error, could not get the details for club {}", clubId, ex);
@@ -32,7 +32,7 @@ public class ClubDetailsImporter {
 
     public CompletableFuture<ClubImportResult> fetchDetails(String clubId) {
         return this.racenetGateway.getClubDetail(clubId).thenCompose(clubDetailsTo -> {
-            return getChampionships(clubDetailsTo)
+            return getUniqueChampionships(clubDetailsTo)
                     .thenApply(championships -> new ClubDetailsUpdatedResult(clubDetailsTo, championships))
                     .thenApply(clubUpdateResult -> (ClubImportResult) clubUpdateResult);
         }).exceptionally(ex -> {
@@ -41,7 +41,7 @@ public class ClubDetailsImporter {
         });
     }
 
-    private CompletableFuture<List<ChampionshipTo>> getChampionships(ClubDetailsTo clubDetails) {
+    private CompletableFuture<List<ChampionshipTo>> getUniqueChampionships(ClubDetailsTo clubDetails) {
         List<CompletableFuture<ChampionshipTo>> championships = clubDetails.
                 currentChampionship()
                 .map(currentChampionship -> {

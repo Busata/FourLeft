@@ -103,4 +103,8 @@ public class Event {
 
         this.status = EventStatus.OPEN;
     }
+
+    public void markClosed() {
+        this.status = EventStatus.FINISHED;
+    }
 }

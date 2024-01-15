@@ -80,6 +80,13 @@ public class Championship {
         this.events.forEach(Event::updateStatus);
     }
 
+    public void markClosed() {
+        this.status = EventStatus.FINISHED;
+
+
+        this.events.forEach(Event::markClosed);
+    }
+
     public void updateEvents(List<Event> events) {
         this.events.clear();
         this.events.addAll(events);
