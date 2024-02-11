@@ -1,30 +1,42 @@
 package io.busata.fourleft.racenetauthenticator.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.v119.network.Network;
+import org.openqa.selenium.devtools.v119.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class EAWRCAuthentication {
 
+    private static final String url = "https://racenet.com";
+    private final String tokenUrl = "https://web-api.racenet.com/api/identity/auth";
+
+
     @Value("${codemasters.email}")
     private String userName;
+
+    @Value("${code-file}")
+    private String codeFilePath;
 
     @Value("${codemasters.pass}")
     private String password;
@@ -33,117 +45,99 @@ public class EAWRCAuthentication {
 
     private EAWRCToken token;
 
+    public void refreshLogin() {
+        System.setProperty("webdriver.chrome.whitelistedIps", "");
+
+        WebDriverManager manager = WebDriverManager.chromedriver();
+        manager.driverVersion("119.0.6045.105");
+
+        ChromeOptions capabilities = new ChromeOptions();
+
+        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
+        manager.capabilities(capabilities);
+
+        ChromeDriver driver = (ChromeDriver) manager.create();
+
+        DevTools devTools = driver.getDevTools();
+        devTools.createSessionIfThereIsNotOne();
+
+        devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+
+        devTools.addListener(Network.responseReceived(), (ResponseReceived event) -> {
+            try {
+                if (event.getResponse().getUrl().equals(tokenUrl)) {
+                    Network.GetResponseBodyResponse send = devTools.send(Network.getResponseBody(event.getRequestId()));
+
+                    try {
+                        token = objectMapper.readValue(send.getBody(), EAWRCToken.class);
+                    } catch (JsonProcessingException e) {
+                        log.error("Something went wrong reading the EA WRC token.");
+                    }
+                }
+            } catch(Exception ex) {
+            }
+        });
+
+        try {
+            triggerAuthCall(driver);
+            log.info("done");
+        } catch (Exception ex) {
+            log.error("Something went wrong while refreshing the login", ex);
+            throw ex;
+        } finally {
+            manager.quit();
+        }
+    }
+
     @SneakyThrows
-    public void refreshLogin() throws URISyntaxException {
-        WebClient client = WebClient.builder().build();
-        CookieManager cookieManager = new CookieManager();
+    private void triggerAuthCall(WebDriver driver) {
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
 
-        //INITIAL URL THAT RETURNS FID
-        URI initiatorURI = new URI("https://accounts.ea.com/connect/auth?client_id=RACENET_1_JS_WEB_APP&response_type=code&redirect_uri=https://racenet.com/oauthCallback");
-        ResponseEntity<String> initiatorResponse = client.get()
-                .uri(initiatorURI)
-                .retrieve()
-                .toEntity(String.class)
-                .block();
+        driver.get(url);
 
-        if (initiatorResponse.getStatusCode().value() != 302) {
-            throw new RuntimeException("Expected 302 from initiator URL");
+        WebElement signinButton = driver.findElement(By.xpath("//button[normalize-space()=\"SIGN IN\"]"));
+
+        signinButton.click();
+
+        WebElement emailField = driver.findElement(By.id("email"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("logInBtn"));
+
+        emailField.sendKeys(userName);
+        passwordField.sendKeys(password);
+        loginButton.click();
+
+        if(this.buttonExists(driver, By.id("btnSendCode"))) {
+            driver.findElement(By.id("btnSendCode")).click();
+
+            log.info("Waiting until {} appears", codeFilePath);
+
+            while(!Files.exists(Path.of(codeFilePath))) {
+                Thread.sleep(1000);
+            }
+
+
+            String s = Files.readString(Path.of(codeFilePath));
+
+            log.info("Code found: {}", s);
+
+            driver.findElement(By.id("twoFactorCode")).sendKeys(s);
+            driver.findElement(By.id("btnSubmit")).click();
         }
 
-        String loginURIWithFID = initiatorResponse.getHeaders().getFirst("Location");
-        var queryParams = getQueryParameters(loginURIWithFID);
-        String fid = queryParams.get("fid");
-
-        //SECOND URL, ALSO RETURNS EXECUTION(?)
-        ResponseEntity<String> loginURIResponse = client.get()
-                .uri(new URI(loginURIWithFID))
-                .retrieve()
-                .toEntity(String.class)
-                .block();
-
-        loginURIResponse.getHeaders().get("set-cookie")
-                .forEach(cookieManager::addCookiesFromHeader);
+        WebElement eaWrcButton = driver.findElement(By.cssSelector("a[href=\"/ea_sports_wrc\""));
+        eaWrcButton.click();
 
 
-        if (loginURIResponse.getStatusCode().value() != 302) {
-            throw new RuntimeException("Expected 302 from loginURI");
-        }
-
-        String loginURIwithFIDAndExecution = loginURIResponse.getHeaders().getFirst("Location");
-
-        //DO LOGIN CALL WITH USER AND PASS
-        String actualLoginURI = "https://signin.ea.com" + loginURIwithFIDAndExecution;
-
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("email", this.userName);
-        formData.add("password", this.password);
-        formData.add("_eventId", "submit");
-        formData.add("showAgeUp", "true");
-        formData.add("loginMethod", "emailPassword");
-        formData.add("thirdPartyCaptchaResponse", "");
-        formData.add("_rememberMe", "on");
-        formData.add("rememberMe", "on");
-
-        ResponseEntity<String> block = client.post()
-                .uri(new URI(actualLoginURI))
-                .header("Cookie", cookieManager.getCookies())
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue(formData)
-                .retrieve()
-                .toEntity(String.class)
-                .block();
-
-        if (block.getStatusCode().value() != 200) {
-            throw new RuntimeException("Not correct status yet, no point in continue");
-        }
-
-
-        URI next = new URI("https://accounts.ea.com/connect/auth?response_type=code&redirect_uri=https%3A%2F%2Fracenet.com%2FoauthCallback&client_id=RACENET_1_JS_WEB_APP&fid=" + fid);
-        ResponseEntity<String> getCode = client.get()
-                .uri(next)
-                .retrieve()
-                .toEntity(String.class)
-                .block();
-        String codeRedirect = getCode.getHeaders().getFirst("Location");
-
-        String s = getQueryParameters(codeRedirect).get("code");
-
-        URI finalURL = new URI("https://web-api.racenet.com/api/identity/auth");
-
-        String response = client.post()
-                .uri(finalURL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(new EAWRCRequestToken(
-                        s,
-                        "RACENET_1_JS_WEB_APP",
-                        "",
-                        "authorization_code",
-                        "https://racenet.com/oauthCallback",
-                        ""
-                )).retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        String jsonString = objectMapper.readValue(response, String.class);
-        EAWRCToken eawrcToken = objectMapper.readValue(jsonString, EAWRCToken.class);
-
-        log.info("Token updated.");
-
-       this.token = eawrcToken;
 
     }
 
 
-    private Map<String, String> getQueryParameters(String url) {
-
-        final var queryParameters = url.split("\\?")[1];
-
-        return Arrays.stream(queryParameters.split("&")).collect(Collectors.toMap(
-                (value) -> value.split("=")[0],
-                (value) -> value.split("=")[1],
-                (existing, newValue) -> existing
-        ));
+    public boolean buttonExists(WebDriver driver, By id) {
+        driver.manage().timeouts().implicitlyWait(0, TimeUnit.MILLISECONDS);
+        boolean exists = !driver.findElements(id).isEmpty();
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+        return exists;
     }
 
     public EAWRCToken getHeaders() {
