@@ -49,7 +49,7 @@ public class EAWRCAuthentication {
         System.setProperty("webdriver.chrome.whitelistedIps", "");
 
         WebDriverManager manager = WebDriverManager.chromedriver();
-        manager.driverVersion("119.0.6045.105");
+        //manager.driverVersion("119.0.6045.105");
 
         ChromeOptions capabilities = new ChromeOptions();
 
