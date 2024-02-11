@@ -24,13 +24,11 @@ public class ClubEventsMessageFactory {
     String singleEventSingleStageFormat = "${eventFlag} • **${carClass}** • ${stageName} *(${season} - ${weather})*";
 
     String multipleEventsEventFormat = "${eventFlag} • **${carClass}** • ${season}";
-    String multipleEventsStageFormat = "${stageName}${service} • **${timeOfDay}** • ${weather}";
+    String multipleEventsStageFormat = "${stageName}${service} • ${weather}";
 
 
 
     public MessageEmbed createEventSummary(Championship activeChampionship) {
-
-
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder);
         buildEntries(embedBuilder, activeChampionship);
