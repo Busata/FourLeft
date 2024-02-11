@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db.local.backend-ea-sports-wrc:
+   container_name: db.local.backend-ea-sports-wrc
+   image: postgres
+   ports:
+     - "17001:5432"
+   environment:
+     - POSTGRES_PASSWORD=backendeasportswrc
+     - POSTGRES_USER=backendeasportswrc
+     - POSTGRES_DB=backendeasportswrc

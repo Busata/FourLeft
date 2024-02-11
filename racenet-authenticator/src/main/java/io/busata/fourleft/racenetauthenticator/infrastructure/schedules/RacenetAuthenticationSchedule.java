@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -25,7 +26,7 @@ public class RacenetAuthenticationSchedule {
 
 
     @Scheduled(initialDelay = 0, fixedDelay=Long.MAX_VALUE, timeUnit = TimeUnit.SECONDS)
-    public void initialUpdate() {
+    public void initialUpdate() throws URISyntaxException {
         if(enableDirtRally2) {
             log.info("DIRT RALLY 2 - AUTHENTICATION - ENABLED");
             dirtRally2Authentication.refreshLogin();
@@ -50,7 +51,7 @@ public class RacenetAuthenticationSchedule {
     }
 
     @Scheduled(cron = "0 */60 * * * *", zone = "UTC")
-    public void updateEAWRC() {
+    public void updateEAWRC() throws URISyntaxException {
         if(!this.enableEAWRC){
             return;
         }
