@@ -30,15 +30,22 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/current")
     String getCurrentResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-
-        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
+                .map(DataObject::toString)
+                .map(jsonString -> {
+                    return jsonString.replace("{\"inline\":false,\"name\":\"\u200E\",\"value\":\"\u200E\"}", "{\"inline\":false,\"name\":\" \",\"value\":\" \"}");
+                })
+                .orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")
     String getPreviousResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
+                .map(jsonString -> {
+                    return jsonString.replace("{\"inline\":false,\"name\":\"\u200E\",\"value\":\"\u200E\"}", "{\"inline\":false,\"name\":\" \",\"value\":\" \"}");
+                }).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/standings")
