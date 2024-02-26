@@ -55,14 +55,24 @@ public class ClubResultsMessageFactory {
                         "**Stages**",
                         String.join(", ", results.stages()),
                         true
-                ))
-                .addField(new MessageEmbed.Field(
-                        "**Racenet**",
-                        "[Link](%s)".formatted(buildRacenetLink(results)),
-                        false
                 ));
+        boolean singleStageEvent = results.stages().size() == 1;
 
-        if (results.stages().size() == 1) {
+        if (singleStageEvent) {
+            embedBuilder.addField(new MessageEmbed.Field(
+                    "\u200b",
+                    "\u200b",
+                    false
+            ));
+        }
+        
+        embedBuilder.addField(new MessageEmbed.Field(
+                "**Club board**",
+                "[Link](%s)".formatted(buildRacenetLink(results)),
+                singleStageEvent
+        ));
+
+        if (singleStageEvent) {
             embedBuilder.addField(new MessageEmbed.Field(
                     "**TT board**",
                     "[Link](%s)".formatted(buildTTBoardLink(results)),
