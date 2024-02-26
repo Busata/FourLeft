@@ -56,12 +56,13 @@ public class ClubResultsMessageFactory {
                         String.join(", ", results.stages()),
                         true
                 ));
+
         boolean singleStageEvent = results.stages().size() == 1;
 
         if (singleStageEvent) {
             embedBuilder.addField(new MessageEmbed.Field(
-                    "\u200b",
-                    "\u200b",
+                    " ",
+                    " ",
                     false
             ));
         }
