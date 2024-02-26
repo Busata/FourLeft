@@ -2,6 +2,7 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
+import io.busata.fourleft.backendeasportswrc.application.fieldmapping.WeatherMappings;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
@@ -11,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 public class ClubResultsMessageFactory {
     private final EAWRCFieldMapper fieldMapper;
 
-   public static String defaultTemplate = "**${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
+    public static String defaultTemplate = "**${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
 
     public MessageEmbed createResultPost(ClubResults results, DiscordClubConfiguration configuration) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -55,10 +57,38 @@ public class ClubResultsMessageFactory {
                         true
                 ))
                 .addField(new MessageEmbed.Field(
-                        StringUtils.isBlank(results.championshipName()) ? "\u200E" : results.championshipName(),
-                        "\u200E",
+                        "**Racenet**",
+                        "[Link](%s)".formatted(buildRacenetLink(results)),
                         false
                 ));
+
+        if (results.stages().size() == 1) {
+            embedBuilder.addField(new MessageEmbed.Field(
+                    "**TT board**",
+                    "[Link](%s)".formatted(buildTTBoardLink(results)),
+                    true
+            ));
+        }
+    }
+
+    private String buildRacenetLink(ClubResults results) {
+        return "https://racenet.com/ea_sports_wrc/clubs/%s".formatted(results.clubId());
+    }
+
+    private String buildTTBoardLink(ClubResults results) {
+
+        Long locationId = results.locationID();
+        Long routeId = results.lastStageRouteID();
+        Long vehicleClassId = results.vehicleClassID();
+        int surfaceCondition = WeatherMappings.isDry(results.lastStageWeatherAndSurface()) ? 0 : 1;
+
+        return "https://racenet.com/ea_sports_wrc/leaderboards/?selectedLocation=%s&selectedRoute=%s&selectedSurfaceCondition=%s&selectedVehicleClass=%s"
+                .formatted(
+                        locationId,
+                        routeId,
+                        surfaceCondition,
+                        vehicleClassId
+                );
     }
 
 

@@ -68,12 +68,20 @@ public class ClubResultsService {
         List<ClubLeaderboardEntry> entries = clubLeaderboardService.findEntries(event.getLeaderboardId());
 
 
+        Stage lastStage = event.getStages().get(event.getStages().size() - 1);
+
         return new ClubResults(
+                club.getId(),
                 club.getClubName(),
                 eventSettings.getLocation(),
                 eventSettings.getLocationID(),
+                lastStage.getStageSettings().getRouteID(),
                 eventSettings.getVehicleClass(),
+                eventSettings.getVehicleClassID(),
                 eventSettings.getWeatherSeason(),
+                eventSettings.getWeatherSeasonID(),
+                lastStage.getStageSettings().getWeatherAndSurface(),
+                lastStage.getStageSettings().getWeatherAndSurfaceID(),
                 event.getLastLeaderboardUpdate(),
                 event.getAbsoluteCloseDate(),
                 event.getStages().stream().map(Stage::getStageSettings).map(StageSettings::getRoute).toList(),
