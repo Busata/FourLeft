@@ -54,7 +54,7 @@ public class ClubStatsMessageFactory {
                     Long entries = statistics.carEntries().getOrDefault(entry.getKey(), 0L);
                     Long topEntries = statistics.carTopEntries().getOrDefault(entry.getKey(), 0L);
 
-                    String topEntriesString = topEntries > 0 ? "• %s in top 10 •".formatted(topEntries) : "•";
+                    String topEntriesString = topEntries > 0 ? "• *%s in top 10* •".formatted(topEntries) : "•";
 
                     return String.format("**%.1f%%** • *%s entries* %s **%s**", percentage, entries, topEntriesString, entry.getKey());
 
