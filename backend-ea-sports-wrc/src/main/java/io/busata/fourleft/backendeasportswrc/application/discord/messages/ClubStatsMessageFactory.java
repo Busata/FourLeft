@@ -29,9 +29,12 @@ public class ClubStatsMessageFactory {
     }
 
     private void buildEntries(EmbedBuilder embedBuilder, ClubStats results) {
+        CarStatistics carStatistics = results.carStatistics();
+
+        long totalEntries = carStatistics.carEntries().values().stream().mapToLong(x -> x).sum();
 
         embedBuilder.addField(new MessageEmbed.Field(
-                "Car statistics",
+                "Car statistics *(%s entries)*".formatted(totalEntries),
                 buildCarStatistics(results),
                 false
         ));
@@ -53,7 +56,7 @@ public class ClubStatsMessageFactory {
 
                     String topEntriesString = topEntries > 0 ? "• %s in top 10 •".formatted(topEntries) : "•";
 
-                    return String.format("%.1f • *%s entries* %s **%s**", percentage, entries, topEntriesString, entry.getKey());
+                    return String.format("**%.1f%%** • *%s entries* %s **%s**", percentage, entries, topEntriesString, entry.getKey());
 
 
         }).collect(Collectors.joining("\n"));

@@ -4,6 +4,8 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStats;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,9 +29,11 @@ public class ClubEventEndedMessageService {
 
     private final DiscordClubConfigurationService discordClubConfigurationService;
     private final ClubResultsService clubResultsService;
+    private final ClubStatsService clubStatsService;
 
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory clubStandingsMessageFactory;
+    private final ClubStatsMessageFactory clubStatsMessageFactory;
 
 
     @EventListener
@@ -47,6 +52,11 @@ public class ClubEventEndedMessageService {
                 MessageEmbed standingsPost = clubStandingsMessageFactory.createStandingsPost(standings, configuration.isRequiresTracking());
                 embeds.add(standingsPost);
             }
+
+            clubStatsService.buildStats(eventEnded.clubId()).ifPresent(stats -> {
+                MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
+                embeds.add(statsPost);
+            });
 
             // Post new results
             clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
