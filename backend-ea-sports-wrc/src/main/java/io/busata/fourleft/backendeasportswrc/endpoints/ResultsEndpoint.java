@@ -3,7 +3,9 @@ package io.busata.fourleft.backendeasportswrc.endpoints;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStandingsMessageFactory;
+import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStatsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,11 @@ public class ResultsEndpoint {
     private final DiscordClubConfigurationService discordClubConfigurationService;
 
     private final ClubResultsService clubResultsService;
+    private final ClubStatsService clubStatsService;
+
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory standingsMessageFactory;
+    private final ClubStatsMessageFactory clubStatsMessageFactory;
 
 
     @GetMapping("/api_v2/results/{channelId}/current")
@@ -32,20 +37,21 @@ public class ResultsEndpoint {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
         return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
                 .map(DataObject::toString)
-                .map(jsonString -> {
-                    return jsonString.replace("{\"inline\":false,\"name\":\"\u200E\",\"value\":\"\u200E\"}", "{\"inline\":false,\"name\":\" \",\"value\":\" \"}");
-                })
                 .orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")
     String getPreviousResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-
         return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
-                .map(jsonString -> {
-                    return jsonString.replace("{\"inline\":false,\"name\":\"\u200E\",\"value\":\"\u200E\"}", "{\"inline\":false,\"name\":\" \",\"value\":\" \"}");
-                }).orElse("");
+               .orElse("");
+    }
+
+    @GetMapping("/api_v2/results/{channelId}/stats")
+    String getStats(@PathVariable Long channelId) {
+        DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
+
+        return clubStatsService.buildStats(discordClubConfiguration.getClubId()).map(results -> clubStatsMessageFactory.createPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/standings")

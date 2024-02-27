@@ -63,7 +63,6 @@ public class ClubResultsMessageFactory {
             embedBuilder.addField(new MessageEmbed.Field(
                     " ",
                     " ",
-                    false,
                     false
             ));
         }

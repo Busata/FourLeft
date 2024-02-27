@@ -26,7 +26,7 @@ public class ClubResultsService {
     @Transactional(readOnly = true)
     public Optional<ClubResults> getPreviousResults(String clubId) {
         return clubService.findPreviousEvent(clubId).flatMap(event -> {
-            return getResults(clubId, event.getChampionshipID(),event.getId());
+            return getResults(clubId, event.getChampionshipID(),event.getId(), this::buildResults);
         });
     }
 
@@ -34,12 +34,12 @@ public class ClubResultsService {
     @Transactional(readOnly = true)
     public Optional<ClubResults> getCurrentResults(String clubId) {
         return clubService.getActiveEvent(clubId).flatMap(event -> {
-            return getResults(clubId, event.getChampionshipID(), event.getId());
+            return getResults(clubId, event.getChampionshipID(), event.getId(), this::buildResults);
         });
     }
 
     @Transactional(readOnly = true)
-    public Optional<ClubResults> getResults(String clubId, String championshipId, String eventId) {
+    public <T> Optional<T> getResults(String clubId, String championshipId, String eventId, ResultBuilder<T> builder) {
         Club club = clubService.findById(clubId);
 
         return club.getChampionships()
@@ -52,17 +52,15 @@ public class ClubResultsService {
                             .filter(event -> Objects.equals(event.getId(), eventId))
                             .findFirst()
                             .map(event -> {
-                                return this.buildResults(club, championship, event);
+                                return builder.accept(club, championship, event);
                             });
                 });
-
     }
 
 
 
     private ClubResults buildResults(Club club, Championship championship, Event event) {
 
-//        ChampionshipSettings championshipSettings = championship.getSettings();
         EventSettings eventSettings = event.getEventSettings();
 
         List<ClubLeaderboardEntry> entries = clubLeaderboardService.findEntries(event.getLeaderboardId());
