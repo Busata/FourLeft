@@ -23,8 +23,6 @@ public class ClubStatsMessageFactory {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             buildHeader(embedBuilder, results);
             buildEntries(embedBuilder, results);
-
-
             return embedBuilder.build();
     }
 

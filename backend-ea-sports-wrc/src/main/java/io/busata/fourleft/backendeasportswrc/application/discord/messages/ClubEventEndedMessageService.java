@@ -54,8 +54,12 @@ public class ClubEventEndedMessageService {
             }
 
             clubStatsService.buildStats(eventEnded.clubId()).ifPresent(stats -> {
-                MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
-                embeds.add(statsPost);
+                try {
+                    MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
+                    embeds.add(statsPost);
+                } catch (Exception ex) {
+                    log.error("Could not add statistics to club event ended post", ex);
+                }
             });
 
             // Post new results
