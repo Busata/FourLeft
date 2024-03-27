@@ -34,7 +34,7 @@ public class ClubEventsMessageFactory {
             buildEntries(embedBuilder, activeChampionship, true);
             return embedBuilder.build();
         } catch (IllegalStateException ex) {
-            log.error("Could not create a full summary, posting minimal summary.", ex);
+            log.error("Could not create a full summary, posting minimal summary.");
             return createEventMinimalSummary(activeChampionship);
         }
     }
