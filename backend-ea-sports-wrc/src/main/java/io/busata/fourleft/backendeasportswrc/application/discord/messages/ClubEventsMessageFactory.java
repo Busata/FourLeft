@@ -28,10 +28,15 @@ public class ClubEventsMessageFactory {
 
 
     public MessageEmbed createEventSummary(Championship activeChampionship) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        buildHeader(embedBuilder);
-        buildEntries(embedBuilder, activeChampionship, true);
-        return embedBuilder.build();
+        try {
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            buildHeader(embedBuilder);
+            buildEntries(embedBuilder, activeChampionship, true);
+            return embedBuilder.build();
+        } catch (IllegalStateException ex) {
+            log.error("Could not create a full summary, posting minimal summary.", ex);
+            return createEventMinimalSummary(activeChampionship);
+        }
     }
 
     public MessageEmbed createEventMinimalSummary(Championship activeChampionship) {
