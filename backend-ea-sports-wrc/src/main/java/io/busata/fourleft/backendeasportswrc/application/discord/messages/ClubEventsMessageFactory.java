@@ -27,28 +27,38 @@ public class ClubEventsMessageFactory {
     String multipleEventsStageFormat = "${stageName}${service} • ${weather}";
 
 
-
     public MessageEmbed createEventSummary(Championship activeChampionship) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder);
-        buildEntries(embedBuilder, activeChampionship);
+        buildEntries(embedBuilder, activeChampionship, true);
         return embedBuilder.build();
+    }
+
+    public MessageEmbed createEventMinimalSummary(Championship activeChampionship) {
+        EmbedBuilder builder = new EmbedBuilder();
+        buildHeader(builder);
+        buildEntries(builder, activeChampionship, false);
+
+        return builder.build();
     }
 
     private void buildHeader(EmbedBuilder embedBuilder) {
         embedBuilder.setTitle("**Championship summary**");
     }
 
-
-    private void buildEntries(EmbedBuilder embedBuilder, Championship activeChampionship) {
+    private void buildEntries(EmbedBuilder embedBuilder, Championship activeChampionship, boolean includeStages) {
 
         activeChampionship.getEvents().forEach(event -> {
             if(event.getStages().size() > 1) {
                 var eventHeader = StringSubstitutor.replace(multipleEventsEventFormat, buildEventMap(event));
-                var stages = event.getStages().stream().map(stage -> {
-                    return StringSubstitutor.replace(multipleEventsStageFormat, buildStageTemplateMap(stage));
-                }).collect(Collectors.joining("\n"));
-
+                String stages;
+                if(includeStages) {
+                     stages = event.getStages().stream().map(stage -> {
+                        return StringSubstitutor.replace(multipleEventsStageFormat, buildStageTemplateMap(stage));
+                    }).collect(Collectors.joining("\n"));
+                } else {
+                    stages = EmbedBuilder.ZERO_WIDTH_SPACE;
+                }
                 embedBuilder.addField(eventHeader, stages, false);
             } else {
                 var values =  StringSubstitutor.replace(singleEventSingleStageFormat, buildTemplateMap(event));

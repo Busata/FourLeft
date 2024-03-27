@@ -9,6 +9,7 @@ import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.springframework.context.event.EventListener;
@@ -38,8 +39,14 @@ public class ChampionshipStartedMessageService {
             List<MessageEmbed> embeds = new ArrayList<>();
 
             clubService.getActiveChampionshipId(championshipStarted.clubId()).flatMap(championshipService::findChampionship).ifPresent(results -> {
-                MessageEmbed resultPost = clubEventsMessageFactory.createEventSummary(results);
-                embeds.add(resultPost);
+                try {
+                    MessageEmbed resultPost = clubEventsMessageFactory.createEventSummary(results);
+                    embeds.add(resultPost);
+                } catch (IllegalStateException ex) {
+                    log.error("Could not create a summary for {}, posting minimal summary.", championshipStarted.clubId(), ex);
+                    MessageEmbed post = clubEventsMessageFactory.createEventMinimalSummary(results);
+                    embeds.add(post);
+                }
             });
 
             clubResultsService.getCurrentResults(championshipStarted.clubId()).ifPresent(results -> {
