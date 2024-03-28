@@ -58,7 +58,7 @@ public class ClubsImporterService {
         //Error handling
         runningProcesses.values().stream().filter(process -> process.getState() == ProcessState.FAILED).forEach(process -> {
             log.error("Process failed, disabling sync for club {}", process.getClubId());
-            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Club {} disabled syncing due to errors.", List.of()));
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Club {} disabled syncing due to errors.", List.of(process.getClubId())));
 
             clubConfigurationService.setClubSync(process.getClubId(), false);
         });
