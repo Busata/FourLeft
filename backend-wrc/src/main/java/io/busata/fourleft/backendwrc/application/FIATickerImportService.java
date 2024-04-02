@@ -66,7 +66,7 @@ public class FIATickerImportService {
 
                     var textEntries = tickerEntry.contents().stream().filter(contentsTo -> contentsTo.type().equals("RICHTEXT"))
                             .map(contentsTo -> {
-                                return FIATickerEntry.builder()
+                                return FIATickerEntry.builder()e
                                         .eventId(activeEventId)
                                         .referenceId(tickerEntry.id())
                                         .time(dateTime)
