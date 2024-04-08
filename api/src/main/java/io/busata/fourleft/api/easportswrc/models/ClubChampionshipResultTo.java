@@ -5,6 +5,6 @@ import java.util.List;
 
 public record ClubChampionshipResultTo(String id, String string, ZonedDateTime absoluteOpenDate,
                                        ZonedDateTime absoluteCloseDate,
-                                       ChampionshipSettingsTo championshipSettingsTo,
+                                       ChampionshipSettingsTo championshipSettings,
                                        List<ClubEventResultTo> events) {
 }

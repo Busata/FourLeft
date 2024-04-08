@@ -4,7 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 public record ClubEventResultTo(
-        EventSettingsTo eventSettingsTo, List<StageSettingsTo> list,
+        EventSettingsTo eventSettings,
+        List<StageSettingsTo> stages,
         String id,
         String status,
         ZonedDateTime absoluteOpenDate,
