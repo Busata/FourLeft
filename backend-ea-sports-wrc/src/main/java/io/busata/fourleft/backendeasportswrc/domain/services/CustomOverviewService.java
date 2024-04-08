@@ -56,6 +56,7 @@ public class CustomOverviewService {
                         entries.stream().map(entry -> {
                             return new ClubResultEntryTo(
                                     entry.getWrcPlayerId(),
+                                    entry.getDisplayName(),
                                     entry.getNationalityID(),
                                     entry.getPlatform(),
                                     entry.getRank(),

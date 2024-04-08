@@ -1,7 +1,10 @@
 package io.busata.fourleft.api.easportswrc.models;
 
-public record ClubChampionshipResultTo(String id, String string, java.time.ZonedDateTime absoluteOpenDate,
-                                       java.time.ZonedDateTime absoluteCloseDate,
+import java.time.ZonedDateTime;
+import java.util.List;
+
+public record ClubChampionshipResultTo(String id, String string, ZonedDateTime absoluteOpenDate,
+                                       ZonedDateTime absoluteCloseDate,
                                        ChampionshipSettingsTo championshipSettingsTo,
-                                       java.util.List<ClubEventResultTo> events) {
+                                       List<ClubEventResultTo> events) {
 }
