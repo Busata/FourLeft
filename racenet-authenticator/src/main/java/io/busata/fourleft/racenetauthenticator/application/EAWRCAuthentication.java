@@ -121,6 +121,7 @@ public class EAWRCAuthentication {
             log.info("Code found: {}", s);
 
             driver.findElement(By.id("twoFactorCode")).sendKeys(s);
+            driver.findElement(By.id("trustThisDevice")).click();
             driver.findElement(By.id("btnSubmit")).click();
         }
 
