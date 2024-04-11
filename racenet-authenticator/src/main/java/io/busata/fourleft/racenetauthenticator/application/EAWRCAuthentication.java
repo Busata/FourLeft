@@ -121,12 +121,13 @@ public class EAWRCAuthentication {
             log.info("Code found: {}", s);
 
             driver.findElement(By.id("twoFactorCode")).sendKeys(s);
-            driver.findElement(By.id("trustThisDevice")).click();
             driver.findElement(By.id("btnSubmit")).click();
+            log.info("Code entered and submitted");
         }
 
         WebElement eaWrcButton = driver.findElement(By.cssSelector("a[href=\"/ea_sports_wrc\""));
         eaWrcButton.click();
+        log.info("Clicked on EA WRC link");
 
 
 
