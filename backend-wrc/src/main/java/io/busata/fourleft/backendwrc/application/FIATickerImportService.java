@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FIATickerImportService {
-    private static final String activeEventId = "448";
+    private static final String activeEventId = "444";
 
     private final WRCApiClient client;
 
@@ -74,7 +74,7 @@ public class FIATickerImportService {
                                         .textHtml(contentsTo.value())
                                         .textMarkdown(convertTextToMarkdown(contentsTo.value()))
                                         .tickerEventKey(tickerEntry.category().title())
-                                        .source(TickerEntrySource.WRC);
+                                        .source(TickerEntrySource.ERC);
                             }).toList();
 
                     tickerEntry.contents().stream().filter(contentsTo -> contentsTo.type().equals("IMAGE")).findFirst().ifPresent(imageContents -> {
