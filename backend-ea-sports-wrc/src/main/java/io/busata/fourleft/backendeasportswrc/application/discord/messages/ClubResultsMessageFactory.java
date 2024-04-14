@@ -135,7 +135,9 @@ public class ClubResultsMessageFactory {
         values.put("displayName", entry.getAlias());
         values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));
         values.put("deltaTime", DurationHelper.formatDelta(entry.getDifferenceAccumulated()));
-
+        if (entry.getDisplayName().equals("Qorsatevela")) {
+            values.put("flag", ":flag_ge:");
+        }
         return values;
     }
 

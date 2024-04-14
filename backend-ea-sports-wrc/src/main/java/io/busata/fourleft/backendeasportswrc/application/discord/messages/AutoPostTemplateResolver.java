@@ -55,7 +55,10 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
             values.put("totalTime", DurationHelper.formatTime(entry.getTimeAccumulated()));
             values.put("deltaTime", "(%s)".formatted(DurationHelper.formatDelta(entry.getDifferenceAccumulated())));
             values.put("vehicle", entry.getVehicle());
-
+            
+            if (entry.getDisplayName().equals("Qorsatevela")) {
+                values.put("flag", ":flag_ge:");
+            }
 
             String playerPlatform = getPlayerPlatform(entry);
 

@@ -64,6 +64,10 @@ public class ClubStandingsMessageFactory {
         values.put("deltaRank", createDeltaRank(entry));
         values.put("deltaPoints", createDeltaPoints(entry));
 
+        if (entry.getDisplayName().equals("Qorsatevela")) {
+            values.put("flag", ":flag_ge:");
+        }
+        
         return values;
     }
 
