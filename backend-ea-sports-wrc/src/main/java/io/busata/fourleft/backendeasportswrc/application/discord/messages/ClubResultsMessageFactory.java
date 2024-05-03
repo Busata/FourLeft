@@ -129,7 +129,7 @@ public class ClubResultsMessageFactory {
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
         Map<String, String> values = new HashMap<>();
 
-        values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries));
+        values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, entry.isDnf()));
         values.put("rank", String.valueOf(entry.getRankAccumulated()));
         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
         values.put("displayName", entry.getAlias());

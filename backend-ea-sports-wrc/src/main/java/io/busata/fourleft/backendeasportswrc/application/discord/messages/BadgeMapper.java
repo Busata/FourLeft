@@ -2,13 +2,13 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 public class BadgeMapper {
 
-    public static String createBadge(long rank, int totalEntries) {
+    public static String createBadge(long rank, int totalEntries, boolean isDnf) {
 
         if(totalEntries > 1000) {
             var percentageRank = ((float) rank / (float) totalEntries) * 100f;
-            return createPercentageBasedIcon(percentageRank, false);
+            return createPercentageBasedIcon(percentageRank, isDnf);
         } else {
-            return createRankBasedIcon(rank, false);
+            return createRankBasedIcon(rank, isDnf);
         }
 
     }

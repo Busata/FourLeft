@@ -4,7 +4,6 @@ package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStats;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j

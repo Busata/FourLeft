@@ -76,4 +76,8 @@ public class ClubLeaderboardEntry {
     public boolean isTracked() {
         return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
     }
+
+    public boolean isDnf() {
+        return this.time.equals(this.timePenalty);
+    }
 }
