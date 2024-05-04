@@ -48,8 +48,8 @@ public class ClubStatsMessageFactory {
     private String buildPlayerStatistics(ClubStats results) {
         return "%s\n%s\n%s".formatted(
                 "**Total DNF** • *%s*".formatted(results.playerStatistics().totalDnf()),
-                "**Percentage finished** • *%s*".formatted(results.playerStatistics().percentageFinished()),
-                "**Percentage DNF** • *%s*".formatted(results.playerStatistics().percentageDnf())
+                "**Percentage finished** • *%s%%*".formatted(results.playerStatistics().percentageFinished()),
+                "**Percentage DNF** • *%s%%*".formatted(results.playerStatistics().percentageDnf())
         );
     }
 
