@@ -31,14 +31,15 @@ public class ClubStatsService {
 
 
                 CarStatistics carStatistics = calculateCarStatistics(entries);
-
+                PlayerStatistics playerStatistics = calculatePlayerStatistics(entries);
 
                 return new ClubStats(
                         event.getEventSettings().getVehicleClass(),
                         event.getEventSettings().getLocation(),
                         event.getEventSettings().getLocationID(),
                         event.getStages().stream().map(Stage::getStageSettings).map(StageSettings::getRoute).toList(),
-                        carStatistics
+                        carStatistics,
+                        playerStatistics
                 );
             });
         });
@@ -65,6 +66,20 @@ public class ClubStatsService {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         return new CarStatistics(percentages, vehicleCount, topCount);
+    }
+
+    @NotNull
+    private static PlayerStatistics calculatePlayerStatistics(List<ClubLeaderboardEntry> entries) {
+        if (entries.isEmpty()) {
+            return new PlayerStatistics(0, 0, 0, 0);
+        }
+
+        long totalEntries = entries.size();
+        long totalDnf = entries.stream().filter(entry -> entry.isDnf()).count();
+        long percentageDnf = (totalDnf * 100) / totalEntries;
+        long percentageFinished = 100 - percentageDnf;
+
+        return new PlayerStatistics(totalEntries, totalDnf, percentageDnf, percentageFinished);
     }
 
 }

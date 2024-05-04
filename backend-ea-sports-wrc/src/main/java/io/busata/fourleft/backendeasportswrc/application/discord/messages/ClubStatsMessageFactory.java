@@ -37,9 +37,23 @@ public class ClubStatsMessageFactory {
                 false
         ));
 
+        embedBuilder.addField(new MessageEmbed.Field(
+                "Player statistics",
+                buildPlayerStatistics(results), 
+         false
+         ));
+
     }
 
-    private String buildCarStatistics(ClubStats results) {
+    private String buildPlayerStatistics(ClubStats results) {
+        return "%s\n%s\n%s".formatted(
+                "**Total DNF** • *%s*".formatted(results.playerStatistics().totalDnf()),
+                "**Percentage finished** • *%s*".formatted(results.playerStatistics().percentageFinished()),
+                "**Percentage DNF** • *%s*".formatted(results.playerStatistics().percentageDnf())
+        );
+    }
+
+private String buildCarStatistics(ClubStats results) {
         CarStatistics statistics = results.carStatistics();
 
         return statistics.carPercentages()
