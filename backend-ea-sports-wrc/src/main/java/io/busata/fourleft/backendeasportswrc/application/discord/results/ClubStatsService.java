@@ -79,7 +79,7 @@ public class ClubStatsService {
         long percentageDnf = (totalDnf * 100) / totalEntries;
         long percentageFinished = 100 - percentageDnf;
 
-        return new PlayerStatistics(totalEntries, totalDnf, percentageDnf, percentageFinished);
+        return new PlayerStatistics(totalEntries, totalDnf, percentageFinished, percentageDnf);
     }
 
 }
