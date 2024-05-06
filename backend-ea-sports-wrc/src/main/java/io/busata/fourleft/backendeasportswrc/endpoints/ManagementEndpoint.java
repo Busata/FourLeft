@@ -12,26 +12,7 @@ public class ManagementEndpoint {
 
     @PostConstruct
     public void setup() {
-
-        var messages = this.discordGateway.getChannelMessagesAfter(1173281586184204348L, 1236928642626490418L, 100L);
-
-        messages.forEach(message -> {
-            try {
-
-                if (message.author().id().equals("961645445250171001")) {
-                    this.discordGateway.deleteMessage(1173281586184204348L, message.id());
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });        
-        
-        messages = this.discordGateway.getChannelMessagesAfter(1218167622131257394L, 1236342471374667796L, 100L);
+        var messages = this.discordGateway.getChannelMessagesAfter(1218167622131257394L, 1236342471374667796L, 100L);
 
         messages.forEach(message -> {
             try {
