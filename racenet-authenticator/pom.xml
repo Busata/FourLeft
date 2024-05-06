@@ -15,7 +15,7 @@
     <description>racenet-authenticator</description>
     <properties>
         <java.version>17</java.version>
-        <selenium.version>4.20.0</selenium.version>
+        <selenium.version>4.19.1</selenium.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
     <dependencies>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
-            <version>5.7.0</version>
+            <version>5.8.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -52,8 +52,8 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v124</artifactId>
-            <version>4.20.0</version>
+            <artifactId>selenium-devtools-v123</artifactId>
+            <version>4.19.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
