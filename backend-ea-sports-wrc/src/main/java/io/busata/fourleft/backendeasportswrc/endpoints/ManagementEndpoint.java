@@ -22,7 +22,7 @@ public class ManagementEndpoint {
                     this.discordGateway.deleteMessage(1173281586184204348L, message.id());
                 }
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -40,7 +40,7 @@ public class ManagementEndpoint {
                     this.discordGateway.deleteMessage(1173281586184204348L, message.id());
                 }
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
