@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
