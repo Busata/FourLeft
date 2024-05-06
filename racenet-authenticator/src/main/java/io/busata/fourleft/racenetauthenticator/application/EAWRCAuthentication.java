@@ -106,7 +106,15 @@ public class EAWRCAuthentication {
         passwordField.sendKeys(password);
         loginButton.click();
 
-        if(this.buttonExists(driver, By.id("btnSendCode"))) {
+
+        // check if there is a label with the for attribute of "readAccept"
+        if(this.elementExists(driver, By.cssSelector("label[for=\"readAccept\"]"))) {
+            driver.findElement(By.cssSelector("label[for=\"readAccept\"]")).click();
+            driver.findElement(By.id("btnNext")).click();
+        }        
+
+
+        if(this.elementExists(driver, By.id("btnSendCode"))) {
             driver.findElement(By.id("btnSendCode")).click();
 
             log.info("Waiting until {} appears", codeFilePath);
@@ -134,7 +142,7 @@ public class EAWRCAuthentication {
     }
 
 
-    public boolean buttonExists(WebDriver driver, By id) {
+    public boolean elementExists(WebDriver driver, By id) {
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.MILLISECONDS);
         boolean exists = !driver.findElements(id).isEmpty();
         driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
