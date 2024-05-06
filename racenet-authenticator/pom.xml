@@ -52,8 +52,8 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v119</artifactId>
-            <version>4.15.0</version>
+            <artifactId>selenium-devtools-v121</artifactId>
+            <version>4.19.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
