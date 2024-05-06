@@ -80,7 +80,9 @@ public class DirtRally2Authentication {
     private WebDriver createDriver() {
         WebDriver driver;
         try {
-            driver = new RemoteWebDriver(new URL(this.seleniumUrl), new FirefoxOptions());
+            var options = new FirefoxOptions();
+            driver = new RemoteWebDriver(new URL(this.seleniumUrl), new FirefoxOptions(), false);
+            
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
