@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v121</artifactId>
+            <artifactId>selenium-devtools-v124</artifactId>
             <version>4.20.0</version>
         </dependency>
         <dependency>
