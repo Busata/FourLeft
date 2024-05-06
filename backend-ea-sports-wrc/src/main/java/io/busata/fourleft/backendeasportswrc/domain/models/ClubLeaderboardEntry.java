@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -78,6 +79,6 @@ public class ClubLeaderboardEntry {
     }
 
     public boolean isDnf() {
-        return this.time.equals(this.timePenalty);
+        return Objects.equals(this.time, this.timePenalty);
     }
 }

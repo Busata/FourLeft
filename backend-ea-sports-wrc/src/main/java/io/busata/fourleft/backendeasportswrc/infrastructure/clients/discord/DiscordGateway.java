@@ -14,6 +14,9 @@ public interface DiscordGateway {
     @GetMapping("/channels/{channelId}/messages")
     List<DiscordMessageTo> getChannelMessages(@PathVariable Long channelId, @RequestParam("limit") Long limit);
 
+    @GetMapping("/channels/{channelId}/messages")
+    List<DiscordMessageTo> getChannelMessagesAfter(@PathVariable Long channelId, @RequestParam("after") Long afterMessageId,  @RequestParam("limit") Long limit);
+
     @PostMapping("/channels/{channelId}/messages")
     DiscordMessageTo createMessage(@PathVariable Long channelId, @RequestBody SimpleDiscordMessageTo message);
 

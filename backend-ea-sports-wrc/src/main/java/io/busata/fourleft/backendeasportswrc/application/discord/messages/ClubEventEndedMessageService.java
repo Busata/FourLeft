@@ -1,6 +1,5 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
-
 import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
@@ -34,13 +33,12 @@ public class ClubEventEndedMessageService {
     private final ClubStandingsMessageFactory clubStandingsMessageFactory;
     private final ClubStatsMessageFactory clubStatsMessageFactory;
 
-
     @EventListener
     public void handleClubEvent(ClubEventEnded eventEnded) {
         discordClubConfigurationService.findByClubId(eventEnded.clubId()).forEach(configuration -> {
             try {
                 postClubEventMessages(eventEnded, configuration);
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 log.error("Failed to post club event ended for configuration {}", configuration.getChannelId());
             }
         });
@@ -55,29 +53,41 @@ public class ClubEventEndedMessageService {
 
         });
         // Post Standings
-        List<ChampionshipStanding> standings = clubResultsService.getStandings(eventEnded.clubId()).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
+        List<ChampionshipStanding> standings = clubResultsService.getStandings(eventEnded.clubId()).stream()
+                .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
         if (!standings.isEmpty()) {
-            MessageEmbed standingsPost = clubStandingsMessageFactory.createStandingsPost(standings, configuration.isRequiresTracking());
+            MessageEmbed standingsPost = clubStandingsMessageFactory.createStandingsPost(standings,
+                    configuration.isRequiresTracking());
             embeds.add(standingsPost);
         }
 
-        clubStatsService.buildStats(eventEnded.clubId()).ifPresent(stats -> {
-            try {
-                MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
-                embeds.add(statsPost);
-            } catch (Exception ex) {
-                log.error("Could not add statistics to club event ended post", ex);
-            }
-        });
+        //Stats
+        try {
+            clubStatsService.buildStats(eventEnded.clubId()).ifPresent(stats -> {
+                try {
+                    MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
+                    embeds.add(statsPost);
+                } catch (Exception ex) {
+                    log.error("Could not add statistics to club event ended post", ex);
+                }
+            });
+        } catch (Exception ex) {
+            log.error("Could not add statistics to club event ended post", ex);
+        }
 
         // Post new results
-        clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
-            MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
-            embeds.add(resultPost);
-        });
+        try {
+            clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
+                MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
+                embeds.add(resultPost);
+            });
+        } catch (Exception ex) {
+            log.error("Could not add current results to club event ended post", ex);
+        }
 
         embeds.forEach(embed -> {
-            discordGateway.createMessage(configuration.getChannelId(), new SimpleDiscordMessageTo(null, List.of(embed.toData().toString())));
+            discordGateway.createMessage(configuration.getChannelId(),
+                    new SimpleDiscordMessageTo(null, List.of(embed.toData().toString())));
         });
     }
 }
