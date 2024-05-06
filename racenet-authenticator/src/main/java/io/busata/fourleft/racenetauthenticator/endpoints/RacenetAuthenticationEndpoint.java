@@ -6,7 +6,6 @@ import io.busata.fourleft.racenetauthenticator.application.EAWRCAuthentication;
 import io.busata.fourleft.racenetauthenticator.application.EAWRCToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -20,7 +19,13 @@ public class RacenetAuthenticationEndpoint {
 
     @GetMapping("/api/external/authentication/dirtrally2")
     public Map<String, String> getDirtRally2Headers() {
-        return authentication.getHeaders().toSingleValueMap();
+        var headers = authentication.getHeaders();
+        if(headers != null) {
+            return headers.toSingleValueMap();
+        }        
+        else  {
+            return null;
+        }
     }
 
     @GetMapping("/api/external/authentication/easportswrc")
