@@ -18,7 +18,7 @@ public class ManagementEndpoint {
             try {
 
                 if (message.author().id().equals("961645445250171001")) {
-                    this.discordGateway.deleteMessage(1173281586184204348L, message.id());
+                    this.discordGateway.deleteMessage(1218167622131257394L, message.id());
                 }
                 try {
                     Thread.sleep(1000);
