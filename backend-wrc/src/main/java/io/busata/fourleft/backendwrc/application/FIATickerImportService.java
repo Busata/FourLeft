@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FIATickerImportService {
-    private static final String activeEventId = "452";
+    private static final String activeEventId = "453";
 
     private final WRCApiClient client;
 
