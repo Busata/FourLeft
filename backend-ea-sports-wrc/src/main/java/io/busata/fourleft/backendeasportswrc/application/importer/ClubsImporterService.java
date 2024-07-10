@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -49,15 +48,15 @@ public class ClubsImporterService {
     }
 
     private void orchestrateRunningProcesses() {
-        //Control the currently running ones.
+        // Control the currently running ones.
         runningProcesses.values().forEach(process -> {
             do {
                 control(process);
             } while (process.canContinue());
         });
 
-
-        List<ClubImportProcess> failedClubs = runningProcesses.values().stream().filter(process -> process.getState() == ProcessState.FAILED).toList();
+        List<ClubImportProcess> failedClubs = runningProcesses.values().stream()
+                .filter(process -> process.getState() == ProcessState.FAILED).toList();
 
         try {
             failedClubs.forEach(process -> {
@@ -67,9 +66,11 @@ public class ClubsImporterService {
         } catch (Exception ex) {
             log.error("Could not disable clubs!");
         }
-        discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Disabled clubs count: %s.".formatted(failedClubs.size()), List.of()));
-
-        //Remove processes that are done.
+        if (failedClubs.size() > 0) {
+            discordGateway.createMessage(1173372471207018576L,
+                    new SimpleDiscordMessageTo("Disabled clubs count: %s.".formatted(failedClubs.size()), List.of()));
+        }
+        // Remove processes that are done.
         runningProcesses.values().removeIf(ClubImportProcess::isDone);
     }
 
@@ -81,7 +82,5 @@ public class ClubsImporterService {
                     handler.control(process);
                 });
     }
-
-
 
 }
