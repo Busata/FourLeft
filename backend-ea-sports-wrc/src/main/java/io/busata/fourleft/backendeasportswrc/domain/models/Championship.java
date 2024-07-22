@@ -113,6 +113,7 @@ public class Championship {
         return now.isAfter(absoluteOpenDate.toLocalDateTime()) && now.isBefore(absoluteCloseDate.toLocalDateTime());
     }
 
+
     public Optional<Event> getActiveEventSnapshot() {
         return this.getEvents().stream().filter(Event::isActiveSnapshot).findFirst();
     }
