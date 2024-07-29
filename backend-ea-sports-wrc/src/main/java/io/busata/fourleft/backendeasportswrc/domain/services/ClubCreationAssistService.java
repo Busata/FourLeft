@@ -32,18 +32,38 @@ public class ClubCreationAssistService {
         .toList();
 
 
-        Map<String, Long> vehicleClassCounts = events.stream()
+        
+        final Map<String, Long> vehicleClassCounts = events.stream()
+        .map(Event::getEventSettings)
+        .map(EventSettings::getVehicleClass)
+        .collect(Collectors.toMap(e -> e, e -> 0L, Long::sum));
+
+
+
+        events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getVehicleClass)
         .limit(14)
-        .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+        .forEach(vehicleClass -> {
+            vehicleClassCounts.computeIfPresent(vehicleClass, (k, v) -> v + 1L);
+        });
 
         
-        Map<String, Long> locationCounts = events.stream()
+        final Map<String, Long> locationCounts = events.stream()
+        .map(Event::getEventSettings)
+        .map(EventSettings::getLocation)
+        .collect(Collectors.toMap(e -> e, e -> 0L, Long::sum));
+
+        
+        events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getLocation)
         .limit(14)
-        .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+        .forEach(locationId -> {
+            locationCounts.computeIfPresent(locationId, (k, v) -> v + 1L);
+        });
+
+
 
         List<String> vehicles = vehicleClassCounts.entrySet().stream()
         .sorted(Map.Entry.comparingByValue())
