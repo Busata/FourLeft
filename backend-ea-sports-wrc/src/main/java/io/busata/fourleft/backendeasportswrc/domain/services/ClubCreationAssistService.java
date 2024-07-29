@@ -43,7 +43,7 @@ public class ClubCreationAssistService {
         events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getVehicleClass)
-        .limit(14)
+        .limit(21)
         .forEach(vehicleClass -> {
             vehicleClassCounts.computeIfPresent(vehicleClass, (k, v) -> v + 1L);
         });
@@ -58,7 +58,7 @@ public class ClubCreationAssistService {
         events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getLocation)
-        .limit(14)
+        .limit(21)
         .forEach(locationId -> {
             locationCounts.computeIfPresent(locationId, (k, v) -> v + 1L);
         });
