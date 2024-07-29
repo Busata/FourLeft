@@ -35,12 +35,14 @@ public class ClubCreationAssistService {
         Map<String, Long> vehicleClassCounts = events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getVehicleClass)
+        .limit(14)
         .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
 
         
         Map<String, Long> locationCounts = events.stream()
         .map(Event::getEventSettings)
         .map(EventSettings::getLocation)
+        .limit(14)
         .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
 
         List<String> vehicles = vehicleClassCounts.entrySet().stream()
