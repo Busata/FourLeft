@@ -26,7 +26,7 @@ public class ClubCreationAssistService {
     public ClubCreationAssistSummary createSummary(String clubId) {
         final var club = clubService.findById(clubId);
         var events = club.getChampionships().stream()
-        .filter(championship -> championship.getStatus() == EventStatus.FINISHED)
+        .filter(championship -> championship.getStatus() == EventStatus.FINISHED || championship.getStatus() == EventStatus.OPEN)
         .flatMap(championship -> championship.getEvents().stream())
         .sorted(Comparator.comparing(Event::getAbsoluteCloseDate).reversed())
         .toList();
