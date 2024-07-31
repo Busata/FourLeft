@@ -1,6 +1,5 @@
 package io.busata.fourleft.backendeasportswrc.application.importer.results;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ChampionshipTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ClubDetailsTo;
 import lombok.Getter;
