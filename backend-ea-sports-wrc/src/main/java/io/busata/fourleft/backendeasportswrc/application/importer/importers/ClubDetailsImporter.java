@@ -36,7 +36,7 @@ public class ClubDetailsImporter {
                     .thenApply(championships -> new ClubDetailsUpdatedResult(clubDetailsTo, championships))
                     .thenApply(clubUpdateResult -> (ClubImportResult) clubUpdateResult);
         }).exceptionally(ex -> {
-            log.error("IMPORTER: Club creation error, could not get the details for club {}", clubId, ex);
+            log.error("IMPORTER: Club update error, could not get the details for club {}", clubId, ex);
             return new FailedClubUpdateResult(clubId);
         });
     }

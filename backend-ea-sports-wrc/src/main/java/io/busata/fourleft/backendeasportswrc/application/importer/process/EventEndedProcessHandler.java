@@ -9,6 +9,7 @@ import io.busata.fourleft.backendeasportswrc.application.importer.process.core.C
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubDetailsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubImportResult;
+import io.busata.fourleft.backendeasportswrc.application.importer.results.FailedClubUpdateResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.LeaderboardUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.StandingsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
@@ -67,10 +68,16 @@ public class EventEndedProcessHandler implements ClubImportProcessHandler {
 
     private void processFetchingUpdateEventEndedSuccess(ClubImportProcess process) {
         ClubImportResult details = process.getDetails().join();
+        
+        if (details instanceof FailedClubUpdateResult) {
+            log.error("IMPORTER - Club {} failed to update its details, skipping", process.getClubId());
+            process.markFailed();
+        }
 
         if (details instanceof ClubDetailsUpdatedResult detailsUpdatedResults) {
             this.clubService.updateClub(detailsUpdatedResults.getClubDetails(), detailsUpdatedResults.getChampionships());
         }
+
 
         process.getLeaderboards().stream()
                 .map(CompletableFuture::join)
