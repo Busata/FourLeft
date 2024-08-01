@@ -72,6 +72,7 @@ public class EventEndedProcessHandler implements ClubImportProcessHandler {
         if (details instanceof FailedClubUpdateResult) {
             log.error("IMPORTER - Club {} failed to update its details, skipping", process.getClubId());
             process.markFailed();
+            return;
         }
 
         if (details instanceof ClubDetailsUpdatedResult detailsUpdatedResults) {
