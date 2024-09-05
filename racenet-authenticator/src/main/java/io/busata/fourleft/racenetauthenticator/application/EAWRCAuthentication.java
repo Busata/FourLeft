@@ -12,8 +12,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v123.network.Network;
-import org.openqa.selenium.devtools.v123.network.model.ResponseReceived;
+import org.openqa.selenium.devtools.v128.network.Network;
+import org.openqa.selenium.devtools.v128.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +52,7 @@ public class EAWRCAuthentication {
 
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080","--headless");
+        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
@@ -98,13 +98,15 @@ public class EAWRCAuthentication {
 
         signinButton.click();
 
-        WebElement emailField = driver.findElement(By.id("email"));
-        WebElement passwordField = driver.findElement(By.id("password"));
         WebElement loginButton = driver.findElement(By.id("logInBtn"));
-
+        WebElement emailField = driver.findElement(By.id("email"));
         emailField.sendKeys(userName);
+        loginButton.click();
+        loginButton = driver.findElement(By.id("logInBtn"));
+        WebElement passwordField = driver.findElement(By.id("password"));
         passwordField.sendKeys(password);
         loginButton.click();
+
 
 
         // check if there is a label with the for attribute of "readAccept"
