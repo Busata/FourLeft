@@ -52,7 +52,7 @@ public class EAWRCAuthentication {
 
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080");
+        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080", "--headless");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
