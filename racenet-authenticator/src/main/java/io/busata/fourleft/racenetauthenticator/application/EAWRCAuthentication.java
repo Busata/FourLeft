@@ -52,7 +52,7 @@ public class EAWRCAuthentication {
 
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--enable-automation", "--no-sandbox","--disable-dev-shm-usage","--disable-gpu", "--remote-allow-origins=*","--window-size=1920,1080", "--headless");
+        capabilities.addArguments("--enable-automation", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--remote-allow-origins=*", "--window-size=1920,1080", "--headless");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
@@ -73,7 +73,7 @@ public class EAWRCAuthentication {
                         log.error("Something went wrong reading the EA WRC token.");
                     }
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
             }
         });
 
@@ -98,30 +98,42 @@ public class EAWRCAuthentication {
 
         signinButton.click();
 
-        WebElement loginButton = driver.findElement(By.id("logInBtn"));
         WebElement emailField = driver.findElement(By.id("email"));
-        emailField.sendKeys(userName);
-        loginButton.click();
-        loginButton = driver.findElement(By.id("logInBtn"));
-        WebElement passwordField = driver.findElement(By.id("password"));
-        passwordField.sendKeys(password);
-        loginButton.click();
 
+        //Racenet switched to a different login flow at some point
+        //First had to enter e-mail , then press "next", then enter password.
+        //Maybe A-B testing, so supporting both.
+        if (!elementExists(driver, By.id("password"))) {
+            emailField.sendKeys(userName);
+            WebElement nextButton = driver.findElement(By.id("logInBtn"));
+            nextButton.click();
+
+            WebElement loginButton = driver.findElement(By.id("logInBtn"));
+            WebElement passwordField = driver.findElement(By.id("password"));
+            passwordField.sendKeys(password);
+            loginButton.click();
+        } else {
+            emailField.sendKeys(userName);
+            WebElement passwordField = driver.findElement(By.id("password"));
+            passwordField.sendKeys(password);
+            WebElement loginButton = driver.findElement(By.id("logInBtn"));
+            loginButton.click();
+        }
 
 
         // check if there is a label with the for attribute of "readAccept"
-        if(this.elementExists(driver, By.cssSelector("label[for=\"readAccept\"]"))) {
+        if (this.elementExists(driver, By.cssSelector("label[for=\"readAccept\"]"))) {
             driver.findElement(By.cssSelector("label[for=\"readAccept\"]")).click();
             driver.findElement(By.id("btnNext")).click();
-        }        
+        }
 
 
-        if(this.elementExists(driver, By.id("btnSendCode"))) {
+        if (this.elementExists(driver, By.id("btnSendCode"))) {
             driver.findElement(By.id("btnSendCode")).click();
 
             log.info("Waiting until {} appears", codeFilePath);
 
-            while(!Files.exists(Path.of(codeFilePath))) {
+            while (!Files.exists(Path.of(codeFilePath))) {
                 Thread.sleep(1000);
             }
 
@@ -138,9 +150,6 @@ public class EAWRCAuthentication {
         WebElement eaWrcButton = driver.findElement(By.cssSelector("a[href=\"/ea_sports_wrc\""));
         eaWrcButton.click();
         log.info("Clicked on EA WRC link");
-
-
-
     }
 
 
