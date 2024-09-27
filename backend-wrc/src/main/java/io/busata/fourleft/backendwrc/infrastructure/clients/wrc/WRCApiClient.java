@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(name="wrc", url = "https://api.wrc.com")
 public interface WRCApiClient {
-    @GetMapping("/content/result/liveUpdates?eventId=456")
+    @GetMapping("/content/result/liveUpdates?eventId=457")
     WRCLiveUpdatesTo getLiveUpdates();
 }
