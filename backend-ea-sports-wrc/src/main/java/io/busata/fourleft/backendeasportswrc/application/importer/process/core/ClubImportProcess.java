@@ -69,6 +69,16 @@ public class ClubImportProcess {
     public void markFailed() {
         setState(ProcessState.FAILED);
     }
+
+    public void complete() {
+        if(this.details != null) {
+            this.details.cancel(true);
+        }
+
+        this.standings.forEach(standings -> standings.cancel(true));
+
+        this.leaderboards.forEach(leaderboards -> leaderboards.cancel(true));
+    }
 }
 
 

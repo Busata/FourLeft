@@ -71,6 +71,7 @@ public class ClubsImporterService {
                     new SimpleDiscordMessageTo("Disabled clubs count: %s.".formatted(failedClubs.size()), List.of()));
         }
         // Remove processes that are done.
+        runningProcesses.values().stream().filter(ClubImportProcess::isDone).forEach(ClubImportProcess::complete);
         runningProcesses.values().removeIf(ClubImportProcess::isDone);
     }
 
