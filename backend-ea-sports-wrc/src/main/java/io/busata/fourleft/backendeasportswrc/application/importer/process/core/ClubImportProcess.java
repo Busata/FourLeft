@@ -19,7 +19,7 @@ public class ClubImportProcess {
     private ProcessState state;
 
     public void setState(ProcessState state) {
-        if(!(this.state == ProcessState.START && state == ProcessState.DONE)) {
+        if (!(this.state == ProcessState.START && state == ProcessState.DONE)) {
             log.info("Club {} • {} -> {}", this.clubId, this.state, state);
         }
         this.state = state;
@@ -71,13 +71,17 @@ public class ClubImportProcess {
     }
 
     public void complete() {
-        if(this.details != null) {
+        if (this.details != null) {
             this.details.cancel(true);
         }
 
-        this.standings.forEach(standings -> standings.cancel(true));
+        if (this.standings != null) {
+            this.standings.forEach(standings -> standings.cancel(true));
+        }
 
-        this.leaderboards.forEach(leaderboards -> leaderboards.cancel(true));
+        if (this.leaderboards != null) {
+            this.leaderboards.forEach(leaderboards -> leaderboards.cancel(true));
+        }
     }
 }
 
