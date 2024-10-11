@@ -108,6 +108,23 @@ public class CommandCreator {
                                 .required(true)
                                 .build())
                         .build()
+                ).addOption(ApplicationCommandOptionData.builder()
+                        .name("setup")
+                        .description("Find the perfect tune in the EA SPORTS WRC setup channel")
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
+                        .addOption(ApplicationCommandOptionData.builder()
+                                .name("country")
+                                .description("Country")
+                                .type(ApplicationCommandOption.Type.STRING.getValue())
+                                .required(true)
+                                .build())
+                        .addOption(ApplicationCommandOptionData.builder()
+                                .name("car")
+                                .description("Car name")
+                                .type(ApplicationCommandOption.Type.STRING.getValue())
+                                .required(true)
+                                .build())
+                        .build()
                 ).build();
 
 
