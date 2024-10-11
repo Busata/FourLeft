@@ -19,7 +19,7 @@ class QueryEndpoint {
 
     @GetMapping("/api_v2/query/setups")
     public List<SetupChannelResultTo> getSetups() {
-        return discordGateway.getThreads(892050958723469332L).stream().map(DiscordActiveThreadsTo::channels).flatMap(Collection::stream).filter(channel -> {
+        return discordGateway.getThreads(892050958723469332L).threads().stream().filter(channel -> {
             return channel.parentId() == 1293964993573683251L;
         }).map(channel -> {
             return new SetupChannelResultTo(channel.id(), channel.name());
