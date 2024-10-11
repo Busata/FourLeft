@@ -28,7 +28,7 @@ public interface DiscordGateway {
     void deleteMessage(@PathVariable Long channelId, @PathVariable Long messageId);
 
     @GetMapping("/guilds/{guildId}/threads/active")
-    List<DiscordActiveThreadsTo> getThreads(@PathVariable Long guildId);
+    DiscordActiveThreadsTo getThreads(@PathVariable Long guildId);
 
     default Optional<DiscordMessageTo> getLastChannelMessage(Long channelId) {
 
