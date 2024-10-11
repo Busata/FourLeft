@@ -6,6 +6,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
@@ -40,22 +41,24 @@ public class SetupFinderCommandHandler {
                             .flatMap(ApplicationCommandInteractionOption::getValue)
                             .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
-
-                    return findChannels(country, car).collectList().map(channels-> {
-                        if(channels.isEmpty()) {
-                            return event.reply("Could not find any setups.").withEphemeral(true);
-                        }
-                        String channelResult = channels.stream().map(result -> {
-                            return "<#%s>".formatted(result.id);
-                        }).collect(Collectors.joining("n"));
-                        return event.reply("Found the following setups: %s".formatted(channelResult)).withEphemeral(true);
-                    });
-
+                    return event.deferReply().then(findAndReplySetups(event, country, car));
                 }).orElse(Mono.empty());
 
             }
             return Mono.empty();
         }).subscribe();
+    }
+
+    private Mono<InteractionApplicationCommandCallbackReplyMono> findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
+        return findChannels(country, car).collectList().map(channels -> {
+            if (channels.isEmpty()) {
+                return event.reply("Could not find any setups.").withEphemeral(true);
+            }
+            String channelResult = channels.stream().map(result -> {
+                return "<#%s>".formatted(result.id);
+            }).collect(Collectors.joining("n"));
+            return event.reply("Found the following setups:\n%s".formatted(channelResult)).withEphemeral(true);
+        });
     }
 
     private Flux<ChannelResult> findChannels(String country, String car) {

@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord;
 
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordActiveThreadsTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordMessageTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -26,6 +27,8 @@ public interface DiscordGateway {
     @DeleteMapping("/channels/{channelId}/messages/{messageId}")
     void deleteMessage(@PathVariable Long channelId, @PathVariable Long messageId);
 
+    @GetMapping("/guilds/{guildId}/threads/active")
+    List<DiscordActiveThreadsTo> getThreads(@PathVariable Long guildId);
 
     default Optional<DiscordMessageTo> getLastChannelMessage(Long channelId) {
 

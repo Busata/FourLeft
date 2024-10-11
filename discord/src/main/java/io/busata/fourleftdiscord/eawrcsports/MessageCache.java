@@ -8,6 +8,9 @@ import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +31,8 @@ public class MessageCache {
     private final EmbedFactory embedFactory;
 
 
-    @PostConstruct
+    @Async
+    @EventListener(ApplicationStartedEvent.class)
     public void populateCaches() {
         this.updateAll();
     }
