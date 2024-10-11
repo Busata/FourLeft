@@ -46,21 +46,15 @@ public class SetupFinderCommandHandler {
         }).subscribe();
     }
 
-    private Mono<InteractionApplicationCommandCallbackReplyMono> findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
-        return findChannels(country, car).map(channels -> {
-            if (channels.isEmpty()) {
-                return event.reply("Could not find any setups.").withEphemeral(true);
-            }
+    private InteractionApplicationCommandCallbackReplyMono findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
+        List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
+        if(channels.isEmpty()) {
+            return event.reply("Could not find any setups.").withEphemeral(true);
+        } else {
             String channelResult = channels.stream().map(result -> {
                 return "<#%s>".formatted(result.id());
             }).collect(Collectors.joining("n"));
             return event.reply("Found the following setups:\n%s".formatted(channelResult)).withEphemeral(true);
-        });
+        }
     }
-
-    private Mono<List<SetupChannelResultTo>> findChannels(String country, String car) {
-        List<SetupChannelResultTo> setupChannelResultToStream = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
-        return Mono.just(setupChannelResultToStream);
-    }
-
 }
