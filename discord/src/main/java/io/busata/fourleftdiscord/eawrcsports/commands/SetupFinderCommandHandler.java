@@ -31,7 +31,7 @@ public class SetupFinderCommandHandler {
         client.on(ChatInputInteractionEvent.class, event -> {
             if (event.getCommandName().equals("wrc")) {
 
-                return event.getOption("track").map(action -> {
+                return event.getOption("setup").map(action -> {
 
                     String country = action.getOption("country")
                             .flatMap(ApplicationCommandInteractionOption::getValue)
