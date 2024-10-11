@@ -14,13 +14,11 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-
 class QueryEndpoint {
-
     private final DiscordGateway discordGateway;
 
     @GetMapping("/api_v2/query/setups")
-    public List<SetupChannelResultTo> getProfile(@PathVariable UUID requestId) {
+    public List<SetupChannelResultTo> getSetups() {
         return discordGateway.getThreads(892050958723469332L).stream().map(DiscordActiveThreadsTo::channels).flatMap(Collection::stream).filter(channel -> {
             return channel.parentId() == 1293964993573683251L;
         }).map(channel -> {
