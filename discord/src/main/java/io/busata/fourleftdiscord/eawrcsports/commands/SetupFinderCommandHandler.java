@@ -47,14 +47,19 @@ public class SetupFinderCommandHandler {
     }
 
     private InteractionFollowupCreateMono findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
-        List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
+        try {
+            List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
         if(channels.isEmpty()) {
             return event.createFollowup("Could not find any setups.").withEphemeral(true);
         } else {
             String channelResult = channels.stream().map(result -> {
                 return "<#%s>".formatted(result.id());
-            }).collect(Collectors.joining("n"));
+            }).collect(Collectors.joining("\n"));
             return event.createFollowup("Found the following setups:\n%s".formatted(channelResult)).withEphemeral(true);
         }
+        } catch (Exception ex) {
+            return event.createFollowup("Something went wrong! Please poke @busata");
+        }
+
     }
 }
