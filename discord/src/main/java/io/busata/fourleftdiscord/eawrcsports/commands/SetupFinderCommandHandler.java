@@ -43,10 +43,13 @@ public class SetupFinderCommandHandler {
 
 
                     return findChannels(country, car).collectList().map(channels-> {
+                        if(channels.isEmpty()) {
+                            return event.reply("Could not find any setups.").withEphemeral(true);
+                        }
                         String channelResult = channels.stream().map(result -> {
                             return "<#%s>".formatted(result.id);
                         }).collect(Collectors.joining("n"));
-                        return event.reply("I have found the following setups: %s".formatted(channelResult)).withEphemeral(true);
+                        return event.reply("Found the following setups: %s".formatted(channelResult)).withEphemeral(true);
                     });
 
                 }).orElse(Mono.empty());
@@ -59,6 +62,9 @@ public class SetupFinderCommandHandler {
     private Flux<ChannelResult> findChannels(String country, String car) {
         try {
             return client.getGuildChannels(Snowflake.of(892050958723469332L))
+                    .doOnNext(channel -> {
+                        log.info(channel.getId() + "--" + channel.getName());
+                    })
                     .filterWhen(topLevelGuildMessageChannel -> {
                         return topLevelGuildMessageChannel
                                 .getRestChannel()
