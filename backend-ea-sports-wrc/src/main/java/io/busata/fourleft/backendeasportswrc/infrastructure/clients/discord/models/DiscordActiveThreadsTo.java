@@ -2,5 +2,5 @@ package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.mod
 
 import java.util.List;
 
-public record DiscordActiveThreadsTo(List<DiscordChannelTo> channels) {
+public record DiscordActiveThreadsTo(List<DiscordChannelTo> threads) {
 }
