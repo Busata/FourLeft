@@ -4,7 +4,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
-import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
+import discord4j.core.spec.InteractionFollowupCreateMono;
 import io.busata.fourleft.api.easportswrc.models.SetupChannelResultTo;
 import io.busata.fourleftdiscord.eawrcsports.EAWRCBackendApi;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class SetupFinderCommandHandler {
                             .flatMap(ApplicationCommandInteractionOption::getValue)
                             .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
 
-                    return event.deferReply().then(findAndReplySetups(event, country, car));
+                    return event.deferReply().withEphemeral(true).then(findAndReplySetups(event, country, car));
                 }).orElse(Mono.empty());
 
             }
@@ -46,15 +46,15 @@ public class SetupFinderCommandHandler {
         }).subscribe();
     }
 
-    private InteractionApplicationCommandCallbackReplyMono findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
+    private InteractionFollowupCreateMono findAndReplySetups(ChatInputInteractionEvent event, String country, String car) {
         List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
         if(channels.isEmpty()) {
-            return event.reply("Could not find any setups.").withEphemeral(true);
+            return event.createFollowup("Could not find any setups.").withEphemeral(true);
         } else {
             String channelResult = channels.stream().map(result -> {
                 return "<#%s>".formatted(result.id());
             }).collect(Collectors.joining("n"));
-            return event.reply("Found the following setups:\n%s".formatted(channelResult)).withEphemeral(true);
+            return event.createFollowup("Found the following setups:\n%s".formatted(channelResult)).withEphemeral(true);
         }
     }
 }
