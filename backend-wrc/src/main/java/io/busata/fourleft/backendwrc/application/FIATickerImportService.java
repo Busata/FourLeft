@@ -28,17 +28,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FIATickerImportService {
-    private static final String activeEventId = "458";
-
     private final WRCApiClient client;
 
     private final FIATickerEntryRepository fiaTickerEntryRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private final CalendarService calendarService;
+
 
     public void importTickerEntries(boolean triggerEvents) {
-        WRCLiveUpdatesTo tickerSummary = client.getLiveUpdates();
+        calendarService.getActiveEventId().map(String::valueOf).ifPresent(eventId -> {
+            doImport(eventId, triggerEvents);
+        });
+    }
+
+    private void doImport(String activeEventId, boolean triggerEvents) {
+        WRCLiveUpdatesTo tickerSummary = client.getLiveUpdates(activeEventId);
 
         Long currentTickerEntryCount = fiaTickerEntryRepository.countByEventId(activeEventId);
 
