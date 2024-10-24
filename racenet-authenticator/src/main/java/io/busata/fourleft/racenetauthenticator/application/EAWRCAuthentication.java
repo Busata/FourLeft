@@ -52,7 +52,7 @@ public class EAWRCAuthentication {
 
         ChromeOptions capabilities = new ChromeOptions();
 
-        capabilities.addArguments("--enable-automation", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--remote-allow-origins=*", "--window-size=1920,1080", "--headless");
+        capabilities.addArguments("--enable-automation", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--remote-allow-origins=*", "--window-size=1920,1080");
         manager.capabilities(capabilities);
 
         ChromeDriver driver = (ChromeDriver) manager.create();
@@ -100,10 +100,15 @@ public class EAWRCAuthentication {
 
         WebElement emailField = driver.findElement(By.id("email"));
 
+        if(elementExists(driver, By.id("rememberMe"))) {
+            driver.findElement(By.id("rememberMe")).click();
+        }
+
         //Racenet switched to a different login flow at some point
         //First had to enter e-mail , then press "next", then enter password.
         //Maybe A-B testing, so supporting both.
         if (!elementExists(driver, By.id("password"))) {
+            log.info("Password on next flow");
             emailField.sendKeys(userName);
             WebElement nextButton = driver.findElement(By.id("logInBtn"));
             nextButton.click();
@@ -113,6 +118,7 @@ public class EAWRCAuthentication {
             passwordField.sendKeys(password);
             loginButton.click();
         } else {
+            log.info("Both fields flow");
             emailField.sendKeys(userName);
             WebElement passwordField = driver.findElement(By.id("password"));
             passwordField.sendKeys(password);
@@ -157,7 +163,13 @@ public class EAWRCAuthentication {
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.MILLISECONDS);
         boolean exists = !driver.findElements(id).isEmpty();
         driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
-        return exists;
+
+        if(exists) {
+            var field = driver.findElement(id);
+            return field.isDisplayed();
+        } else {
+            return false;
+        }
     }
 
     public EAWRCToken getHeaders() {
