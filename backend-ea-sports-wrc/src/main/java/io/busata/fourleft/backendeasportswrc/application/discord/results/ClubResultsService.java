@@ -118,7 +118,7 @@ public class ClubResultsService {
 
     @NotNull
     private List<ChampionshipStanding> createCustomStandingsForWeeklyPowerStage(Championship championship) {
-        final Map<String, PlayerEntryData> playerData = new HashMap();
+        final Map<String, PlayerEntryData> playerData = new HashMap<>();
         final Map<String, Integer> points = new HashMap<>();
 
         log.info("Calculating points for championship {}", championship.getId());
@@ -143,13 +143,15 @@ public class ClubResultsService {
                         return oldPoints;
                     }
 
-                    return oldPoints + CustomPoints.getValue(entry.getRank().intValue());
+                    int i = oldPoints + CustomPoints.getValue(entry.getRank().intValue());
+                    log.info("Points: {}",i);
+                    return i;
                 });
 
             });
         });
 
-        log.info("Points size: ", points.size());
+        log.info("Points size: {}", points.size());
 
 
         final AtomicInteger ranks = new AtomicInteger(1);
