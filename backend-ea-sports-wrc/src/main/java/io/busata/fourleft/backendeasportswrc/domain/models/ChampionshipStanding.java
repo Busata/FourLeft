@@ -26,6 +26,7 @@ public class ChampionshipStanding {
     private Championship championship;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @Setter
     @JoinColumn(name = "ssid", updatable = false, insertable = false, referencedColumnName = "id")
     Profile profile;
 

@@ -1,8 +1,10 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.results;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
+import io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
+import io.busata.fourleft.backendeasportswrc.domain.services.profile.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +28,7 @@ public class ClubResultsService {
 
     private final ClubService clubService;
     private final ClubLeaderboardService clubLeaderboardService;
+    private final ProfileService profileService;
 
 
 
@@ -154,9 +157,12 @@ public class ClubResultsService {
 
         final AtomicInteger ranks = new AtomicInteger(1);
 
-        return points.entrySet().stream().sorted(Map.Entry.comparingByValue()).map(entry -> {
+        return points.entrySet().stream().sorted(Map.Entry.<String,Integer>comparingByValue().reversed()).map(entry -> {
             var player = playerData.get(entry.getKey());
             return new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), entry.getValue(), ranks.getAndAdd(1), player.nationalityId());
+        }).map(standing -> {
+            standing.setProfile(profileService.getProfileById(standing.getSsid()).orElse(null));
+            return standing;
         }).toList();
     }
 

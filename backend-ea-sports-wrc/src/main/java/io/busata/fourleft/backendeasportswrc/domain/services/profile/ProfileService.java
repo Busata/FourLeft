@@ -30,6 +30,10 @@ public class ProfileService {
         }).map(ProfileUpdateRequest::getId);
     }
 
+    public Optional<Profile> getProfileById(String id) {
+        return profileRepository.findById(id);
+    }
+
     public Optional<Profile> getProfile(UUID requestId) {
         Optional<ProfileUpdateRequest> byId = updateRequestRepository.findById(requestId);
 
