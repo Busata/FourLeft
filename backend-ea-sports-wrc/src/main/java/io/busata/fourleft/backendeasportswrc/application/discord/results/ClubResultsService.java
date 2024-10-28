@@ -128,6 +128,7 @@ public class ClubResultsService {
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
             log.info("Calculating points for leaderboard {}", leaderboardId);
+            log.info("Board size: {}", board.getEntries().size());
 
             board.getEntries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
 
@@ -147,6 +148,8 @@ public class ClubResultsService {
 
             });
         });
+
+        log.info("Points size: ", points.size());
 
 
         final AtomicInteger ranks = new AtomicInteger(1);
