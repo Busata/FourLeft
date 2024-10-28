@@ -124,14 +124,11 @@ public class ClubResultsService {
         final Map<String, PlayerEntryData> playerData = new HashMap<>();
         final Map<String, Integer> points = new HashMap<>();
 
-        log.info("Calculating points for championship {}", championship.getId());
         championship.getEvents().stream()
         .filter(Event::isFinished)
         .forEach(event -> {
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
-            log.info("Calculating points for leaderboard {}", leaderboardId);
-            log.info("Board size: {}", board.getEntries().size());
 
             board.getEntries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
 
@@ -151,9 +148,6 @@ public class ClubResultsService {
 
             });
         });
-
-        log.info("Points size: {}", points.size());
-
 
         final AtomicInteger ranks = new AtomicInteger(1);
 
