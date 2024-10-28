@@ -62,6 +62,10 @@ public class ResultsEndpoint {
 
         List<ChampionshipStanding> standings = clubResultsService.getStandings(discordClubConfiguration.getClubId()).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
         log.info("Standings size: {}", standings.size());
+        if(!standings.isEmpty()) {
+            log.info("First entry: {} {} {}", standings.get(0).getPointsAccumulated(), standings.get(0).getDisplayName(), standings.get(0).getRank());
+
+        }
         return standingsMessageFactory.createStandingsPost(standings, discordClubConfiguration.isRequiresTracking()).toData().toString();
     }
 }

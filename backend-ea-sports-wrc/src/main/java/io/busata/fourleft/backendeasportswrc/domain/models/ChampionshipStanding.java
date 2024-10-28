@@ -70,6 +70,7 @@ public class ChampionshipStanding {
     public int getRankDifference() {
         return this.previousRank - this.rank;
     }
+
     public boolean isTracked() {
         return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
     }

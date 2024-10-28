@@ -155,7 +155,6 @@ public class ClubResultsService {
         final AtomicInteger ranks = new AtomicInteger(1);
 
         return points.entrySet().stream().sorted(Map.Entry.comparingByValue()).map(entry -> {
-
             var player = playerData.get(entry.getKey());
             return new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), entry.getValue(), ranks.getAndAdd(1), player.nationalityId());
         }).toList();
