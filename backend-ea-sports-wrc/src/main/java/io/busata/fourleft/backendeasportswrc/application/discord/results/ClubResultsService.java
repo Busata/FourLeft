@@ -143,7 +143,7 @@ public class ClubResultsService {
                         return oldPoints;
                     }
 
-                    return oldPoints + CustomPoints.getValue(entry.getRank().intValue());
+                    return oldPoints + CustomPoints.getValue(entry.getRankAccumulated().intValue());
                 });
 
             });
