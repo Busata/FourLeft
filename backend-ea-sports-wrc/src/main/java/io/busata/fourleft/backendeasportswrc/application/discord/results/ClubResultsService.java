@@ -98,7 +98,7 @@ public class ClubResultsService {
         Club club = clubService.findById(clubId);
 
         if(Objects.equals(clubId, "146")) {
-            club.getActiveChampionshipSnapshot()
+            return club.getActiveChampionshipSnapshot()
             .filter(Championship::hasFinishedEvent)
             .or(() -> clubService.getPreviousChampionship(club))
             .map(championship -> {
@@ -142,7 +142,7 @@ public class ClubResultsService {
 
                     return new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), entry.getValue(), ranks.getAndAdd(1), player.nationalityId());
                 }).toList();
-            });
+            }).orElse(List.of());
         }
 
         return club.getActiveChampionshipSnapshot()
