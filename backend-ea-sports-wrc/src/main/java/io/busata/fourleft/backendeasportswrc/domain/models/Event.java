@@ -57,6 +57,10 @@ public class Event {
         return this.status == EventStatus.OPEN;
     }
 
+    public boolean isFinished() {
+        return this.status == EventStatus.FINISHED;
+    }
+
     public boolean isActiveNow() {
         var now = ApplicationClock.now();
 

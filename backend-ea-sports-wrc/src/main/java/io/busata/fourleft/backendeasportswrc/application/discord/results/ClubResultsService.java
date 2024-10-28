@@ -9,9 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +96,55 @@ public class ClubResultsService {
     @Transactional(readOnly = true)
     public List<ChampionshipStanding> getStandings(String clubId) {
         Club club = clubService.findById(clubId);
+
+        if(Objects.equals(clubId, "146")) {
+            club.getActiveChampionshipSnapshot()
+            .filter(Championship::hasFinishedEvent)
+            .or(() -> clubService.getPreviousChampionship(club))
+            .map(championship -> {
+
+                final Map<String, PlayerEntryData> playerData = new HashMap();
+                final Map<String, Integer> points = new HashMap<>();
+
+
+                championship.getEvents().stream()
+                .filter(Event::isFinished)
+                .forEach(event -> {
+                    String leaderboardId = event.getLastStage().getLeaderboardId();
+                    var board = clubLeaderboardService.findById(leaderboardId);
+
+                    board.getEntries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
+
+                        playerData.computeIfAbsent(entry.getSsid(), (ssid) -> {
+                            return new PlayerEntryData(entry.getSsid(), entry.getDisplayName(), entry.getNationalityID().intValue());
+                        });
+
+                        points.putIfAbsent(entry.getSsid(), 0);
+
+                        points.computeIfPresent(entry.getSsid(), (ssid, oldPoints) -> {
+                            if(entry.isDnf()) {
+                                return oldPoints;
+                            }
+
+                            return oldPoints + CustomPoints.getValue(entry.getRank().intValue());
+                        });
+
+                    });
+                });
+
+
+                final AtomicInteger ranks = new AtomicInteger(1);
+
+                return points.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue)).map(entry -> {
+
+                    var player = playerData.get(entry.getKey());
+
+
+                    return new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), entry.getValue(), ranks.getAndAdd(1), player.nationalityId());
+                }).toList();
+            });
+        }
+
         return club.getActiveChampionshipSnapshot()
                 .filter(Championship::hasFinishedEvent)
                 .or(() -> clubService.getPreviousChampionship(club))
