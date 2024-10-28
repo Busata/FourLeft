@@ -9,6 +9,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubSta
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.data.DataObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ResultsEndpoint {
@@ -59,6 +61,7 @@ public class ResultsEndpoint {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
         List<ChampionshipStanding> standings = clubResultsService.getStandings(discordClubConfiguration.getClubId()).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
+        log.info("Standings size: {}", standings.size());
         return standingsMessageFactory.createStandingsPost(standings, discordClubConfiguration.isRequiresTracking()).toData().toString();
     }
 }

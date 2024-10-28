@@ -143,9 +143,7 @@ public class ClubResultsService {
                         return oldPoints;
                     }
 
-                    int i = oldPoints + CustomPoints.getValue(entry.getRank().intValue());
-                    log.info("Points: {}",i);
-                    return i;
+                    return oldPoints + CustomPoints.getValue(entry.getRank().intValue());
                 });
 
             });
