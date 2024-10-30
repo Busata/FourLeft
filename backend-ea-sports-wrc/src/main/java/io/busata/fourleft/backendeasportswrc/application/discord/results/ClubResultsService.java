@@ -101,15 +101,15 @@ public class ClubResultsService {
     public List<ChampionshipStanding> getStandings(String clubId) {
         Club club = clubService.findById(clubId);
 
-        if(Objects.equals(clubId, "146")) {
-            log.info("Calculating points for club 146");
+        // if(Objects.equals(clubId, "146")) {
+        //     log.info("Calculating points for club 146");
 
-            return club.getActiveChampionshipSnapshot()
-            .filter(Championship::hasFinishedEvent)
-            .or(() -> clubService.getPreviousChampionship(club))
-            .map(this::createCustomStandingsForWeeklyPowerStage)
-                    .orElse(List.of());
-        }
+        //     return club.getActiveChampionshipSnapshot()
+        //     .filter(Championship::hasFinishedEvent)
+        //     .or(() -> clubService.getPreviousChampionship(club))
+        //     .map(this::createCustomStandingsForWeeklyPowerStage)
+        //             .orElse(List.of());
+        // }
 
         return club.getActiveChampionshipSnapshot()
                 .filter(Championship::hasFinishedEvent)
