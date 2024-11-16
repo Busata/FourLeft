@@ -1,19 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.application.importer.process;
 
 import io.busata.fourleft.api.easportswrc.events.ClubChampionshipStarted;
-import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubDetailsImporter;
-import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubLeaderboardsImporter;
-import io.busata.fourleft.backendeasportswrc.application.importer.importers.ClubStandingsImporter;
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcess;
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubDetailsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubImportResult;
-import io.busata.fourleft.backendeasportswrc.application.importer.results.LeaderboardUpdatedResult;
-import io.busata.fourleft.backendeasportswrc.application.importer.results.StandingsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
-import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @Service
