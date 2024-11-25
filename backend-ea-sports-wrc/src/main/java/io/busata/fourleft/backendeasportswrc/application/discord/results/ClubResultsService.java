@@ -131,6 +131,12 @@ public class ClubResultsService {
             var ranks = calculateRanks(points);
 
             points.entrySet().forEach(entrySet -> {
+                standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
+                    var actualPoints = points.get(ssid);
+                    var actualRank = ranks.get(ssid);
+                    standing.updateStandings(actualRank, standing.getPointsAccumulated() + actualPoints);
+                    return standing;
+                });
 
                 standings.computeIfAbsent(entrySet.getKey(), (ssid) -> {
                     
@@ -143,12 +149,7 @@ public class ClubResultsService {
                     return championshipStanding;
                 });
 
-                standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
-                    var actualPoints = points.get(ssid);
-                    var actualRank = ranks.get(ssid);
-                    standing.updateStandings(actualRank, standing.getPointsAccumulated() + actualPoints);
-                    return standing;
-                });
+
             });
         };
 
