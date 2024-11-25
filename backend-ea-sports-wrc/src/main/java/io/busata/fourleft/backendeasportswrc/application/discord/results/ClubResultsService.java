@@ -132,7 +132,7 @@ public class ClubResultsService {
             points.entrySet().forEach(entrySet -> {
                 standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
                     var actualPoints = points.get(ssid);
-                    standing.updatePoints(actualPoints);;
+                    standing.updatePoints(actualPoints + standing.getPointsAccumulated());;
                     return standing;
                 });
 
