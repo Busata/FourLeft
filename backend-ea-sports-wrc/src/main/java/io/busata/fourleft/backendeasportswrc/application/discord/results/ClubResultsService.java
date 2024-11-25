@@ -1,7 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.results;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
-import io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import io.busata.fourleft.backendeasportswrc.domain.services.profile.ProfileService;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -122,11 +120,58 @@ public class ClubResultsService {
     @NotNull
     private List<ChampionshipStanding> createCustomStandingsForWeeklyPowerStage(Championship championship) {
         final Map<String, PlayerEntryData> playerData = new HashMap<>();
-        final Map<String, Integer> points = new HashMap<>();
+        final Map<String, ChampionshipStanding> standings = new HashMap<>();
 
-        championship.getEvents().stream()
+        List<Event> events =  championship.getEvents().stream()
         .filter(Event::isFinished)
-        .forEach(event -> {
+        .toList();
+
+        for(Event event: events) {
+            var points = calculateEventPoints(event, playerData);
+            var ranks = calculateRanks(points);
+
+            points.entrySet().forEach(entrySet -> {
+
+                standings.computeIfAbsent(entrySet.getKey(), (ssid) -> {
+                    
+                    var player = playerData.get(ssid);
+                    var actualPoints = points.get(ssid);
+                    var actualRank = ranks.get(ssid);
+                    var profile = profileService.getProfileById(ssid).orElse(null);
+                    ChampionshipStanding championshipStanding = new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), actualPoints, actualRank, player.nationalityId());
+                    championshipStanding.setProfile(profile);
+                    return championshipStanding;
+                });
+
+                standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
+                    var actualPoints = points.get(ssid);
+                    var actualRank = ranks.get(ssid);
+                    standing.updateStandings(actualRank, actualPoints);
+                    return standing;
+                });
+            });
+        };
+
+        return standings.values().stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
+    }
+    
+    private Map<String, Integer> calculateRanks(Map<String, Integer> points) {
+        var sortedByRank = points.entrySet().stream()
+        .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())
+        .map(entry -> entry.getKey()).toList();
+
+        Map<String, Integer> ranks = new HashMap<>();
+
+        for(int i = 0; i < sortedByRank.size(); i++) {
+            ranks.put(sortedByRank.get(i), i + 1);
+        }
+
+        return ranks;
+    }
+
+    private Map<String, Integer> calculateEventPoints(Event event, Map<String, PlayerEntryData> playerData) {
+        Map<String, Integer> points = new HashMap<>();
+
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
 
@@ -147,17 +192,8 @@ public class ClubResultsService {
                 });
 
             });
-        });
 
-        final AtomicInteger ranks = new AtomicInteger(1);
-
-        return points.entrySet().stream().sorted(Map.Entry.<String,Integer>comparingByValue().reversed()).map(entry -> {
-            var player = playerData.get(entry.getKey());
-            return new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), entry.getValue(), ranks.getAndAdd(1), player.nationalityId());
-        }).map(standing -> {
-            standing.setProfile(profileService.getProfileById(standing.getSsid()).orElse(null));
-            return standing;
-        }).toList();
+            return points;
     }
 
 }
