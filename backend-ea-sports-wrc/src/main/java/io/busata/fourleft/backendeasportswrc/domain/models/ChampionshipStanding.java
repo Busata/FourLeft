@@ -57,6 +57,16 @@ public class ChampionshipStanding {
         this.pointsAccumulatedPrevious = pointsAccumulated;
     }
 
+    public void updatePoints(int pointsAccumulated) {
+        this.pointsAccumulatedPrevious = this.pointsAccumulated;
+        this.pointsAccumulated = pointsAccumulated;
+    }
+
+    public void updateRank(int rank) {
+        this.previousRank = this.rank;
+        this.rank = rank;
+    }
+    
     public void updateStandings(int rank, int pointsAccumulated) {
         this.previousRank = this.rank;
         this.rank = rank;

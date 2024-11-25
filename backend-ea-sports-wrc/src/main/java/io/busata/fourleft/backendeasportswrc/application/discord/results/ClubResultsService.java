@@ -128,43 +128,44 @@ public class ClubResultsService {
 
         for(Event event: events) {
             var points = calculateEventPoints(event, playerData);
-            var ranks = calculateRanks(points);
 
             points.entrySet().forEach(entrySet -> {
                 standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
                     var actualPoints = points.get(ssid);
-                    var actualRank = ranks.get(ssid);
-                    standing.updateStandings(actualRank, standing.getPointsAccumulated() + actualPoints);
+                    standing.updatePoints(actualPoints);;
                     return standing;
                 });
 
                 standings.computeIfAbsent(entrySet.getKey(), (ssid) -> {
-                    
                     var player = playerData.get(ssid);
                     var actualPoints = points.get(ssid);
-                    var actualRank = ranks.get(ssid);
                     var profile = profileService.getProfileById(ssid).orElse(null);
-                    ChampionshipStanding championshipStanding = new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), actualPoints, actualRank, player.nationalityId());
+                    ChampionshipStanding championshipStanding = new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), actualPoints, 0, player.nationalityId());
                     championshipStanding.setProfile(profile);
                     return championshipStanding;
                 });
+            });
 
+            var ranks = calculateRanks(standings);
 
+            ranks.entrySet().forEach(entrySet -> {
+                standings.computeIfPresent(entrySet.getKey(), (key, standing) -> {
+                    standing.updateRank(entrySet.getValue());
+                    return standing;
+                });
             });
         };
 
         return standings.values().stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
     }
     
-    private Map<String, Integer> calculateRanks(Map<String, Integer> points) {
-        var sortedByRank = points.entrySet().stream()
-        .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())
-        .map(entry -> entry.getKey()).toList();
+    private Map<String, Integer> calculateRanks(Map<String, ChampionshipStanding> standings) {
+        var sortedStandings = standings.values().stream().sorted(Comparator.comparing(ChampionshipStanding::getPointsAccumulated).reversed()).toList();
 
         Map<String, Integer> ranks = new HashMap<>();
 
-        for(int i = 0; i < sortedByRank.size(); i++) {
-            ranks.put(sortedByRank.get(i), i + 1);
+        for(int i = 0; i < sortedStandings.size(); i++) {
+            ranks.put(sortedStandings.get(i).getSsid(), i + 1);
         }
 
         return ranks;
