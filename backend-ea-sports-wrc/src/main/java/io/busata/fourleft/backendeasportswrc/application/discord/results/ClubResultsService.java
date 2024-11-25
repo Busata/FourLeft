@@ -146,7 +146,7 @@ public class ClubResultsService {
                 standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
                     var actualPoints = points.get(ssid);
                     var actualRank = ranks.get(ssid);
-                    standing.updateStandings(actualRank, actualPoints);
+                    standing.updateStandings(actualRank, standing.getPointsAccumulated() + actualPoints);
                     return standing;
                 });
             });
