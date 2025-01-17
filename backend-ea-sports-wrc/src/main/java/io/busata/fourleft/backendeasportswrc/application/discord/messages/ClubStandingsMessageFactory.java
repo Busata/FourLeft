@@ -67,6 +67,10 @@ public class ClubStandingsMessageFactory {
         if (entry.getDisplayName().equals("Qorsatevela")) {
             values.put("flag", ":flag_ge:");
         }
+
+        if (entry.getDisplayName().equals("rjT36")) {
+            values.put("flag", ":flag_sg:");
+        }
         
         return values;
     }
