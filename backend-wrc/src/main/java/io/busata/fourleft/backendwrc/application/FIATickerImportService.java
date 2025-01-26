@@ -63,7 +63,7 @@ public class FIATickerImportService {
                 fiaTickerEntryRepository.deleteByReferenceId(UUID.fromString(entry));
             }
 
-            
+            return;
         }
 
 
