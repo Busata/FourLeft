@@ -50,6 +50,19 @@ public class FIATickerImportService {
 
         int total = tickerSummary.items().size();
 
+        if(total < currentTickerEntryCount) {
+            final var existingEntries = fiaTickerEntryRepository.findByEventId(activeEventId);
+            final var existingEntryIds = existingEntries.stream().map(FIATickerEntry::getReferenceId).collect(Collectors.toList());
+            final var newEntryIds = tickerSummary.items().stream().map( e -> e.id()).toList();
+
+            existingEntryIds.removeAll(newEntryIds);
+
+            for(var entry : existingEntryIds) {
+                log.warn("Existing entry id {} is no longer in the new ones", entry);
+            }
+        }
+
+
         long tickerEntryDelta = total - currentTickerEntryCount;
 
         if (tickerEntryDelta == 0) {
