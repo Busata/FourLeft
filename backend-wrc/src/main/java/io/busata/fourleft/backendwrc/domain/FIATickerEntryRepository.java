@@ -10,6 +10,6 @@ public interface FIATickerEntryRepository extends JpaRepository<FIATickerEntry, 
 
     List<FIATickerEntry> findByEventId(String eventId);
 
-    void deleteByReferenceId(UUID referenceId);
+    void deleteByReferenceId(String referenceId);
 
 }

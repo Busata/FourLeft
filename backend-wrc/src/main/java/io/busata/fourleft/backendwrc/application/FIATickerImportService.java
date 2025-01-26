@@ -60,7 +60,7 @@ public class FIATickerImportService {
 
             for(var entry : existingEntryIds) {
                 log.warn("Existing entry id {} is no longer in the new ones", entry);
-                fiaTickerEntryRepository.deleteByReferenceId(UUID.fromString(entry));
+                fiaTickerEntryRepository.deleteByReferenceId(entry);
             }
 
             return;
