@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2024-07-22 09:56:15.
+// Generated using typescript-generator version 2.35.1025 on 2025-02-06 16:45:55.
 
 export interface RoutesTo {
 }
@@ -104,6 +104,11 @@ export interface ProfileUpdateRequestTo {
     racenet: string;
     discordId: string;
     userName: string;
+}
+
+export interface SetupChannelResultTo {
+    id: number;
+    name: string;
 }
 
 export interface StageSettingsTo {

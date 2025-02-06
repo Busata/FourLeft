@@ -40,4 +40,9 @@ public class ClubConfigurationService {
             this.clubConfigurationRepository.save(new ClubConfiguration(clubId));
         }
     }
+
+    @Transactional
+    public void resetDisabledClubs() {
+        this.clubConfigurationRepository.resetDisabledClubs();
+    }
 }
