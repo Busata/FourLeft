@@ -11,25 +11,9 @@ function restoreDatabase() {
   ssh veevi "/bin/bash -c 'docker exec -t $remote_database pg_dumpall --no-owner --no-role-passwords -w -x -c -U $user > dump_$remote_database.sql;gzip -f dump_$remote_database.sql'";
 
   echo "Copying to local machine..."
-  scp veevi:~/dump_"$remote_database".sql.gz /tmp/dump.sql.gz
+  scp veevi:~/dump_"$remote_database".sql.gz /tmp/dump_"$remote_database".sql.gz
 
-  echo "Unzipping file..."
-  gzip -d /tmp/dump.sql.gz
-
-  echo "(Re)creating container..."
-  docker compose -f "$FOURLEFT_DEVOPS_ROOT"/docker/"$local_database".yml down
-  docker compose -f "$FOURLEFT_DEVOPS_ROOT"/docker/"$local_database".yml up -d
-
-  echo "Restore dump..."
-  sleep 5s
-
-  cat /tmp/dump.sql | docker exec -i db.local.$local_database /bin/bash -c "PGPASSWORD=$user psql -U $user $user"
-
-  echo "Stopping container.."
-  docker compose -f "$FOURLEFT_DEVOPS_ROOT"/database/"$local_database".yml stop
-
-  echo "Removing local sql file..."
-  rm /tmp/dump.sql
+  
 
 
 

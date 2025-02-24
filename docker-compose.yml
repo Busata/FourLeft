@@ -78,6 +78,7 @@ services:
       - "8084:8084"
     depends_on:
       - db.backend-ea-sports-wrc
+      - db.rabbitmq
   spring.fourleft.backend-dirtrally2:
     build: backend-dirtrally2
     container_name: spring.fourleft.backend-dirtrally2

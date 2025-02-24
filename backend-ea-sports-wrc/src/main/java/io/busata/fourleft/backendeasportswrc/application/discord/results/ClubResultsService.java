@@ -130,6 +130,10 @@ public class ClubResultsService {
             var points = calculateEventPoints(event, playerData);
 
             points.entrySet().forEach(entrySet -> {
+                if(entrySet.getKey() == null) {
+                    return;
+                }
+
                 standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
                     var actualPoints = points.get(ssid);
                     standing.updatePoints(actualPoints + standing.getPointsAccumulated());;
