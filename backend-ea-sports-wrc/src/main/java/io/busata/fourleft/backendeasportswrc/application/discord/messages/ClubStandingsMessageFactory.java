@@ -38,7 +38,7 @@ public class ClubStandingsMessageFactory {
 
     private void buildEntries(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings, boolean requiresTracking) {
         var lists = ListHelpers.partitionInGroups(standings.stream()
-                        .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 16)
+                        .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 20)
                         .filter(entry -> entry.getPointsAccumulated() > 0)
                         .limit(50)
                 .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
