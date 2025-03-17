@@ -132,7 +132,7 @@ insert into field_mapping (id, name, value, note, mapped_by_user, context, type)
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#88',':flag_zm:', 'Zambian', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#89',':flag_eu:', 'Europe', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#90',':flag_bb:', 'Barbados', true, 'DISCORD', 'EMOTE');
-insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#93',':flag_ana:', 'ANA', true, 'DISCORD', 'EMOTE');
+insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#93',':flag_white:', 'ANA', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#94',':flag_kz:', 'Kazakhstan', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#95',':flag_sv:', 'Salvadoran', true, 'DISCORD', 'EMOTE');
 insert into field_mapping (id, name, value, note, mapped_by_user, context, type)  values (uuid_generate_v4(),'nationalityFlag#96',':flag_gt:', 'Guatemalan', true, 'DISCORD', 'EMOTE');
