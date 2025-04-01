@@ -8,6 +8,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfigurat
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.ListHelpers;
+import io.busata.fourleft.common.BadgeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -117,13 +118,50 @@ public class ClubResultsMessageFactory {
             List<ClubLeaderboardEntry> groupOfEntries = lists.get(i);
             String values = groupOfEntries.stream().map(entry -> {
 
-                return StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, totalEntries));
+                Map<String, String> templateMap;
+                if(results.clubId().equals("146")) {
+                    templateMap = buildAprilTemplateMap(entry, totalEntries);
+                } else {
+                    templateMap = buildTemplateMap(entry, totalEntries);
+                }
+
+                return StringSubstitutor.replace(entryTemplate, templateMap);
             }).collect(Collectors.joining("\n"));
 
             embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, values, false);
 
         }
 
+    }
+
+    private Map<String, String> buildAprilTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
+        Map<String, String> values = new HashMap<>();
+        
+
+        values.put("rank", String.valueOf(entry.getRankAccumulated()));
+        values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));
+        values.put("deltaTime", DurationHelper.formatDelta(entry.getDifferenceAccumulated()));
+        
+        if(entry.getRankAccumulated().equals(1L)) {
+            values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, false));
+            values.put("displayName", "PJ");
+            values.put("flag", fieldMapper.getDiscordField("nationalityFlag#31", FieldMappingType.EMOTE));
+        } else {
+            values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, true));
+            values.put("displayName", entry.getAlias());
+            values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
+
+            if (entry.getDisplayName().equals("Qorsatevela")) {
+                values.put("flag", ":flag_ge:");
+            }
+    
+            if (entry.getDisplayName().equals("rjT36")) {
+                values.put("flag", ":flag_sg:");
+            }
+        }
+        
+
+        return values;
     }
 
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
