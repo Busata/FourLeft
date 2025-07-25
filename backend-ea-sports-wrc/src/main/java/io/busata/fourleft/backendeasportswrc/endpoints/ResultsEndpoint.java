@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.data.DataObject;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,17 +48,20 @@ public class ResultsEndpoint {
     }
 
 
-    @GetMapping("/api_v2/results/club/{clubId}/{championshipId}/{eventId}")
-    String getClubResults(@PathVariable String clubId, @PathVariable String championshipId, @PathVariable String eventId) {
-        return clubResultsService.getEventResults(clubId, championshipId, eventId).map(clubResults -> {
-                    Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
-                    Stream<String> entries = clubResults.entries().stream().map(entry -> {
-                        return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
-                                DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatDelta(entry.getTimePenalty()), DurationHelper.formatDelta(entry.getDifferenceToFirst()), entry.getPlatform());
-                    });
+    @GetMapping(value="/api_v2/results/club/{clubId}/{championshipId}/{eventId}", produces = "text/csv")
+    ResponseEntity<String> getClubResults(@PathVariable String clubId, @PathVariable String championshipId, @PathVariable String eventId) {
+        String csv = clubResultsService.getEventResults(clubId, championshipId, eventId).map(clubResults -> {
+            Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
+            Stream<String> entries = clubResults.entries().stream().map(entry -> {
+                return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
+                        DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatDelta(entry.getTimePenalty()), DurationHelper.formatDelta(entry.getDifferenceToFirst()), entry.getPlatform());
+            });
 
-                    return Stream.concat(header, entries).collect(Collectors.joining(",\n"));
+            return Stream.concat(header, entries).collect(Collectors.joining(",\n"));
         }).orElse("");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+clubId+eventId+".csv\"")
+                .body(csv);
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")
