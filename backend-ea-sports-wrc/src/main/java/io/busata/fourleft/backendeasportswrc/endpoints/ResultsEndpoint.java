@@ -71,8 +71,10 @@ public class ResultsEndpoint {
 
             for(var list : entryLists) {
                 builder.append(i < list.size() ? buildLine(list.get(i)) : ",,,");
-                builder.append(",");
+                builder.append(",,");
             }
+
+            builder.deleteCharAt(builder.length() - 1);
 
             lines.add(builder.toString());
         }
