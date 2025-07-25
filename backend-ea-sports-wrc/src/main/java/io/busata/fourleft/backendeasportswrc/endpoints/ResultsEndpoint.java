@@ -8,6 +8,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubRes
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
+import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,7 @@ public class ResultsEndpoint {
 
         String csv = Stream.of(eventResults).flatMap(clubResults -> {
             Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
-            Stream<String> entries = clubResults.entries().stream().map(entry -> {
+            Stream<String> entries = clubResults.entries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).map(entry -> {
                 return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
                         DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatCSVDelta(entry.getTimePenalty()), DurationHelper.formatCSVDelta(entry.getDifferenceToFirst()), entry.getPlatform());
             });
