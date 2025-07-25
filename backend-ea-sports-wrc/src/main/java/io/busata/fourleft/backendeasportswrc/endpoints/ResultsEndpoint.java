@@ -61,7 +61,7 @@ public class ResultsEndpoint {
             Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
             Stream<String> entries = clubResults.entries().stream().map(entry -> {
                 return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
-                        DurationHelper.formatCSVTime(entry.getTimeAccumulated()), DurationHelper.formatCSVDelta(entry.getTimePenalty()), DurationHelper.formatCSVDelta(entry.getDifferenceToFirst()), entry.getPlatform());
+                        DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatCSVDelta(entry.getTimePenalty()), DurationHelper.formatCSVDelta(entry.getDifferenceToFirst()), entry.getPlatform());
             });
 
             return Stream.concat(header, entries);
