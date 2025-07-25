@@ -48,4 +48,20 @@ public class DurationHelper {
             return "+" + formatTime(duration);
         }
     }
+
+    public static String formatCSVTime(Duration duration) {
+        if(duration.toHoursPart() == 0) {
+            return DurationFormatUtils.formatDuration(duration.toMillis(), "mm:ss.SSSSSSS");
+        } else {
+            return DurationFormatUtils.formatDuration(duration.toMillis(), "HH:mm:ss.SSSSSSS");
+        }
+    }
+
+    public static String formatCSVDelta(Duration duration) {
+        if(duration.toMillis() == 0) {
+            return "00:00:00";
+        } else {
+            return formatTime(duration);
+        }
+    }
 }

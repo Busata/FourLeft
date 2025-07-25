@@ -4,6 +4,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.configuration.D
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStandingsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStatsMessageFactory;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,17 +52,23 @@ public class ResultsEndpoint {
 
     @GetMapping(value="/api_v2/results/club/{clubId}/{championshipId}/{eventId}", produces = "text/csv")
     ResponseEntity<String> getClubResults(@PathVariable String clubId, @PathVariable String championshipId, @PathVariable String eventId) {
-        String csv = clubResultsService.getEventResults(clubId, championshipId, eventId).map(clubResults -> {
+        ClubResults eventResults = clubResultsService.getEventResults(clubId, championshipId, eventId).orElseThrow();
+
+        var championship = eventResults.championshipName();
+        var stageName = eventResults.stages().get(0);
+
+        String csv = Stream.of(eventResults).flatMap(clubResults -> {
             Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
             Stream<String> entries = clubResults.entries().stream().map(entry -> {
                 return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
-                        DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatDelta(entry.getTimePenalty()), DurationHelper.formatDelta(entry.getDifferenceToFirst()), entry.getPlatform());
+                        DurationHelper.formatCSVTime(entry.getTimeAccumulated()), DurationHelper.formatCSVDelta(entry.getTimePenalty()), DurationHelper.formatCSVDelta(entry.getDifferenceToFirst()), entry.getPlatform());
             });
 
-            return Stream.concat(header, entries).collect(Collectors.joining(",\n"));
-        }).orElse("");
+            return Stream.concat(header, entries);
+        }).collect(Collectors.joining(",\n"));
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+clubId+eventId+".csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+clubId+"_"+championship+"_"+stageName+".csv\"")
                 .body(csv);
     }
 
