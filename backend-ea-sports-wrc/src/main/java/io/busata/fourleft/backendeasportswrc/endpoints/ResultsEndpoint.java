@@ -8,6 +8,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubRes
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -40,6 +43,20 @@ public class ResultsEndpoint {
         return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
                 .map(DataObject::toString)
                 .orElse("");
+    }
+
+
+    @GetMapping("/api_v2/results/club/{clubId}/{championshipId}/{eventId}")
+    String getClubResults(@PathVariable String clubId, @PathVariable String championshipId, @PathVariable String eventId) {
+        return clubResultsService.getEventResults(clubId, championshipId, eventId).map(clubResults -> {
+                    Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
+                    Stream<String> entries = clubResults.entries().stream().map(entry -> {
+                        return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
+                                DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatDelta(entry.getTimePenalty()), DurationHelper.formatDelta(entry.getDifferenceToFirst()), entry.getPlatform());
+                    });
+
+                    return Stream.concat(header, entries).collect(Collectors.joining(",\n"));
+        }).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")

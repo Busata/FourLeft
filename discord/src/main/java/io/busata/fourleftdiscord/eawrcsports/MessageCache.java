@@ -30,13 +30,6 @@ public class MessageCache {
 
     private final EmbedFactory embedFactory;
 
-
-    @Async
-    @EventListener(ApplicationStartedEvent.class)
-    public void populateCaches() {
-        this.updateAll();
-    }
-
     public Optional<EmbedCreateSpec> getMessage(Long channelId, MessageCacheType type) {
         if (this.cachedData.containsKey(channelId)) {
             Map<MessageCacheType, EmbedCreateSpec> messageCacheTypeEmbedCreateSpecMap = this.cachedData.get(channelId);

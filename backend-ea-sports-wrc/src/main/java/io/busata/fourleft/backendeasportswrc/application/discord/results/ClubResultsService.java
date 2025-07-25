@@ -46,6 +46,11 @@ public class ClubResultsService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<ClubResults> getEventResults(String clubId, String championshipId, String eventId) {
+        return getResults(clubId, championshipId, eventId, this::buildResults);
+    }
+
+    @Transactional(readOnly = true)
     public <T> Optional<T> getResults(String clubId, String championshipId, String eventId, ResultBuilder<T> builder) {
         Club club = clubService.findById(clubId);
 

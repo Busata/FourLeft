@@ -129,36 +129,6 @@ public class ClubResultsMessageFactory {
 
     }
 
-    // private Map<String, String> buildAprilTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
-    //     Map<String, String> values = new HashMap<>();
-        
-
-    //     values.put("rank", String.valueOf(entry.getRankAccumulated()));
-    //     values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));
-    //     values.put("deltaTime", DurationHelper.formatDelta(entry.getDifferenceAccumulated()));
-        
-    //     if(entry.getRankAccumulated().equals(1L)) {
-    //         values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, false));
-    //         values.put("displayName", "PJ");
-    //         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#31", FieldMappingType.EMOTE));
-    //     } else {
-    //         values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, true));
-    //         values.put("displayName", entry.getAlias());
-    //         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
-
-    //         if (entry.getDisplayName().equals("Qorsatevela")) {
-    //             values.put("flag", ":flag_ge:");
-    //         }
-    
-    //         if (entry.getDisplayName().equals("rjT36")) {
-    //             values.put("flag", ":flag_sg:");
-    //         }
-    //     }
-        
-
-    //     return values;
-    // }
-
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
         Map<String, String> values = new HashMap<>();
 
