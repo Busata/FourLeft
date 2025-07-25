@@ -58,7 +58,7 @@ public class ResultsEndpoint {
 
         var championship = eventResults.get(0).championshipName();
 
-        var entryLists = eventResults.stream().map(ClubResults::entries).toList();
+        var entryLists = eventResults.stream().map(result -> result.entries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).toList()).toList();
 
         var maxEntries = entryLists.stream().mapToInt(List::size).max().orElse(0);
 
