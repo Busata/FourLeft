@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -51,26 +52,41 @@ public class ResultsEndpoint {
     }
 
 
-    @GetMapping(value="/api_v2/results/club/{clubId}/{championshipId}/{eventId}", produces = "text/csv")
-    ResponseEntity<String> getClubResults(@PathVariable String clubId, @PathVariable String championshipId, @PathVariable String eventId) {
-        ClubResults eventResults = clubResultsService.getEventResults(clubId, championshipId, eventId).orElseThrow();
+    @GetMapping(value="/api_v2/results/club/{clubId}/{championshipId}", produces = "text/csv")
+    ResponseEntity<String> getClubResults(@PathVariable String clubId, @PathVariable String championshipId) {
+        List<ClubResults> eventResults = clubResultsService.getEventResults(clubId, championshipId).stream().sorted(Comparator.comparing(ClubResults::eventCloseDate)).toList();
 
-        var championship = eventResults.championshipName();
-        var stageName = eventResults.stages().get(0);
+        var championship = eventResults.get(0).championshipName();
 
-        String csv = Stream.of(eventResults).flatMap(clubResults -> {
-            Stream<String> header = Stream.of("Rank,DisplayName,Vehicle,Time,TimePenalty,DifferenceToFirst,Platform");
-            Stream<String> entries = clubResults.entries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).map(entry -> {
-                return "%s, %s, %s, %s, %s, %s, %s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(),
-                        DurationHelper.formatTime(entry.getTimeAccumulated()), DurationHelper.formatCSVDelta(entry.getTimePenalty()), DurationHelper.formatCSVDelta(entry.getDifferenceToFirst()), entry.getPlatform());
-            });
+        var entryLists = eventResults.stream().map(ClubResults::entries).toList();
 
-            return Stream.concat(header, entries);
-        }).collect(Collectors.joining(",\n"));
+        var maxEntries = entryLists.stream().mapToInt(List::size).max().orElse(0);
+
+        List<String> lines = new ArrayList<>();
+        lines.add("Rank,DisplayName,Vehicle,Time,,".repeat(entryLists.size()));
+
+        for (int i = 0; i < maxEntries; i++) {
+
+            StringBuilder builder = new StringBuilder();
+
+            for(var list : entryLists) {
+                builder.append(i < list.size() ? buildLine(list.get(i)) : ",,,");
+                builder.append(",");
+            }
+
+            lines.add(builder.toString());
+        }
+
+
+        String csv = lines.stream().collect(Collectors.joining("\n"));
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+clubId+"_"+championship+"_"+stageName+".csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+clubId+"_"+championship+".csv\"")
                 .body(csv);
+    }
+
+    private String buildLine(ClubLeaderboardEntry entry) {
+        return "%s,%s,%s,%s".formatted(entry.getRankAccumulated(), entry.getDisplayName(), entry.getVehicle(), DurationHelper.formatTime(entry.getTimeAccumulated()));
     }
 
     @GetMapping("/api_v2/results/{channelId}/previous")

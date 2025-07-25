@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,8 +47,8 @@ public class ClubResultsService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ClubResults> getEventResults(String clubId, String championshipId, String eventId) {
-        return getResults(clubId, championshipId, eventId, this::buildResults);
+    public List<ClubResults> getEventResults(String clubId, String championshipId) {
+        return getResults(clubId, championshipId, this::buildResults);
     }
 
     @Transactional(readOnly = true)
@@ -67,6 +68,24 @@ public class ClubResultsService {
                                 return builder.accept(club, championship, event);
                             });
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public <T> List<T> getResults(String clubId, String championshipId, ResultBuilder<T> builder) {
+        Club club = clubService.findById(clubId);
+
+        return club.getChampionships()
+                .stream()
+                .filter(championship -> Objects.equals(championship.getId(), championshipId))
+                .findFirst()
+                .stream().flatMap(championship -> {
+                    return championship.getEvents()
+                            .stream()
+                            .filter(Event::isFinished)
+                            .map(event -> {
+                                return builder.accept(club, championship, event);
+                            });
+                }).toList();
     }
 
 
