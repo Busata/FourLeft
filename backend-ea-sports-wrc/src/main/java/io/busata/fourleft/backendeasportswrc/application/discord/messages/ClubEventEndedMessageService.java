@@ -39,7 +39,7 @@ public class ClubEventEndedMessageService {
             try {
                 postClubEventMessages(eventEnded, configuration);
             } catch (Exception ex) {
-                log.error("Failed to post club event ended for configuration {}", configuration.getChannelId());
+                log.error("Failed to post club event ended for configuration {}", configuration.getChannelId(), ex);
             }
         });
     }
