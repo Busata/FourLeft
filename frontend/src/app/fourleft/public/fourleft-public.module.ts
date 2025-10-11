@@ -33,6 +33,8 @@ import {
 import {EASportsWRCPageComponent} from "./easportswrc/easports-wrcpage/easports-wrcpage.component";
 import { EASportsWRCProfileContainerComponent } from './easportswrc/profile/easports-wrc-profile-container/easports-wrcprofile-container.component';
 import { EASportsWRCProfileFormComponent } from './easportswrc/profile/easports-wrcprofile-form/easports-wrcprofile-form.component';
+import { PrivacyPolicyComponent } from './legal/privacy-policy.component';
+import { TermsOfServiceComponent } from './legal/terms-of-service.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +54,9 @@ import { EASportsWRCProfileFormComponent } from './easportswrc/profile/easports-
     EASportsWRCPageComponent,
     EASportsWRCProfileRedirectComponent,
     EASportsWRCProfileContainerComponent,
-    EASportsWRCProfileFormComponent
+    EASportsWRCProfileFormComponent,
+    PrivacyPolicyComponent,
+    TermsOfServiceComponent
   ],
   imports: [
     FourleftPublicRoutingModule,

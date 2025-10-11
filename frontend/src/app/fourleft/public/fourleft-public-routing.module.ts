@@ -16,6 +16,8 @@ import {
 import {
   EASportsWRCProfileContainerComponent
 } from "./easportswrc/profile/easports-wrc-profile-container/easports-wrcprofile-container.component";
+import {PrivacyPolicyComponent} from "./legal/privacy-policy.component";
+import {TermsOfServiceComponent} from "./legal/terms-of-service.component";
 
 export const routes: Routes = [
   {
@@ -87,7 +89,17 @@ export const routes: Routes = [
             path: 'results/:id',
             pathMatch:"full",
             component: ResultDetailsComponent
-          }
+          },
+      {
+        path: 'privacy',
+        pathMatch: 'full',
+        component: PrivacyPolicyComponent
+      },
+      {
+        path: 'terms',
+        pathMatch: 'full',
+        component: TermsOfServiceComponent
+      }
     ]
   },
   {
