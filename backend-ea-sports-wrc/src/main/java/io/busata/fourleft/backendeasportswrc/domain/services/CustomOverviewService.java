@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +24,27 @@ public class CustomOverviewService {
     @Transactional
     public ClubOverviewTo createOverview(String clubId) {
         Club club = clubService.findById(clubId);
+
+        // Collect all leaderboard IDs upfront to enable batch fetching
+        List<String> allLeaderboardIds = club.getChampionships().stream()
+                .flatMap(championship -> championship.getEvents().stream())
+                .map(event -> event.getLastStage().getLeaderboardId())
+                .toList();
+
+        // Batch fetch all leaderboard entries in a single query
+        Map<String, List<ClubLeaderboardEntry>> leaderboardEntriesMap =
+                clubLeaderboardService.findEntriesByLeaderboardIds(allLeaderboardIds);
+
         List<ClubChampionshipResultTo> championships = club.getChampionships().stream().map(championship -> {
 
             List<ClubEventResultTo> events = championship.getEvents().stream().map(event -> {
                 Stage lastStage = event.getLastStage();
 
-
-                List<ClubLeaderboardEntry> entries = clubLeaderboardService.findEntries(lastStage.getLeaderboardId());
-
+                // Use the pre-fetched map for O(1) lookup instead of N queries
+                List<ClubLeaderboardEntry> entries = leaderboardEntriesMap.getOrDefault(
+                        lastStage.getLeaderboardId(),
+                        List.of()
+                );
 
                 return new ClubEventResultTo(
                         new EventSettingsTo(

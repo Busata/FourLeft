@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -90,5 +91,19 @@ public class ClubLeaderboardService {
     public List<ClubLeaderboardEntry> findEntries(String leaderboardId) {
 
         return this.clubLeaderboardRepository.findEntries(leaderboardId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, List<ClubLeaderboardEntry>> findEntriesByLeaderboardIds(List<String> leaderboardIds) {
+        if (leaderboardIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return this.clubLeaderboardRepository.findAllWithEntriesByIds(leaderboardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        ClubLeaderboard::getId,
+                        ClubLeaderboard::getEntries
+                ));
     }
 }
