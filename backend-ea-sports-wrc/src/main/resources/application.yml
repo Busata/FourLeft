@@ -13,3 +13,7 @@ server:
 
 racenet-api:
   url: https://web-api.racenet.com
+
+club-export:
+  output-directory: /tmp/club-exports
+  scheduling-enabled: true
