@@ -11,8 +11,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,10 +25,24 @@ public class CustomOverviewService {
 
     @Transactional
     public ClubOverviewTo createOverview(String clubId) {
+        return createOverview(clubId, null);
+    }
+
+    @Transactional
+    public ClubOverviewTo createOverview(String clubId, Integer maxChampionships) {
         Club club = clubService.findById(clubId);
 
+        // Filter championships based on limit
+        List<io.busata.fourleft.backendeasportswrc.domain.models.Championship> championships = club.getChampionships();
+        if (maxChampionships != null && maxChampionships > 0) {
+            championships = championships.stream()
+                    .sorted(Comparator.comparing(io.busata.fourleft.backendeasportswrc.domain.models.Championship::getAbsoluteCloseDate).reversed())
+                    .limit(maxChampionships)
+                    .collect(Collectors.toList());
+        }
+
         // Collect all leaderboard IDs upfront to enable batch fetching
-        List<String> allLeaderboardIds = club.getChampionships().stream()
+        List<String> allLeaderboardIds = championships.stream()
                 .flatMap(championship -> championship.getEvents().stream())
                 .map(event -> event.getLastStage().getLeaderboardId())
                 .toList();
@@ -35,7 +51,7 @@ public class CustomOverviewService {
         Map<String, List<ClubLeaderboardEntry>> leaderboardEntriesMap =
                 clubLeaderboardService.findEntriesByLeaderboardIds(allLeaderboardIds);
 
-        List<ClubChampionshipResultTo> championships = club.getChampionships().stream().map(championship -> {
+        List<ClubChampionshipResultTo> championshipResults = championships.stream().map(championship -> {
 
             List<ClubEventResultTo> events = championship.getEvents().stream().map(event -> {
                 Stage lastStage = event.getLastStage();
@@ -106,6 +122,6 @@ public class CustomOverviewService {
             );
         }).toList();
 
-        return new ClubOverviewTo(club.getId(), club.getClubName(), club.getClubDescription(), club.getClubCreatedAt(), club.getActiveMemberCount(), club.getLastLeaderboardUpdate(), club.getLastDetailsUpdate(), championships);
+        return new ClubOverviewTo(club.getId(), club.getClubName(), club.getClubDescription(), club.getClubCreatedAt(), club.getActiveMemberCount(), club.getLastLeaderboardUpdate(), club.getLastDetailsUpdate(), championshipResults);
     }
 }

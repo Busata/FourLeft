@@ -54,6 +54,12 @@ public class ClubExportEndpoint {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/api_v2/export/clubs/{clubId}/max-championships")
+    public ResponseEntity<Void> setMaxChampionships(@PathVariable String clubId, @RequestParam(required = false) Integer maxChampionships) {
+        clubExportConfigurationService.setMaxChampionships(clubId, maxChampionships);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/api_v2/export/trigger")
     public ResponseEntity<Void> triggerExportAll() {
         log.info("Manual trigger of all club exports");

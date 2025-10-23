@@ -21,9 +21,13 @@ public class ClubExportConfiguration {
     @Setter
     boolean enabled;
 
+    @Setter
+    Integer maxChampionships;
+
     public ClubExportConfiguration(String clubId) {
         this.clubId = clubId;
         this.enabled = true;
+        this.maxChampionships = null;
     }
 
 }

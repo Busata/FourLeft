@@ -60,4 +60,17 @@ public class ClubExportConfigurationService {
             log.warn("Club {} not found in export configurations", clubId);
         }
     }
+
+    @Transactional
+    public void setMaxChampionships(String clubId, Integer maxChampionships) {
+        Optional<ClubExportConfiguration> config = clubExportConfigurationRepository.findByClubId(clubId);
+
+        if (config.isPresent()) {
+            config.get().setMaxChampionships(maxChampionships);
+            clubExportConfigurationRepository.save(config.get());
+            log.info("Set club {} max championships to {}", clubId, maxChampionships);
+        } else {
+            log.warn("Club {} not found in export configurations", clubId);
+        }
+    }
 }

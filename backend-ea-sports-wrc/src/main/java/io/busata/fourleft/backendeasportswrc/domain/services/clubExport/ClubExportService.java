@@ -49,7 +49,12 @@ public class ClubExportService {
         log.info("Exporting club data for clubId: {}", clubId);
 
         try {
-            ClubOverviewTo overview = customOverviewService.createOverview(clubId);
+            // Get the export configuration to check for championship limit
+            Integer maxChampionships = clubExportConfigurationRepository.findByClubId(clubId)
+                    .map(ClubExportConfiguration::getMaxChampionships)
+                    .orElse(null);
+
+            ClubOverviewTo overview = customOverviewService.createOverview(clubId, maxChampionships);
 
             Path outputPath = getOutputPath(clubId);
             ensureDirectoryExists(outputPath.getParent());
