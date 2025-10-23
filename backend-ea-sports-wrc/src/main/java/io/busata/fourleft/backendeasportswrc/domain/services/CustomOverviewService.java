@@ -1,7 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.domain.services;
 
-import io.busata.fourleft.api.easportswrc.models.*;
-import io.busata.fourleft.backendeasportswrc.application.importer.ClubFactory;
+import io.busata.fourleft.api.easportswrc.models.ChampionshipSettingsTo;
+import io.busata.fourleft.api.easportswrc.models.ClubChampionshipResultTo;
+import io.busata.fourleft.api.easportswrc.models.ClubEventResultTo;
+import io.busata.fourleft.api.easportswrc.models.ClubOverviewTo;
+import io.busata.fourleft.api.easportswrc.models.ClubResultEntryTo;
+import io.busata.fourleft.api.easportswrc.models.EventSettingsTo;
+import io.busata.fourleft.api.easportswrc.models.StageSettingsTo;
+import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.Stage;
@@ -33,10 +39,10 @@ public class CustomOverviewService {
         Club club = clubService.findById(clubId);
 
         // Filter championships based on limit
-        List<io.busata.fourleft.backendeasportswrc.domain.models.Championship> championships = club.getChampionships();
+        List<Championship> championships = club.getChampionships();
         if (maxChampionships != null && maxChampionships > 0) {
             championships = championships.stream()
-                    .sorted(Comparator.comparing(io.busata.fourleft.backendeasportswrc.domain.models.Championship::getAbsoluteCloseDate).reversed())
+                    .sorted(Comparator.comparing(Championship::getAbsoluteCloseDate).reversed())
                     .limit(maxChampionships)
                     .collect(Collectors.toList());
         }

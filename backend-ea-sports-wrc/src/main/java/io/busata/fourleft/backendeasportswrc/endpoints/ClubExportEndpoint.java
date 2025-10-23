@@ -59,13 +59,13 @@ public class ClubExportEndpoint {
         clubExportConfigurationService.setMaxChampionships(clubId, maxChampionships);
         return ResponseEntity.ok().build();
     }
-
-    @PostMapping("/api_v2/export/trigger")
-    public ResponseEntity<Void> triggerExportAll() {
-        log.info("Manual trigger of all club exports");
-        clubExportService.exportAllEnabledClubs();
-        return ResponseEntity.ok().build();
-    }
+//
+//    @PostMapping("/api_v2/export/trigger")
+//    public ResponseEntity<Void> triggerExportAll() {
+//        log.info("Manual trigger of all club exports");
+//        clubExportService.exportAllEnabledClubs();
+//        return ResponseEntity.ok().build();
+//    }
 
     @PostMapping("/api_v2/export/clubs/{clubId}/trigger")
     public ResponseEntity<Void> triggerExportClub(@PathVariable String clubId) {
