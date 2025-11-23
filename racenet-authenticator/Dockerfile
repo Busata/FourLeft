@@ -1,6 +1,6 @@
 FROM debian:latest
 RUN apt-get update
-RUN apt-get install -y openjdk-17-jdk
+RUN apt-get install -y openjdk-21-jdk
 
 #import cert into java
 ARG CERT="dirtgame-com.pem"
