@@ -29,7 +29,11 @@ public class RacenetAuthenticationSchedule {
     public void initialUpdate() throws URISyntaxException {
         if(enableDirtRally2) {
             log.info("DIRT RALLY 2 - AUTHENTICATION - ENABLED");
-            dirtRally2Authentication.refreshLogin();
+            try {
+                dirtRally2Authentication.refreshLogin();
+            } catch (Exception ex) {
+                log.error("Something went wrong trying to refresh DR2.0");
+            }
         } else {
             log.info("DIRT RALLY 2 - AUTHENTICATION - DISABLED");
         }
