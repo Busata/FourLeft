@@ -69,6 +69,7 @@ public class DirtRally2Authentication {
 
         private void updateXSRFHToken () {
             DR2InitialState initialState = api.getInitialState(apiHeaders);
+            log.info("initialState: {}", initialState.identity().token());
             apiHeaders.set("RaceNet.XSRFH", initialState.identity().token());
         }
 
@@ -111,9 +112,10 @@ public class DirtRally2Authentication {
             HttpHeaders httpHeaders = new HttpHeaders();
             String cookieHeader = Stream.of("RaceNet", "RaceNet.XSRFC")
                     .map(cookieMap::get)
-                    .map(Cookie::toString)
+                    .map(cookie -> cookie.value)
                     .collect(Collectors.joining("; "));
 
+            log.info(cookieHeader);
             httpHeaders.add("Cookie", cookieHeader);
 
             return httpHeaders;
