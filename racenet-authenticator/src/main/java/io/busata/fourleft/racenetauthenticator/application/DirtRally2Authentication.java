@@ -1,27 +1,22 @@
 package io.busata.fourleft.racenetauthenticator.application;
 
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.Cookie;
 import io.busata.fourleft.racenetauthenticator.infrastructure.clients.dirtrally2.DR2InitialState;
 import io.busata.fourleft.racenetauthenticator.infrastructure.clients.dirtrally2.DirtRally2AuthenticationApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,15 +35,9 @@ public class DirtRally2Authentication {
     @Value("${codemasters.pass}")
     private String password;
 
-    @Value("${selenium.url}")
-    private String seleniumUrl;
-
     private LocalDateTime lastCookieRefresh;
 
     public void refreshLogin() {
-        WebDriver driver = createDriver();
-
-        try {
             if (lastCookieRefresh != null) {
                 final var now = LocalDateTime.now();
                 final var lastCookieTime = Duration.between(lastCookieRefresh, now).toSeconds();
@@ -58,89 +47,79 @@ public class DirtRally2Authentication {
                 }
             }
 
+            try (Playwright playwright = Playwright.create()) {
+                Browser browser = playwright.chromium().launch(
+                        new BrowserType.LaunchOptions().setHeadless(false)
+                );
 
-            Map<String, Cookie> authCookies = getAuthCookies(driver);
-            apiHeaders = buildApiHeaders(authCookies);
+
+                Map<String, Cookie> authCookies = getAuthCookies(browser);
+                apiHeaders = buildApiHeaders(authCookies);
 
 
-            updateXSRFHToken();
+                updateXSRFHToken();
 
-            lastCookieRefresh = LocalDateTime.now();
-            log.info("Full refresh at: {}", lastCookieRefresh);
-        }
-        catch(Exception ex) {
-            log.error("Something went wrong while refreshing the login", ex);
-            throw ex;
-        } finally {
-            driver.manage().deleteAllCookies();
-            driver.quit();
-        }
+                lastCookieRefresh = LocalDateTime.now();
+                log.info("Full refresh at: {}", lastCookieRefresh);
+            } catch (Exception ex) {
+                log.error("Something went wrong while refreshing the login", ex);
+                throw ex;
+            }
     }
 
-    private WebDriver createDriver() {
-        WebDriver driver;
-        try {
-            var options = new FirefoxOptions();
-            driver = new RemoteWebDriver(new URL(this.seleniumUrl), new FirefoxOptions(), false);
-            
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        return driver;
-    }
-
-
-    private void updateXSRFHToken() {
-        DR2InitialState initialState = api.getInitialState(apiHeaders);
-        apiHeaders.set("RaceNet.XSRFH", initialState.identity().token());
-    }
-
-    private Map<String, Cookie> getAuthCookies(WebDriver driver) {
-        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
-
-        driver.get(url);
-
-        WebElement emailField = driver.findElement(By.id("Email"));
-        WebElement passwordField = driver.findElement(By.id("Password"));
-        WebElement rememberMeField = driver.findElement(By.id("remember_me_container"));
-
-        WebElement loginButton = driver.findElement(By.xpath("/html/body/div[2]/div/div/div/div/form/div[4]/div/input"));
-
-        emailField.sendKeys(userName);
-        passwordField.sendKeys(password);
-        rememberMeField.click();
-
-        loginButton.click();
-
-        driver.get(url);
-
-        driver.findElement(By.xpath("/html/body/div[1]/div[1]/div/main/div[1]/div/h3"));
-
-
-        Set<Cookie> cookies = driver.manage().getCookies();
-
-        Map<String, Cookie> cookieMap = new HashMap<>();
-        for (Cookie cookie : cookies) {
-            cookieMap.put(cookie.getName(), cookie);
+        private void updateXSRFHToken () {
+            DR2InitialState initialState = api.getInitialState(apiHeaders);
+            apiHeaders.set("RaceNet.XSRFH", initialState.identity().token());
         }
 
-        return cookieMap;
+        private Map<String, Cookie> getAuthCookies (Browser browser){
+
+            var context = browser.newContext();
+            var page  = context.newPage();
+            page.navigate(url);
+
+            Locator emailField = page.locator("id=Email");
+            Locator passwordField = page.locator("id=Password");
+            Locator rememberMeField = page.locator("id=remember_me_container");
+
+            Locator loginButton = page.locator("id=login_button_container").locator("button");
+
+            emailField.fill(userName);
+            passwordField.fill(password);
+            rememberMeField.click();
+
+            loginButton.click();
+
+            page.navigate(url);
+
+            Locator header = page.locator(".ClubsBanner__header");
+            header.waitFor();
+
+
+            var cookies = context.cookies();
+
+            Map<String, Cookie> cookieMap = new HashMap<>();
+            for (Cookie cookie : cookies) {
+                cookieMap.put(cookie.name, cookie);
+            }
+
+            return cookieMap;
+        }
+
+        private HttpHeaders buildApiHeaders (Map < String, Cookie > cookieMap){
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            String cookieHeader = Stream.of("RaceNet", "RaceNet.XSRFC")
+                    .map(cookieMap::get)
+                    .map(Cookie::toString)
+                    .collect(Collectors.joining("; "));
+
+            httpHeaders.add("Cookie", cookieHeader);
+
+            return httpHeaders;
+        }
+
+        public HttpHeaders getHeaders () {
+            return apiHeaders;
+        }
     }
-
-    private HttpHeaders buildApiHeaders(Map<String,Cookie> cookieMap) {
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        String cookieHeader = Stream.of("RaceNet", "RaceNet.XSRFC")
-                .map(cookieMap::get)
-                .map(Cookie::toString)
-                .collect(Collectors.joining("; "));
-
-        httpHeaders.add("Cookie", cookieHeader);
-
-        return httpHeaders;
-    }
-
-    public HttpHeaders getHeaders() {
-        return apiHeaders;
-    }
-}
