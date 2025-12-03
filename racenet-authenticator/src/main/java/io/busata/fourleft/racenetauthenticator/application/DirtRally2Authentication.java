@@ -112,7 +112,7 @@ public class DirtRally2Authentication {
             HttpHeaders httpHeaders = new HttpHeaders();
             String cookieHeader = Stream.of("RaceNet", "RaceNet.XSRFC")
                     .map(cookieMap::get)
-                    .map(cookie -> cookie.value)
+                    .map(cookie -> "%s=%s".formatted(cookie.name, cookie.value))
                     .collect(Collectors.joining("; "));
 
             log.info(cookieHeader);
