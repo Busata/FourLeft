@@ -82,7 +82,7 @@ public class DirtRally2Authentication {
             Locator passwordField = page.locator("id=Password");
             Locator rememberMeField = page.locator("id=remember_me_container");
 
-            Locator loginButton = page.locator("id=login_button_container").locator("button");
+            Locator loginButton = page.locator("id=login_button_container");
 
             emailField.fill(userName);
             passwordField.fill(password);
