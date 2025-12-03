@@ -132,14 +132,6 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
     ports:
       - "8082:8082"
-    depends_on:
-      - helper.se-firefox
-  helper.se-firefox:
-    build: racenet-authenticator/firefox
-    restart: always
-    container_name: helper.se-firefox
-    ports:
-      - "4444:4444"
   proxy.fourleft-reverse-proxy:
     build: devops/reverse-proxy
     container_name: fourleft-reverse-proxy
