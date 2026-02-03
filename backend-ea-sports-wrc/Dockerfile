@@ -14,4 +14,4 @@ ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} backend_easportswrc.jar
 
 EXPOSE 8084
-ENTRYPOINT ["java", "-jar", "/backend_easportswrc.jar"]
+ENTRYPOINT ["java", "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/backend_easportswrc.jar"]
