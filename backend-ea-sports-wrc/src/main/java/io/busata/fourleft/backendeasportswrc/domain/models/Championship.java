@@ -72,11 +72,9 @@ public class Championship {
 
         if(now.isAfter(absoluteCloseDate.toLocalDateTime())) {
             this.status = EventStatus.FINISHED;
-            return;
+        } else {
+            this.status = EventStatus.OPEN;
         }
-
-        this.status = EventStatus.OPEN;
-
 
         this.events.forEach(Event::updateStatus);
     }

@@ -9,8 +9,10 @@ import io.busata.fourleft.backendeasportswrc.application.importer.results.Leader
 import io.busata.fourleft.backendeasportswrc.application.importer.results.StandingsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
+import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -26,6 +28,7 @@ public class UpdateHistoryClubProcessHandler implements ClubImportProcessHandler
     private final ClubLeaderboardsImporter leaderboardsImporter;
     private final ClubStandingsImporter clubStandingsImporter;
     private final ClubLeaderboardService leaderboardService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Getter
@@ -75,6 +78,7 @@ public class UpdateHistoryClubProcessHandler implements ClubImportProcessHandler
 
         this.clubService.markHistoryUpdateDone(process.getClubId());
 
+        eventPublisher.publishEvent(new ClubEventEnded(process.getClubId()));
 
         process.markDone();
 
