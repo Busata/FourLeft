@@ -1,6 +1,8 @@
-FROM debian:latest
+# Ubuntu 22.04 (jammy) + JDK 21. Playwright 1.44 supports jammy; the previous
+# debian:latest moved to trixie, which Playwright doesn't support (its --with-deps
+# step fails on the renamed/dropped font packages).
+FROM eclipse-temurin:21-jdk-jammy
 RUN apt-get update
-RUN apt-get install -y openjdk-21-jdk
 
 RUN addgroup spring && adduser --ingroup spring spring
 
