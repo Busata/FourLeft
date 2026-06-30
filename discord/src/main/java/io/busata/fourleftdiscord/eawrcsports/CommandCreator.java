@@ -1,159 +1,60 @@
 package io.busata.fourleftdiscord.eawrcsports;
 
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.discordjson.json.ApplicationCommandOptionData;
-import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.Permission;
-import discord4j.rest.util.PermissionSet;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class CommandCreator {
-    private final GatewayDiscordClient client;
+    private final JDA client;
 
     @PostConstruct
     public void createCommands() {
-        long applicationId = client.getRestClient().getApplicationId().block();
+        SlashCommandData eaWrcSportsCommand = Commands.slash("wrc", "All commands related to EA Sports WRC")
+                .addSubcommandGroups(
+                        new SubcommandGroupData("results", "Results for the current channels club")
+                                .addSubcommands(
+                                        new SubcommandData("current", "Current results"),
+                                        new SubcommandData("previous", "Previous results"),
+                                        new SubcommandData("standings", "Standings")
+                                ),
+                        new SubcommandGroupData("events", "Event related commands")
+                                .addSubcommands(
+                                        new SubcommandData("summary", "Summary of the events for the active championship")
+                                )
+                )
+                .addSubcommands(
+                        new SubcommandData("track", "Track your name.")
+                                .addOption(OptionType.STRING, "racenet", "EA Racenet account name, case sensitive", true),
+                        new SubcommandData("setup", "Find the perfect tune in the EA SPORTS WRC setup channel")
+                                .addOption(OptionType.STRING, "country", "Country", true)
+                                .addOption(OptionType.STRING, "car", "Car name", true)
+                );
 
+        SlashCommandData configureBotCommand = Commands.slash("fourleft", "Commands related to the fourleft bot")
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                .addSubcommandGroups(
+                        new SubcommandGroupData("configure", "Configuration for the bot")
+                                .addSubcommands(
+                                        new SubcommandData("track", "Track a club in this channel")
+                                                .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true)
+                                                .addOption(OptionType.BOOLEAN, "autoposts", "If the bot should autopost results for this club (defaults to true)", false),
+                                        new SubcommandData("untrack", "Track a club in this channel")
+                                                .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true)
+                                )
+                );
 
-        ApplicationCommandRequest configureBotCommand = ApplicationCommandRequest.builder()
-                .name("fourleft")
-                .description("Commands related to the fourleft bot")
-                .defaultPermission(false)
-                .defaultMemberPermissions(String.valueOf(PermissionSet.of(Permission.ADMINISTRATOR).getRawValue()))
-                .addOption(ApplicationCommandOptionData.builder()
-                        .name("configure")
-                        .description("Configuration for the bot")
-                        .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("track")
-                                .description("Track a club in this channel")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .addOption(ApplicationCommandOptionData.builder()
-                                        .name("clubid")
-                                        .description("The club id (found in the racenet url when navigating to your club)")
-                                        .required(true)
-                                        .type(ApplicationCommandOption.Type.STRING.getValue())
-                                        .build())
-                                .addOption(ApplicationCommandOptionData.builder()
-                                        .name("autoposts")
-                                        .description("If the bot should autopost results for this club (defaults to true)")
-                                        .required(false)
-                                        .type(ApplicationCommandOption.Type.BOOLEAN.getValue())
-                                        .build())
-                                .build()
-                        ).addOption(ApplicationCommandOptionData.builder()
-                                .name("untrack")
-                                .description("Track a club in this channel")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .addOption(ApplicationCommandOptionData.builder()
-                                        .name("clubid")
-                                        .description("The club id (found in the racenet url when navigating to your club)")
-                                        .required(true)
-                                        .type(ApplicationCommandOption.Type.STRING.getValue())
-                                        .build())
-                                .build()
-                        )
-                        .build()
-                ).build();
-
-        ApplicationCommandRequest eaWrcSportsCommand = ApplicationCommandRequest.builder()
-                .name("wrc")
-                .description("All commands related to EA Sports WRC")
-                .addOption(ApplicationCommandOptionData.builder()
-                        .name("results")
-                        .description("Results for the current channels club")
-                        .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("current")
-                                .description("Current results")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .build())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("previous")
-                                .description("Previous results")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .build())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("standings")
-                                .description("Standings")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .build())
-                        .build()
-                ).addOption(ApplicationCommandOptionData.builder()
-                        .name("events")
-                        .description("Event related commands")
-                        .type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("summary")
-                                .description("Summary of the events for the active championship")
-                                .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                                .build())
-                        .build()
-                ).addOption(ApplicationCommandOptionData.builder()
-                        .name("track")
-                        .description("Track your name.")
-                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("racenet")
-                                .description("EA Racenet account name, case sensitive")
-                                .type(ApplicationCommandOption.Type.STRING.getValue())
-                                .required(true)
-                                .build())
-                        .build()
-                ).addOption(ApplicationCommandOptionData.builder()
-                        .name("setup")
-                        .description("Find the perfect tune in the EA SPORTS WRC setup channel")
-                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("country")
-                                .description("Country")
-                                .type(ApplicationCommandOption.Type.STRING.getValue())
-                                .required(true)
-                                .build())
-                        .addOption(ApplicationCommandOptionData.builder()
-                                .name("car")
-                                .description("Car name")
-                                .type(ApplicationCommandOption.Type.STRING.getValue())
-                                .required(true)
-                                .build())
-                        .build()
-                ).build();
-
-
-        Map<String, ApplicationCommandData> discordCommands = client.getRestClient()
-                .getApplicationService()
-                .getGlobalApplicationCommands(applicationId)
-                .collectMap(ApplicationCommandData::name).block();
-
-        updateOrCreateCommand(applicationId, eaWrcSportsCommand, discordCommands);
-        updateOrCreateCommand(applicationId, configureBotCommand, discordCommands);
-
-
-    }
-
-    private void updateOrCreateCommand(long applicationId, ApplicationCommandRequest botCommand, Map<String, ApplicationCommandData> discordCommands) {
-        if (discordCommands.containsKey(botCommand.name())) {
-            ApplicationCommandData command = discordCommands.get(botCommand.name());
-            long commandId = command.id().asLong();
-
-            client.getRestClient()
-                    .getApplicationService()
-                    .modifyGlobalApplicationCommand(applicationId, commandId, botCommand)
-                    .subscribe();
-
-        } else {
-            client.getRestClient().getApplicationService()
-                    .createGlobalApplicationCommand(applicationId, botCommand)
-                    .subscribe();
-        }
+        client.updateCommands().addCommands(eaWrcSportsCommand, configureBotCommand).queue();
     }
 
 }

@@ -1,48 +1,55 @@
 package io.busata.fourleftdiscord.eawrcsports.commands;
 
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import io.busata.fourleftdiscord.eawrcsports.MessageCache;
 import io.busata.fourleftdiscord.eawrcsports.MessageCacheType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import jakarta.annotation.PostConstruct;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ResultsCommandHandler {
-    private final GatewayDiscordClient client;
+public class ResultsCommandHandler extends ListenerAdapter {
+    private final JDA client;
     private final MessageCache messageCache;
 
     @PostConstruct
     public void setupListener() {
-        client.on(ChatInputInteractionEvent.class, event -> {
-            if (event.getCommandName().equals("wrc")) {
-
-                return event.getOption("results").flatMap(action -> {
-                    return action.getOption("current").map(subAction -> {
-                        return getResultsFromCache(event, MessageCacheType.RESULTS_CURRENT);
-                    }).or(() -> action.getOption("previous").map(subAction -> {
-                        return getResultsFromCache(event, MessageCacheType.RESULTS_PREVIOUS);
-                    })).or(() -> action.getOption("standings").map(subAction -> {
-                        return getResultsFromCache(event, MessageCacheType.RESULTS_STANDINGS);
-                    }));
-                }).orElseGet(Mono::empty);
-
-            }
-            return Mono.empty();
-        }).subscribe();
+        client.addEventListener(this);
     }
 
-    private Mono<Void> getResultsFromCache(ChatInputInteractionEvent event, MessageCacheType resultsStandings) {
-        return messageCache.getMessage(event.getInteraction().getChannelId().asLong(), resultsStandings).map(results -> {
-            return event.reply(InteractionApplicationCommandCallbackSpec.builder().embeds(List.of(results)).build());
-        }).orElseGet(() -> event.reply("Could not find any results for this request.").withEphemeral(true));
+    @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        if (!event.getName().equals("wrc")) {
+            return;
+        }
+        if (!"results".equals(event.getSubcommandGroup())) {
+            return;
+        }
+
+        MessageCacheType type = switch (event.getSubcommandName()) {
+            case "current" -> MessageCacheType.RESULTS_CURRENT;
+            case "previous" -> MessageCacheType.RESULTS_PREVIOUS;
+            case "standings" -> MessageCacheType.RESULTS_STANDINGS;
+            case null, default -> null;
+        };
+
+        if (type == null) {
+            return;
+        }
+
+        replyFromCache(event, type);
+    }
+
+    private void replyFromCache(SlashCommandInteractionEvent event, MessageCacheType type) {
+        messageCache.getMessage(event.getChannelIdLong(), type).ifPresentOrElse(
+                embed -> event.replyEmbeds(embed).queue(),
+                () -> event.reply("Could not find any results for this request.").setEphemeral(true).queue()
+        );
     }
 }

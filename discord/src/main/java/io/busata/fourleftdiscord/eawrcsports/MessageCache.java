@@ -1,7 +1,7 @@
 package io.busata.fourleftdiscord.eawrcsports;
 
 
-import discord4j.core.spec.EmbedCreateSpec;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import io.busata.fourleft.api.easportswrc.EASportsWRCQueueNames;
 import io.busata.fourleft.api.easportswrc.events.ChannelUpdatedEvent;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
@@ -26,13 +26,13 @@ public class MessageCache {
 
     private final EAWRCBackendApi api;
 
-    private final Map<Long, Map<MessageCacheType, EmbedCreateSpec>> cachedData = new HashMap<>();
+    private final Map<Long, Map<MessageCacheType, MessageEmbed>> cachedData = new HashMap<>();
 
     private final EmbedFactory embedFactory;
 
-    public Optional<EmbedCreateSpec> getMessage(Long channelId, MessageCacheType type) {
+    public Optional<MessageEmbed> getMessage(Long channelId, MessageCacheType type) {
         if (this.cachedData.containsKey(channelId)) {
-            Map<MessageCacheType, EmbedCreateSpec> messageCacheTypeEmbedCreateSpecMap = this.cachedData.get(channelId);
+            Map<MessageCacheType, MessageEmbed> messageCacheTypeEmbedCreateSpecMap = this.cachedData.get(channelId);
             if (messageCacheTypeEmbedCreateSpecMap.containsKey(type)) {
                 return Optional.ofNullable(messageCacheTypeEmbedCreateSpecMap.get(type));
             }
@@ -51,7 +51,7 @@ public class MessageCache {
         var summary = api.getSummary(channelId);
 
 
-        Map<MessageCacheType, EmbedCreateSpec> messages = this.cachedData.get(channelId);
+        Map<MessageCacheType, MessageEmbed> messages = this.cachedData.get(channelId);
 
         currentResults.ifPresent(results -> {
             messages.put(MessageCacheType.RESULTS_CURRENT, embedFactory.create(results));

@@ -1,12 +1,9 @@
 package io.busata.fourleftdiscord;
 
-import discord4j.core.DiscordClientBuilder;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.presence.ClientActivity;
-import discord4j.core.object.presence.ClientPresence;
-import discord4j.gateway.intent.IntentSet;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,13 +14,9 @@ public class BotConfiguration {
     private String discordToken;
 
     @Bean
-    public GatewayDiscordClient gatewayDiscordClient() {
-        GatewayDiscordClient client =  DiscordClientBuilder.create(discordToken)
-                .build()
-                .gateway().setInitialPresence(shard -> ClientPresence.online(ClientActivity.watching("the leaderboards")))
-                .setEnabledIntents(IntentSet.all())
-                .login().block();
-
-        return client;
+    public JDA jda() {
+        return JDABuilder.createLight(discordToken)
+                .setActivity(Activity.watching("the leaderboards"))
+                .build();
     }
 }

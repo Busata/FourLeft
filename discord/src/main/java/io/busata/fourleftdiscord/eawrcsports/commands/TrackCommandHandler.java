@@ -1,51 +1,51 @@
 package io.busata.fourleftdiscord.eawrcsports.commands;
 
 
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestResultTo;
 import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestTo;
 import io.busata.fourleftdiscord.eawrcsports.EAWRCBackendApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import jakarta.annotation.PostConstruct;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TrackCommandHandler {
-    private final GatewayDiscordClient client;
+public class TrackCommandHandler extends ListenerAdapter {
+    private final JDA client;
     private final EAWRCBackendApi api;
 
     @PostConstruct
     public void setupListener() {
-        client.on(ChatInputInteractionEvent.class, event -> {
-            if (event.getCommandName().equals("wrc")) {
+        client.addEventListener(this);
+    }
 
-                return event.getOption("track").map(action -> {
+    @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        if (!event.getName().equals("wrc")) {
+            return;
+        }
+        if (event.getSubcommandGroup() != null) {
+            return;
+        }
+        if (!"track".equals(event.getSubcommandName())) {
+            return;
+        }
 
-                    String username = action.getOption("racenet")
-                            .flatMap(ApplicationCommandInteractionOption::getValue)
-                            .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
+        String username = event.getOption("racenet", OptionMapping::getAsString);
 
-                    ProfileUpdateRequestResultTo response = api.requestTrackingUpdate(new ProfileUpdateRequestTo(username, event.getInteraction().getUser().getId().toString(), event.getInteraction().getUser().getUsername()));
+        ProfileUpdateRequestResultTo response = api.requestTrackingUpdate(new ProfileUpdateRequestTo(username, event.getUser().getId(), event.getUser().getName()));
 
-                    if (response.foundProfile()) {
-                        return event.reply("Update your nickname, controller and platform choice [here](https://fourleft.io/easportswrc/profile/" + response.requestId() + ").").withEphemeral(true).then();
-                    } else {
-                        return event.reply("Please ensure you've participated in an event and check for case sensitivity in your Racenet ID before using this command. Stuck? Contact @busata").withEphemeral(true);
-                    }
-
-
-                }).orElse(Mono.empty());
-
-            }
-            return Mono.empty();
-        }).subscribe();
+        if (response.foundProfile()) {
+            event.reply("Update your nickname, controller and platform choice [here](https://fourleft.io/easportswrc/profile/" + response.requestId() + ").").setEphemeral(true).queue();
+        } else {
+            event.reply("Please ensure you've participated in an event and check for case sensitivity in your Racenet ID before using this command. Stuck? Contact @busata").setEphemeral(true).queue();
+        }
     }
 }

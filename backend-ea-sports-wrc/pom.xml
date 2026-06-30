@@ -44,7 +44,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.17</version>
+            <version>6.4.2</version>
         </dependency>
         <dependency>
         <groupId>com.github.database-rider</groupId>

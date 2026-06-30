@@ -1,85 +1,56 @@
 package io.busata.fourleftdiscord.eawrcsports.commands;
 
 
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubRemoveConfigurationTo;
-import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestResultTo;
-import io.busata.fourleft.api.easportswrc.models.ProfileUpdateRequestTo;
 import io.busata.fourleftdiscord.eawrcsports.EAWRCBackendApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import jakarta.annotation.PostConstruct;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ConfigureCommandHandler {
-    private final GatewayDiscordClient client;
+public class ConfigureCommandHandler extends ListenerAdapter {
+    private final JDA client;
     private final EAWRCBackendApi api;
 
     @PostConstruct
     public void setupListener() {
-        client.on(ChatInputInteractionEvent.class, event -> {
-            if (event.getCommandName().equals("fourleft")) {
+        client.addEventListener(this);
+    }
 
-                return event.getOption("configure").flatMap(subOption -> {
-                    return subOption.getOption("track").map(action -> {
+    @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        if (!event.getName().equals("fourleft")) {
+            return;
+        }
+        if (!"configure".equals(event.getSubcommandGroup())) {
+            return;
+        }
 
-                        String clubId = action.getOption("clubid")
-                                .flatMap(ApplicationCommandInteractionOption::getValue)
-                                .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
+        long guildId = event.getGuild() != null ? event.getGuild().getIdLong() : -1L;
+        long channelId = event.getChannelIdLong();
 
-                        boolean autoposts = action.getOption("autoposts")
-                                .flatMap(ApplicationCommandInteractionOption::getValue)
-                                .map(ApplicationCommandInteractionOptionValue::asBoolean).orElse(true);
+        if ("track".equals(event.getSubcommandName())) {
+            String clubId = event.getOption("clubid", OptionMapping::getAsString);
+            boolean autoposts = event.getOption("autoposts") != null ? event.getOption("autoposts").getAsBoolean() : true;
 
-                        api.createChannelConfiguration(new DiscordClubCreateConfigurationTo(
-                                event.getInteraction().getGuildId().map(Snowflake::asLong).orElse(-1L),
-                                event.getInteraction().getChannelId().asLong(),
-                                clubId,
-                                autoposts
-                        ));
+            api.createChannelConfiguration(new DiscordClubCreateConfigurationTo(guildId, channelId, clubId, autoposts));
 
+            event.reply("Club %s will be tracked for this channel".formatted(clubId)).setEphemeral(true).queue();
+        } else if ("untrack".equals(event.getSubcommandName())) {
+            String clubId = event.getOption("clubid", OptionMapping::getAsString);
 
-                        return event.reply("Club %s will be tracked for this channel".formatted(clubId)).withEphemeral(true).then();
-                    });
+            api.removeChannelConfiguration(new DiscordClubRemoveConfigurationTo(guildId, channelId, clubId));
 
-                }).orElse(Mono.empty());
-            }
-            return Mono.empty();
-        }).subscribe();
-
-        client.on(ChatInputInteractionEvent.class, event -> {
-            if (event.getCommandName().equals("fourleft")) {
-
-                return event.getOption("configure").flatMap(subOption -> {
-                    return subOption.getOption("untrack").map(action -> {
-
-                        String clubId = action.getOption("clubid")
-                                .flatMap(ApplicationCommandInteractionOption::getValue)
-                                .map(ApplicationCommandInteractionOptionValue::asString).orElseThrow();
-
-                        api.removeChannelConfiguration(new DiscordClubRemoveConfigurationTo(
-                                event.getInteraction().getGuildId().map(Snowflake::asLong).orElse(-1L),
-                                event.getInteraction().getChannelId().asLong(),
-                                clubId)
-                        );
-
-
-                        return event.reply("Club %s no longer tracked for this channel".formatted(clubId)).withEphemeral(true).then();
-                    });
-
-                }).orElse(Mono.empty());
-            }
-            return Mono.empty();
-        }).subscribe();
+            event.reply("Club %s no longer tracked for this channel".formatted(clubId)).setEphemeral(true).queue();
+        }
     }
 }
