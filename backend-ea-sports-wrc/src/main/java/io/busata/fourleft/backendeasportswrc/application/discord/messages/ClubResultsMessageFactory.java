@@ -7,7 +7,6 @@ import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
-import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.ListHelpers;
 import io.busata.fourleft.common.BadgeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,29 +102,44 @@ public class ClubResultsMessageFactory {
     }
 
 
-    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking) {
-        int desiredGroupSize = 10;
+    private static final int MAX_FIELD_VALUE_LENGTH = MessageEmbed.VALUE_MAX_LENGTH;
+    private static final int DESIRED_GROUP_SIZE = 10;
 
+    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking) {
         int totalEntries = results.entries().size();
 
-
-        List<List<ClubLeaderboardEntry>> lists = ListHelpers.partitionInGroups(results.entries().stream()
+        List<String> renderedEntries = results.entries().stream()
                 .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
-                .sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).limit(50).toList(), desiredGroupSize);
+                .sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated))
+                .limit(50)
+                .map(entry -> StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, totalEntries)))
+                .toList();
 
-        for (int i = 0; i < lists.size(); i++) {
-            List<ClubLeaderboardEntry> groupOfEntries = lists.get(i);
-            String values = groupOfEntries.stream().map(entry -> {
+        StringBuilder currentField = new StringBuilder();
+        int currentGroupSize = 0;
 
-            Map<String, String> templateMap = buildTemplateMap(entry, totalEntries);
+        for (String renderedEntry : renderedEntries) {
+            int additionalLength = currentField.isEmpty() ? renderedEntry.length() : renderedEntry.length() + 1;
 
-                return StringSubstitutor.replace(entryTemplate, templateMap);
-            }).collect(Collectors.joining("\n"));
+            boolean exceedsLength = currentField.length() + additionalLength > MAX_FIELD_VALUE_LENGTH;
+            boolean exceedsGroupSize = currentGroupSize >= DESIRED_GROUP_SIZE;
 
-            embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, values, false);
+            if (currentGroupSize > 0 && (exceedsLength || exceedsGroupSize)) {
+                embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, currentField.toString(), false);
+                currentField.setLength(0);
+                currentGroupSize = 0;
+            }
 
+            if (!currentField.isEmpty()) {
+                currentField.append("\n");
+            }
+            currentField.append(renderedEntry);
+            currentGroupSize++;
         }
 
+        if (currentGroupSize > 0) {
+            embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, currentField.toString(), false);
+        }
     }
 
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
