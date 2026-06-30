@@ -37,32 +37,35 @@ cp .env.example .env   # then edit
 docker compose up --build -d
 ```
 
-Listens on port `8085`.
+The container listens on `8085` and is reached through the `nginx-proxy` edge
+(the same `VIRTUAL_HOST` / `LETSENCRYPT_HOST` mechanism the rest of the stack
+uses) at `https://2fa-relay.fourleft.io`. It is not published on the host
+directly. Point the `2fa-relay.fourleft.io` DNS record at this server.
 
 ## Postmark setup
 
-Point the server's inbound webhook URL at this service's public address:
+Point the server's inbound webhook URL at the public address:
 
 ```
-https://your-host/webhook/inbound
+https://2fa-relay.fourleft.io/webhook/inbound
 ```
 
 If you set `WEBHOOK_USERNAME` / `WEBHOOK_PASSWORD`, embed them in the URL so
 Postmark sends them as Basic Auth:
 
 ```
-https://USER:PASS@your-host/webhook/inbound
+https://USER:PASS@2fa-relay.fourleft.io/webhook/inbound
 ```
 
 ## Typical login flow (consumer side)
 
 ```bash
 # 1. Clear any stale code before triggering the login
-curl -X POST -H "Authorization: Bearer $API_TOKEN" https://your-host/code/clear
+curl -X POST -H "Authorization: Bearer $API_TOKEN" https://2fa-relay.fourleft.io/code/clear
 
 # 2. Trigger the EA login (which sends the 2FA mail) ...
 
 # 3. Poll for the code (404 until it arrives)
-curl -H "Authorization: Bearer $API_TOKEN" https://your-host/code
+curl -H "Authorization: Bearer $API_TOKEN" https://2fa-relay.fourleft.io/code
 # -> {"code":"199074"}
 ```

@@ -6,8 +6,15 @@ services:
     restart: always
     env_file:
       - .env
-    ports:
-      - "8085:8085"
+    environment:
+      # Routed by the nginx-proxy edge (same mechanism as proxy.fourleft-reverse-proxy).
+      # Point the 2fa-relay.fourleft.io DNS record at this host and nginx-proxy + the
+      # letsencrypt companion handle vhost routing and TLS automatically.
+      - VIRTUAL_HOST=2fa-relay.fourleft.io
+      - VIRTUAL_PORT=8085
+      - LETSENCRYPT_HOST=2fa-relay.fourleft.io
+    expose:
+      - "8085"
 
 networks:
   default:
