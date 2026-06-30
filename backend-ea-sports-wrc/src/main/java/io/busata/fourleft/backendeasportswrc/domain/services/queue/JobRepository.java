@@ -15,14 +15,15 @@ import java.util.Optional;
 public interface JobRepository extends JpaRepository<Job, Long> {
 
     /**
-     * Recent jobs for the dashboard, newest first, filtered by an optional status
-     * ({@code null} ignores it) and a club-id (ref) LIKE pattern. The caller always
-     * passes a concrete pattern ({@code %%} matches everything) so Postgres can infer
-     * the parameter type — a null inside LOWER(...) would resolve to LOWER(bytea).
+     * Recent jobs for the dashboard, newest first, filtered by an optional type
+     * and status ({@code null} ignores either) and a ref LIKE pattern. The caller
+     * always passes a concrete pattern ({@code %%} matches everything) so Postgres
+     * can infer the parameter type — a null inside LOWER(...) would resolve to
+     * LOWER(bytea).
      */
     @Query("""
             SELECT j FROM Job j
-            WHERE j.type = :type
+            WHERE (:type IS NULL OR j.type = :type)
               AND (:status IS NULL OR j.status = :status)
               AND LOWER(j.ref) LIKE LOWER(:searchPattern)
             ORDER BY j.id DESC
@@ -32,7 +33,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
                            @Param("searchPattern") String searchPattern,
                            Pageable pageable);
 
-    long countByTypeAndStatus(JobType type, JobStatus status);
+    long countByStatus(JobStatus status);
+
+    long countByType(JobType type);
 
     /** Prune terminal jobs older than a cutoff (keeps the table bounded). */
     @Modifying

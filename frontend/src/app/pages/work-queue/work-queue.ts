@@ -4,34 +4,46 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin, interval, merge, startWith, Subject, switchMap } from 'rxjs';
 
 import {
-  ImportJobStatus,
-  ImportJobView,
-  ImportQueueSummary,
-} from '../../models/import-queue';
+  JobStatus,
+  JobType,
+  WorkJobView,
+  WorkQueueSummary,
+} from '../../models/work-queue';
 
 const REFRESH_MS = 3000;
-const STATUS_ORDER: ImportJobStatus[] = ['PENDING', 'RUNNING', 'DONE', 'FAILED'];
+const STATUS_ORDER: JobStatus[] = ['PENDING', 'RUNNING', 'DONE', 'FAILED'];
+const TYPE_ORDER: JobType[] = ['CLUB', 'TT', 'CONFIG_CLEANUP'];
 
-type StatusFilter = ImportJobStatus | 'ALL';
+const TYPE_LABELS: Record<JobType, string> = {
+  CLUB: 'Club',
+  TT: 'Time trial',
+  CONFIG_CLEANUP: 'Config cleanup',
+};
+
+type StatusFilter = JobStatus | 'ALL';
+type TypeFilter = JobType | 'ALL';
 
 @Component({
-  selector: 'app-import-queue',
-  templateUrl: './import-queue.html',
-  styleUrl: './import-queue.scss',
+  selector: 'app-work-queue',
+  templateUrl: './work-queue.html',
+  styleUrl: './work-queue.scss',
 })
-export class ImportQueue implements OnInit {
+export class WorkQueue implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly reload = new Subject<void>();
 
   readonly statusOrder = STATUS_ORDER;
+  readonly typeOrder = TYPE_ORDER;
+  readonly typeLabels = TYPE_LABELS;
 
-  readonly summary = signal<ImportQueueSummary | null>(null);
-  readonly jobs = signal<ImportJobView[]>([]);
+  readonly summary = signal<WorkQueueSummary | null>(null);
+  readonly jobs = signal<WorkJobView[]>([]);
   readonly updatedAt = signal('');
   readonly error = signal('');
 
   readonly statusFilter = signal<StatusFilter>('ALL');
+  readonly typeFilter = signal<TypeFilter>('ALL');
   readonly search = signal('');
 
   ngOnInit(): void {
@@ -39,8 +51,8 @@ export class ImportQueue implements OnInit {
       .pipe(
         switchMap(() =>
           forkJoin({
-            summary: this.http.get<ImportQueueSummary>('/api_v2/import-queue/summary'),
-            jobs: this.http.get<ImportJobView[]>('/api_v2/import-queue/jobs', { params: this.jobParams() }),
+            summary: this.http.get<WorkQueueSummary>('/api_v2/work-queue/summary'),
+            jobs: this.http.get<WorkJobView[]>('/api_v2/work-queue/jobs', { params: this.jobParams() }),
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
@@ -52,7 +64,7 @@ export class ImportQueue implements OnInit {
           this.updatedAt.set(new Date().toLocaleTimeString());
           this.error.set('');
         },
-        error: () => this.error.set('Could not reach the import queue API.'),
+        error: () => this.error.set('Could not reach the work queue API.'),
       });
   }
 
@@ -61,6 +73,10 @@ export class ImportQueue implements OnInit {
     const status = this.statusFilter();
     if (status !== 'ALL') {
       params = params.set('status', status);
+    }
+    const type = this.typeFilter();
+    if (type !== 'ALL') {
+      params = params.set('type', type);
     }
     const term = this.search().trim();
     if (term) {
@@ -74,13 +90,26 @@ export class ImportQueue implements OnInit {
     this.reload.next();
   }
 
+  setType(type: TypeFilter): void {
+    this.typeFilter.set(type);
+    this.reload.next();
+  }
+
   onSearch(value: string): void {
     this.search.set(value);
     this.reload.next();
   }
 
-  count(status: ImportJobStatus): number {
+  count(status: JobStatus): number {
     return this.summary()?.jobCountsByStatus?.[status] ?? 0;
+  }
+
+  typeCount(type: JobType): number {
+    return this.summary()?.jobCountsByType?.[type] ?? 0;
+  }
+
+  typeLabel(type: JobType): string {
+    return TYPE_LABELS[type] ?? type;
   }
 
   totalCount(): number {

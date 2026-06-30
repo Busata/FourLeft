@@ -17,13 +17,13 @@ public class ClubUpdateSchedule {
 
     private final ClubConfigurationService clubConfigurationService;
     private final ClubsImporterService importerService;
-    private final QueueProperties importQueueProperties;
+    private final QueueProperties queueProperties;
 
     @Scheduled(cron = "*/5 * * * * *", zone = "UTC")
     public void updateImporter() {
         // When the new worker queue is enabled it owns club imports; stand down to
         // avoid both systems importing every club at once.
-        if (importQueueProperties.isEnabled()) {
+        if (queueProperties.isEnabled()) {
             return;
         }
         importerService.sync();
