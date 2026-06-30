@@ -41,36 +41,70 @@
     }
   }
 
-  .iq-cards {
+  .iq-controls {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 28px;
+    margin-bottom: 18px;
   }
-  .iq-card {
-    border: 1px solid #272b36;
-    border-radius: 10px;
-    padding: 14px 18px;
-    min-width: 110px;
 
-    &__n {
-      font-size: 26px;
-      font-weight: 600;
+  .iq-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .iq-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid #2f3441;
+    background: transparent;
+    color: #c7ccd8;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+
+    &:hover {
+      border-color: #4a5366;
     }
-    &__l {
+    &--active {
+      background: #232838;
+      border-color: #5b8cff;
+      color: #fff;
+    }
+    &__n {
+      font-variant-numeric: tabular-nums;
       color: #8b91a1;
       font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
     }
+    // status accents on the left edge of each chip's dot
+    &--PENDING.iq-chip--active { border-color: #b08400; }
+    &--RUNNING.iq-chip--active { border-color: #2f72d6; }
+    &--DONE.iq-chip--active    { border-color: #2f9e54; }
+    &--FAILED.iq-chip--active  { border-color: #d2453b; }
   }
 
-  h2 {
-    font-size: 14px;
-    color: #8b91a1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 28px 0 10px;
+  .iq-search {
+    margin-left: auto;
+    padding: 6px 12px;
+    min-width: 220px;
+    border-radius: 8px;
+    border: 1px solid #2f3441;
+    background: #14171e;
+    color: #e6e8ee;
+    font-size: 13px;
+
+    &::placeholder {
+      color: #6c7280;
+    }
+    &:focus {
+      outline: none;
+      border-color: #5b8cff;
+    }
   }
 
   .iq-table {

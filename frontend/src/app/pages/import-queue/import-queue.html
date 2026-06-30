@@ -1,6 +1,6 @@
 <div class="import-queue">
   <header class="iq-header">
-    <h1>Import Queue</h1>
+    <h1>Import status</h1>
     <span class="iq-sub">Clubs</span>
     @if (updatedAt()) {
       <span class="iq-updated">updated {{ updatedAt() }}</span>
@@ -13,55 +13,38 @@
 
   @if (summary() && !summary()!.queueEnabled) {
     <div class="iq-banner iq-banner--warn">
-      The import queue is <strong>disabled</strong> (<code>import-queue.enabled=false</code>).
-      The legacy importer is running instead — no jobs will appear here.
+      The import queue is <strong>disabled</strong> — the legacy importer is running instead,
+      so no jobs will appear here.
     </div>
   }
 
-  <div class="iq-cards">
-    <div class="iq-card">
-      <div class="iq-card__n">{{ summary()?.targetCount ?? 0 }}</div>
-      <div class="iq-card__l">Targets</div>
+  <div class="iq-controls">
+    <div class="iq-chips">
+      <button
+        class="iq-chip"
+        [class.iq-chip--active]="statusFilter() === 'ALL'"
+        (click)="setStatus('ALL')">
+        All <span class="iq-chip__n">{{ totalCount() }}</span>
+      </button>
+      @for (status of statusOrder; track status) {
+        <button
+          class="iq-chip"
+          [class]="'iq-chip iq-chip--' + status"
+          [class.iq-chip--active]="statusFilter() === status"
+          (click)="setStatus(status)">
+          {{ status }} <span class="iq-chip__n">{{ count(status) }}</span>
+        </button>
+      }
     </div>
-    @for (status of statusOrder; track status) {
-      <div class="iq-card">
-        <div class="iq-card__n">{{ count(status) }}</div>
-        <div class="iq-card__l">{{ status }}</div>
-      </div>
-    }
+
+    <input
+      class="iq-search"
+      type="search"
+      placeholder="Search club id…"
+      [value]="search()"
+      (input)="onSearch($any($event.target).value)" />
   </div>
 
-  <h2>Recurring targets</h2>
-  @if (targets().length) {
-    <table class="iq-table">
-      <thead>
-        <tr>
-          <th>Club</th>
-          <th class="num">Cadence</th>
-          <th class="num">Bounds</th>
-          <th>Next run</th>
-          <th>Enabled</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (target of targets(); track target.id) {
-          <tr>
-            <td>{{ target.ref }}</td>
-            <td class="num">{{ target.intervalSec }}s</td>
-            <td class="num muted">{{ target.minIntervalSec }}–{{ target.maxIntervalSec }}s</td>
-            <td>{{ formatTime(target.nextRunAt) }}</td>
-            <td>
-              @if (target.enabled) { yes } @else { <span class="muted">no</span> }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  } @else {
-    <div class="iq-empty">No targets yet.</div>
-  }
-
-  <h2>Recent jobs</h2>
   @if (jobs().length) {
     <table class="iq-table">
       <thead>
@@ -80,7 +63,7 @@
           <tr>
             <td class="num muted">{{ job.id }}</td>
             <td>{{ job.ref }}</td>
-            <td><span class="iq-badge" [class]="'iq-badge--' + job.status">{{ job.status }}</span></td>
+            <td><span class="iq-badge" [class]="'iq-badge iq-badge--' + job.status">{{ job.status }}</span></td>
             <td class="num">{{ job.attempts }}</td>
             <td>{{ formatTime(job.createdAt) }}</td>
             <td>
@@ -93,6 +76,6 @@
       </tbody>
     </table>
   } @else {
-    <div class="iq-empty">No jobs yet.</div>
+    <div class="iq-empty">No matching jobs.</div>
   }
 </div>

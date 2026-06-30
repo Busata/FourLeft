@@ -92,4 +92,16 @@ public class ImportJobService {
         }
         return requeued;
     }
+
+    /** Delete terminal jobs past their retention window so the table stays bounded. */
+    @Transactional
+    public void prune() {
+        int done = jobRepository.deleteByStatusOlderThanHours(
+                ImportJobStatus.DONE.name(), properties.getDoneRetentionHours());
+        int failed = jobRepository.deleteByStatusOlderThanHours(
+                ImportJobStatus.FAILED.name(), properties.getFailedRetentionHours());
+        if (done > 0 || failed > 0) {
+            log.info("Pruned {} done and {} failed job(s)", done, failed);
+        }
+    }
 }

@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Deploy CLI local config (remote host/path) ###
+.deploy.conf

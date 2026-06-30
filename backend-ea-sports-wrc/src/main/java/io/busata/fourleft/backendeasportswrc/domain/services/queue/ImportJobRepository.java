@@ -14,10 +14,31 @@ import java.util.Optional;
 
 public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
 
-    /** Most recent jobs of a type, newest first (dashboard view). */
-    List<ImportJob> findByTypeOrderByIdDesc(ImportType type, Pageable pageable);
+    /**
+     * Recent jobs for the dashboard, newest first, with optional status and
+     * club-id (ref) search filters. Pass {@code null} for a filter to ignore it.
+     */
+    @Query("""
+            SELECT j FROM ImportJob j
+            WHERE j.type = :type
+              AND (:status IS NULL OR j.status = :status)
+              AND (:search IS NULL OR LOWER(j.ref) LIKE LOWER(CONCAT('%', :search, '%')))
+            ORDER BY j.id DESC
+            """)
+    List<ImportJob> search(@Param("type") ImportType type,
+                           @Param("status") ImportJobStatus status,
+                           @Param("search") String search,
+                           Pageable pageable);
 
     long countByTypeAndStatus(ImportType type, ImportJobStatus status);
+
+    /** Prune terminal jobs older than a cutoff (keeps the table bounded). */
+    @Modifying
+    @Query(value = """
+            DELETE FROM import_job
+            WHERE status = :status AND created_at < now() - make_interval(hours => :hours)
+            """, nativeQuery = true)
+    int deleteByStatusOlderThanHours(@Param("status") String status, @Param("hours") int hours);
 
     /**
      * Claim the next runnable job. {@code FOR UPDATE SKIP LOCKED} means concurrent

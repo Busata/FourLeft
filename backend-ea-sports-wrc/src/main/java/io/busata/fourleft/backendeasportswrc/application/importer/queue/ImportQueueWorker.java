@@ -45,6 +45,15 @@ public class ImportQueueWorker {
         }
     }
 
+    @Scheduled(fixedDelayString = "${import-queue.prune-tick-ms:3600000}")
+    public void pruneTick() {
+        try {
+            jobService.prune();
+        } catch (Exception ex) {
+            log.error("Prune tick failed", ex);
+        }
+    }
+
     @Scheduled(fixedDelayString = "${import-queue.work-tick-ms:1000}")
     public void workTick() {
         jobService.requeueStale();

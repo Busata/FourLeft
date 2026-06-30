@@ -16,7 +16,7 @@ export const routes: Routes = [
       { path: 'home', component: Home, title: 'fourleft.io' },
       { path: 'easportswrc/profile', component: ProfileInfo, title: 'EA Sports WRC Profile' },
       { path: 'easportswrc/profile/:requestId', component: ProfileEditor, title: 'EA Sports WRC Profile' },
-      { path: 'easportswrc/import-queue', component: ImportQueue, title: 'Import Queue' },
+      { path: 'easportswrc/import-queue', component: ImportQueue, title: 'Status' },
       { path: 'privacy', component: Privacy, title: 'Privacy Policy' },
       { path: 'terms', component: Terms, title: 'Terms of Service' },
     ],

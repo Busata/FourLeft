@@ -1,17 +1,18 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
-import { forkJoin, interval, startWith, switchMap } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { forkJoin, interval, merge, startWith, Subject, switchMap } from 'rxjs';
 
 import {
   ImportJobStatus,
   ImportJobView,
   ImportQueueSummary,
-  ImportTargetView,
 } from '../../models/import-queue';
 
 const REFRESH_MS = 3000;
 const STATUS_ORDER: ImportJobStatus[] = ['PENDING', 'RUNNING', 'DONE', 'FAILED'];
+
+type StatusFilter = ImportJobStatus | 'ALL';
 
 @Component({
   selector: 'app-import-queue',
@@ -21,32 +22,32 @@ const STATUS_ORDER: ImportJobStatus[] = ['PENDING', 'RUNNING', 'DONE', 'FAILED']
 export class ImportQueue implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly reload = new Subject<void>();
 
   readonly statusOrder = STATUS_ORDER;
 
   readonly summary = signal<ImportQueueSummary | null>(null);
-  readonly targets = signal<ImportTargetView[]>([]);
   readonly jobs = signal<ImportJobView[]>([]);
   readonly updatedAt = signal('');
   readonly error = signal('');
 
+  readonly statusFilter = signal<StatusFilter>('ALL');
+  readonly search = signal('');
+
   ngOnInit(): void {
-    interval(REFRESH_MS)
+    merge(interval(REFRESH_MS).pipe(startWith(0)), this.reload)
       .pipe(
-        startWith(0),
         switchMap(() =>
           forkJoin({
             summary: this.http.get<ImportQueueSummary>('/api_v2/import-queue/summary'),
-            targets: this.http.get<ImportTargetView[]>('/api_v2/import-queue/targets'),
-            jobs: this.http.get<ImportJobView[]>('/api_v2/import-queue/jobs?limit=100'),
+            jobs: this.http.get<ImportJobView[]>('/api_v2/import-queue/jobs', { params: this.jobParams() }),
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ summary, targets, jobs }) => {
+        next: ({ summary, jobs }) => {
           this.summary.set(summary);
-          this.targets.set(targets);
           this.jobs.set(jobs);
           this.updatedAt.set(new Date().toLocaleTimeString());
           this.error.set('');
@@ -55,8 +56,36 @@ export class ImportQueue implements OnInit {
       });
   }
 
+  private jobParams(): HttpParams {
+    let params = new HttpParams().set('limit', '100');
+    const status = this.statusFilter();
+    if (status !== 'ALL') {
+      params = params.set('status', status);
+    }
+    const term = this.search().trim();
+    if (term) {
+      params = params.set('search', term);
+    }
+    return params;
+  }
+
+  setStatus(status: StatusFilter): void {
+    this.statusFilter.set(status);
+    this.reload.next();
+  }
+
+  onSearch(value: string): void {
+    this.search.set(value);
+    this.reload.next();
+  }
+
   count(status: ImportJobStatus): number {
     return this.summary()?.jobCountsByStatus?.[status] ?? 0;
+  }
+
+  totalCount(): number {
+    const counts = this.summary()?.jobCountsByStatus;
+    return counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
   }
 
   /** Human-friendly absolute + relative time, e.g. "12:30:05 (in 4s)". */

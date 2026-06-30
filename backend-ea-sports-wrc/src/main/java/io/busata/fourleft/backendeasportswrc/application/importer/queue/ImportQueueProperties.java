@@ -31,4 +31,10 @@ public class ImportQueueProperties {
 
     /** Backoff base (seconds) applied as attempts * base before a retry. */
     private int retryBackoffSeconds = 30;
+
+    /** How long completed (DONE) jobs are kept before pruning, in hours. */
+    private int doneRetentionHours = 24;
+
+    /** How long failed jobs are kept before pruning, in hours (longer, so they're noticed). */
+    private int failedRetentionHours = 336;
 }

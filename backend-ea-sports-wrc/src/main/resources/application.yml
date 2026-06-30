@@ -32,3 +32,6 @@ import-queue:
   max-attempts: 3                # tries before a job is marked FAILED
   retry-backoff-seconds: 30      # linear backoff base between retries
   stale-job-seconds: 600         # RUNNING longer than this => requeued (crashed worker)
+  prune-tick-ms: 3600000         # how often terminal jobs are pruned (hourly)
+  done-retention-hours: 24       # keep completed jobs this long, then delete
+  failed-retention-hours: 336    # keep failed jobs longer (14d) so they're noticed
