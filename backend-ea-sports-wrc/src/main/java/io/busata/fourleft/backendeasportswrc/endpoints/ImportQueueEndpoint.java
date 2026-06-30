@@ -50,8 +50,9 @@ public class ImportQueueEndpoint {
                               @RequestParam(required = false) ImportJobStatus status,
                               @RequestParam(required = false) String search) {
         int capped = Math.min(Math.max(limit, 1), 500);
-        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
-        return jobRepository.search(FOCUS, status, normalizedSearch, PageRequest.of(0, capped))
+        String term = (search == null) ? "" : search.trim();
+        String searchPattern = "%" + term + "%"; // empty term -> "%%" matches everything
+        return jobRepository.search(FOCUS, status, searchPattern, PageRequest.of(0, capped))
                 .stream().map(JobView::from).toList();
     }
 

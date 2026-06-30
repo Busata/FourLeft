@@ -15,19 +15,21 @@ import java.util.Optional;
 public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
 
     /**
-     * Recent jobs for the dashboard, newest first, with optional status and
-     * club-id (ref) search filters. Pass {@code null} for a filter to ignore it.
+     * Recent jobs for the dashboard, newest first, filtered by an optional status
+     * ({@code null} ignores it) and a club-id (ref) LIKE pattern. The caller always
+     * passes a concrete pattern ({@code %%} matches everything) so Postgres can infer
+     * the parameter type — a null inside LOWER(...) would resolve to LOWER(bytea).
      */
     @Query("""
             SELECT j FROM ImportJob j
             WHERE j.type = :type
               AND (:status IS NULL OR j.status = :status)
-              AND (:search IS NULL OR LOWER(j.ref) LIKE LOWER(CONCAT('%', :search, '%')))
+              AND LOWER(j.ref) LIKE LOWER(:searchPattern)
             ORDER BY j.id DESC
             """)
     List<ImportJob> search(@Param("type") ImportType type,
                            @Param("status") ImportJobStatus status,
-                           @Param("search") String search,
+                           @Param("searchPattern") String searchPattern,
                            Pageable pageable);
 
     long countByTypeAndStatus(ImportType type, ImportJobStatus status);
