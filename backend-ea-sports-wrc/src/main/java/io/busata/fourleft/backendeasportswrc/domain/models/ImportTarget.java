@@ -39,8 +39,10 @@ public class ImportTarget {
     @Setter
     int intervalSec;
 
+    @Setter
     int minIntervalSec;
 
+    @Setter
     int maxIntervalSec;
 
     Instant nextRunAt;

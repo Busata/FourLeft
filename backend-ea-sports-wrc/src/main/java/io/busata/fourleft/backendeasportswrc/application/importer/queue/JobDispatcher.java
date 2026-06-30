@@ -27,4 +27,10 @@ public class JobDispatcher {
         }
         return handler.handle(job);
     }
+
+    /** Whether a target of this type/ref has real work to do right now. */
+    public boolean shouldEnqueue(ImportType type, String ref) {
+        JobHandler handler = handlers.get(type);
+        return handler != null && handler.shouldEnqueue(ref);
+    }
 }

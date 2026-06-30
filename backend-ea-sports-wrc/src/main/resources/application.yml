@@ -24,7 +24,8 @@ club-export:
 # club imports over to the queue; the legacy importer then stands down.
 import-queue:
   enabled: false
-  club-interval-seconds: 30      # fixed refresh cadence for CLUB targets
+  club-interval-seconds: 900     # how often each club is checked (15m); a job is only
+                                 # created when the club actually has work (see shouldEnqueue)
   schedule-tick-ms: 5000         # how often due targets become jobs
   work-tick-ms: 1000             # how often the worker drains the job queue
   batch-size: 25                 # max jobs drained per worker tick

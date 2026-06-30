@@ -51,6 +51,21 @@ public class ClubService {
         return !getLeaderboardsRequiringUpdate(clubId).isEmpty();
     }
 
+    /**
+     * Whether an import would actually do anything for this club. Mirrors the routing
+     * in InitialClubProcessHandler: a new club, or one needing a detail/leaderboard/
+     * history update. Used by the queue to avoid enqueuing no-op jobs.
+     */
+    @Transactional(readOnly = true)
+    public boolean requiresImport(String clubId) {
+        if (!exists(clubId)) {
+            return true;
+        }
+        return requiresDetailUpdate(clubId)
+                || requiresLeaderboardUpdate(clubId)
+                || requiresHistoryUpdate(clubId);
+    }
+
     @Transactional(readOnly = true)
     public boolean requiresHistoryUpdate(String clubId) {
         Club club = this.findById(clubId);

@@ -23,6 +23,7 @@ public class ImportTargetService {
     private final ImportTargetRepository targetRepository;
     private final ClubConfigurationService clubConfigurationService;
     private final ImportJobService jobService;
+    private final JobDispatcher jobDispatcher;
     private final ImportQueueProperties properties;
 
     /**
@@ -37,8 +38,21 @@ public class ImportTargetService {
             targetRepository.findByTypeAndRef(ImportType.CLUB, config.getClubId())
                     .ifPresentOrElse(
                             existing -> {
+                                boolean dirty = false;
                                 if (!existing.isEnabled()) {
                                     existing.setEnabled(true);
+                                    dirty = true;
+                                }
+                                // Keep the cadence in sync with config (clubs are fixed: min == max).
+                                if (existing.getIntervalSec() != interval
+                                        || existing.getMinIntervalSec() != interval
+                                        || existing.getMaxIntervalSec() != interval) {
+                                    existing.setIntervalSec(interval);
+                                    existing.setMinIntervalSec(interval);
+                                    existing.setMaxIntervalSec(interval);
+                                    dirty = true;
+                                }
+                                if (dirty) {
                                     targetRepository.save(existing);
                                 }
                             },
@@ -59,9 +73,10 @@ public class ImportTargetService {
     }
 
     /**
-     * Turn due targets into jobs. Claims a batch with SKIP LOCKED, enqueues one job
-     * each (skipping any target that still has a job in flight), and reschedules the
-     * target by its current cadence.
+     * Turn due targets into jobs. Claims a batch with SKIP LOCKED and, for each target
+     * that actually has work to do (and has no job already in flight), enqueues one job.
+     * Every claimed target is rescheduled by its cadence whether or not it produced a
+     * job, so no-op visits never reach the queue.
      *
      * @return number of jobs enqueued
      */
@@ -70,11 +85,13 @@ public class ImportTargetService {
         List<ImportTarget> due = targetRepository.claimDue(properties.getScheduleBatchSize());
         int enqueued = 0;
         for (ImportTarget target : due) {
-            boolean created = jobService
-                    .enqueueForTarget(target.getType(), target.getRef(), target.getId())
-                    .isPresent();
-            if (created) {
-                enqueued++;
+            if (jobDispatcher.shouldEnqueue(target.getType(), target.getRef())) {
+                boolean created = jobService
+                        .enqueueForTarget(target.getType(), target.getRef(), target.getId())
+                        .isPresent();
+                if (created) {
+                    enqueued++;
+                }
             }
             targetRepository.reschedule(target.getId());
         }

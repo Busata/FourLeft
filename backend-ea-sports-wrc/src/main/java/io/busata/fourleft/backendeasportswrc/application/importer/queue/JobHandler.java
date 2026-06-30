@@ -16,4 +16,13 @@ public interface JobHandler {
      * worker retry / fail the job; returning a {@link JobResult} signals success.
      */
     JobResult handle(ImportJob job);
+
+    /**
+     * Whether a recurring target with this ref should enqueue a job right now.
+     * Lets a handler skip no-op work (e.g. a club with nothing to update) so the
+     * queue only ever holds real jobs. Defaults to always enqueue.
+     */
+    default boolean shouldEnqueue(String ref) {
+        return true;
+    }
 }

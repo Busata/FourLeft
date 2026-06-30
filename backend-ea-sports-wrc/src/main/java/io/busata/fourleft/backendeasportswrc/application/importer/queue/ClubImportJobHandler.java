@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.application.importer.queue;
 import io.busata.fourleft.backendeasportswrc.application.importer.ClubsImporterService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
 import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +12,17 @@ import org.springframework.stereotype.Component;
 public class ClubImportJobHandler implements JobHandler {
 
     private final ClubsImporterService clubsImporterService;
+    private final ClubService clubService;
 
     @Override
     public ImportType type() {
         return ImportType.CLUB;
+    }
+
+    @Override
+    public boolean shouldEnqueue(String ref) {
+        // Only enqueue when an import would actually do something (no no-op jobs).
+        return clubService.requiresImport(ref);
     }
 
     @Override
