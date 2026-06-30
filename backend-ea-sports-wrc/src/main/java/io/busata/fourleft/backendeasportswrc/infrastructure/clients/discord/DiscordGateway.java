@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord;
 
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordActiveThreadsTo;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordChannelTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordMessageTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -11,6 +12,9 @@ import java.util.Optional;
 
 @FeignClient(name = "discordbotclient", url = "https://discord.com/api", configuration = DiscordBotFeignConfig.class)
 public interface DiscordGateway {
+
+    @GetMapping("/channels/{channelId}")
+    DiscordChannelTo getChannel(@PathVariable Long channelId);
 
     @GetMapping("/channels/{channelId}/messages")
     List<DiscordMessageTo> getChannelMessages(@PathVariable Long channelId, @RequestParam("limit") Long limit);

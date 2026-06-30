@@ -1,8 +1,8 @@
 package io.busata.fourleft.backendeasportswrc.domain.services.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJobStatus;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobStatus;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
+public interface JobRepository extends JpaRepository<Job, Long> {
 
     /**
      * Recent jobs for the dashboard, newest first, filtered by an optional status
@@ -21,23 +21,23 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
      * the parameter type — a null inside LOWER(...) would resolve to LOWER(bytea).
      */
     @Query("""
-            SELECT j FROM ImportJob j
+            SELECT j FROM Job j
             WHERE j.type = :type
               AND (:status IS NULL OR j.status = :status)
               AND LOWER(j.ref) LIKE LOWER(:searchPattern)
             ORDER BY j.id DESC
             """)
-    List<ImportJob> search(@Param("type") ImportType type,
-                           @Param("status") ImportJobStatus status,
+    List<Job> search(@Param("type") JobType type,
+                           @Param("status") JobStatus status,
                            @Param("searchPattern") String searchPattern,
                            Pageable pageable);
 
-    long countByTypeAndStatus(ImportType type, ImportJobStatus status);
+    long countByTypeAndStatus(JobType type, JobStatus status);
 
     /** Prune terminal jobs older than a cutoff (keeps the table bounded). */
     @Modifying
     @Query(value = """
-            DELETE FROM import_job
+            DELETE FROM job
             WHERE status = :status AND created_at < now() - make_interval(hours => :hours)
             """, nativeQuery = true)
     int deleteByStatusOlderThanHours(@Param("status") String status, @Param("hours") int hours);
@@ -49,18 +49,18 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
      * on transaction commit (which also releases the row lock).
      */
     @Query(value = """
-            SELECT * FROM import_job
+            SELECT * FROM job
             WHERE status = 'PENDING' AND run_after <= now()
             ORDER BY run_after
             FOR UPDATE SKIP LOCKED
             LIMIT 1
             """, nativeQuery = true)
-    Optional<ImportJob> claimNext();
+    Optional<Job> claimNext();
 
     /** True if this recurring target already has a job in flight (prevents pile-up). */
     @Query(value = """
             SELECT EXISTS (
-                SELECT 1 FROM import_job
+                SELECT 1 FROM job
                 WHERE target_id = :targetId AND status IN ('PENDING', 'RUNNING')
             )
             """, nativeQuery = true)
@@ -69,7 +69,7 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, Long> {
     /** Recover jobs whose worker died mid-flight: RUNNING for too long -> back to PENDING. */
     @Modifying
     @Query(value = """
-            UPDATE import_job
+            UPDATE job
             SET status = 'PENDING', locked_at = NULL
             WHERE status = 'RUNNING' AND locked_at < now() - make_interval(secs => :staleSeconds)
             """, nativeQuery = true)

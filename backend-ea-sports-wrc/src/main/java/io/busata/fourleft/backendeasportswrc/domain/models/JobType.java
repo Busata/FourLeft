@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.domain.models;
 
-public enum ImportType {
+public enum JobType {
     CLUB,
-    TT
+    TT,
+    CONFIG_CLEANUP
 }

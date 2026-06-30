@@ -1,4 +1,4 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
 /**
  * Outcome a {@link JobHandler} reports back to the worker.

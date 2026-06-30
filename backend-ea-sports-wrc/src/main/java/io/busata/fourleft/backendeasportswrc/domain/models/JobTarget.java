@@ -24,15 +24,15 @@ import java.time.Instant;
 @Entity
 @Getter
 @NoArgsConstructor
-public class ImportTarget {
+public class JobTarget {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "import_target_generator")
-    @SequenceGenerator(name = "import_target_generator", sequenceName = "import_target_seq", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_target_generator")
+    @SequenceGenerator(name = "job_target_generator", sequenceName = "job_target_seq", allocationSize = 50)
     Long id;
 
     @Enumerated(EnumType.STRING)
-    ImportType type;
+    JobType type;
 
     String ref;
 
@@ -50,7 +50,7 @@ public class ImportTarget {
     @Setter
     boolean enabled = true;
 
-    public ImportTarget(ImportType type, String ref, int minIntervalSec, int maxIntervalSec) {
+    public JobTarget(JobType type, String ref, int minIntervalSec, int maxIntervalSec) {
         this.type = type;
         this.ref = ref;
         this.minIntervalSec = minIntervalSec;

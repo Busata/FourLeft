@@ -1,8 +1,8 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
 import io.busata.fourleft.backendeasportswrc.application.importer.ClubsImporterService;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,8 +15,8 @@ public class ClubImportJobHandler implements JobHandler {
     private final ClubService clubService;
 
     @Override
-    public ImportType type() {
-        return ImportType.CLUB;
+    public JobType type() {
+        return JobType.CLUB;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class ClubImportJobHandler implements JobHandler {
     }
 
     @Override
-    public JobResult handle(ImportJob job) {
+    public JobResult handle(Job job) {
         clubsImporterService.runClub(job.getRef());
         // Clubs run on a fixed cadence today; report 'changed' so adaptive backoff
         // (when min != max) keeps them at the floor. Wire real change-detection here

@@ -1,9 +1,9 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJobStatus;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
-import io.busata.fourleft.backendeasportswrc.domain.services.queue.ImportJobRepository;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobStatus;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
+import io.busata.fourleft.backendeasportswrc.domain.services.queue.JobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,18 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 
-/** Owns the {@code import_job} lifecycle: enqueue, claim, complete, fail, recover. */
+/** Owns the {@code job} lifecycle: enqueue, claim, complete, fail, recover. */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ImportJobService {
+public class JobService {
 
-    private final ImportJobRepository jobRepository;
-    private final ImportQueueProperties properties;
+    private final JobRepository jobRepository;
+    private final QueueProperties properties;
 
     /** Enqueue an ad-hoc one-off job (e.g. "import club X right now"). */
     @Transactional
-    public ImportJob enqueue(ImportType type, String ref) {
+    public Job enqueue(JobType type, String ref) {
         return enqueue(type, ref, null);
     }
 
@@ -34,15 +34,15 @@ public class ImportJobService {
      * @return the new job, or empty if a job for this target was already active
      */
     @Transactional
-    public Optional<ImportJob> enqueueForTarget(ImportType type, String ref, Long targetId) {
+    public Optional<Job> enqueueForTarget(JobType type, String ref, Long targetId) {
         if (jobRepository.hasActiveJobForTarget(targetId)) {
             return Optional.empty();
         }
         return Optional.of(enqueue(type, ref, targetId));
     }
 
-    private ImportJob enqueue(ImportType type, String ref, Long targetId) {
-        return jobRepository.save(new ImportJob(type, ref, targetId));
+    private Job enqueue(JobType type, String ref, Long targetId) {
+        return jobRepository.save(new Job(type, ref, targetId));
     }
 
     /**
@@ -51,7 +51,7 @@ public class ImportJobService {
      * worker can claim the same job in the window before it flips to RUNNING.
      */
     @Transactional
-    public Optional<ImportJob> claimNext() {
+    public Optional<Job> claimNext() {
         return jobRepository.claimNext().map(job -> {
             job.markRunning();
             return job;
@@ -59,23 +59,23 @@ public class ImportJobService {
     }
 
     @Transactional
-    public void complete(ImportJob job) {
+    public void complete(Job job) {
         job.markDone();
         jobRepository.save(job);
     }
 
     /** Retry with linear backoff while attempts remain, otherwise mark FAILED. */
     @Transactional
-    public void fail(ImportJob job, Exception ex) {
+    public void fail(Job job, Exception ex) {
         job.setLastError(ex.getMessage());
         if (job.getAttempts() < properties.getMaxAttempts()) {
-            job.setStatus(ImportJobStatus.PENDING);
+            job.setStatus(JobStatus.PENDING);
             job.setLockedAt(null);
             job.setRunAfter(Instant.now().plusSeconds((long) job.getAttempts() * properties.getRetryBackoffSeconds()));
             log.warn("Job {} ({} {}) failed attempt {}, will retry: {}",
                     job.getId(), job.getType(), job.getRef(), job.getAttempts(), ex.getMessage());
         } else {
-            job.setStatus(ImportJobStatus.FAILED);
+            job.setStatus(JobStatus.FAILED);
             job.setLockedAt(null);
             log.error("Job {} ({} {}) failed permanently after {} attempts",
                     job.getId(), job.getType(), job.getRef(), job.getAttempts(), ex);
@@ -97,9 +97,9 @@ public class ImportJobService {
     @Transactional
     public void prune() {
         int done = jobRepository.deleteByStatusOlderThanHours(
-                ImportJobStatus.DONE.name(), properties.getDoneRetentionHours());
+                JobStatus.DONE.name(), properties.getDoneRetentionHours());
         int failed = jobRepository.deleteByStatusOlderThanHours(
-                ImportJobStatus.FAILED.name(), properties.getFailedRetentionHours());
+                JobStatus.FAILED.name(), properties.getFailedRetentionHours());
         if (done > 0 || failed > 0) {
             log.info("Pruned {} done and {} failed job(s)", done, failed);
         }

@@ -15,27 +15,27 @@ import java.time.Instant;
 
 /**
  * A single unit of work ("import this one thing now"). Created either by the
- * recurring {@link ImportTarget} scheduler or enqueued ad-hoc (e.g. "import club X").
+ * recurring {@link JobTarget} scheduler or enqueued ad-hoc (e.g. "import club X").
  * Throwaway: once {@code DONE} it can be pruned; it carries no long-lived state.
  */
 @Entity
 @Getter
 @NoArgsConstructor
-public class ImportJob {
+public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "import_job_generator")
-    @SequenceGenerator(name = "import_job_generator", sequenceName = "import_job_seq", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_generator")
+    @SequenceGenerator(name = "job_generator", sequenceName = "job_seq", allocationSize = 50)
     Long id;
 
     @Enumerated(EnumType.STRING)
-    ImportType type;
+    JobType type;
 
     String ref;
 
     @Setter
     @Enumerated(EnumType.STRING)
-    ImportJobStatus status = ImportJobStatus.PENDING;
+    JobStatus status = JobStatus.PENDING;
 
     @Setter
     int attempts = 0;
@@ -54,24 +54,24 @@ public class ImportJob {
     @Setter
     String lastError;
 
-    public ImportJob(ImportType type, String ref, Long targetId) {
+    public Job(JobType type, String ref, Long targetId) {
         this.type = type;
         this.ref = ref;
         this.targetId = targetId;
-        this.status = ImportJobStatus.PENDING;
+        this.status = JobStatus.PENDING;
         this.attempts = 0;
         this.runAfter = Instant.now();
         this.createdAt = Instant.now();
     }
 
     public void markRunning() {
-        this.status = ImportJobStatus.RUNNING;
+        this.status = JobStatus.RUNNING;
         this.lockedAt = Instant.now();
         this.attempts = this.attempts + 1;
     }
 
     public void markDone() {
-        this.status = ImportJobStatus.DONE;
+        this.status = JobStatus.DONE;
         this.lockedAt = null;
     }
 }

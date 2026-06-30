@@ -1,10 +1,10 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
-import io.busata.fourleft.backendeasportswrc.application.importer.queue.ImportQueueProperties;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJobStatus;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
-import io.busata.fourleft.backendeasportswrc.domain.services.queue.ImportJobRepository;
+import io.busata.fourleft.backendeasportswrc.application.work.queue.QueueProperties;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobStatus;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
+import io.busata.fourleft.backendeasportswrc.domain.services.queue.JobRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,22 +18,22 @@ import java.util.Map;
 
 /**
  * Read-only views feeding the public import-queue status page. Scoped to
- * {@link ImportType#CLUB} for now.
+ * {@link JobType#CLUB} for now.
  */
 @RestController
 @RequiredArgsConstructor
 public class ImportQueueEndpoint {
 
-    private static final ImportType FOCUS = ImportType.CLUB;
+    private static final JobType FOCUS = JobType.CLUB;
 
-    private final ImportJobRepository jobRepository;
-    private final ImportQueueProperties properties;
+    private final JobRepository jobRepository;
+    private final QueueProperties properties;
 
     /** Whether the queue is enabled + per-status totals (drive the filter chips). */
     @GetMapping("/api_v2/import-queue/summary")
     public SummaryView summary() {
         Map<String, Long> counts = new LinkedHashMap<>();
-        for (ImportJobStatus status : ImportJobStatus.values()) {
+        for (JobStatus status : JobStatus.values()) {
             counts.put(status.name(), jobRepository.countByTypeAndStatus(FOCUS, status));
         }
         return new SummaryView(properties.isEnabled(), counts);
@@ -47,7 +47,7 @@ public class ImportQueueEndpoint {
      */
     @GetMapping("/api_v2/import-queue/jobs")
     public List<JobView> jobs(@RequestParam(defaultValue = "100") int limit,
-                              @RequestParam(required = false) ImportJobStatus status,
+                              @RequestParam(required = false) JobStatus status,
                               @RequestParam(required = false) String search) {
         int capped = Math.min(Math.max(limit, 1), 500);
         String term = (search == null) ? "" : search.trim();
@@ -62,7 +62,7 @@ public class ImportQueueEndpoint {
     public record JobView(Long id, String ref, String status, int attempts,
                           Instant runAfter, Instant lockedAt, Instant createdAt,
                           Long targetId, String lastError) {
-        static JobView from(ImportJob j) {
+        static JobView from(Job j) {
             return new JobView(j.getId(), j.getRef(), j.getStatus().name(), j.getAttempts(),
                     j.getRunAfter(), j.getLockedAt(), j.getCreatedAt(), j.getTargetId(), j.getLastError());
         }

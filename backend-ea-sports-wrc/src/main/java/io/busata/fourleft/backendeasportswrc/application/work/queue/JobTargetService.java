@@ -1,10 +1,10 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubConfiguration;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportTarget;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobTarget;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
-import io.busata.fourleft.backendeasportswrc.domain.services.queue.ImportTargetRepository;
+import io.busata.fourleft.backendeasportswrc.domain.services.queue.JobTargetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,17 +14,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Owns the {@code import_target} schedule: which things recur, how often, and adapting that. */
+/** Owns the {@code job_target} schedule: which things recur, how often, and adapting that. */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ImportTargetService {
+public class JobTargetService {
 
-    private final ImportTargetRepository targetRepository;
+    private final JobTargetRepository targetRepository;
     private final ClubConfigurationService clubConfigurationService;
-    private final ImportJobService jobService;
+    private final JobService jobService;
     private final JobDispatcher jobDispatcher;
-    private final ImportQueueProperties properties;
+    private final QueueProperties properties;
 
     /**
      * Make sure every syncable club has an enabled CLUB target. This replaces the
@@ -35,7 +35,7 @@ public class ImportTargetService {
         int interval = properties.getClubIntervalSeconds();
         List<ClubConfiguration> syncable = clubConfigurationService.findSyncableClubs();
         for (ClubConfiguration config : syncable) {
-            targetRepository.findByTypeAndRef(ImportType.CLUB, config.getClubId())
+            targetRepository.findByTypeAndRef(JobType.CLUB, config.getClubId())
                     .ifPresentOrElse(
                             existing -> {
                                 boolean dirty = false;
@@ -58,18 +58,50 @@ public class ImportTargetService {
                             },
                             () -> targetRepository.save(
                                     // Fixed cadence for clubs: min == max.
-                                    new ImportTarget(ImportType.CLUB, config.getClubId(), interval, interval)));
+                                    new JobTarget(JobType.CLUB, config.getClubId(), interval, interval)));
         }
 
         // Prune the other direction: a club that is no longer syncable (e.g. removed after a 404)
         // must stop being scheduled, otherwise enqueueDueTargets() keeps minting jobs for it forever.
         Set<String> syncableRefs = syncable.stream().map(ClubConfiguration::getClubId).collect(Collectors.toSet());
-        for (ImportTarget target : targetRepository.findByType(ImportType.CLUB)) {
+        for (JobTarget target : targetRepository.findByType(JobType.CLUB)) {
             if (target.isEnabled() && !syncableRefs.contains(target.getRef())) {
                 target.setEnabled(false);
                 targetRepository.save(target);
             }
         }
+    }
+
+    /**
+     * Make sure the system maintenance targets exist. Currently just the single Discord
+     * configuration cleanup target, on a fixed daily cadence.
+     */
+    @Transactional
+    public void syncSystemTargets() {
+        int interval = properties.getConfigCleanupIntervalSeconds();
+        targetRepository.findByTypeAndRef(JobType.CONFIG_CLEANUP, ConfigCleanupJobHandler.REF)
+                .ifPresentOrElse(
+                        existing -> {
+                            boolean dirty = false;
+                            if (!existing.isEnabled()) {
+                                existing.setEnabled(true);
+                                dirty = true;
+                            }
+                            // Fixed cadence: min == max == interval.
+                            if (existing.getIntervalSec() != interval
+                                    || existing.getMinIntervalSec() != interval
+                                    || existing.getMaxIntervalSec() != interval) {
+                                existing.setIntervalSec(interval);
+                                existing.setMinIntervalSec(interval);
+                                existing.setMaxIntervalSec(interval);
+                                dirty = true;
+                            }
+                            if (dirty) {
+                                targetRepository.save(existing);
+                            }
+                        },
+                        () -> targetRepository.save(
+                                new JobTarget(JobType.CONFIG_CLEANUP, ConfigCleanupJobHandler.REF, interval, interval)));
     }
 
     /**
@@ -82,9 +114,9 @@ public class ImportTargetService {
      */
     @Transactional
     public int enqueueDueTargets() {
-        List<ImportTarget> due = targetRepository.claimDue(properties.getScheduleBatchSize());
+        List<JobTarget> due = targetRepository.claimDue(properties.getScheduleBatchSize());
         int enqueued = 0;
-        for (ImportTarget target : due) {
+        for (JobTarget target : due) {
             if (jobDispatcher.shouldEnqueue(target.getType(), target.getRef())) {
                 boolean created = jobService
                         .enqueueForTarget(target.getType(), target.getRef(), target.getId())

@@ -1,7 +1,7 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 
 /**
  * Does the actual import work for one job type. Add a new {@code @Component}
@@ -9,13 +9,13 @@ import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
  */
 public interface JobHandler {
 
-    ImportType type();
+    JobType type();
 
     /**
      * Perform the import for a single job. Throwing signals failure and lets the
      * worker retry / fail the job; returning a {@link JobResult} signals success.
      */
-    JobResult handle(ImportJob job);
+    JobResult handle(Job job);
 
     /**
      * Whether a recurring target with this ref should enqueue a job right now.

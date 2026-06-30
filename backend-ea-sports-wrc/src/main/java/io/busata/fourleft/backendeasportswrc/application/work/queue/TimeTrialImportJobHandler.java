@@ -1,7 +1,7 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Component;
 public class TimeTrialImportJobHandler implements JobHandler {
 
     @Override
-    public ImportType type() {
-        return ImportType.TT;
+    public JobType type() {
+        return JobType.TT;
     }
 
     @Override
-    public JobResult handle(ImportJob job) {
+    public JobResult handle(Job job) {
         log.warn("TT import not implemented yet - skipping ref {}", job.getRef());
         // Report 'unchanged' so a (future) adaptive TT target backs off instead of
         // hammering an unimplemented path.

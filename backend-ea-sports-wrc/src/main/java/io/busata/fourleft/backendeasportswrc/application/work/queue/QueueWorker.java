@@ -1,6 +1,6 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,25 +17,26 @@ import java.util.Optional;
  *   <li>{@link #workTick()} — drain pending jobs.</li>
  * </ol>
  * Both are safe to run on multiple instances (claims use SKIP LOCKED). The whole
- * bean only activates when {@code import-queue.enabled=true}; otherwise the legacy
+ * bean only activates when {@code work-queue.enabled=true}; otherwise the legacy
  * {@code ClubUpdateSchedule} importer remains the only thing running.
  */
 @Component
 @Profile("!test")
-@ConditionalOnProperty(prefix = "import-queue", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "work-queue", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
-public class ImportQueueWorker {
+public class QueueWorker {
 
-    private final ImportTargetService targetService;
-    private final ImportJobService jobService;
+    private final JobTargetService targetService;
+    private final JobService jobService;
     private final JobDispatcher dispatcher;
-    private final ImportQueueProperties properties;
+    private final QueueProperties properties;
 
-    @Scheduled(fixedDelayString = "${import-queue.schedule-tick-ms:5000}")
+    @Scheduled(fixedDelayString = "${work-queue.schedule-tick-ms:5000}")
     public void scheduleTick() {
         try {
             targetService.syncClubTargets();
+            targetService.syncSystemTargets();
             int enqueued = targetService.enqueueDueTargets();
             if (enqueued > 0) {
                 log.debug("Enqueued {} job(s) from due targets", enqueued);
@@ -45,7 +46,7 @@ public class ImportQueueWorker {
         }
     }
 
-    @Scheduled(fixedDelayString = "${import-queue.prune-tick-ms:3600000}")
+    @Scheduled(fixedDelayString = "${work-queue.prune-tick-ms:3600000}")
     public void pruneTick() {
         try {
             jobService.prune();
@@ -54,12 +55,12 @@ public class ImportQueueWorker {
         }
     }
 
-    @Scheduled(fixedDelayString = "${import-queue.work-tick-ms:1000}")
+    @Scheduled(fixedDelayString = "${work-queue.work-tick-ms:1000}")
     public void workTick() {
         jobService.requeueStale();
 
         for (int i = 0; i < properties.getBatchSize(); i++) {
-            Optional<ImportJob> claimed = jobService.claimNext();
+            Optional<Job> claimed = jobService.claimNext();
             if (claimed.isEmpty()) {
                 return; // queue drained for now
             }
@@ -67,7 +68,7 @@ public class ImportQueueWorker {
         }
     }
 
-    private void process(ImportJob job) {
+    private void process(Job job) {
         try {
             JobResult result = dispatcher.dispatch(job);
             jobService.complete(job);

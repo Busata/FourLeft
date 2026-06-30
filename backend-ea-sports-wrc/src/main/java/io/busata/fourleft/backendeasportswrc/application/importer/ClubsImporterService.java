@@ -36,7 +36,7 @@ public class ClubsImporterService {
 
     /**
      * Import a single club to completion, reusing the existing state-machine handlers.
-     * Entry point for the job-queue worker (see application.importer.queue): the queue
+     * Entry point for the job-queue worker (see application.work.queue): the queue
      * owns scheduling/lifecycle, this owns the actual per-club import logic.
      *
      * @throws ClubImportFailedException if the club ends in the FAILED state

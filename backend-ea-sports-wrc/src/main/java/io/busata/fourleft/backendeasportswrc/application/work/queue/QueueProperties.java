@@ -1,4 +1,4 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,16 +6,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "import-queue")
+@ConfigurationProperties(prefix = "work-queue")
 @Getter
 @Setter
-public class ImportQueueProperties {
+public class QueueProperties {
 
     /** Master switch for the new worker system. Off => the legacy importer keeps running. */
     private boolean enabled = false;
 
     /** Fixed cadence for CLUB targets, in seconds. */
     private int clubIntervalSeconds = 30;
+
+    /** Fixed cadence for the Discord configuration cleanup target, in seconds (default 24h). */
+    private int configCleanupIntervalSeconds = 86400;
 
     /** Max jobs a single worker tick drains before yielding. */
     private int batchSize = 25;

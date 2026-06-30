@@ -1,7 +1,7 @@
-package io.busata.fourleft.backendeasportswrc.application.importer.queue;
+package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportJob;
-import io.busata.fourleft.backendeasportswrc.domain.models.ImportType;
+import io.busata.fourleft.backendeasportswrc.domain.models.Job;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 @Component
 public class JobDispatcher {
 
-    private final Map<ImportType, JobHandler> handlers;
+    private final Map<JobType, JobHandler> handlers;
 
     public JobDispatcher(List<JobHandler> handlers) {
         this.handlers = handlers.stream()
                 .collect(Collectors.toMap(JobHandler::type, Function.identity()));
     }
 
-    public JobResult dispatch(ImportJob job) {
+    public JobResult dispatch(Job job) {
         JobHandler handler = handlers.get(job.getType());
         if (handler == null) {
             throw new IllegalStateException("No JobHandler registered for type " + job.getType());
@@ -29,7 +29,7 @@ public class JobDispatcher {
     }
 
     /** Whether a target of this type/ref has real work to do right now. */
-    public boolean shouldEnqueue(ImportType type, String ref) {
+    public boolean shouldEnqueue(JobType type, String ref) {
         JobHandler handler = handlers.get(type);
         return handler != null && handler.shouldEnqueue(ref);
     }

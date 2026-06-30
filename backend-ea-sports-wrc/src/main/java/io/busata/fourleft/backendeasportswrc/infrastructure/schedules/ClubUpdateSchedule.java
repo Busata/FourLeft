@@ -1,7 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.schedules;
 
 import io.busata.fourleft.backendeasportswrc.application.importer.ClubsImporterService;
-import io.busata.fourleft.backendeasportswrc.application.importer.queue.ImportQueueProperties;
+import io.busata.fourleft.backendeasportswrc.application.work.queue.QueueProperties;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class ClubUpdateSchedule {
 
     private final ClubConfigurationService clubConfigurationService;
     private final ClubsImporterService importerService;
-    private final ImportQueueProperties importQueueProperties;
+    private final QueueProperties importQueueProperties;
 
     @Scheduled(cron = "*/5 * * * * *", zone = "UTC")
     public void updateImporter() {

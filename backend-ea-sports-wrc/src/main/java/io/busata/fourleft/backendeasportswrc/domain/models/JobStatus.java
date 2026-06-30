@@ -1,6 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.domain.models;
 
-public enum ImportJobStatus {
+public enum JobStatus {
     PENDING,
     RUNNING,
     DONE,

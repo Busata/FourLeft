@@ -18,14 +18,15 @@ club-export:
   output-directory: /tmp/club-exports
   scheduling-enabled: true
 
-# Database-backed worker queue for imports (see application.importer.queue).
+# Database-backed worker queue for background jobs (see application.work.queue).
 # Disabled by default => the legacy ClubUpdateSchedule importer keeps running.
 # Flip 'enabled' to true (here, in the config server, or per profile) to hand
 # club imports over to the queue; the legacy importer then stands down.
-import-queue:
+work-queue:
   enabled: false
   club-interval-seconds: 900     # how often each club is checked (15m); a job is only
                                  # created when the club actually has work (see shouldEnqueue)
+  config-cleanup-interval-seconds: 86400  # how often stale Discord configs are pruned (24h)
   schedule-tick-ms: 5000         # how often due targets become jobs
   work-tick-ms: 1000             # how often the worker drains the job queue
   batch-size: 25                 # max jobs drained per worker tick
