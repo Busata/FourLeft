@@ -17,3 +17,18 @@ racenet-api:
 club-export:
   output-directory: /tmp/club-exports
   scheduling-enabled: true
+
+# Database-backed worker queue for imports (see application.importer.queue).
+# Disabled by default => the legacy ClubUpdateSchedule importer keeps running.
+# Flip 'enabled' to true (here, in the config server, or per profile) to hand
+# club imports over to the queue; the legacy importer then stands down.
+import-queue:
+  enabled: false
+  club-interval-seconds: 30      # fixed refresh cadence for CLUB targets
+  schedule-tick-ms: 5000         # how often due targets become jobs
+  work-tick-ms: 1000             # how often the worker drains the job queue
+  batch-size: 25                 # max jobs drained per worker tick
+  schedule-batch-size: 100       # max due targets turned into jobs per tick
+  max-attempts: 3                # tries before a job is marked FAILED
+  retry-backoff-seconds: 30      # linear backoff base between retries
+  stale-job-seconds: 600         # RUNNING longer than this => requeued (crashed worker)
