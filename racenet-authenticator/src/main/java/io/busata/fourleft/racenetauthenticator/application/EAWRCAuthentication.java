@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +28,6 @@ public class EAWRCAuthentication {
 
     @Value("${codemasters.email}")
     private String userName;
-
-    @Value("${code-file}")
-    private String codeFilePath;
 
     @Value("${codemasters.pass}")
     private String password;
@@ -48,6 +43,8 @@ public class EAWRCAuthentication {
     private double elementWaitMs;
 
     private final ObjectMapper objectMapper;
+
+    private final TwoFactorCodeClient twoFactorCodeClient;
 
     private EAWRCToken token;
 
@@ -134,17 +131,17 @@ public class EAWRCAuthentication {
         }
 
         if (elementExists(page, "#btnSendCode")) {
+            // Clear any previously captured code before requesting a new one, so a stale
+            // code can never be consumed by this login attempt.
+            twoFactorCodeClient.clear();
+
             page.locator("#btnSendCode").click();
 
-            log.info("Waiting until {} appears", codeFilePath);
+            log.info("Waiting for 2FA code from the relay...");
 
-            while (!Files.exists(Path.of(codeFilePath))) {
-                Thread.sleep(1000);
-            }
+            String s = twoFactorCodeClient.waitForCode();
 
-            String s = Files.readString(Path.of(codeFilePath));
-
-            log.info("Code found: {}", s);
+            log.info("Code received: {}", s);
 
             page.locator("#twoFactorCode").fill(s);
             page.locator("#btnSubmit").click();

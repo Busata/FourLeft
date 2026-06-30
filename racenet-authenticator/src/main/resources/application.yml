@@ -11,3 +11,11 @@ racenet-authenticator:
   enable-ea-wrc: true
   # Run the browser headless by default; override locally (e.g. the "override" profile) to watch the flow.
   headless: true
+  # racenet-2fa-relay: captures EA 2FA codes (via Postmark) and serves them on a token-protected endpoint.
+  twofactor:
+    # Internal address on the shared "veevi" docker network. Override locally if running outside docker.
+    base-url: http://racenet-2fa-relay:8085
+    # Must match the relay's API_TOKEN. Provide via the config server / override, not in source control.
+    api-token: ""
+    poll-timeout-seconds: 120
+    poll-interval-seconds: 2
