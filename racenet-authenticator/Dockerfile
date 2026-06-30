@@ -3,11 +3,13 @@
 # can build this module via the wrapper without a host-side JDK/Maven.
 
 # ---- build stage: compile and produce the fat jar ----
-FROM eclipse-temurin:25-jdk AS build
+# Maven 3.9.16 (matches .mvn/wrapper) preinstalled on JDK 25 — using the image's
+# mvn avoids the wrapper downloading Maven at build time.
+FROM maven:3.9.16-eclipse-temurin-25 AS build
 WORKDIR /workspace
 COPY . .
-RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw -B -ntp -DskipTests -pl racenet-authenticator -am clean package
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    mvn -B -ntp -DskipTests -pl racenet-authenticator -am clean package
 
 # ---- runtime stage ----
 # Ubuntu 22.04 (jammy) + JDK 25. Playwright 1.44 supports jammy; the previous
