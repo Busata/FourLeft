@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  racenet-2fa-relay:
+    build: .
+    container_name: racenet-2fa-relay
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8085:8085"
+
+networks:
+  default:
+    name: veevi
+    external: true

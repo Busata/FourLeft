@@ -47,7 +47,10 @@ public class DirtRally2Authentication {
                 }
             }
 
-            try (Playwright playwright = Playwright.create()) {
+            // Only Chromium is installed/used; suppress Playwright's first-run
+            // auto-download of the full browser set (Chromium + Firefox + WebKit).
+            try (Playwright playwright = Playwright.create(
+                    new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")))) {
                 Browser browser = playwright.chromium().launch(
                         new BrowserType.LaunchOptions().setHeadless(true)
                 );

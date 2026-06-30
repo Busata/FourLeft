@@ -5,8 +5,9 @@ spring:
     import: "optional:configserver:"
 server:
   port: 8082
-selenium:
-  url: "http://helper.se-firefox:4444/wd/hub"
 racenet-authenticator:
-  enable-dirt-rally2: true
+  # Dirt Rally 2.0 online servers shut down 2026-07-08; flow left in place but disabled.
+  enable-dirt-rally2: false
   enable-ea-wrc: true
+  # Run the browser headless by default; override locally (e.g. the "override" profile) to watch the flow.
+  headless: true

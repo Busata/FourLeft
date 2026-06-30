@@ -1,27 +1,24 @@
 package io.busata.fourleft.racenetauthenticator.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bonigarcia.wdm.WebDriverManager;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v128.network.Network;
-import org.openqa.selenium.devtools.v128.network.model.ResponseReceived;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -30,7 +27,6 @@ public class EAWRCAuthentication {
 
     private static final String url = "https://racenet.com";
     private final String tokenUrl = "https://web-api.racenet.com/api/identity/auth";
-
 
     @Value("${codemasters.email}")
     private String userName;
@@ -41,101 +37,104 @@ public class EAWRCAuthentication {
     @Value("${codemasters.pass}")
     private String password;
 
+    // Run with a visible browser by overriding this (e.g. in the "override" profile) to debug the flow.
+    @Value("${racenet-authenticator.headless:true}")
+    private boolean headless;
+
+    // How long elementExists() waits for an optional step (consent / 2FA) to render before
+    // deciding it's absent. The login submit redirects through OAuth, so these pages don't
+    // appear instantly; too short a wait skips the step (e.g. the "send code" 2FA page).
+    @Value("${racenet-authenticator.element-wait-ms:5000}")
+    private double elementWaitMs;
+
     private final ObjectMapper objectMapper;
 
     private EAWRCToken token;
 
     public void refreshLogin() {
-        System.setProperty("webdriver.chrome.whitelistedIps", "");
+        // Suppress Playwright's first-run auto-download of the full browser set
+        // (Chromium + Firefox + WebKit). Only Chromium is installed/used; see the
+        // Dockerfile and the `playwright-install-chromium` exec goal in pom.xml.
+        try (Playwright playwright = Playwright.create(
+                new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")))) {
+            Browser browser = playwright.chromium().launch(
+                    new BrowserType.LaunchOptions()
+                            .setHeadless(headless)
+                            .setArgs(List.of("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"))
+            );
 
-        WebDriverManager manager = WebDriverManager.chromedriver();
-
-        ChromeOptions capabilities = new ChromeOptions();
-
-        capabilities.addArguments("--enable-automation", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--remote-allow-origins=*", "--window-size=1920,1080", "--headless");
-        manager.capabilities(capabilities);
-
-        ChromeDriver driver = (ChromeDriver) manager.create();
-
-        DevTools devTools = driver.getDevTools();
-        devTools.createSessionIfThereIsNotOne();
-
-        devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
-
-        devTools.addListener(Network.responseReceived(), (ResponseReceived event) -> {
             try {
-                if (event.getResponse().getUrl().equals(tokenUrl)) {
-                    Network.GetResponseBodyResponse send = devTools.send(Network.getResponseBody(event.getRequestId()));
+                BrowserContext context = browser.newContext(
+                        new Browser.NewContextOptions().setViewportSize(1920, 1080)
+                );
+                Page page = context.newPage();
+                page.setDefaultTimeout(60_000);
 
-                    try {
-                        token = objectMapper.readValue(send.getBody(), EAWRCToken.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("Something went wrong reading the EA WRC token.");
+                // Intercept the token response, mirroring the previous DevTools network listener.
+                page.onResponse(response -> {
+                    if (response.url().equals(tokenUrl)) {
+                        try {
+                            token = objectMapper.readValue(response.text(), EAWRCToken.class);
+                        } catch (Exception e) {
+                            log.error("Something went wrong reading the EA WRC token.", e);
+                        }
                     }
-                }
-            } catch (Exception ex) {
-            }
-        });
+                });
 
-        try {
-            triggerAuthCall(driver);
-            log.info("done");
+                triggerAuthCall(page);
+                log.info("done");
+            } finally {
+                browser.close();
+            }
         } catch (Exception ex) {
             log.error("Something went wrong while refreshing the login", ex);
             throw ex;
-        } finally {
-            manager.quit();
         }
     }
 
     @SneakyThrows
-    private void triggerAuthCall(WebDriver driver) {
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
+    private void triggerAuthCall(Page page) {
+        page.navigate(url);
 
-        driver.get(url);
-
-        WebElement signinButton = driver.findElement(By.xpath("//button[normalize-space()=\"SIGN IN\"]"));
-
+        Locator signinButton = page.locator("xpath=//button[normalize-space()=\"SIGN IN\"]");
         signinButton.click();
 
-        WebElement emailField = driver.findElement(By.id("email"));
+        Locator emailField = page.locator("#email");
+        emailField.waitFor();
 
-        if(elementExists(driver, By.id("rememberMe"))) {
-            driver.findElement(By.id("rememberMe")).click();
+        // The visible control is <label for="rememberMe">, which overlays the checkbox and
+        // intercepts pointer events, so a direct click on the input times out. Click the label
+        // (like a user would), and only when not already checked so we never toggle it off.
+        if (elementExists(page, "#rememberMe") && !page.locator("#rememberMe").isChecked()) {
+            page.locator("label[for=\"rememberMe\"]").click();
         }
 
         //Racenet switched to a different login flow at some point
         //First had to enter e-mail , then press "next", then enter password.
         //Maybe A-B testing, so supporting both.
-        if (!elementExists(driver, By.id("password"))) {
+        if (!elementExists(page, "#password")) {
             log.info("Password on next flow");
-            emailField.sendKeys(userName);
-            WebElement nextButton = driver.findElement(By.id("logInBtn"));
-            nextButton.click();
+            emailField.fill(userName);
+            page.locator("#logInBtn").click();
 
-            WebElement loginButton = driver.findElement(By.id("logInBtn"));
-            WebElement passwordField = driver.findElement(By.id("password"));
-            passwordField.sendKeys(password);
-            loginButton.click();
+            Locator passwordField = page.locator("#password");
+            passwordField.fill(password);
+            page.locator("#logInBtn").click();
         } else {
             log.info("Both fields flow");
-            emailField.sendKeys(userName);
-            WebElement passwordField = driver.findElement(By.id("password"));
-            passwordField.sendKeys(password);
-            WebElement loginButton = driver.findElement(By.id("logInBtn"));
-            loginButton.click();
+            emailField.fill(userName);
+            page.locator("#password").fill(password);
+            page.locator("#logInBtn").click();
         }
-
 
         // check if there is a label with the for attribute of "readAccept"
-        if (this.elementExists(driver, By.cssSelector("label[for=\"readAccept\"]"))) {
-            driver.findElement(By.cssSelector("label[for=\"readAccept\"]")).click();
-            driver.findElement(By.id("btnNext")).click();
+        if (elementExists(page, "label[for=\"readAccept\"]")) {
+            page.locator("label[for=\"readAccept\"]").click();
+            page.locator("#btnNext").click();
         }
 
-
-        if (this.elementExists(driver, By.id("btnSendCode"))) {
-            driver.findElement(By.id("btnSendCode")).click();
+        if (elementExists(page, "#btnSendCode")) {
+            page.locator("#btnSendCode").click();
 
             log.info("Waiting until {} appears", codeFilePath);
 
@@ -143,31 +142,33 @@ public class EAWRCAuthentication {
                 Thread.sleep(1000);
             }
 
-
             String s = Files.readString(Path.of(codeFilePath));
 
             log.info("Code found: {}", s);
 
-            driver.findElement(By.id("twoFactorCode")).sendKeys(s);
-            driver.findElement(By.id("btnSubmit")).click();
+            page.locator("#twoFactorCode").fill(s);
+            page.locator("#btnSubmit").click();
             log.info("Code entered and submitted");
         }
 
-        WebElement eaWrcButton = driver.findElement(By.cssSelector("a[href=\"/ea_sports_wrc\""));
+        Locator eaWrcButton = page.locator("a[href=\"/ea_sports_wrc\"]");
         eaWrcButton.click();
         log.info("Clicked on EA WRC link");
     }
 
-
-    public boolean elementExists(WebDriver driver, By id) {
-        driver.manage().timeouts().implicitlyWait(0, TimeUnit.MILLISECONDS);
-        boolean exists = !driver.findElements(id).isEmpty();
-        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
-
-        if(exists) {
-            var field = driver.findElement(id);
-            return field.isDisplayed();
-        } else {
+    /**
+     * Waits up to {@code elementWaitMs} for the element to become visible, returning true as
+     * soon as it appears or false if it never does. A bounded wait (rather than an immediate
+     * probe) is required because the optional consent / 2FA steps render after OAuth redirects
+     * that complete some time after the action that triggered them.
+     */
+    public boolean elementExists(Page page, String selector) {
+        try {
+            page.locator(selector).first().waitFor(new Locator.WaitForOptions()
+                    .setState(WaitForSelectorState.VISIBLE)
+                    .setTimeout(elementWaitMs));
+            return true;
+        } catch (TimeoutError e) {
             return false;
         }
     }
@@ -176,4 +177,3 @@ public class EAWRCAuthentication {
         return token;
     }
 }
-

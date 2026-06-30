@@ -15,7 +15,6 @@
     <description>racenet-authenticator</description>
     <properties>
         <java.version>17</java.version>
-        <selenium.version>4.24.0</selenium.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
     <dependencies>
@@ -28,32 +27,12 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.9.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v142</artifactId>
-            <version>4.38.0</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
@@ -104,6 +83,32 @@
                     <source>7</source>
                     <target>7</target>
                 </configuration>
+            </plugin>
+            <!--
+                Installs ONLY Chromium into the local Playwright cache (~/.cache/ms-playwright),
+                so running from the IDE / CLI doesn't trigger the first-run download of the full
+                browser set. Run once per machine: mvn exec:java@playwright-install-chromium
+                (the browser cache persists, so subsequent runs are a fast no-op).
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>playwright-install-chromium</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.microsoft.playwright.CLI</mainClass>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>chromium</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
