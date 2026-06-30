@@ -88,6 +88,11 @@ export class ImportQueue implements OnInit {
     return counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
   }
 
+  /** True when the timestamp is in the future (a job waiting out a retry backoff). */
+  isFuture(iso: string | null): boolean {
+    return iso != null && new Date(iso).getTime() > Date.now();
+  }
+
   /** Human-friendly absolute + relative time, e.g. "12:30:05 (in 4s)". */
   formatTime(iso: string | null): string {
     if (!iso) {

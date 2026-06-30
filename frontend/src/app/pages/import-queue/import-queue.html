@@ -54,7 +54,7 @@
           <th>Status</th>
           <th class="num">Tries</th>
           <th>Created</th>
-          <th>Run after</th>
+          <th>Next attempt</th>
           <th>Last error</th>
         </tr>
       </thead>
@@ -67,7 +67,7 @@
             <td class="num">{{ job.attempts }}</td>
             <td>{{ formatTime(job.createdAt) }}</td>
             <td>
-              @if (job.status === 'PENDING') { {{ formatTime(job.runAfter) }} }
+              @if (job.status === 'PENDING' && isFuture(job.runAfter)) { {{ formatTime(job.runAfter) }} }
               @else { <span class="muted">—</span> }
             </td>
             <td class="iq-err" [title]="job.lastError ?? ''">{{ job.lastError }}</td>
