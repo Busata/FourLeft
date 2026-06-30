@@ -1,0 +1,144 @@
+.import-queue {
+  max-width: 1200px;
+
+  .iq-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    .iq-sub {
+      color: #8b91a1;
+      font-size: 14px;
+    }
+    .iq-updated {
+      margin-left: auto;
+      color: #8b91a1;
+      font-size: 12px;
+    }
+  }
+
+  .iq-banner {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+
+    &--warn {
+      background: #3a2410;
+      border-color: #6b4410;
+      color: #ffcd7a;
+    }
+    &--error {
+      background: #3a1414;
+      border-color: #6b1f1f;
+      color: #ff9d96;
+    }
+  }
+
+  .iq-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .iq-card {
+    border: 1px solid #272b36;
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-width: 110px;
+
+    &__n {
+      font-size: 26px;
+      font-weight: 600;
+    }
+    &__l {
+      color: #8b91a1;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  h2 {
+    font-size: 14px;
+    color: #8b91a1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 28px 0 10px;
+  }
+
+  .iq-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #272b36;
+    border-radius: 10px;
+    overflow: hidden;
+
+    th,
+    td {
+      text-align: left;
+      padding: 9px 14px;
+      border-bottom: 1px solid #272b36;
+    }
+    th {
+      color: #8b91a1;
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .muted {
+      color: #8b91a1;
+    }
+  }
+
+  .iq-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+
+    &--PENDING {
+      background: #b08400;
+    }
+    &--RUNNING {
+      background: #2f72d6;
+    }
+    &--DONE {
+      background: #2f9e54;
+    }
+    &--FAILED {
+      background: #d2453b;
+    }
+  }
+
+  .iq-err {
+    color: #ff9d96;
+    font-size: 12px;
+    max-width: 360px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .iq-empty {
+    color: #8b91a1;
+    padding: 16px 14px;
+    border: 1px solid #272b36;
+    border-radius: 10px;
+  }
+}

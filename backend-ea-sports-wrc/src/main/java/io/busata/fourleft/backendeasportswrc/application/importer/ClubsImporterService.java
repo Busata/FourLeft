@@ -34,6 +34,28 @@ public class ClubsImporterService {
         return runningProcesses.size();
     }
 
+    /**
+     * Import a single club to completion, reusing the existing state-machine handlers.
+     * Entry point for the job-queue worker (see application.importer.queue): the queue
+     * owns scheduling/lifecycle, this owns the actual per-club import logic.
+     *
+     * @throws ClubImportFailedException if the club ends in the FAILED state
+     */
+    public void runClub(String clubId) {
+        ClubImportProcess process = new ClubImportProcess(clubId);
+        try {
+            do {
+                control(process);
+            } while (process.canContinue());
+
+            if (process.getState() == ProcessState.FAILED) {
+                throw new ClubImportFailedException(clubId);
+            }
+        } finally {
+            process.complete();
+        }
+    }
+
     private void initiateClubProcessing() {
         clubConfigurationService.findSyncableClubs()
                 .stream()

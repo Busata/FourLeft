@@ -47,6 +47,16 @@ public class RacenetApiWireMocks {
     }
 
     @SneakyThrows
+    public void createClubNotFound(WireMockServer racenetApi, String clubId) {
+
+            racenetApi.stubFor(get("/api/wrc2023clubs/%s?includeChampionship=true".formatted(clubId))
+                    .willReturn(aResponse()
+                            .withHeader("Content-Type","application/json")
+                            .withStatus(404)
+            ));
+    }
+
+    @SneakyThrows
     public void createLeaderboards(WireMockServer racenetApi, String clubId, String leaderboardId, ClubLeaderboardResultTo leaderboardResult) {
             racenetApi.stubFor(get(urlPathMatching("/api/wrc2023clubs/%s/leaderboard/%s".formatted(clubId, leaderboardId)))
                     .withQueryParam("MaxResultCount", equalTo("10"))

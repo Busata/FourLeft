@@ -11,6 +11,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import io.busata.fourleft.backendeasportswrc.domain.services.championships.ChampionshipService;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
+import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationRepository;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.authorization.EAWRCToken;
@@ -53,6 +54,9 @@ class ClubCreationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private ClubConfigurationService clubConfigurationService;
+
+    @Autowired
+    private ClubConfigurationRepository clubConfigurationRepository;
 
     @Autowired
     private ClubService clubService;
@@ -125,9 +129,27 @@ class ClubCreationIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(clubConfigurationService.findSyncableClubs()).isEmpty();
 
-
+        // A transient failure only disables the club; its configuration is kept so it can be retried later.
+        assertThat(clubConfigurationRepository.findByClubId("11")).isNotEmpty();
     }
 
+
+    @Test
+    @DataSet(provider = BaseDataSet.class, cleanBefore = true, skipCleaningFor = "schema_version")
+    public void testClubNotFoundRemovesConfiguration() throws InterruptedException {
+
+        racenetApiWireMocks.createClubNotFound(racenetApi, "11");
+
+        assertThat(clubConfigurationService.findSyncableClubs()).isNotEmpty();
+
+        runSyncUntilDone();
+
+        assertThrows(NoSuchElementException.class, () -> clubService.findById("11"));
+
+        // A 404 means the club is gone for good: its sync configuration is deleted, not just disabled,
+        // so the periodic resetDisabledClubs() can never resurrect it.
+        assertThat(clubConfigurationRepository.findByClubId("11")).isEmpty();
+    }
 
     private void runSyncUntilDone() throws InterruptedException {
         int runningProcesses;
