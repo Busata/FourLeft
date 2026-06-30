@@ -1,0 +1,13 @@
+<div
+  class="slide-toggle"
+  [class.active]="active()"
+  [class.inactive]="!active()"
+  role="switch"
+  [attr.aria-checked]="active()"
+  tabindex="0"
+  (click)="toggle()"
+  (keydown.space)="$event.preventDefault(); toggle()"
+  (keydown.enter)="toggle()"
+>
+  <div class="toggle-button"></div>
+</div>

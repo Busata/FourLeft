@@ -1,0 +1,29 @@
+.public-container {
+  width: 100%;
+}
+
+.buttons {
+  background-color: #202225;
+  z-index: 99;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.45);
+
+  .menu-button {
+    &:hover,
+    &.menu-button-active {
+      background-color: #3a3d42; // lighten(#202225, 10%)
+    }
+  }
+}
+
+.wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.main {
+  width: 100%;
+  padding-top: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+}

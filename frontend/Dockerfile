@@ -1,26 +1,19 @@
-# Stage 1: Compile and Build angular codebase
+# Stage 1: build the Angular app
+FROM node:24-alpine AS build
 
-# Use official node image as the base image
-FROM node:16 as build
+WORKDIR /app
 
-# Set the working directory
-WORKDIR /usr/local/app
+# Install dependencies first (better layer caching).
+# .npmrc pins the public npm registry so the build needs no private credentials.
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci
 
-# Add the source code to app
-COPY ./ /usr/local/app/
-
-# Install all the dependencies
-RUN npm install
-
-# Generate the build of the application
+# Build
+COPY . .
 RUN npm run build
 
-
-# Stage 2: Serve app with nginx server
-
-# Use official nginx image as the base image
+# Stage 2: serve with nginx
 FROM nginx:latest
 
-# Copy the build output to replace the default nginx contents.
-COPY --from=build /usr/local/app/dist/fourleft-frontend /usr/share/nginx/html
+COPY --from=build /app/dist/fourleft-frontend/browser /usr/share/nginx/html
 COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf

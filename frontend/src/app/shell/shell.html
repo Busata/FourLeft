@@ -1,0 +1,17 @@
+<div class="public-container">
+  <div class="pure-g">
+    <div class="buttons pure-u-1">
+      <a class="menu-button dark" routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
+         routerLinkActive="menu-button-active">Fourleft.io</a>
+      <a class="menu-button dark" routerLink="/home" routerLinkActive="menu-button-active">Home</a>
+      <a class="menu-button dark" routerLink="/easportswrc/profile" routerLinkActive="menu-button-active">EA Sports WRC Profile</a>
+      <a class="menu-button dark" routerLink="/privacy" routerLinkActive="menu-button-active">Privacy Policy</a>
+      <a class="menu-button dark" routerLink="/terms" routerLinkActive="menu-button-active">Terms of Service</a>
+    </div>
+    <div class="wrapper">
+      <div class="main">
+        <router-outlet />
+      </div>
+    </div>
+  </div>
+</div>

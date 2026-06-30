@@ -1,107 +1,167 @@
-/* You can add global styles to this file, and also import other style files */
-$roboto-font-path: "~roboto-fontface/fonts" !default;
-@import "roboto-fontface/css/roboto/sass/roboto-fontface";
-
-@import "purecss/build/base-min.css";
-@import "purecss/build/grids-min.css";
-@import "purecss/build/grids-responsive-min.css";
-
-@import "styles/buttons";
-@import "styles/forms";
+/* Global styles for fourleft.io */
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-
-.g-header-h1 {
-  font-size: 1.5em;
-}
-.g-header-h2 {
-  font-size: 1.3em;
-}
-.g-full-width {
-  width: 100%;
-}
-.g-header-h1, .g-header-h2 {
-  padding-left: 15px;
-  font-weight: 800;
-
-  .g-header-label {
-    margin-top: 5px;
-    display: block;
-    font-size: 0.7em;
-    color: lightslategrey;
-    font-weight: 400;
-  }
-  margin-bottom: 15px;
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
-.g-image-rounded {
-  border-radius: 5px;
-}
-
-#footer {
-  width: 100%;
-  position: fixed;
-  right: 15px;
-  text-align: right;
-  padding-left: 30px;
-  bottom: 0;
-  z-index: 99;
-}
-
-.g-image-h-400 {
-  max-height: 450px;
-}
-.g-image-h-300 {
-  max-height: 315px;
-}
-
-.g-photo-stream {
-  width: 66vw;
+/* ---- Minimal grid ---- */
+.pure-g {
   display: flex;
-  flex-wrap: wrap;
-  .image-wrapper {
-    margin: 2.5px;
+  flex-flow: row wrap;
+}
+
+.pure-u-1,
+.pure-u-1-1 {
+  width: 100%;
+}
+
+.pure-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.images-container {
+  display: flex;
+}
+
+/* ---- Menu / buttons ---- */
+.menu-button {
+  display: inline-block;
+  background-color: transparent;
+  color: white;
+  font-weight: 800;
+  outline: none;
+  border: none;
+  padding: 15px;
+  text-decoration: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.dark {
+    background-color: #202225;
   }
 }
 
+.g-button {
+  border-style: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
+.g-button-primary,
+.g-button-secondary,
+.g-button-tertiary,
+.g-button-danger {
+  color: white;
+  font-weight: 800;
+}
+
+.g-button-primary {
+  background-color: #65b7b9 !important;
+}
+
+.g-button-secondary {
+  background-color: #5d9573 !important;
+}
+
+.g-button-danger {
+  background-color: #b81431 !important;
+}
+
+.g-button-tertiary {
+  background-color: #ffa100 !important;
+}
+
+/* ---- Forms ---- */
+.form-group {
+  margin-bottom: 5px;
+
+  label {
+    font-weight: 800;
+    font-size: 0.8em;
+    display: block;
+    color: #767575;
+  }
+
+  input[type='checkbox'] {
+    width: 2em;
+    height: 2em;
+  }
+}
+
+input,
+select {
+  padding: 10px;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid black;
+}
+
+select {
+  background-color: white;
+  padding-right: 15px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+
+  .info {
+    font-weight: 800;
+    color: #767575;
+  }
+}
+
+/* ---- Cards / helpers ---- */
 .g-card {
   margin-top: 15px;
   margin-bottom: 15px;
   padding: 15px;
   border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
-  -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
-  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.45);
 
   &:hover {
-    -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
-    -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
-    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.75);
   }
 }
 
-.g-center {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.g-image-h-400 {
+  max-height: 450px;
 }
 
-.g-readonly {
-  background-color: #f5f5f5;
+.g-image-h-300 {
+  max-height: 315px;
 }
 
-.drag-handle {
-  user-select: none;
-
-  &:hover {
-    cursor: grab;
-  }
+/* ---- Snackbar ---- */
+.snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background-color: #323232;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.45);
+  z-index: 100;
 }

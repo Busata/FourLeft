@@ -1,4 +1,14 @@
-node_modules/
-.angular/
+# Build artifacts and local installs — npm ci installs fresh inside the image.
+node_modules
+dist
+.angular
+
+# Not needed in the build context
+.git
+.vscode
+.idea
 pom.xml
-package-lock.json
+target
+*.md
+Dockerfile
+.dockerignore

@@ -1,0 +1,54 @@
+<div class="g-card">
+  @if (error()) {
+    <p>{{ error() }}</p>
+  } @else if (!loaded()) {
+    <p>Loading profile&hellip;</p>
+  } @else {
+    <form [formGroup]="form">
+      <div class="form-group">
+        <label>Display name</label>
+        <input formControlName="displayName" type="text" />
+      </div>
+      <div class="form-group">
+        <label>Platform</label>
+        <select formControlName="platform">
+          <option value="PC">Steam</option>
+          <option value="PLAYSTATION">Playstation</option>
+          <option value="STEAM">Steam</option>
+          <option value="XBOX">Xbox</option>
+          <option value="OTHER">Other</option>
+          <option value="UNKNOWN">Unknown</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Controller</label>
+        <select formControlName="controller">
+          <option value="WHEEL">Wheel</option>
+          <option value="CONTROLLER">Gamepad</option>
+          <option value="KEYBOARD">Keyboard</option>
+          <option value="OTHER">Other</option>
+          <option value="UNKNOWN">Unknown</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Racenet (Cannot be changed)</label>
+        <input formControlName="racenet" type="text" />
+      </div>
+
+      <div class="form-group">
+        <label>Track results (Official clubs, big clubs, ...)</label>
+        <div class="checkbox-group">
+          <app-slide-toggle formControlName="trackDiscord"></app-slide-toggle>
+        </div>
+      </div>
+
+      <button class="g-button g-button-primary" type="button" (click)="save()">Save</button>
+      <button class="g-button g-button-tertiary" type="button" (click)="reset()">Reset</button>
+    </form>
+  }
+</div>
+
+@if (notice()) {
+  <div class="snackbar">{{ notice() }}</div>
+}
