@@ -6,8 +6,8 @@
     <artifactId>fourleft</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
     </properties>
     <name>Fourleft</name>
     <description>Fourleft Application (Bot, Server, Client)</description>

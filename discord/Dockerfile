@@ -1,5 +1,4 @@
-FROM alpine:3.15.4
-RUN apk add openjdk17
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 ARG JAR_FILE=target/*.jar

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 COPY docker/certs/digicert-g2-intermediate.pem /usr/local/share/ca-certificates/digicert-g2-intermediate.crt
 RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts \
