@@ -29,7 +29,9 @@ services:
       - POSTGRES_USER=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_USER}
       - POSTGRES_DB=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_DB}
   spring.fourleft.backend-ea-sports-wrc:
-    build: backend-ea-sports-wrc
+    build:
+      context: .
+      dockerfile: backend-ea-sports-wrc/Dockerfile
     container_name: spring.backend-ea-sports-wrc
     restart: always
     volumes:
@@ -46,7 +48,9 @@ services:
       - db.backend-ea-sports-wrc
       - db.rabbitmq
   spring.fourleft.discord:
-    build: discord
+    build:
+      context: .
+      dockerfile: discord/Dockerfile
     container_name: spring.fourleft.discord
     restart: always
     extra_hosts:
@@ -69,7 +73,9 @@ services:
     restart: always
     container_name: proxy.fourleft_frontend
   spring.racenet-authenticator:
-    build: racenet-authenticator
+    build:
+      context: .
+      dockerfile: racenet-authenticator/Dockerfile
     container_name: spring.racenet-authenticator
     restart: always
     volumes:

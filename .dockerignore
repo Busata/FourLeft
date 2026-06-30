@@ -1,0 +1,26 @@
+# The Spring service images build the Maven reactor from the repo root, so the
+# build context is the whole repo. Keep it lean: anything excluded here is
+# rebuilt inside the image or isn't needed to produce the jars.
+
+# VCS / IDE
+.git
+.gitignore
+.idea
+.vscode
+**/*.iml
+
+# Build output (the jars are rebuilt inside the build stage)
+**/target
+
+# Node deps + frontend sources: not needed to build the Spring jars. Keep only
+# frontend/pom.xml so the Maven reactor (which lists frontend as a module) loads.
+**/node_modules
+frontend/**
+!frontend/pom.xml
+
+# Python sidecars build from their own Dockerfiles, not the Java reactor
+racenet-2fa-relay
+racenet-login
+
+# Misc
+**/*.log
