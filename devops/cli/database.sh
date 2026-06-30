@@ -39,10 +39,9 @@ function restoreDatabase() {
 
 TITLE="Database Tasks"
 RESTORE_EASPORTSWRC="Restore to local DB - EA Sports WRC"
-RESTORE_DIRTRALLYTWO="Restore to local DB - Dirt Rally 2.0"
 RESTORE_DISCORD="Restore to local DB - Discord bot"
 
-TYPES=("$RESTORE_EASPORTSWRC" "$RESTORE_DIRTRALLYTWO" "$RESTORE_DISCORD")
+TYPES=("$RESTORE_EASPORTSWRC" "$RESTORE_DISCORD")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -52,9 +51,6 @@ if [ -n "$selected_option_index" ]; then
           restoreDatabase "db.backend-ea-sports-wrc" "backendeasportswrc" "backend-ea-sports-wrc"
             ;;
         2)
-          restoreDatabase "db.fourleft" "postgres"
-            ;;
-        3)
           restoreDatabase "db.fourleft_discord" "postgres"
             ;;
         *)

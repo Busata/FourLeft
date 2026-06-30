@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Import;
         AsyncConfig.class,
         FeignConfig.class,
         CachingConfig.class,
-        ImageGenerationConfig.class,
         InterceptorsConfig.class,
         KeycloakConfig.class,
-        MessagingConfig.class,
         SchedulingConfig.class,
         SecurityConfig.class
 })

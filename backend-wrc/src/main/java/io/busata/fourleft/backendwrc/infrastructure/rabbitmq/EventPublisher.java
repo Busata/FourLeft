@@ -22,10 +22,6 @@ public class EventPublisher {
     public void handleClubUpdate(ClubEventStarted clubEventStarted) {
         rabbitMQ.convertAndSend(QueueNames.CLUB_EVENT_STARTED, clubEventStarted);
     }
-    @EventListener
-    public void handleCommunityUpdate(CommunityChallengeUpdateEvent clubEventStarted) {
-        rabbitMQ.convertAndSend(QueueNames.COMMUNITY_UPDATED, "OK");
-    }
 
     @EventListener
     public void handleEventEnded(ClubEventEnded event) {

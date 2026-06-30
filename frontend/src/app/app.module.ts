@@ -24,7 +24,6 @@ import { tablerSteeringWheel,
   tablerDeviceGamepad,
   tablerKeyboard
 } from '@ng-icons/tabler-icons';
-import {InfiniteScrollModule} from "ngx-infinite-scroll";
 
 export function storageFactory(): OAuthStorage {
   return localStorage;
@@ -46,7 +45,6 @@ const authConfig: AuthConfig = {
     OAuthModule.forRoot(),
     AppRoutingModule,
     BrowserModule,
-    InfiniteScrollModule,
     NgIconsModule.withIcons({ tablerSteeringWheel,
       tablerBrandXbox,
       tablerX,
