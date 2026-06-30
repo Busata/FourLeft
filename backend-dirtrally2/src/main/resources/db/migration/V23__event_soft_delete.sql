@@ -1,1 +1,0 @@
-alter table event add column archived boolean default false;

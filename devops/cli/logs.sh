@@ -9,9 +9,8 @@ TITLE="Log Tasks"
 RESTORE_EASPORTSWRC="Follow logs -- Backend - EA SPORTS WRC"
 RESTORE_AUTHENTICATOR="Follow logs -- Backend - Authenticator"
 RESTORE_DISCORD="Follow logs -- Backend - Discord"
-RESTORE_WRC="Follow logs -- Backend -- WRC"
 
-TYPES=("$RESTORE_EASPORTSWRC" "$RESTORE_AUTHENTICATOR" "$RESTORE_DISCORD" "$RESTORE_WRC")
+TYPES=("$RESTORE_EASPORTSWRC" "$RESTORE_AUTHENTICATOR" "$RESTORE_DISCORD")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -24,7 +23,7 @@ if [ -n "$selected_option_index" ]; then
           followLogs "spring.racenet-authenticator"
             ;;
         3)
-          followLogs "spring.backend-wrc"
+          followLogs "spring.fourleft.discord"
             ;;
         *)
             echo "Invalid selection or cancelled."

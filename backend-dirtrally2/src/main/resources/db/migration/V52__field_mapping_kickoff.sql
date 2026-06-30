@@ -1,1 +1,0 @@
-insert into field_mapping (id, name, value, type, mapped_by_user, context) values (uuid_generate_v4(), 'eLngAustralia','fi-au','EMOTE',true,'FRONTEND');;

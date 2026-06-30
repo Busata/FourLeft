@@ -1,1 +1,0 @@
-drop table fiaticker_entry;

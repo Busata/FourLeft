@@ -1,1 +1,0 @@
-update player_info set display_name=racenet;

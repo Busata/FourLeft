@@ -1,9 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 2.35.1025 on 2026-06-30 15:28:45.
-
-export interface RoutesTo {
-}
+// Generated using typescript-generator version 2.35.1025 on 2026-06-30 16:10:08.
 
 export interface ChampionshipSettingsTo {
     name: string;
@@ -118,47 +115,6 @@ export interface StageSettingsTo {
     weatherAndSurface: string;
 }
 
-export interface FIATickerUpdateTo {
-    title: string;
-    tickerEventKey: string;
-    dateTime: number;
-    text: string;
-    imageUrl: string;
-}
-
-export interface FieldMappingRequestTo {
-    name: string;
-    type: FieldMappingType;
-    context: FieldMappingContext;
-}
-
-export interface FieldMappingTo {
-    id: string;
-    name: string;
-    value: string;
-    fieldMappingType: FieldMappingType;
-    context: FieldMappingContext;
-    mappedByUser: boolean;
-}
-
-export interface FieldMappingUpdateTo {
-    name: string;
-    value: string;
-    fieldMappingType: FieldMappingType;
-}
-
-export interface MessageLogTo {
-    messageType: MessageType;
-    viewType: ViewType;
-    messageId: number;
-    channelId: number;
-}
-
-export interface UserTo {
-    name: string;
-    roles: string[];
-}
-
 export interface Duration extends TemporalAmount, Comparable<Duration>, Serializable {
 }
 
@@ -184,11 +140,3 @@ export type ControllerType = "WHEEL" | "CONTROLLER" | "KEYBOARD" | "OTHER" | "UN
 export type Platform = "PC" | "PLAYSTATION" | "XBOX" | "EPIC" | "EA_APP" | "STEAM" | "STEAM_DECK" | "OTHER" | "UNKNOWN";
 
 export type PeripheralType = "MONITOR" | "TRIPLES" | "WIDESCREEN" | "VR" | "OTHER" | "UNKNOWN";
-
-export type FieldMappingType = "HUMAN_READABLE" | "FLAG" | "EMOTE" | "IMAGE" | "COLOUR";
-
-export type FieldMappingContext = "BACKEND" | "FRONTEND";
-
-export type MessageType = "AUTO_POST" | "RESULTS_POST" | "JOIN_POST" | "LEAVE_POST" | "CURRENT_RESULTS_POST" | "PREVIOUS_RESULTS_POST" | "COMMUNITY_EVENT" | "AUTOMATED_CLUB_POST";
-
-export type ViewType = "STANDARD" | "EXTRA";

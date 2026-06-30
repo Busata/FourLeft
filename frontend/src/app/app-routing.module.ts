@@ -7,10 +7,6 @@ const routes: Routes = [
     path:'',
     loadChildren: () => import('./fourleft/public/fourleft-public.module').then(m => m.FourleftPublicModule)
   },
-  {
-    path: 'private',
-    loadChildren: () => import('./fourleft/private/fourleft-private.module').then(m => m.FourleftPrivateModule)
-  },
 ];
 
 @NgModule({
