@@ -1,6 +1,5 @@
 package io.busata.fourleft.backendeasportswrc.application.importer.importers;
 
-import feign.FeignException;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.*;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.RacenetGateway;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ChampionshipTo;
@@ -21,49 +20,25 @@ public class ClubDetailsImporter {
     private final RacenetGateway racenetGateway;
 
     public CompletableFuture<ClubImportResult> createNewClub(String clubId) {
-        return this.racenetGateway.getClubDetail(clubId).<CompletableFuture<ClubImportResult>>handle((clubDetails, ex) -> {
-            if (ex != null) {
-                ClubImportFailureReason reason = classifyFailure(ex);
-                log.error("IMPORTER: Club creation error, could not get the details for club {} ({})", clubId, reason, ex);
-                return CompletableFuture.completedFuture(new FailedClubCreationResult(clubId, reason));
-            }
+        return this.racenetGateway.getClubDetail(clubId).thenCompose(clubDetails -> {
             return getUniqueChampionships(clubDetails)
-                    .<ClubImportResult>thenApply(championships -> new ClubCreationResult(clubDetails, championships))
-                    .exceptionally(championshipEx -> {
-                        log.error("IMPORTER: Club creation error, could not get the championships for club {}", clubId, championshipEx);
-                        return new FailedClubCreationResult(clubId, ClubImportFailureReason.UNKNOWN);
-                    });
-        }).thenCompose(future -> future);
+                    .thenApply(championships -> new ClubCreationResult(clubDetails, championships)).thenApply(clubCreationResult -> (ClubImportResult) clubCreationResult);
+        }).exceptionally(ex -> {
+            log.error("IMPORTER: Club creation error, could not get the details for club {}", clubId, ex);
+            return new FailedClubCreationResult(clubId);
+
+        });
     }
 
     public CompletableFuture<ClubImportResult> fetchDetails(String clubId) {
-        return this.racenetGateway.getClubDetail(clubId).<CompletableFuture<ClubImportResult>>handle((clubDetailsTo, ex) -> {
-            if (ex != null) {
-                ClubImportFailureReason reason = classifyFailure(ex);
-                log.error("IMPORTER: Club update error, could not get the details for club {} ({})", clubId, reason, ex);
-                return CompletableFuture.completedFuture(new FailedClubUpdateResult(clubId, reason));
-            }
+        return this.racenetGateway.getClubDetail(clubId).thenCompose(clubDetailsTo -> {
             return getUniqueChampionships(clubDetailsTo)
-                    .<ClubImportResult>thenApply(championships -> new ClubDetailsUpdatedResult(clubDetailsTo, championships))
-                    .exceptionally(championshipEx -> {
-                        log.error("IMPORTER: Club update error, could not get the championships for club {}", clubId, championshipEx);
-                        return new FailedClubUpdateResult(clubId, ClubImportFailureReason.UNKNOWN);
-                    });
-        }).thenCompose(future -> future);
-    }
-
-    /**
-     * A 404 from the club detail endpoint means the club no longer exists on Racenet, so it
-     * should be removed from the sync configuration. Anything else is treated as a (potentially
-     * transient) failure that gets retried later.
-     */
-    private ClubImportFailureReason classifyFailure(Throwable ex) {
-        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
-            if (cause instanceof FeignException feignException && feignException.status() == 404) {
-                return ClubImportFailureReason.CLUB_NOT_FOUND;
-            }
-        }
-        return ClubImportFailureReason.UNKNOWN;
+                    .thenApply(championships -> new ClubDetailsUpdatedResult(clubDetailsTo, championships))
+                    .thenApply(clubUpdateResult -> (ClubImportResult) clubUpdateResult);
+        }).exceptionally(ex -> {
+            log.error("IMPORTER: Club update error, could not get the details for club {}", clubId, ex);
+            return new FailedClubUpdateResult(clubId);
+        });
     }
 
     private CompletableFuture<List<ChampionshipTo>> getUniqueChampionships(ClubDetailsTo clubDetails) {

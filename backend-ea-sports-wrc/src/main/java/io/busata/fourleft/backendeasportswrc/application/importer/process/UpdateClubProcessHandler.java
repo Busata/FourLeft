@@ -5,10 +5,8 @@ import io.busata.fourleft.backendeasportswrc.application.importer.process.core.C
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubDetailsUpdatedResult;
-import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubImportFailureReason;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.FailedClubUpdateResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
-import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +22,6 @@ public class UpdateClubProcessHandler implements ClubImportProcessHandler {
 
     private final ClubService clubService;
     private final ClubDetailsImporter clubDetailsImporter;
-    private final ClubConfigurationService clubConfigurationService;
 
     @Getter
     private final Map<ProcessState, Consumer<ClubImportProcess>> strategies = Map.of(
@@ -60,13 +57,8 @@ public class UpdateClubProcessHandler implements ClubImportProcessHandler {
             this.clubService.updateClub(updatedResult.getClubDetails(), updatedResult.getChampionships());
             process.markDone();
         }
-        if (result instanceof FailedClubUpdateResult failedResult) {
-            if (failedResult.getReason() == ClubImportFailureReason.CLUB_NOT_FOUND) {
-                log.warn("IMPORTER - Club {} no longer exists, removing it from sync", process.getClubId());
-                this.clubConfigurationService.removeClub(process.getClubId());
-            } else {
-                log.error("IMPORTER - Club {} failed to update its details, skipping", process.getClubId());
-            }
+        if (result instanceof FailedClubUpdateResult) {
+            log.error("IMPORTER - Club {} failed to update its details, skipping", process.getClubId());
             process.markFailed();
         }
 

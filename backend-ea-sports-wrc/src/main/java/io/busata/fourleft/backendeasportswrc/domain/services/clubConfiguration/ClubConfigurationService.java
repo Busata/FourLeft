@@ -35,11 +35,6 @@ public class ClubConfigurationService {
     }
 
     @Transactional
-    public void removeClub(String clubId) {
-        this.clubConfigurationRepository.deleteAll(this.clubConfigurationRepository.findByClubId(clubId));
-    }
-
-    @Transactional
     public void addClubSync(String clubId) {
         if(clubConfigurationRepository.findByClubId(clubId).isEmpty()) {
             this.clubConfigurationRepository.save(new ClubConfiguration(clubId));

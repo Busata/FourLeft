@@ -5,7 +5,6 @@ import io.busata.fourleft.backendeasportswrc.application.importer.process.core.C
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ClubImportProcessHandler;
 import io.busata.fourleft.backendeasportswrc.application.importer.process.core.ProcessState;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubCreationResult;
-import io.busata.fourleft.backendeasportswrc.application.importer.results.ClubImportFailureReason;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.FailedClubCreationResult;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
@@ -54,14 +53,9 @@ public class CreateNewClubProcessHandler implements ClubImportProcessHandler {
 
         }
 
-        if (result instanceof FailedClubCreationResult failedResult) {
-            if (failedResult.getReason() == ClubImportFailureReason.CLUB_NOT_FOUND) {
-                log.warn("IMPORTER - Club {} does not exist, removing it from sync", process.getClubId());
-                this.clubConfigurationService.removeClub(process.getClubId());
-            } else {
-                log.error("IMPORTER - Club {} failed to create as details could not be fetched", process.getClubId());
-                this.clubConfigurationService.setClubSync(process.getClubId(), false);
-            }
+        if (result instanceof FailedClubCreationResult) {
+            log.error("IMPORTER - Club {} failed to create as details could not be fetched", process.getClubId());
+            this.clubConfigurationService.setClubSync(process.getClubId(), false);
             process.markFailed();
         }
 
