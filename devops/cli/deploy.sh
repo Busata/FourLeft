@@ -40,11 +40,6 @@ function runDeploy() {
         return
     fi
 
-    local pull_cmd=""
-    if whiptail --title "Deploy" --yesno "Run 'git pull' on $REMOTE_HOST before building?" 8 64; then
-        pull_cmd="git pull && "
-    fi
-
     if ! whiptail --title "Deploy" --yesno \
         "About to build & deploy on $REMOTE_HOST:\n\n$services\n\nProceed?" 15 72; then
         echo "Cancelled."
@@ -52,7 +47,7 @@ function runDeploy() {
     fi
 
     # -t for a TTY so docker build progress streams live.
-    local remote_cmd="cd $REMOTE_DIR && ${pull_cmd}docker compose build $services && docker compose up -d $services"
+    local remote_cmd="cd $REMOTE_DIR && git pull && docker compose build $services && docker compose up -d $services"
     echo "→ $REMOTE_HOST: $remote_cmd"
     ssh -t "$REMOTE_HOST" "/bin/bash -lc '$remote_cmd'"
     echo "Done."

@@ -22,6 +22,14 @@ services:
     container_name: db.backend-ea-sports-wrc
     image: postgres:16
     restart: always
+    # pg_stat_statements is a preload module, so it needs these -c flags + a restart. Once up,
+    # run once: CREATE EXTENSION IF NOT EXISTS pg_stat_statements; then query the pg_stat_statements
+    # view (ORDER BY total_exec_time DESC) to rank queries by cumulative CPU.
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c pg_stat_statements.max=10000
     volumes:
       - /mnt/docker-data/backend-ea-sports-wrc:/var/lib/postgresql/data
     environment:
