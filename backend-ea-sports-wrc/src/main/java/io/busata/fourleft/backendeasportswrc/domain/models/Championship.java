@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.core.annotation.Order;
@@ -38,7 +40,12 @@ public class Championship {
     @Setter
     Club club;
 
+    // SUBSELECT: initialise every loaded championship's events in one query
+    // (... where championship_id in (<the query that loaded the championships>)) instead of one
+    // select per championship. Same for Event.stages. These two EAGER List collections are what
+    // fanned a single club load out into a select-per-event against the event_stages join table.
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     @OrderBy("absoluteCloseDate asc")
     @JoinColumn(name = "championship_id")
     List<Event> events = new ArrayList<>();

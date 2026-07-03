@@ -5,6 +5,8 @@ import io.busata.fourleft.backendeasportswrc.infrastructure.time.ApplicationCloc
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -39,7 +41,10 @@ public class Event {
     EventSettings eventSettings;
 
 
+    // SUBSELECT: load all stages for every loaded event in one query instead of one per event
+    // (the event_stages join-table select that dominated the DB's seq-scan count). See Championship.events.
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     List<Stage> stages = new ArrayList<>();
 
 
