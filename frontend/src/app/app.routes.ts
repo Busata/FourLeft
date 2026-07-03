@@ -6,6 +6,7 @@ import { Terms } from './pages/terms/terms';
 import { ProfileInfo } from './pages/profile-info/profile-info';
 import { ProfileEditor } from './pages/profile-editor/profile-editor';
 import { WorkQueue } from './pages/work-queue/work-queue';
+import { TimeTrials } from './pages/time-trials/time-trials';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'easportswrc/profile', component: ProfileInfo, title: 'EA Sports WRC Profile' },
       { path: 'easportswrc/profile/:requestId', component: ProfileEditor, title: 'EA Sports WRC Profile' },
       { path: 'easportswrc/work-queue', component: WorkQueue, title: 'Status' },
+      { path: 'easportswrc/time-trials', component: TimeTrials, title: 'Time Trials' },
       { path: 'privacy', component: Privacy, title: 'Privacy Policy' },
       { path: 'terms', component: Terms, title: 'Terms of Service' },
     ],
