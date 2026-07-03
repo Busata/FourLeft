@@ -31,12 +31,12 @@
                 <th>Stage</th>
                 <th>Surface</th>
                 <th>Class</th>
-                <th class="num">Rank</th>
+                <th class="num ttp-sort" (click)="toggleSort()">Rank {{ sortIndicator() }}</th>
                 <th class="num">Time</th>
               </tr>
             </thead>
             <tbody>
-              @for (record of p.entries; track record.combinationId) {
+              @for (record of sortedEntries(); track record.combinationId) {
                 <tr>
                   <td>{{ record.location }}</td>
                   <td>
@@ -47,7 +47,13 @@
                   </td>
                   <td>{{ surfaceLabel(record.surfaceCondition) }}</td>
                   <td>{{ record.vehicleClass }}</td>
-                  <td class="num rank">{{ record.rank }}</td>
+                  <td class="num rank">
+                    @if (podium(record.rank); as tier) {
+                      <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ record.rank }}</span>
+                    } @else {
+                      {{ record.rank }}
+                    }
+                  </td>
                   <td class="num time">{{ formatTime(record.time) }}</td>
                 </tr>
               }

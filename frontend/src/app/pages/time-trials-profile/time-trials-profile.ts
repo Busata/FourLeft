@@ -1,9 +1,11 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TtPlayerProfile } from '../../models/time-trial-board';
+import { TtPlayerEntry, TtPlayerProfile } from '../../models/time-trial-board';
+
+type SortDir = 'asc' | 'desc';
 
 /**
  * A player's time-trial profile: every board they have a stored time on (reverse lookup by display
@@ -24,6 +26,24 @@ export class TimeTrialsProfile implements OnInit {
   readonly profile = signal<TtPlayerProfile | null>(null);
   readonly loading = signal(false);
   readonly error = signal('');
+
+  /** Rank ascending puts the driver's best (podium) finishes first. */
+  readonly sortDir = signal<SortDir>('asc');
+
+  /** Profile rows sorted by rank; null ranks always sort last regardless of direction. */
+  readonly sortedEntries = computed<TtPlayerEntry[]>(() => {
+    const p = this.profile();
+    if (!p) {
+      return [];
+    }
+    const dir = this.sortDir() === 'asc' ? 1 : -1;
+    return [...p.entries].sort((a, b) => {
+      if (a.rank == null && b.rank == null) return 0;
+      if (a.rank == null) return 1;
+      if (b.rank == null) return -1;
+      return (a.rank - b.rank) * dir;
+    });
+  });
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -55,6 +75,23 @@ export class TimeTrialsProfile implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  /** Toggle the rank sort direction. */
+  toggleSort(): void {
+    this.sortDir.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+  }
+
+  sortIndicator(): string {
+    return this.sortDir() === 'asc' ? '▲' : '▼';
+  }
+
+  /** Podium tier for a rank: 'gold' | 'silver' | 'bronze' for 1/2/3, else ''. */
+  podium(rank: number | null): string {
+    if (rank === 1) return 'gold';
+    if (rank === 2) return 'silver';
+    if (rank === 3) return 'bronze';
+    return '';
   }
 
   surfaceLabel(surfaceCondition: number): string {

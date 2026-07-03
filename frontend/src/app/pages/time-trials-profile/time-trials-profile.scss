@@ -6,6 +6,7 @@
 
 .ttp {
   max-width: 1000px;
+  margin: 0 auto;
   padding-bottom: 48px;
 }
 
@@ -89,6 +90,14 @@
     background: #f6f7f9;
     white-space: nowrap;
   }
+  th.ttp-sort {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: #2f72d6;
+    }
+  }
   tbody tr:hover {
     background: #f4f6fa;
   }
@@ -104,6 +113,35 @@
   }
   .time {
     font-weight: 600;
+  }
+}
+
+// Podium badges for the top three ranks: gold / silver / bronze pills.
+.ttp-podium {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  border: 1px solid transparent;
+
+  &--gold {
+    background: #fbf1cf;
+    border-color: #e8c766;
+    color: #8a6d1a;
+  }
+  &--silver {
+    background: #eef0f3;
+    border-color: #c3c9d2;
+    color: #5c636e;
+  }
+  &--bronze {
+    background: #f6e6d6;
+    border-color: #d8a877;
+    color: #8a5a2b;
   }
 }
 
