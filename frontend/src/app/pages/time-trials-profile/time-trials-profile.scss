@@ -16,10 +16,15 @@
   align-items: center;
   margin-bottom: 20px;
 
-  .iq-search {
+  .ttp-autocomplete {
+    position: relative;
     flex: 1;
     min-width: 0;
     max-width: 340px;
+  }
+
+  .iq-search {
+    width: 100%;
     padding: 6px 12px 6px 32px;
     border-radius: 999px;
     border: 1px solid #d5d9e0;
@@ -40,6 +45,45 @@
       outline: none;
       border-color: #2f72d6;
       box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+    }
+  }
+}
+
+// Autocomplete dropdown under a search box.
+.ttp-suggest {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+
+  li {
+    margin: 0;
+  }
+  button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #1f2430;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      background: #f1f5fb;
+      color: #2f72d6;
     }
   }
 }
@@ -229,7 +273,7 @@
   .ttp-search--sm {
     margin-bottom: 0;
 
-    .iq-search {
+    .ttp-autocomplete {
       max-width: 300px;
     }
   }
@@ -279,6 +323,24 @@
     color: #6b7280;
     font-size: 13px;
   }
+}
+
+// One rally per row: a labelled section holding that rally's common stage boards.
+.cmp-rally {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.cmp-rally-name {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2430;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #edeff3;
 }
 
 .cmp-grid {

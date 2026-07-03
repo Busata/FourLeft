@@ -2,6 +2,8 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { TtPlayerEntry, TtPlayerProfile } from '../../models/time-trial-board';
 
@@ -27,6 +29,13 @@ export interface CompareBoard {
   a: TtPlayerEntry;
   b: TtPlayerEntry;
   rows: CompareRow[];
+}
+
+/** All common boards for one rally (location) — one row of the compare view. */
+export interface CompareRally {
+  locationId: number;
+  location: string;
+  boards: CompareBoard[];
 }
 
 /**
@@ -61,6 +70,15 @@ export class TimeTrialsProfile implements OnInit {
   /** Bound to the search boxes; may differ from the loaded names until submitted. */
   readonly query = signal('');
   readonly vsQuery = signal('');
+
+  // Autocomplete: suggestion lists and dropdown visibility, per box.
+  readonly suggestions = signal<string[]>([]);
+  readonly showSuggest = signal(false);
+  readonly vsSuggestions = signal<string[]>([]);
+  readonly showVsSuggest = signal(false);
+
+  private readonly queryInput$ = new Subject<string>();
+  private readonly vsQueryInput$ = new Subject<string>();
 
   /** Rank ascending puts the driver's best (podium) finishes first. */
   readonly sortDir = signal<SortDir>('asc');
@@ -110,7 +128,29 @@ export class TimeTrialsProfile implements OnInit {
     return boards;
   });
 
+  /** Common boards grouped by rally, so the compare view shows one rally per row. */
+  readonly commonByRally = computed<CompareRally[]>(() => {
+    const rallies = new Map<number, CompareRally>();
+    for (const board of this.common()) {
+      const id = board.a.locationId;
+      let rally = rallies.get(id);
+      if (!rally) {
+        rally = { locationId: id, location: board.location, boards: [] };
+        rallies.set(id, rally);
+      }
+      rally.boards.push(board);
+    }
+    return [...rallies.values()];
+  });
+
   ngOnInit(): void {
+    this.queryInput$
+      .pipe(debounceTime(180), distinctUntilChanged(), switchMap((q) => this.suggest(q)), takeUntilDestroyed(this.destroyRef))
+      .subscribe((names) => this.suggestions.set(names));
+    this.vsQueryInput$
+      .pipe(debounceTime(180), distinctUntilChanged(), switchMap((q) => this.suggest(q)), takeUntilDestroyed(this.destroyRef))
+      .subscribe((names) => this.vsSuggestions.set(names));
+
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const name = (params.get('name') ?? '').trim();
       this.name.set(name);
@@ -211,8 +251,45 @@ export class TimeTrialsProfile implements OnInit {
     return Number.isFinite(seconds) ? seconds : null;
   }
 
+  /** Fetch name suggestions for {@code q} (empty for short/blank input); errors degrade to no list. */
+  private suggest(q: string): Observable<string[]> {
+    const trimmed = q.trim();
+    if (trimmed.length < 2) {
+      return of([]);
+    }
+    const params = new HttpParams().set('q', trimmed);
+    return this.http
+      .get<string[]>('/api_v2/time-trials/players/suggest', { params })
+      .pipe(catchError(() => of([])));
+  }
+
+  onQueryInput(value: string): void {
+    this.query.set(value);
+    this.showSuggest.set(true);
+    this.queryInput$.next(value);
+  }
+
+  onVsQueryInput(value: string): void {
+    this.vsQuery.set(value);
+    this.showVsSuggest.set(true);
+    this.vsQueryInput$.next(value);
+  }
+
+  pickSuggestion(name: string): void {
+    this.query.set(name);
+    this.showSuggest.set(false);
+    this.submitSearch();
+  }
+
+  pickVsSuggestion(name: string): void {
+    this.vsQuery.set(name);
+    this.showVsSuggest.set(false);
+    this.submitVs();
+  }
+
   /** Look up the typed name by pushing it to the `?name=` param, which drives the load. */
   submitSearch(): void {
+    this.showSuggest.set(false);
     const name = this.query().trim();
     if (name === this.name()) {
       return;
@@ -226,6 +303,7 @@ export class TimeTrialsProfile implements OnInit {
 
   /** Set (or update) the comparison player via the `?vs=` param. */
   submitVs(): void {
+    this.showVsSuggest.set(false);
     const vs = this.vsQuery().trim();
     if (vs === this.vs()) {
       return;

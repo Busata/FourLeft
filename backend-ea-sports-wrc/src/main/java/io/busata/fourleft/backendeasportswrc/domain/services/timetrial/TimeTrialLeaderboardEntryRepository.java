@@ -34,6 +34,19 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     List<TimeTrialLeaderboardEntry> findLatestByDisplayName(@Param("name") String name);
 
     /**
+     * Distinct display names containing {@code q} (case-insensitive) — the driver autocomplete. Names
+     * that start with the query rank first, then alphabetically. Backed by the trigram index on
+     * lower(display_name). {@link Pageable} caps the number of suggestions returned.
+     */
+    @Query("""
+            select e.displayName from TimeTrialLeaderboardEntry e
+            where lower(e.displayName) like lower(concat('%', :q, '%'))
+            group by e.displayName
+            order by min(case when lower(e.displayName) like lower(concat(:q, '%')) then 0 else 1 end), e.displayName
+            """)
+    List<String> suggestDisplayNames(@Param("q") String q, Pageable pageable);
+
+    /**
      * One page of a board's live snapshot. Filters to the latest {@code fetchedAt} so an in-progress
      * re-fetch (which transiently holds two generations) still reads a single clean board; after a
      * fetch completes only one generation remains anyway. Order/paging come from the {@link Pageable}.

@@ -1,12 +1,26 @@
 <div class="ttp">
   <form class="ttp-search" (submit)="$event.preventDefault(); submitSearch()">
-    <input
-      class="iq-search"
-      type="search"
-      placeholder="Search for a driver by name…"
-      [value]="query()"
-      (input)="query.set($any($event.target).value)"
-      (search)="submitSearch()" />
+    <div class="ttp-autocomplete">
+      <input
+        class="iq-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Search for a driver by name…"
+        [value]="query()"
+        (input)="onQueryInput($any($event.target).value)"
+        (focus)="showSuggest.set(true)"
+        (blur)="showSuggest.set(false)"
+        (search)="submitSearch()" />
+      @if (showSuggest() && suggestions().length) {
+        <ul class="ttp-suggest">
+          @for (s of suggestions(); track s) {
+            <li>
+              <button type="button" (mousedown)="$event.preventDefault(); pickSuggestion(s)">{{ s }}</button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
     <button type="submit" class="ttp-search-btn">Search</button>
   </form>
 
@@ -30,13 +44,27 @@
 
     <div class="ttp-compare-bar">
       <form class="ttp-search ttp-search--sm" (submit)="$event.preventDefault(); submitVs()">
-        <input
-          class="iq-search"
-          type="search"
-          placeholder="Compare with another driver…"
-          [value]="vsQuery()"
-          (input)="vsQuery.set($any($event.target).value)"
-          (search)="submitVs()" />
+        <div class="ttp-autocomplete">
+          <input
+            class="iq-search"
+            type="search"
+            autocomplete="off"
+            placeholder="Compare with another driver…"
+            [value]="vsQuery()"
+            (input)="onVsQueryInput($any($event.target).value)"
+            (focus)="showVsSuggest.set(true)"
+            (blur)="showVsSuggest.set(false)"
+            (search)="submitVs()" />
+          @if (showVsSuggest() && vsSuggestions().length) {
+            <ul class="ttp-suggest">
+              @for (s of vsSuggestions(); track s) {
+                <li>
+                  <button type="button" (mousedown)="$event.preventDefault(); pickVsSuggestion(s)">{{ s }}</button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
         <button type="submit" class="ttp-search-btn">Compare</button>
       </form>
       @if (comparing()) {
@@ -67,17 +95,20 @@
         </div>
 
         @if (common().length) {
-          <div class="cmp-grid">
-            @for (board of common(); track board.combinationId) {
-              <div class="cmp-board">
-                <div class="cmp-board-head">
-                  <a
-                    class="ttp-board"
-                    [routerLink]="['../boards']"
-                    [queryParams]="{ board: board.combinationId }">{{ board.location }} — {{ board.route }}</a>
-                  <span class="cmp-meta">{{ surfaceLabel(board.surfaceCondition) }} · {{ board.vehicleClass }}</span>
-                </div>
-                <table class="iq-table cmp-table">
+          @for (rally of commonByRally(); track rally.locationId) {
+            <section class="cmp-rally">
+              <h2 class="cmp-rally-name">{{ rally.location }}</h2>
+              <div class="cmp-grid">
+                @for (board of rally.boards; track board.combinationId) {
+                  <div class="cmp-board">
+                    <div class="cmp-board-head">
+                      <a
+                        class="ttp-board"
+                        [routerLink]="['../boards']"
+                        [queryParams]="{ board: board.combinationId }">{{ board.route }}</a>
+                      <span class="cmp-meta">{{ surfaceLabel(board.surfaceCondition) }} · {{ board.vehicleClass }}</span>
+                    </div>
+                    <table class="iq-table cmp-table">
                   <thead>
                     <tr>
                       <th class="cmp-label"></th>
@@ -111,11 +142,13 @@
                         </td>
                       </tr>
                     }
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                }
               </div>
-            }
-          </div>
+            </section>
+          }
         } @else if (!loading() && !vsLoading()) {
           <div class="iq-empty">
             “{{ name() }}” and “{{ vs() }}” have no boards in common in the fetched data.

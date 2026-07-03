@@ -71,6 +71,16 @@ public class TimeTrialBoardEndpoint {
                 result.getTotalElements(), result.getTotalPages());
     }
 
+    /** Driver autocomplete: distinct display names matching {@code q} (case-insensitive substring). */
+    @GetMapping("/api_v2/time-trials/players/suggest")
+    public List<String> suggest(@RequestParam String q) {
+        String trimmed = q.trim();
+        if (trimmed.length() < 2) {
+            return List.of(); // too short to be selective; skip the scan
+        }
+        return entryRepository.suggestDisplayNames(trimmed, PageRequest.of(0, 10));
+    }
+
     /** Reverse lookup: every board a player (by display name) has a stored time on, with its context. */
     @GetMapping("/api_v2/time-trials/player")
     public PlayerProfileView player(@RequestParam String name) {
