@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-public class StandingsUpdatedResult extends StandingsImportResult {
+public class StandingsUpdatedResult {
 
     @Getter
     private final String clubId;

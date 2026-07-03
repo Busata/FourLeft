@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Setter
 public class QueueProperties {
 
-    /** Master switch for the worker system. Off => the legacy {@code ClubUpdateSchedule} importer keeps running. */
+    /** Master switch for the worker system. Off => {@code ClubUpdateSchedule} drives the importer directly. */
     private boolean enabled = false;
 
     /** Max jobs importing concurrently (across ticks). Caps the virtual-thread drain. */

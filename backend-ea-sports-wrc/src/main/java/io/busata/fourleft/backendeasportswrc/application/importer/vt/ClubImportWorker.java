@@ -33,32 +33,15 @@ import java.util.concurrent.Executors;
  * The per-club import flow, run on a single virtual thread by {@link VirtualThreadClubImporter}.
  *
  * <p>Each club is imported by a plain, linear, <i>blocking</i> flow: call the Racenet gateway, wait,
- * push the raw result through the existing domain services, re-publish the domain events downstream
- * features depend on. There is no {@code CompletableFuture} state machine and no {@code ProcessState}
- * enum — the legacy {@code process.*} handlers each collapse into one method here.
- *
- * <h2>Flow map (legacy handler → method)</h2>
- * <ul>
- *   <li>{@code InitialClubProcessHandler} → {@link #importClub} (the routing decision).</li>
- *   <li>{@code CreateNewClubProcessHandler} → {@link #createNewClub}.</li>
- *   <li>{@code UpdateClubProcessHandler} → {@link #updateExistingClub} (branches to the two below or
- *       a plain details refresh).</li>
- *   <li>{@code UpcomingChampionshipStartedProcessHandler} → {@link #championshipStarted}.</li>
- *   <li>{@code EventEndedProcessHandler} → {@link #eventEnded}.</li>
- *   <li>{@code UpdateLeaderboardsProcessHandler} → {@link #updateLeaderboards}.</li>
- *   <li>{@code UpdateHistoryClubProcessHandler} → {@link #updateHistory}.</li>
- * </ul>
+ * push the raw result through the domain services, re-publish the domain events downstream features
+ * depend on. {@link #importClub} routes a club to one of a handful of single-purpose methods
+ * ({@link #createNewClub}, {@link #updateExistingClub}, {@link #updateLeaderboards},
+ * {@link #updateHistory}) based on what the club currently needs.
  *
  * <p><b>Failure model.</b> A failed <i>details</i> fetch is fatal for the cycle: it propagates to
- * {@link #importClub}, which disables sync for the club ({@code setClubSync(clubId, false)}) — the
- * legacy {@code FAILED} behaviour that the batch loop turned into a {@code setClubSync} + Discord
- * "Disabled clubs count" message. A failed <i>single leaderboard or standings</i> fetch is
- * non-fatal: it is logged and skipped so the rest of the batch still applies and the event still
- * fires, matching the legacy per-board {@code exceptionally} handling.
- *
- * <p><b>Batch Discord notification.</b> The legacy per-cycle "Disabled clubs count: N" aggregate has
- * no cycle boundary here (clubs run on independent threads), so it is intentionally dropped; the
- * per-club disable is logged instead.
+ * {@link #importClub}, which disables sync for the club ({@code setClubSync(clubId, false)}). A
+ * failed <i>single leaderboard or standings</i> fetch is non-fatal: it is logged and skipped so the
+ * rest of the batch still applies and the event still fires.
  */
 @Service
 @RequiredArgsConstructor
@@ -107,10 +90,8 @@ public class ClubImportWorker {
     }
 
     /**
-     * A club needing a detail update splits three ways, mirroring
-     * {@code UpdateClubProcessHandler.processUpdateExistingClub}: an upcoming championship that has
-     * started and a just-finished active event each get their own batch; otherwise it is a plain
-     * details refresh.
+     * A club needing a detail update splits three ways: an upcoming championship that has started and
+     * a just-finished active event each get their own batch; otherwise it is a plain details refresh.
      */
     private ClubImportReport updateExistingClub(String clubId) {
         if (clubService.hasUpcomingChampionshipThatStarted(clubId)) {
@@ -123,7 +104,7 @@ public class ClubImportWorker {
         }
     }
 
-    /** Mirrors {@code UpcomingChampionshipStartedProcessHandler}: refresh details, then announce the start. */
+    /** Refresh details, then announce that the upcoming championship has started. */
     private ClubImportReport championshipStarted(String clubId) {
         fetchAndUpdateDetails(clubId);
         eventPublisher.publishEvent(new ClubChampionshipStarted(clubId));
@@ -131,9 +112,9 @@ public class ClubImportWorker {
     }
 
     /**
-     * Mirrors {@code EventEndedProcessHandler}: refresh details (fatal on failure), then push the open
-     * leaderboards and the active championship's standings, then announce the ended event. A failed
-     * board/standings fetch is logged and skipped inside the apply helpers.
+     * Refresh details (fatal on failure), then push the open leaderboards and the active championship's
+     * standings, then announce the ended event. A failed board/standings fetch is logged and skipped
+     * inside the apply helpers.
      */
     private ClubImportReport eventEnded(String clubId) {
         fetchAndUpdateDetails(clubId);
@@ -148,7 +129,7 @@ public class ClubImportWorker {
                 boards.boards(), standings, boards.entries());
     }
 
-    /** Mirrors {@code UpdateLeaderboardsProcessHandler}: push the boards that need it, then signal a refresh. */
+    /** Push the boards that need it, then signal a refresh. */
     private ClubImportReport updateLeaderboards(String clubId) {
         List<String> leaderboards = clubService.getLeaderboardsRequiringUpdate(clubId);
         if (leaderboards.isEmpty()) {
@@ -162,8 +143,8 @@ public class ClubImportWorker {
     }
 
     /**
-     * Mirrors {@code UpdateHistoryClubProcessHandler}: push the finished-event leaderboards and their
-     * championship standings, mark the history update done, then announce the ended event.
+     * Push the finished-event leaderboards and their championship standings, mark the history update
+     * done, then announce the ended event.
      */
     private ClubImportReport updateHistory(String clubId) {
         AppliedBoards boards = applyLeaderboards(clubId, clubService.getHistoryLeaderboards(clubId));
@@ -184,12 +165,11 @@ public class ClubImportWorker {
 
     /**
      * Fetch every championship the club references except {@code currentChampionship} (already embedded in
-     * {@code clubDetails}), one virtual thread per championship. Mirrors the legacy
-     * {@code ClubDetailsImporter.getUniqueChampionships} fan-out, but stays on virtual threads instead of the
-     * common {@code ForkJoinPool}, so the blocking Racenet calls never pin a carrier thread.
+     * {@code clubDetails}), one virtual thread per championship, so the blocking Racenet calls never pin a
+     * carrier thread.
      *
-     * <p>If any fetch fails the exception propagates (the caller disables sync), matching the legacy
-     * {@code allOf} semantics where one failed fetch failed the whole creation.
+     * <p>If any fetch fails the exception propagates and the caller disables sync — one failed fetch fails
+     * the whole creation.
      */
     private List<ChampionshipTo> fetchUniqueChampionships(ClubDetailsTo clubDetails) {
         List<String> championshipIds = clubDetails.currentChampionship()
@@ -214,8 +194,7 @@ public class ClubImportWorker {
     /**
      * Fetch each leaderboard on its own virtual thread, then push the results sequentially on this
      * thread (the domain writes stay single-threaded per club). A single board's fetch failure is
-     * logged and skipped so the rest of the batch still applies — the legacy per-board
-     * {@code exceptionally} behaviour.
+     * logged and skipped so the rest of the batch still applies.
      */
     private AppliedBoards applyLeaderboards(String clubId, Collection<String> leaderboardIds) {
         int boards = 0;
@@ -245,8 +224,7 @@ public class ClubImportWorker {
 
     /**
      * Fetch each championship's standings on its own virtual thread, then push the results sequentially.
-     * A single championship's fetch failure is logged and skipped, matching the legacy filtering of
-     * {@code StandingsImportResultFailed}.
+     * A single championship's fetch failure is logged and skipped.
      */
     private int applyStandings(String clubId, Collection<String> championshipIds) {
         int applied = 0;
@@ -267,7 +245,7 @@ public class ClubImportWorker {
         return applied;
     }
 
-    /** Blocking, paginated leaderboard fetch — the sync equivalent of {@code ClubLeaderboardsImporter.importLeaderboard}. */
+    /** Blocking, paginated leaderboard fetch. */
     private LeaderboardUpdatedResult fetchLeaderboard(String clubId, String leaderboardId) {
         List<ClubLeaderboardEntryTo> entries = new ArrayList<>();
         String cursor = null;
@@ -280,7 +258,7 @@ public class ClubImportWorker {
         return new LeaderboardUpdatedResult(clubId, leaderboardId, entries);
     }
 
-    /** Blocking, paginated standings fetch — the sync equivalent of {@code ClubStandingsImporter.importStandings}. */
+    /** Blocking, paginated standings fetch. */
     private StandingsUpdatedResult fetchStandings(String clubId, String championshipId) {
         List<ClubStandingsResultEntryTo> entries = new ArrayList<>();
         String cursor = null;

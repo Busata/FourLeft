@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.maciejwalkowiak.wiremock.spring.ConfigureWireMock;
 import com.maciejwalkowiak.wiremock.spring.EnableWireMock;
 import com.maciejwalkowiak.wiremock.spring.InjectWireMock;
-import io.busata.fourleft.backendeasportswrc.application.importer.ClubsImporterService;
+import io.busata.fourleft.backendeasportswrc.application.importer.ClubImporter;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.authorization.EAWRCToken;
 import io.busata.fourleft.backendeasportswrc.infrastructure.time.ApplicationClock;
 import io.busata.fourleft.backendeasportswrc.test.AbstractIntegrationTest;
@@ -41,7 +41,7 @@ class DiscordAutoPostingServiceIntegrationTest extends AbstractIntegrationTest {
     private WireMockServer authorizationApi;
 
     @Autowired
-    private ClubsImporterService clubsImporterService;
+    private ClubImporter clubsImporterService;
 
     @Autowired
     private RacenetApiWireMocks racenetApiWireMocks;

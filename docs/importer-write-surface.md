@@ -4,18 +4,19 @@ Analysis of every persistence write the in-process club importer performs, to de
 HTTP endpoints a future **out-of-process importer** would call to push results back.
 
 - **Companion interface:** [`ClubImportApi.java`](../backend-ea-sports-wrc/src/main/java/io/busata/fourleft/backendeasportswrc/endpoints/importapi/ClubImportApi.java)
-- **Scope:** the `application.importer.*` state machine and the domain-service methods it calls.
+- **Scope:** the `application.importer.vt.ClubImportWorker` flow and the domain-service methods it calls.
 
 ---
 
 ## How the importer works today
 
-`ClubUpdateSchedule` (every 5s) → `ClubsImporterService.sync()`:
+A club is imported either by the work queue (`application/work/queue/`, when `work-queue.enabled`)
+or, when the queue is off, by `ClubUpdateSchedule` (every 5s) → `ClubImporter.sync()`. Both paths
+converge on `ClubImportWorker.importClub(clubId)`, which runs on a single virtual thread:
 
-1. `initiateClubProcessing()` reads `ClubConfiguration.keepSynced` clubs and starts a
-   `ClubImportProcess` (a state machine) per club.
-2. `orchestrateRunningProcesses()` steps each process. Handlers in
-   `application/importer/process/` **fetch from Racenet (async, read-only)** and then call
+1. It reads current club state via `ClubService` (`exists`, `requires{Detail,Leaderboard,History}Update`,
+   …) to decide what this club needs this cycle.
+2. It **fetches from Racenet (blocking)** through `BlockingRacenetGateway`, then calls
    **domain services**, which do all the writes inside `@Transactional` methods.
 
 The importer never touches repositories directly. All persistence funnels through
@@ -59,19 +60,19 @@ Handlers load entities with `findById(...)`, mutate them, and rely on tx-commit 
 
 ## Input payloads (fields consumed from Racenet)
 
-**Club create/update (W1, W2)** — source `ClubDetailsImporter.createNewClub/fetchDetails`:
+**Club create/update (W1, W2)** — source `ClubImportWorker.createNewClub/fetchAndUpdateDetails`:
 
 - **Club:** `clubID`, `clubName`, `clubDescription`, `activeMemberCount`, `clubCreatedAt`, `championshipIDs`, `currentChampionship`
 - **Championship (`ChampionshipTo`):** `id`, `absoluteOpenDate`, `absoluteCloseDate`, `settings{name, format, bonusPointsMode, scoringSystem, trackDegradation, isHardcoreDamageEnabled, isAssistsAllowed, isTuningAllowed}`, `events[]`
 - **Event (`ChampionshipEventTo`):** `id`, `leaderboardID`, `absoluteOpenDate`, `absoluteCloseDate`, `status`, `eventSettings{vehicleClassID, vehicleClass, weatherSeasonID, weatherSeason, locationID, location, duration}`, `stages[]`
 - **Stage (`ChampionshipEventStageTo`):** `id`, `leaderboardID`, `stageSettings{routeID, route, weatherAndSurfaceID, weatherAndSurface, timeOfDayID, timeOfDay, serviceAreaID, serviceArea}`
 
-**Leaderboard (W7)** — source `ClubLeaderboardsImporter.importLeaderboard` (paginated). Per entry:
+**Leaderboard (W7)** — source `ClubImportWorker.fetchLeaderboard` (paginated). Per entry:
 `displayName, nationalityID, platform, rank, vehicle, wrcPlayerId, ssid, time, timePenalty,
 timeAccumulated, differenceToFirst`. Derived **server-side**: `rankAccumulated`,
 `differenceAccumulated`, dedup by displayName, sort by `timeAccumulated`.
 
-**Standings (W5/W6)** — source `ClubStandingsImporter.importStandings` (paginated). Per entry:
+**Standings (W5/W6)** — source `ClubImportWorker.fetchStandings` (paginated). Per entry:
 `ssid, displayName, pointsAccumulated, rank, nationalityID`. Deduplicated by `rank` server-side.
 
 ---
@@ -84,9 +85,9 @@ Published **after** the writes; downstream features depend on them:
 
 | Event | Emitted at | Downstream |
 |---|---|---|
-| `ClubEventEnded` | `EventEndedProcessHandler:95`, `UpdateHistoryClubProcessHandler:81` | Discord "event ended" message |
-| `ClubChampionshipStarted` | `UpcomingChampionshipStartedProcessHandler:56` | Discord "championship started" message |
-| `LeaderboardUpdatedEvent` | `UpdateLeaderboardsProcessHandler:74` | `EventRelayer` → RabbitMQ `ChannelUpdatedEvent` (channel refresh) |
+| `ClubEventEnded` | `ClubImportWorker.eventEnded`, `ClubImportWorker.updateHistory` | Discord "event ended" message |
+| `ClubChampionshipStarted` | `ClubImportWorker.championshipStarted` | Discord "championship started" message |
+| `LeaderboardUpdatedEvent` | `ClubImportWorker.updateLeaderboards` | `EventRelayer` → RabbitMQ `ChannelUpdatedEvent` (channel refresh) |
 
 If the importer moves out, **the endpoints must re-publish these** or notifications/relays
 break silently. Note `ClubEventEnded` fires once after a *batch* of writes (details + all open
@@ -94,18 +95,20 @@ leaderboards + active-championship standings) — hence the explicit `signalEven
 
 ### 2. External side-effect
 
-`ClubsImporterService:69` posts a Discord message ("Disabled clubs count: N") when any process
-ends `FAILED`. Host-side orchestration concern.
+When a club's details fetch fails, `ClubImportWorker` disables sync for that club
+(`setClubSync(clubId, false)`) and logs it. (The old state machine also posted an aggregate
+Discord "Disabled clubs count: N" message per cycle; that has no cycle boundary here — clubs run
+on independent threads — so it was intentionally dropped.)
 
 ### 3. The importer is also a reader — the real design fork
 
 What to fetch is decided entirely by DB reads of current club state
-(`InitialClubProcessHandler`, `UpdateClubProcessHandler`, `ClubService`): `exists`,
+(`ClubImportWorker` via `ClubService`): `exists`,
 `requires{Detail,Leaderboard,History}Update`, `hasActiveEventThatFinished`,
 `hasUpcomingChampionshipThatStarted`, `getOpenLeaderboards`, `getLeaderboardsRequiringUpdate`,
 `getHistory{Leaderboards,Championships}`, `getActiveChampionshipId`, `findSyncableClubs`.
 
-- **Option A — thin writer (recommended).** State machine + decisions stay in this app; the
+- **Option A — thin writer (recommended).** The import flow + decisions stay in this app; the
   remote app only does Racenet fetch + push. Fewest moving parts; DB stays single-owner. The
   write endpoints above are all you need.
 - **Option B — autonomous importer.** The remote app owns the decision logic and needs

@@ -29,9 +29,9 @@ import java.util.List;
  *       features depend on (Discord notifications; RabbitMQ {@code ChannelUpdatedEvent} via
  *       {@code EventRelayer}). Each method below documents which event its flow currently emits;
  *       the endpoint implementation must re-publish them or those features silently break.</li>
- *   <li><b>What to import is decided by DB reads.</b> The current state machine
- *       ({@code InitialClubProcessHandler} etc.) reads club state to choose which leaderboards /
- *       championships need fetching. This interface is the <i>write</i> half only; if the remote
+ *   <li><b>What to import is decided by DB reads.</b> The importer ({@code ClubImportWorker}) reads
+ *       club state to choose which leaderboards / championships need fetching. This interface is the
+ *       <i>write</i> half only; if the remote
  *       app also owns that decision logic it needs matching read endpoints (see the design doc).</li>
  * </ol>
  *

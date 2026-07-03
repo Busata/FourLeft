@@ -49,7 +49,7 @@ class ClubCreationIntegrationTest extends AbstractIntegrationTest {
     private WireMockServer racenetApi;
 
     @Autowired
-    private ClubsImporterService clubsImporterService;
+    private ClubImporter clubsImporterService;
 
     @Autowired
     private ClubConfigurationService clubConfigurationService;

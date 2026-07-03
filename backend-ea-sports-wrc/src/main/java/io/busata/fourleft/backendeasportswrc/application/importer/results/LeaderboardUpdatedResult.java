@@ -6,7 +6,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-public class LeaderboardUpdatedResult extends LeaderboardImportResult {
+public class LeaderboardUpdatedResult {
 
     @Getter
     private final String clubId;

@@ -7,7 +7,6 @@ import io.busata.fourleft.backendeasportswrc.infrastructure.properties.ImporterP
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -16,20 +15,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Virtual-thread rewrite of the club importer. Enabled with {@code fourleft.importer.mode=virtual-threads}.
- *
- * <p><b>Model:</b> instead of the {@code CompletableFuture} state machine (legacy
- * {@code ClubsImporterService} + {@code process.*} handlers), each club is imported by one
- * <i>virtual thread</i> running a plain, linear, blocking flow ({@link ClubImportWorker#importClub}).
- * Racenet fetches block the virtual thread cheaply; there is no explicit state enum to advance.
+ * The club importer: each club is imported by one <i>virtual thread</i> running a plain, linear,
+ * blocking flow ({@link ClubImportWorker#importClub}). Racenet fetches block the virtual thread
+ * cheaply; there is no explicit state enum to advance.
  *
  * <p><b>This class owns only orchestration:</b> the virtual-thread executor lifecycle and the
- * in-flight guard so the 5s schedule never starts a second worker for a club that is still running
- * (the legacy analogue is {@code runningProcesses}). All the real import logic lives in
- * {@link ClubImportWorker} — that is what you rewrite.
+ * in-flight guard so the 5s schedule never starts a second worker for a club that is still running.
+ * All the real import logic lives in {@link ClubImportWorker}.
  */
 @Service
-@ConditionalOnProperty(name = "fourleft.importer.mode", havingValue = "virtual-threads")
 @RequiredArgsConstructor
 @Slf4j
 public class VirtualThreadClubImporter implements ClubImporter {
@@ -64,7 +58,7 @@ public class VirtualThreadClubImporter implements ClubImporter {
     }
 
     private void startIfNotRunning(String clubId) {
-        // Set.add returns false if the club is already in flight -> skip, mirroring the legacy dedupe.
+        // Set.add returns false if the club is already in flight -> skip.
         if (!inFlight.add(clubId)) {
             return;
         }
