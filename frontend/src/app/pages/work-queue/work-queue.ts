@@ -156,7 +156,9 @@ export class WorkQueue implements OnInit {
   jobCounts(job: WorkJobView): string {
     const parts: string[] = [];
     if (job.leaderboardsUpdated) {
-      parts.push(`${job.leaderboardsUpdated} board${job.leaderboardsUpdated === 1 ? '' : 's'}`);
+      parts.push(
+        `${job.leaderboardsUpdated} leaderboard${job.leaderboardsUpdated === 1 ? '' : 's'}`,
+      );
     }
     if (job.entriesImported) {
       parts.push(`${job.entriesImported} entries`);
