@@ -72,10 +72,17 @@ public class Championship {
 
         if(now.isAfter(absoluteCloseDate.toLocalDateTime())) {
             this.status = EventStatus.FINISHED;
-        } else {
-            this.status = EventStatus.OPEN;
+            // The championship is over, so every event in it is over. Force them closed rather than
+            // leaving each event to its own close date: when the championship's close date precedes
+            // its last event's (or the API still reports that event OPEN), the event would otherwise
+            // stay OPEN and custom points — computed only over finished events — would silently drop
+            // it. Use Event::markClosed, not Championship::markClosed, so updatedAfterFinish stays
+            // false and the final history/standings import still runs.
+            this.events.forEach(Event::markClosed);
+            return;
         }
 
+        this.status = EventStatus.OPEN;
         this.events.forEach(Event::updateStatus);
     }
 
