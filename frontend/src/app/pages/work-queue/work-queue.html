@@ -70,6 +70,9 @@
           <th>Type</th>
           <th>Ref</th>
           <th>Status</th>
+          <th>Outcome</th>
+          <th>Duration</th>
+          <th>Details</th>
           <th>Created</th>
           <th>Last error</th>
         </tr>
@@ -81,6 +84,14 @@
             <td>{{ typeLabel(job.type) }}</td>
             <td>{{ job.ref }}</td>
             <td><span class="iq-badge" [class]="'iq-badge iq-badge--' + job.status">{{ job.status }}</span></td>
+            <td>
+              {{ outcomeLabel(job.outcome) }}
+              @if (job.recovered) {
+                <span class="iq-badge iq-badge--recovered" title="Recovered after a crashed worker">⟳</span>
+              }
+            </td>
+            <td [title]="durationTitle(job)">{{ formatDuration(job.durationMs) }}</td>
+            <td class="muted">{{ jobCounts(job) }}</td>
             <td>{{ formatTime(job.createdAt) }}</td>
             <td class="iq-err" [title]="job.lastError ?? ''">{{ job.lastError }}</td>
           </tr>

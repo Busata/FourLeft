@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin, interval, merge, startWith, Subject, switchMap } from 'rxjs';
 
 import {
+  JobOutcome,
   JobStatus,
   JobType,
   WorkJobView,
@@ -17,6 +18,17 @@ const TYPE_ORDER: JobType[] = ['CLUB'];
 
 const TYPE_LABELS: Record<JobType, string> = {
   CLUB: 'Club',
+};
+
+const OUTCOME_LABELS: Record<JobOutcome, string> = {
+  CLUB_CREATED: 'Club created',
+  CHAMPIONSHIP_STARTED: 'Championship started',
+  EVENT_ENDED: 'Event ended',
+  LEADERBOARDS_UPDATED: 'Leaderboards updated',
+  HISTORY_UPDATED: 'History updated',
+  DETAILS_REFRESHED: 'Details refreshed',
+  NO_CHANGE: 'No change',
+  SYNC_DISABLED: 'Sync disabled (failed)',
 };
 
 type StatusFilter = JobStatus | 'ALL';
@@ -117,6 +129,54 @@ export class WorkQueue implements OnInit {
   totalCount(): number {
     const counts = this.summary()?.jobCountsByStatus;
     return counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
+  }
+
+  outcomeLabel(outcome: JobOutcome | null): string {
+    return outcome ? (OUTCOME_LABELS[outcome] ?? outcome) : '—';
+  }
+
+  /** Compact elapsed duration, e.g. "820ms", "4.3s", "1m 12s". */
+  formatDuration(ms: number | null): string {
+    if (ms == null) {
+      return '—';
+    }
+    if (ms < 1000) {
+      return `${ms}ms`;
+    }
+    const seconds = ms / 1000;
+    if (seconds < 60) {
+      return `${seconds.toFixed(1)}s`;
+    }
+    const mins = Math.floor(seconds / 60);
+    const rem = Math.round(seconds % 60);
+    return `${mins}m ${rem}s`;
+  }
+
+  /** What the run moved, e.g. "3 boards · 512 entries · 1 standings"; empty when nothing. */
+  jobCounts(job: WorkJobView): string {
+    const parts: string[] = [];
+    if (job.leaderboardsUpdated) {
+      parts.push(`${job.leaderboardsUpdated} board${job.leaderboardsUpdated === 1 ? '' : 's'}`);
+    }
+    if (job.entriesImported) {
+      parts.push(`${job.entriesImported} entries`);
+    }
+    if (job.standingsUpdated) {
+      parts.push(`${job.standingsUpdated} standings`);
+    }
+    return parts.join(' · ');
+  }
+
+  /** Tooltip for the duration cell: queue wait + recovery note. */
+  durationTitle(job: WorkJobView): string {
+    const bits: string[] = [];
+    if (job.waitMs != null) {
+      bits.push(`waited ${this.formatDuration(job.waitMs)} in queue`);
+    }
+    if (job.recovered) {
+      bits.push(`recovered after crash (${job.attempts} attempts)`);
+    }
+    return bits.join(' • ');
   }
 
   /** Human-friendly absolute + relative time, e.g. "12:30:05 (in 4s)". */

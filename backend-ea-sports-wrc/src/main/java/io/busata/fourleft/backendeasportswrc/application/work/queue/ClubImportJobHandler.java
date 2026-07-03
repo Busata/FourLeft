@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
+import io.busata.fourleft.backendeasportswrc.application.importer.vt.ClubImportReport;
 import io.busata.fourleft.backendeasportswrc.application.importer.vt.ClubImportWorker;
 import io.busata.fourleft.backendeasportswrc.domain.models.Job;
 import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
@@ -45,7 +46,8 @@ public class ClubImportJobHandler implements JobHandler {
     public JobResult handle(Job job) {
         // importClub owns its own failure handling (disables sync; does not rethrow), so the job
         // completes even on import error. requeueStale recovers a crashed worker.
-        clubImportWorker.importClub(job.getRef());
-        return JobResult.dataChanged();
+        ClubImportReport report = clubImportWorker.importClub(job.getRef());
+        return new JobResult(report.changed(), report.outcome(),
+                report.leaderboardsUpdated(), report.standingsUpdated(), report.entriesImported());
     }
 }

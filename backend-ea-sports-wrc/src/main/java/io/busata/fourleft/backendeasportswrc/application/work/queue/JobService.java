@@ -57,8 +57,11 @@ public class JobService {
         });
     }
 
+    /** Mark DONE and record what the run did (outcome, item counts, duration via finishedAt). */
     @Transactional
-    public void complete(Job job) {
+    public void complete(Job job, JobResult result) {
+        job.recordOutcome(result.outcome(), result.changed(),
+                result.leaderboardsUpdated(), result.standingsUpdated(), result.entriesImported());
         job.markDone();
         jobRepository.save(job);
     }
@@ -67,8 +70,7 @@ public class JobService {
     @Transactional
     public void fail(Job job, Exception ex) {
         job.setLastError(ex.getMessage());
-        job.setStatus(JobStatus.FAILED);
-        job.setLockedAt(null);
+        job.markFailed();
         log.error("Job {} ({} {}) failed", job.getId(), job.getType(), job.getRef(), ex);
         jobRepository.save(job);
     }

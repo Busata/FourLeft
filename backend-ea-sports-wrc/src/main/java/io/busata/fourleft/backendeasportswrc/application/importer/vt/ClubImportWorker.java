@@ -5,6 +5,7 @@ import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
 import io.busata.fourleft.api.easportswrc.events.LeaderboardUpdatedEvent;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.LeaderboardUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.StandingsUpdatedResult;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobOutcome;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
@@ -70,35 +71,38 @@ public class ClubImportWorker {
     private final BlockingRacenetGateway racenetGateway;
     private final ApplicationEventPublisher eventPublisher;
 
-    public void importClub(String clubId) {
+    public ClubImportReport importClub(String clubId) {
         try {
             if (!clubService.exists(clubId)) {
-                createNewClub(clubId);
-                return;
+                return createNewClub(clubId);
             }
 
             if (clubService.requiresDetailUpdate(clubId)) {
-                updateExistingClub(clubId);
+                return updateExistingClub(clubId);
             } else if (clubService.requiresLeaderboardUpdate(clubId)) {
-                updateLeaderboards(clubId);
+                return updateLeaderboards(clubId);
             } else if (clubService.requiresHistoryUpdate(clubId)) {
-                updateHistory(clubId);
+                return updateHistory(clubId);
             }
-            // else: nothing to do this cycle.
+            // Nothing to do this cycle.
+            return ClubImportReport.of(JobOutcome.NO_CHANGE, false);
         } catch (Exception ex) {
             handleFailure(clubId, ex);
+            return ClubImportReport.of(JobOutcome.SYNC_DISABLED, false);
         }
     }
 
-    private void createNewClub(String clubId) {
+    private ClubImportReport createNewClub(String clubId) {
         try {
             var clubDetails = this.racenetGateway.getClubDetail(clubId);
             var championships = fetchUniqueChampionships(clubDetails);
 
             this.clubService.createClub(clubDetails, championships);
+            return ClubImportReport.of(JobOutcome.CLUB_CREATED, true);
         } catch (Exception ex) {
             this.clubConfigurationService.setClubSync(clubId, false);
             log.error("Error while fetching club details for club {} and championships", clubId, ex);
+            return ClubImportReport.of(JobOutcome.SYNC_DISABLED, false);
         }
     }
 
@@ -108,20 +112,22 @@ public class ClubImportWorker {
      * started and a just-finished active event each get their own batch; otherwise it is a plain
      * details refresh.
      */
-    private void updateExistingClub(String clubId) {
+    private ClubImportReport updateExistingClub(String clubId) {
         if (clubService.hasUpcomingChampionshipThatStarted(clubId)) {
-            championshipStarted(clubId);
+            return championshipStarted(clubId);
         } else if (clubService.hasActiveEventThatFinished(clubId)) {
-            eventEnded(clubId);
+            return eventEnded(clubId);
         } else {
             fetchAndUpdateDetails(clubId);
+            return ClubImportReport.of(JobOutcome.DETAILS_REFRESHED, true);
         }
     }
 
     /** Mirrors {@code UpcomingChampionshipStartedProcessHandler}: refresh details, then announce the start. */
-    private void championshipStarted(String clubId) {
+    private ClubImportReport championshipStarted(String clubId) {
         fetchAndUpdateDetails(clubId);
         eventPublisher.publishEvent(new ClubChampionshipStarted(clubId));
+        return ClubImportReport.of(JobOutcome.CHAMPIONSHIP_STARTED, true);
     }
 
     /**
@@ -129,38 +135,44 @@ public class ClubImportWorker {
      * leaderboards and the active championship's standings, then announce the ended event. A failed
      * board/standings fetch is logged and skipped inside the apply helpers.
      */
-    private void eventEnded(String clubId) {
+    private ClubImportReport eventEnded(String clubId) {
         fetchAndUpdateDetails(clubId);
 
-        applyLeaderboards(clubId, clubService.getOpenLeaderboards(clubId));
+        AppliedBoards boards = applyLeaderboards(clubId, clubService.getOpenLeaderboards(clubId));
 
         String activeChampionshipId = clubService.getActiveChampionshipId(clubId).orElseThrow();
-        applyStandings(clubId, List.of(activeChampionshipId));
+        int standings = applyStandings(clubId, List.of(activeChampionshipId));
 
         eventPublisher.publishEvent(new ClubEventEnded(clubId));
+        return new ClubImportReport(JobOutcome.EVENT_ENDED, true,
+                boards.boards(), standings, boards.entries());
     }
 
     /** Mirrors {@code UpdateLeaderboardsProcessHandler}: push the boards that need it, then signal a refresh. */
-    private void updateLeaderboards(String clubId) {
+    private ClubImportReport updateLeaderboards(String clubId) {
         List<String> leaderboards = clubService.getLeaderboardsRequiringUpdate(clubId);
         if (leaderboards.isEmpty()) {
-            return;
+            return ClubImportReport.of(JobOutcome.NO_CHANGE, false);
         }
 
-        applyLeaderboards(clubId, leaderboards);
+        AppliedBoards boards = applyLeaderboards(clubId, leaderboards);
         eventPublisher.publishEvent(new LeaderboardUpdatedEvent(clubId));
+        return new ClubImportReport(JobOutcome.LEADERBOARDS_UPDATED, true,
+                boards.boards(), 0, boards.entries());
     }
 
     /**
      * Mirrors {@code UpdateHistoryClubProcessHandler}: push the finished-event leaderboards and their
      * championship standings, mark the history update done, then announce the ended event.
      */
-    private void updateHistory(String clubId) {
-        applyLeaderboards(clubId, clubService.getHistoryLeaderboards(clubId));
-        applyStandings(clubId, clubService.getHistoryChampionships(clubId));
+    private ClubImportReport updateHistory(String clubId) {
+        AppliedBoards boards = applyLeaderboards(clubId, clubService.getHistoryLeaderboards(clubId));
+        int standings = applyStandings(clubId, clubService.getHistoryChampionships(clubId));
 
         clubService.markHistoryUpdateDone(clubId);
         eventPublisher.publishEvent(new ClubEventEnded(clubId));
+        return new ClubImportReport(JobOutcome.HISTORY_UPDATED, true,
+                boards.boards(), standings, boards.entries());
     }
 
     private void fetchAndUpdateDetails(String clubId) {
@@ -205,7 +217,9 @@ public class ClubImportWorker {
      * logged and skipped so the rest of the batch still applies — the legacy per-board
      * {@code exceptionally} behaviour.
      */
-    private void applyLeaderboards(String clubId, Collection<String> leaderboardIds) {
+    private AppliedBoards applyLeaderboards(String clubId, Collection<String> leaderboardIds) {
+        int boards = 0;
+        int entries = 0;
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             var futures = leaderboardIds.stream()
                     .map(id -> Map.entry(id, executor.submit(() -> fetchLeaderboard(clubId, id))))
@@ -213,12 +227,20 @@ public class ClubImportWorker {
 
             for (var future : futures) {
                 try {
-                    clubLeaderboardService.updateLeaderboards(Futures.join(future.getValue()));
+                    LeaderboardUpdatedResult result = Futures.join(future.getValue());
+                    clubLeaderboardService.updateLeaderboards(result);
+                    boards++;
+                    entries += result.getEntries().size();
                 } catch (Exception ex) {
                     log.error("Club {} • Board {} • Failed to import", clubId, future.getKey(), ex);
                 }
             }
         }
+        return new AppliedBoards(boards, entries);
+    }
+
+    /** How much a leaderboard batch actually pushed: distinct boards and total entries across them. */
+    private record AppliedBoards(int boards, int entries) {
     }
 
     /**
@@ -226,7 +248,8 @@ public class ClubImportWorker {
      * A single championship's fetch failure is logged and skipped, matching the legacy filtering of
      * {@code StandingsImportResultFailed}.
      */
-    private void applyStandings(String clubId, Collection<String> championshipIds) {
+    private int applyStandings(String clubId, Collection<String> championshipIds) {
+        int applied = 0;
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             var futures = championshipIds.stream()
                     .map(id -> Map.entry(id, executor.submit(() -> fetchStandings(clubId, id))))
@@ -235,11 +258,13 @@ public class ClubImportWorker {
             for (var future : futures) {
                 try {
                     clubService.updateStandings(Futures.join(future.getValue()));
+                    applied++;
                 } catch (Exception ex) {
                     log.error("Club {} • Championship {} • Failed to import standings", clubId, future.getKey(), ex);
                 }
             }
         }
+        return applied;
     }
 
     /** Blocking, paginated leaderboard fetch — the sync equivalent of {@code ClubLeaderboardsImporter.importLeaderboard}. */

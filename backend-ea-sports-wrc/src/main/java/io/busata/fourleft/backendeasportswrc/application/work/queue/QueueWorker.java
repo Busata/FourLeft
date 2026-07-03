@@ -101,8 +101,8 @@ public class QueueWorker {
 
     private void process(Job job) {
         try {
-            dispatcher.dispatch(job);
-            jobService.complete(job);
+            JobResult result = dispatcher.dispatch(job);
+            jobService.complete(job, result);
             if (job.getTargetId() != null) {
                 // Recompute next-due from the post-import state (timestamps/boundaries just advanced).
                 targetService.rescheduleFromState(job.getTargetId());

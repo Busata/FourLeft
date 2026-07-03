@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Comparator;
@@ -96,12 +97,31 @@ public class WorkQueueEndpoint {
                               Map<String, Long> jobCountsByType) {
     }
 
+    /**
+     * A job for the status table. Beyond identity/status it reports what a completed run did
+     * ({@code outcome}, {@code changed}, item counts), how long it took ({@code durationMs}), how
+     * long it waited to be picked up ({@code waitMs}), and whether it was recovered from a crashed
+     * worker ({@code attempts > 1 -> recovered}).
+     */
     public record JobView(Long id, String type, String ref, String status,
-                          Instant lockedAt, Instant createdAt,
+                          Instant createdAt, Instant startedAt, Instant finishedAt,
+                          Long durationMs, Long waitMs, int attempts, boolean recovered,
+                          String outcome, Boolean changed,
+                          Integer leaderboardsUpdated, Integer standingsUpdated, Integer entriesImported,
                           Long targetId, String lastError) {
         static JobView from(Job j) {
+            Instant started = j.getStartedAt();
+            Instant finished = j.getFinishedAt();
+            Long durationMs = (started != null && finished != null)
+                    ? Duration.between(started, finished).toMillis() : null;
+            Long waitMs = (started != null)
+                    ? Duration.between(j.getCreatedAt(), started).toMillis() : null;
+            int attempts = (j.getAttempts() == null) ? 0 : j.getAttempts();
             return new JobView(j.getId(), j.getType().name(), j.getRef(), j.getStatus().name(),
-                    j.getLockedAt(), j.getCreatedAt(), j.getTargetId(), j.getLastError());
+                    j.getCreatedAt(), started, finished, durationMs, waitMs, attempts, attempts > 1,
+                    (j.getOutcome() == null) ? null : j.getOutcome().name(), j.getChanged(),
+                    j.getLeaderboardsUpdated(), j.getStandingsUpdated(), j.getEntriesImported(),
+                    j.getTargetId(), j.getLastError());
         }
     }
 }

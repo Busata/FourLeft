@@ -158,6 +158,11 @@
     &--FAILED {
       background: #d2453b;
     }
+    &--recovered {
+      margin-left: 6px;
+      padding: 1px 6px;
+      background: #6b4fa0;
+    }
   }
 
   .iq-err {
