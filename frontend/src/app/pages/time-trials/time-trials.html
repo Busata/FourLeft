@@ -15,29 +15,29 @@
     <input
       class="iq-search"
       type="search"
-      placeholder="Search location, stage, class or key…"
+      placeholder="Search — space-separated terms (e.g. monte wrc wet)"
       [value]="search()"
       (input)="onSearch($any($event.target).value)" />
     <span class="tt-count">{{ total() }} combination{{ total() === 1 ? '' : 's' }}</span>
   </div>
 
-  @if (items().length) {
+  @if (visible().length) {
     <table class="iq-table">
       <thead>
         <tr>
           <th>Key</th>
-          <th>Location</th>
-          <th>Stage</th>
-          <th>Surface</th>
-          <th>Vehicle class</th>
-          <th>Exists</th>
-          <th class="num">Entries</th>
-          <th class="num">Changed</th>
-          <th>Probed</th>
+          <th class="tt-sort" (click)="setSort('location')">Location {{ sortIndicator('location') }}</th>
+          <th class="tt-sort" (click)="setSort('route')">Stage {{ sortIndicator('route') }}</th>
+          <th class="tt-sort" (click)="setSort('surface')">Surface {{ sortIndicator('surface') }}</th>
+          <th class="tt-sort" (click)="setSort('vehicleClass')">Vehicle class {{ sortIndicator('vehicleClass') }}</th>
+          <th class="tt-sort" (click)="setSort('exists')">Exists {{ sortIndicator('exists') }}</th>
+          <th class="tt-sort num" (click)="setSort('totalEntries')">Entries {{ sortIndicator('totalEntries') }}</th>
+          <th class="tt-sort num" (click)="setSort('changedEntries')">Changed {{ sortIndicator('changedEntries') }}</th>
+          <th class="tt-sort" (click)="setSort('probedAt')">Probed {{ sortIndicator('probedAt') }}</th>
         </tr>
       </thead>
       <tbody>
-        @for (c of items(); track c.id) {
+        @for (c of visible(); track c.id) {
           <tr>
             <td class="tt-key">{{ c.id }}</td>
             <td>{{ c.location }} <span class="muted">#{{ c.locationId }}</span></td>
@@ -65,7 +65,7 @@
       <span class="tt-pager__info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
       <button class="iq-chip" (click)="next()" [disabled]="page() >= totalPages() - 1">Next</button>
     </div>
-  } @else {
+  } @else if (!loading()) {
     <div class="iq-empty">
       @if (search()) {
         No combinations match "{{ search() }}".

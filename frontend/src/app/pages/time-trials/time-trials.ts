@@ -1,11 +1,35 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, debounceTime, EMPTY, startWith, Subject, switchMap, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
-import { TimeTrialPage } from '../../models/time-trial';
+import { TimeTrialCombination } from '../../models/time-trial';
 
 const PAGE_SIZE = 50;
+
+/** Columns that can be sorted; 'default' keeps the server's grouped order (location → stage → surface → class). */
+type SortKey =
+  | 'default'
+  | 'location'
+  | 'route'
+  | 'surface'
+  | 'vehicleClass'
+  | 'exists'
+  | 'totalEntries'
+  | 'changedEntries'
+  | 'probedAt';
+type SortDir = 'asc' | 'desc';
+
+// How to read a sort value from a row, and the natural default direction when the column is picked.
+const SORTERS: Record<Exclude<SortKey, 'default'>, { value: (c: TimeTrialCombination) => number | string | null; dir: SortDir }> = {
+  location: { value: (c) => c.location, dir: 'asc' },
+  route: { value: (c) => c.route, dir: 'asc' },
+  surface: { value: (c) => c.surfaceCondition, dir: 'asc' },
+  vehicleClass: { value: (c) => c.vehicleClass, dir: 'asc' },
+  exists: { value: (c) => (c.valid == null ? null : c.valid ? 1 : 0), dir: 'desc' },
+  totalEntries: { value: (c) => c.totalEntries, dir: 'desc' },
+  changedEntries: { value: (c) => c.changedEntries, dir: 'desc' },
+  probedAt: { value: (c) => (c.probedAt ? Date.parse(c.probedAt) : null), dir: 'desc' },
+};
 
 @Component({
   selector: 'app-time-trials',
@@ -15,75 +39,113 @@ const PAGE_SIZE = 50;
 export class TimeTrials implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly reload = new Subject<void>();
-  private readonly searchInput = new Subject<string>();
+
+  readonly all = signal<TimeTrialCombination[]>([]);
+  readonly loading = signal(true);
+  readonly error = signal('');
 
   readonly search = signal('');
+  readonly sortKey = signal<SortKey>('default');
+  readonly sortDir = signal<SortDir>('asc');
   readonly page = signal(0);
-  readonly data = signal<TimeTrialPage | null>(null);
-  readonly error = signal('');
-  readonly loading = signal(false);
 
-  readonly items = computed(() => this.data()?.items ?? []);
-  readonly total = computed(() => this.data()?.total ?? 0);
-  readonly totalPages = computed(() => this.data()?.totalPages ?? 0);
+  readonly pageSize = PAGE_SIZE;
+
+  /** Search terms split on whitespace — every term must match some column (AND across terms). */
+  private readonly terms = computed(() =>
+    this.search().toLowerCase().split(/\s+/).filter((t) => t.length > 0),
+  );
+
+  readonly filtered = computed(() => {
+    const terms = this.terms();
+    const rows = this.all();
+    if (terms.length === 0) {
+      return rows;
+    }
+    return rows.filter((c) => {
+      const haystack = `${c.id} ${c.location} ${c.route} ${c.vehicleClass} ${this.surfaceLabel(
+        c.surfaceCondition,
+      )}`.toLowerCase();
+      return terms.every((t) => haystack.includes(t));
+    });
+  });
+
+  readonly sorted = computed(() => {
+    const key = this.sortKey();
+    const rows = this.filtered();
+    if (key === 'default') {
+      return rows;
+    }
+    const read = SORTERS[key].value;
+    const dir = this.sortDir() === 'asc' ? 1 : -1;
+    return [...rows].sort((a, b) => {
+      const va = read(a);
+      const vb = read(b);
+      // Never-probed values sort last regardless of direction.
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+  });
+
+  readonly total = computed(() => this.filtered().length);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
+  readonly visible = computed(() => {
+    const start = this.page() * PAGE_SIZE;
+    return this.sorted().slice(start, start + PAGE_SIZE);
+  });
 
   ngOnInit(): void {
-    // Debounce the search box, then reset to the first page and refetch.
-    this.searchInput
-      .pipe(debounceTime(250), takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.search.set(value.trim());
-        this.page.set(0);
-        this.reload.next();
+    this.http
+      .get<TimeTrialCombination[]>('/api_v2/time-trials')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rows) => {
+          this.all.set(rows);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Could not reach the time-trials API.');
+          this.loading.set(false);
+        },
       });
-
-    this.reload
-      .pipe(
-        startWith(void 0),
-        tap(() => this.loading.set(true)),
-        switchMap(() =>
-          this.http.get<TimeTrialPage>('/api_v2/time-trials', { params: this.params() }).pipe(
-            catchError(() => {
-              this.error.set('Could not reach the time-trials API.');
-              this.loading.set(false);
-              return EMPTY;
-            }),
-          ),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((page) => {
-        this.data.set(page);
-        this.error.set('');
-        this.loading.set(false);
-      });
-  }
-
-  private params(): HttpParams {
-    let params = new HttpParams().set('page', String(this.page())).set('size', String(PAGE_SIZE));
-    const term = this.search();
-    if (term) {
-      params = params.set('search', term);
-    }
-    return params;
   }
 
   onSearch(value: string): void {
-    this.searchInput.next(value);
+    this.search.set(value);
+    this.page.set(0);
+  }
+
+  /** Click a column: toggle direction if already active, else switch to it at its natural default direction. */
+  setSort(key: Exclude<SortKey, 'default'>): void {
+    if (this.sortKey() === key) {
+      this.sortDir.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      this.sortKey.set(key);
+      this.sortDir.set(SORTERS[key].dir);
+    }
+    this.page.set(0);
+  }
+
+  sortIndicator(key: Exclude<SortKey, 'default'>): string {
+    if (this.sortKey() !== key) {
+      return '';
+    }
+    return this.sortDir() === 'asc' ? '▲' : '▼';
   }
 
   prev(): void {
     if (this.page() > 0) {
       this.page.update((n) => n - 1);
-      this.reload.next();
     }
   }
 
   next(): void {
     if (this.page() < this.totalPages() - 1) {
       this.page.update((n) => n + 1);
-      this.reload.next();
     }
   }
 

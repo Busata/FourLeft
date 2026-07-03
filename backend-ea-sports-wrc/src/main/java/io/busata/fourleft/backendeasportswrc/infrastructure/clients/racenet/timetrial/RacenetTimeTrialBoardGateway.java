@@ -3,7 +3,7 @@ package io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.tim
 import feign.FeignException;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.authorization.EAWRCToken;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.authorization.RacenetAuthorizationApi;
-import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.EASportsWRCRacenetApi;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.TimeTrialLeaderboardClient;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.timetrial.TimeTrialLeaderboardResultTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * Real Racenet-backed {@link TimeTrialBoardGateway}, hitting
- * {@code GET /api/wrc2023Stats/leaderboard/{routeId}/{vehicleClassId}/{surface}} on the same host and
- * with the same auth as the club calls ({@code EASportsWRCRacenetApi} / {@code web-api.racenet.com}).
+ * {@code GET /api/wrc2023Stats/leaderboard/{routeId}/{vehicleClassId}/{surface}} via
+ * {@link TimeTrialLeaderboardClient} (rate-limited + retried by resilience4j), same host + auth as
+ * the club calls.
  *
  * <p>The probe only reads {@code totalEntrantCount}, so it requests a single result. Existence:
  * a 2xx means the board is there (entry count may be 0); a 404 means there is no board for this
@@ -29,12 +30,12 @@ public class RacenetTimeTrialBoardGateway implements TimeTrialBoardGateway {
     private static final int PROBE_RESULT_COUNT = 1;
 
     private final RacenetAuthorizationApi authorizationApi;
-    private final EASportsWRCRacenetApi api;
+    private final TimeTrialLeaderboardClient client;
 
     @Override
     public ProbeResult probe(long locationId, long routeId, int surfaceCondition, long vehicleClassId) {
         try {
-            TimeTrialLeaderboardResultTo result = api.getTimeTrialLeaderboard(
+            TimeTrialLeaderboardResultTo result = client.getTimeTrialLeaderboard(
                     getHeaders(), routeId, vehicleClassId, surfaceCondition, PROBE_RESULT_COUNT, false, 0);
 
             long total = (result == null || result.totalEntrantCount() == null) ? 0L : result.totalEntrantCount();

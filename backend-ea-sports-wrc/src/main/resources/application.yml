@@ -32,3 +32,32 @@ work-queue:
   stale-job-seconds: 600
   done-retention-hours: 24
   failed-retention-hours: 336
+
+resilience4j:
+  ratelimiter:
+    rateLimiterAspectOrder: 101   # inside retry, so each retry re-acquires a permit
+    instances:
+      # Throttles the time-trial probe/fetch sweep. GLOBAL across all concurrent probe jobs, so this
+      # is the real "keep it gentle" knob: limitForPeriod / limitRefreshPeriod = max Racenet calls/sec.
+      # Keep it high enough that a per-rally probe job (<=684 calls, shared by up to
+      # work-queue.max-concurrent-jobs jobs) finishes inside stale-job-seconds (600s) — i.e. don't drop
+      # much below ~7/s while probes are per-rally.
+      racenet-timetrial:
+        limit-for-period: 8
+        limit-refresh-period: 1s
+        timeout-duration: 30s
+  retry:
+    retryAspectOrder: 100
+    instances:
+      racenet-timetrial:
+        max-attempts: 4
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 20s
+        retry-exceptions:
+          - feign.FeignException$TooManyRequests
+          - feign.FeignException$BadGateway
+          - feign.FeignException$ServiceUnavailable
+          - feign.FeignException$GatewayTimeout
+          - feign.RetryableException

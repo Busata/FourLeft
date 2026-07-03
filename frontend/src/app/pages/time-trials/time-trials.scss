@@ -98,6 +98,14 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
       background: #f6f7f9;
+      white-space: nowrap;
+    }
+    th.tt-sort {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.tt-sort:hover {
+      color: #2f72d6;
     }
     tbody tr {
       transition: background 0.1s;
