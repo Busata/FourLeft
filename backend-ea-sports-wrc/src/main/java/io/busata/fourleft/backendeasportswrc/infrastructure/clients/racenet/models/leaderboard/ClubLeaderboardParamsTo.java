@@ -7,6 +7,6 @@ public record ClubLeaderboardParamsTo(
 
 ) {
     public ClubLeaderboardParamsTo(String cursor) {
-        this(10, 0, cursor);
+        this(20, 0, cursor);
     }
 }
