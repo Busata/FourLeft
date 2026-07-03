@@ -7,7 +7,8 @@ DEPLOY="Build & deploy"
 RESTORE_DATA="Restore data"
 FOLLOW_LOGS="Follow logs"
 LOCAL_DOCKER="Local docker actions"
-TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER")
+TIME_TRIALS="Time trial actions"
+TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -24,6 +25,9 @@ if [ -n "$selected_option_index" ]; then
             ;;
         4)
           . "$FOURLEFT_DEVOPS_ROOT"/cli/docker.sh
+            ;;
+        5)
+          . "$FOURLEFT_DEVOPS_ROOT"/cli/timetrials.sh
             ;;
         *)
             echo "Invalid selection or cancelled."

@@ -95,6 +95,10 @@ export class TimeTrials implements OnInit {
     if (valid == null) {
       return 'Unknown';
     }
-    return valid ? 'Valid' : 'Invalid';
+    return valid ? 'Yes' : 'No';
+  }
+
+  probedLabel(iso: string | null): string {
+    return iso ? new Date(iso).toLocaleDateString() : '—';
   }
 }

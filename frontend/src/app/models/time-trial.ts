@@ -11,8 +11,14 @@ export interface TimeTrialCombination {
   surfaceCondition: number;
   vehicleClassId: number;
   vehicleClass: string;
-  /** Whether this combination has a board on Racenet; null = not yet determined. */
+  /** From the latest probe: whether the board exists on Racenet; null = never probed. */
   valid: boolean | null;
+  /** From the latest probe: entry count on the board; null = never probed / board absent. */
+  totalEntries: number | null;
+  /** From the latest observation: entries changed since the previous fetch; null for probes (not fetched). */
+  changedEntries: number | null;
+  /** When the latest probe ran (ISO); null = never probed. */
+  probedAt: string | null;
 }
 
 /** A page of combinations — mirrors the backend TimeTrialEndpoint.PageView. */

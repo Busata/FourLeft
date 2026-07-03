@@ -22,5 +22,7 @@ public enum JobOutcome {
     /** Nothing needed doing this cycle. */
     NO_CHANGE,
     /** The import failed and the club's sync was disabled; the job still completes. */
-    SYNC_DISABLED
+    SYNC_DISABLED,
+    /** A time-trial probe pass finished: boards checked for existence + entry counts recorded. */
+    TT_PROBED
 }

@@ -4,6 +4,7 @@ import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.mode
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ChampionshipTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.leaderboard.ClubLeaderboardResultTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.standings.ClubStandingsResultTo;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.timetrial.TimeTrialLeaderboardResultTo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,5 +38,19 @@ public interface EASportsWRCRacenetApi {
                                            @PathVariable String championshipId,
                                            @RequestParam(name="ResultCount") int resultCount,
                                            @RequestParam(name="Cursor", required = false) String cursor
+    );
+
+    /**
+     * Public time-trial leaderboard for a stage. Path is {@code routeId/vehicleClassId/surface}
+     * (surface 0=dry, 1=wet) — location is implied by the route. Responds 404 when no board exists.
+     */
+    @GetMapping("/api/wrc2023Stats/leaderboard/{routeId}/{vehicleClassId}/{surfaceCondition}")
+    TimeTrialLeaderboardResultTo getTimeTrialLeaderboard(@RequestHeader HttpHeaders headers,
+                                                         @PathVariable long routeId,
+                                                         @PathVariable long vehicleClassId,
+                                                         @PathVariable int surfaceCondition,
+                                                         @RequestParam(name="maxResultCount") int maxResultCount,
+                                                         @RequestParam(name="focusOnMe") boolean focusOnMe,
+                                                         @RequestParam(name="platform") int platform
     );
 }

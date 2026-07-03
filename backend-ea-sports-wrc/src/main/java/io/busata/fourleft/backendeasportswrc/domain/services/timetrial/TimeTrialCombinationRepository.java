@@ -7,7 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface TimeTrialCombinationRepository extends JpaRepository<TimeTrialCombination, String> {
+
+    /** Every combination for one rally — the scope of a single probe job. */
+    List<TimeTrialCombination> findByLocationId(Long locationId);
 
     /**
      * A page of combinations for the catalog, matched by a case-insensitive LIKE across the id key and

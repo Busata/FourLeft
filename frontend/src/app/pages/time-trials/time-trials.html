@@ -30,7 +30,10 @@
           <th>Stage</th>
           <th>Surface</th>
           <th>Vehicle class</th>
-          <th>Valid</th>
+          <th>Exists</th>
+          <th class="num">Entries</th>
+          <th class="num">Changed</th>
+          <th>Probed</th>
         </tr>
       </thead>
       <tbody>
@@ -49,6 +52,9 @@
                 {{ validLabel(c.valid) }}
               </span>
             </td>
+            <td class="num">{{ c.totalEntries ?? '—' }}</td>
+            <td class="num">{{ c.changedEntries ?? '—' }}</td>
+            <td class="muted">{{ probedLabel(c.probedAt) }}</td>
           </tr>
         }
       </tbody>

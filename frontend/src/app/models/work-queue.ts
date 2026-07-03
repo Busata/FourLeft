@@ -1,5 +1,5 @@
 export type JobStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED';
-export type JobType = 'CLUB';
+export type JobType = 'CLUB' | 'TT_PROBE';
 
 /** What a completed job did — mirrors the backend JobOutcome enum. */
 export type JobOutcome =
@@ -10,7 +10,8 @@ export type JobOutcome =
   | 'HISTORY_UPDATED'
   | 'DETAILS_REFRESHED'
   | 'NO_CHANGE'
-  | 'SYNC_DISABLED';
+  | 'SYNC_DISABLED'
+  | 'TT_PROBED';
 
 export interface WorkQueueSummary {
   queueEnabled: boolean;

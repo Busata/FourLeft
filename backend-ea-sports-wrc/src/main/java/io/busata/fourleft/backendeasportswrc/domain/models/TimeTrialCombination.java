@@ -4,12 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * One queryable Racenet time-trial leaderboard, identified by the tuple that addresses it:
- * {@code location + route (stage) + surface condition + vehicle class}. The catalog of every
- * such combination (seeded in {@code V017}); a worker fetches the actual board per row later.
+ * {@code location + route (stage) + surface condition + vehicle class}. The immutable catalog of
+ * every such combination (seeded in {@code V017}). Whether a board actually exists and its entry
+ * count are <em>not</em> here — those are probe observations recorded in {@code TimeTrialProbe}.
  *
  * <p>The Racenet call is
  * {@code /ea_sports_wrc/leaderboards/?selectedLocation={locationId}&selectedRoute={routeId}
@@ -36,8 +36,4 @@ public class TimeTrialCombination {
 
     private Long vehicleClassId;
     private String vehicleClass;
-
-    /** Whether this combination actually has a board on Racenet. {@code null} = not yet determined. */
-    @Setter
-    private Boolean valid;
 }
