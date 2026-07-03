@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 public class TimeTrialFetchJobHandler implements JobHandler {
 
     /**
-     * Top-N cap for a scheduled/bulk fetch. Bounds a board to {@code ceil(2000/20) = 100} calls no
+     * Top-N cap for a scheduled/bulk fetch. Bounds a board to {@code ceil(1000/20) = 50} calls no
      * matter how big it is, keeping the whole catalog affordable under the shared rate limit. A board
      * needing its full depth is handled separately (on-demand full fetch, which passes 0 = uncapped).
      */
-    private static final int FETCH_CAP = 2000;
+    private static final int FETCH_CAP = 1000;
 
     private final TimeTrialFetchService fetchService;
     private final JobService jobService;

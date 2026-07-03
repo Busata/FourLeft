@@ -26,7 +26,7 @@ import java.util.Optional;
  * {@link TimeTrialProbe} observation recording the true board size and how many of the stored entries
  * changed since the previous fetch (churn).
  *
- * <p>The cap keeps a board bounded (top 2000 = 100 calls) so the whole catalog is affordable; an
+ * <p>The cap keeps a board bounded (top 1000 = 50 calls) so the whole catalog is affordable; an
  * on-demand full fetch passes no cap and can be thousands of <em>sequential</em> calls (Racenet caps
  * the page at 20), minutes of wall-clock. Either way, to stay safe:
  * <ul>
