@@ -41,6 +41,9 @@ public class TimeTrialLeaderboardEntry {
     private String wrcPlayerId;
 
     private Long rank;
+    // Spring's naming strategy maps nationalityID -> "nationalityid" (no split before a trailing
+    // all-caps run); pin it to the migration's snake_case column instead.
+    @Column(name = "nationality_id")
     private Long nationalityID;
     private Long platform;
 
