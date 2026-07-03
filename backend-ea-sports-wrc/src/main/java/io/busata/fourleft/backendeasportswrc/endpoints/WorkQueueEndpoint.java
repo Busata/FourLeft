@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -82,9 +82,12 @@ public class WorkQueueEndpoint {
                 .toList();
     }
 
-    public record TargetView(Long id, String type, String ref, LocalDateTime nextRunAt, boolean enabled) {
+    public record TargetView(Long id, String type, String ref, Instant nextRunAt, boolean enabled) {
         static TargetView from(JobTarget t) {
-            return new TargetView(t.getId(), t.getType().name(), t.getRef(), t.getNextRunAt(), t.isEnabled());
+            // nextRunAt is a LocalDateTime in the app's UTC clock; emit it as a zoned Instant so the
+            // client parses it in UTC (a bare LocalDateTime serializes without a zone and is read as local).
+            return new TargetView(t.getId(), t.getType().name(), t.getRef(),
+                    t.getNextRunAt().toInstant(ZoneOffset.UTC), t.isEnabled());
         }
     }
 
