@@ -1,0 +1,154 @@
+<div class="ttb">
+  <!-- Sidebar: rally → stage → surface drill-down -->
+  <aside class="ttb-side">
+    @if (catalogError()) {
+      <div class="iq-banner iq-banner--error">{{ catalogError() }}</div>
+    } @else if (!catalog()) {
+      <div class="ttb-side__hint">Loading boards…</div>
+    } @else if (catalog()!.rallies.length === 0) {
+      <div class="ttb-side__hint">No boards fetched yet.</div>
+    } @else {
+      <ul class="ttb-tree">
+        @for (rally of catalog()!.rallies; track rally.locationId) {
+          <li class="ttb-tree__rally">
+            <button class="ttb-node ttb-node--rally" (click)="toggleRally(rally)">
+              <span class="ttb-caret" [class.ttb-caret--open]="isRallyOpen(rally)">▸</span>
+              {{ rally.location }}
+            </button>
+
+            @if (isRallyOpen(rally)) {
+              <ul class="ttb-tree__stages">
+                @for (stage of rally.stages; track stage.routeId) {
+                  <li>
+                    <button class="ttb-node ttb-node--stage" (click)="toggleStage(stage)">
+                      <span class="ttb-caret" [class.ttb-caret--open]="isStageOpen(stage)">▸</span>
+                      {{ stage.route }}
+                    </button>
+
+                    @if (isStageOpen(stage)) {
+                      <ul class="ttb-tree__surfaces">
+                        @for (surface of stage.surfaces; track surface.surfaceCondition) {
+                          <li>
+                            <button
+                              class="ttb-node ttb-node--surface"
+                              [class.ttb-node--active]="isSurfaceSelected(stage, surface)"
+                              (click)="selectSurface(rally, stage, surface)">
+                              {{ surfaceLabel(surface.surfaceCondition) }}
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <!-- Main panel: class selector + entries -->
+  <section class="ttb-main">
+    @if (!selection()) {
+      <div class="ttb-empty">
+        <h2>Pick a board</h2>
+        <p>Drill down on the left: choose a rally, a stage, then dry or wet.</p>
+      </div>
+    } @else {
+      <header class="ttb-context">
+        <h1>{{ selection()!.location }}</h1>
+        <span class="ttb-crumb">{{ selection()!.route }}</span>
+        <span class="ttb-crumb ttb-crumb--surface">{{ surfaceLabel(selection()!.surfaceCondition) }}</span>
+      </header>
+
+      <!-- Car class — consistently shown for the selected stage+surface -->
+      <div class="ttb-classes">
+        <span class="ttb-classes__label">Class</span>
+        @for (cls of selection()!.classes; track cls.vehicleClassId) {
+          <button
+            class="iq-chip"
+            [class.iq-chip--active]="selectedClassId() === cls.vehicleClassId"
+            (click)="selectClass(cls.vehicleClassId)">
+            {{ cls.vehicleClass }}
+          </button>
+        }
+      </div>
+
+      @if (entriesError()) {
+        <div class="iq-banner iq-banner--error">{{ entriesError() }}</div>
+      }
+
+      @if (entryPage(); as ep) {
+        <div class="ttb-tablewrap">
+          <table class="iq-table ttb-table">
+            <thead>
+              <tr>
+                <th class="num">#</th>
+                <th>Driver</th>
+                <th>Vehicle</th>
+                <th class="num">Time</th>
+                <th class="num">Gap</th>
+                <th class="splits-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of ep.entries; track entry.rank) {
+                <tr
+                  class="ttb-row"
+                  [class.ttb-row--open]="expandedRank() === entry.rank"
+                  (click)="toggleSplits(entry.rank)">
+                  <td class="num rank">{{ entry.rank }}</td>
+                  <td class="driver">{{ entry.displayName }}</td>
+                  <td class="muted">{{ entry.vehicle }}</td>
+                  <td class="num time">{{ formatTime(entry.time) }}</td>
+                  <td class="num gap">{{ formatDiff(entry.differenceToFirst, entry.rank) }}</td>
+                  <td class="splits-col">
+                    @if (entry.splits && entry.splits.length) {
+                      <span class="ttb-caret" [class.ttb-caret--open]="expandedRank() === entry.rank">▸</span>
+                    }
+                  </td>
+                </tr>
+                @if (expandedRank() === entry.rank && entry.splits && entry.splits.length) {
+                  <tr class="ttb-splits-row">
+                    <td></td>
+                    <td colspan="5">
+                      <div class="ttb-splits">
+                        @for (split of entry.splits; track $index) {
+                          <span class="ttb-split">
+                            <span class="ttb-split__n">S{{ $index + 1 }}</span>
+                            {{ formatTime(split) }}
+                          </span>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (ep.total === 0 && !loadingEntries()) {
+          <div class="iq-empty">No entries stored for this board yet.</div>
+        } @else {
+          <div class="ttb-pager">
+            <button class="iq-chip" (click)="prev()" [disabled]="page() === 0 || loadingEntries()">Prev</button>
+            <span class="ttb-pager__info">
+              Page {{ page() + 1 }} of {{ totalPages() }} · {{ ep.total }} entries
+            </span>
+            <button
+              class="iq-chip"
+              (click)="next()"
+              [disabled]="page() >= totalPages() - 1 || loadingEntries()">
+              Next
+            </button>
+          </div>
+        }
+      } @else if (loadingEntries()) {
+        <div class="ttb-loading">Loading entries…</div>
+      }
+    }
+  </section>
+</div>

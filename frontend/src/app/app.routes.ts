@@ -8,6 +8,8 @@ import { ProfileEditor } from './pages/profile-editor/profile-editor';
 import { Status } from './pages/status/status';
 import { WorkQueue } from './pages/work-queue/work-queue';
 import { TimeTrials } from './pages/time-trials/time-trials';
+import { TimeTrialsShell } from './pages/time-trials-shell/time-trials-shell';
+import { TimeTrialsBoards } from './pages/time-trials-boards/time-trials-boards';
 
 export const routes: Routes = [
   {
@@ -24,12 +26,19 @@ export const routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'queue' },
           { path: 'queue', component: WorkQueue, title: 'Status' },
-          { path: 'time-trials', component: TimeTrials, title: 'Time Trials' },
+          { path: 'time-trials', component: TimeTrials, title: 'Time Trials Coverage' },
         ],
       },
-      // Keep old top-level URLs working (bookmarks, links).
+      {
+        path: 'easportswrc/time-trials',
+        component: TimeTrialsShell,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'boards' },
+          { path: 'boards', component: TimeTrialsBoards, title: 'Time Trials' },
+        ],
+      },
+      // Keep the old top-level work-queue URL working (bookmarks, links).
       { path: 'easportswrc/work-queue', pathMatch: 'full', redirectTo: 'easportswrc/status/queue' },
-      { path: 'easportswrc/time-trials', pathMatch: 'full', redirectTo: 'easportswrc/status/time-trials' },
       { path: 'privacy', component: Privacy, title: 'Privacy Policy' },
       { path: 'terms', component: Terms, title: 'Terms of Service' },
     ],

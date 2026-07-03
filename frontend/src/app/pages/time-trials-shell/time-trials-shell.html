@@ -1,0 +1,9 @@
+<div class="tt-shell">
+  <nav class="tt-tabs">
+    @for (tab of tabs; track tab.path) {
+      <a class="tt-tab" [routerLink]="tab.path" routerLinkActive="tt-tab--active">{{ tab.label }}</a>
+    }
+  </nav>
+
+  <router-outlet />
+</div>

@@ -1,6 +1,8 @@
 package io.busata.fourleft.backendeasportswrc.domain.services.timetrial;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,27 @@ import java.util.UUID;
 public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeTrialLeaderboardEntry, UUID> {
 
     List<TimeTrialLeaderboardEntry> findByCombinationId(String combinationId);
+
+    /** The combinations that currently have stored entries — the boards worth showing in the browser. */
+    @Query("select distinct e.combinationId from TimeTrialLeaderboardEntry e")
+    List<String> findDistinctCombinationIds();
+
+    /**
+     * One page of a board's live snapshot. Filters to the latest {@code fetchedAt} so an in-progress
+     * re-fetch (which transiently holds two generations) still reads a single clean board; after a
+     * fetch completes only one generation remains anyway. Order/paging come from the {@link Pageable}.
+     */
+    @Query(value = """
+            select e from TimeTrialLeaderboardEntry e
+            where e.combinationId = :combinationId
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = :combinationId)
+            """,
+            countQuery = """
+            select count(e) from TimeTrialLeaderboardEntry e
+            where e.combinationId = :combinationId
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = :combinationId)
+            """)
+    Page<TimeTrialLeaderboardEntry> findLatestPage(@Param("combinationId") String combinationId, Pageable pageable);
 
     /**
      * Just (player key, time) for a board's current rows — the churn comparison needs nothing else,
