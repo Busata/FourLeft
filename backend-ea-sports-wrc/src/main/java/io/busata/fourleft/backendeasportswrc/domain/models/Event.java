@@ -68,12 +68,19 @@ public class Event {
     }
 
     public boolean requiresLeaderboardUpdate() {
+        LocalDateTime now = ApplicationClock.now();
+
+        // Only events that have actually started refresh. Without this guard an upcoming event's
+        // close date is always in the future, so updatedAfterClose can never become true and it
+        // re-qualifies every 10 minutes forever (stamping itself with a time still before its close),
+        // dragging every not-yet-started event of the championship into the update set.
+        boolean hasOpened = !now.isBefore(this.absoluteOpenDate.toLocalDateTime());
+
         boolean updatedAfterClose = this.lastLeaderboardUpdate.isAfter(this.absoluteCloseDate.toLocalDateTime());
 
-        boolean timeSinceLastUpdate = Duration.between(lastLeaderboardUpdate, ApplicationClock.now()).toMinutes() >= 10;
+        boolean timeSinceLastUpdate = Duration.between(lastLeaderboardUpdate, now).toMinutes() >= 10;
 
-
-        return !updatedAfterClose && timeSinceLastUpdate;
+        return hasOpened && !updatedAfterClose && timeSinceLastUpdate;
     }
 
     public Stage getLastStage() {

@@ -116,12 +116,17 @@ public class Club {
         int detailHours = getActiveChampionshipSnapshot().map(activeChampionship -> 24).orElse(1);
         Stream<LocalDateTime> detailDue = Stream.of(lastDetailsUpdate.plusHours(detailHours));
 
-        // 2. Leaderboard refresh: every 10min for the active championship's events not yet closed-out
-        //    (mirrors Event.requiresLeaderboardUpdate).
+        // 2. Leaderboard refresh for the active championship's events not yet closed-out
+        //    (mirrors Event.requiresLeaderboardUpdate). A not-yet-started event is due at its open
+        //    date, not immediately — without that it would be perpetually "due" while its close date
+        //    sits in the future. A started event refreshes every 10min.
         Stream<LocalDateTime> leaderboardDue = getActiveChampionshipSnapshot().stream()
                 .flatMap(championship -> championship.getEvents().stream())
                 .filter(event -> !event.getLastLeaderboardUpdate().isAfter(event.getAbsoluteCloseDate().toLocalDateTime()))
-                .map(event -> event.getLastLeaderboardUpdate().plusMinutes(10));
+                .map(event -> {
+                    LocalDateTime opensAt = event.getAbsoluteOpenDate().toLocalDateTime();
+                    return now.isBefore(opensAt) ? opensAt : event.getLastLeaderboardUpdate().plusMinutes(10);
+                });
 
         // 3. Event/championship boundaries: an open date flips a championship active; a close date
         //    finishes it (event-ended / history). Any future one is a moment work can become due.
