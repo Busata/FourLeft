@@ -59,7 +59,7 @@ public class RacenetTimeTrialBoardGateway implements TimeTrialBoardGateway {
 
     @Override
     public FetchResult fetch(long locationId, long routeId, int surfaceCondition, long vehicleClassId,
-                             Consumer<List<TimeTrialLeaderboardEntryTo>> pageConsumer) {
+                             int maxEntries, Consumer<List<TimeTrialLeaderboardEntryTo>> pageConsumer) {
         HttpHeaders headers = getHeaders();
 
         TimeTrialLeaderboardResultTo page;
@@ -71,12 +71,18 @@ public class RacenetTimeTrialBoardGateway implements TimeTrialBoardGateway {
         }
 
         int total = totalOf(page);
+        int emitted = 0;
 
-        // Stream each non-empty page to the consumer, then follow the cursor. Stopping on an empty
-        // page too (not just a blank cursor) guards against a board that keeps handing back a
-        // non-blank `next` past its last row, which would otherwise loop forever mid-backfill.
+        // Stream each non-empty page to the consumer, then follow the cursor. Stop once the cap is hit
+        // (a bounded top-N keeps even a 50k board to a handful of calls). Stopping on an empty page too
+        // (not just a blank cursor) guards against a board that keeps handing back a non-blank `next`
+        // past its last row, which would otherwise loop forever.
         while (page != null && page.entries() != null && !page.entries().isEmpty()) {
             pageConsumer.accept(page.entries());
+            emitted += page.entries().size();
+            if (maxEntries > 0 && emitted >= maxEntries) {
+                break;
+            }
             String cursor = nextCursor(page);
             if (cursor == null) {
                 break;

@@ -21,13 +21,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Fetches one time-trial board in full and stores it: stream every page from the paging gateway,
- * replacing the board's stored rows with the fresh snapshot and appending a {@link TimeTrialProbe}
- * observation recording the total and how many entries changed since the previous fetch (churn).
+ * Fetches a board's top entries (up to {@code maxEntries}) and stores them: stream every page from the
+ * paging gateway, replacing the board's stored rows with the fresh snapshot and appending a
+ * {@link TimeTrialProbe} observation recording the true board size and how many of the stored entries
+ * changed since the previous fetch (churn).
  *
- * <p>Built for boards of any size, including the few with tens of thousands of entries. Racenet caps
- * the page at 20, so a big board is thousands of <em>sequential</em> calls (minutes of wall-clock).
- * To survive that:
+ * <p>The cap keeps a board bounded (top 2000 = 100 calls) so the whole catalog is affordable; an
+ * on-demand full fetch passes no cap and can be thousands of <em>sequential</em> calls (Racenet caps
+ * the page at 20), minutes of wall-clock. Either way, to stay safe:
  * <ul>
  *   <li>each page is saved in its own short transaction, so peak memory is one page (no board-wide
  *       list, no growing persistence context) and the DB connection is released between pages while
@@ -57,10 +58,12 @@ public class TimeTrialFetchService {
     private final TimeTrialBoardGateway boardGateway;
 
     /**
-     * @param heartbeat pinged after each stored page to keep the job's stale clock fresh; pass a no-op
-     *                  when calling outside the work queue
+     * @param maxEntries stop after this many entries (the top N); {@code <= 0} pulls the whole board.
+     *                   The scheduled/bulk path caps this; a future on-demand "full fetch" passes 0.
+     * @param heartbeat  pinged after each stored page to keep the job's stale clock fresh; pass a no-op
+     *                   when calling outside the work queue
      */
-    public FetchReport fetchCombination(String combinationId, Runnable heartbeat) {
+    public FetchReport fetchCombination(String combinationId, int maxEntries, Runnable heartbeat) {
         TimeTrialCombination combination = combinationRepository.findById(combinationId)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown time-trial combination: " + combinationId));
 
@@ -73,7 +76,7 @@ public class TimeTrialFetchService {
         int[] totalAndChanged = {0, 0};
 
         FetchResult result = boardGateway.fetch(combination.getLocationId(), combination.getRouteId(),
-                combination.getSurfaceCondition(), combination.getVehicleClassId(),
+                combination.getSurfaceCondition(), combination.getVehicleClassId(), maxEntries,
                 page -> {
                     persistPage(combinationId, page, previousTimes, fetchedAt, totalAndChanged);
                     heartbeat.run();
@@ -91,12 +94,14 @@ public class TimeTrialFetchService {
         // rows an earlier crashed run left, which also predate this fetch).
         entryRepository.deleteSupersededBy(combinationId, fetchedAt);
 
-        int total = totalAndChanged[0];
+        int stored = totalAndChanged[0];
         int changed = totalAndChanged[1];
-        probeRepository.save(new TimeTrialProbe(combinationId, true, total, changed));
-        log.info("Time-trial fetch • {} • {} entries stored ({} changed, Racenet reported {})",
-                combinationId, total, changed, result.totalEntries());
-        return new FetchReport(true, total, changed);
+        int boardSize = result.totalEntries(); // true size from the envelope, may exceed what we stored
+        // Record the true board size as the popularity signal; changed is churn within the stored top-N.
+        probeRepository.save(new TimeTrialProbe(combinationId, true, boardSize, changed));
+        log.info("Time-trial fetch • {} • stored {} of {} entries ({} changed)",
+                combinationId, stored, boardSize, changed);
+        return new FetchReport(true, stored, boardSize, changed);
     }
 
     /** Persist one page in its own transaction (via the repository) and tally churn against the previous snapshot. */

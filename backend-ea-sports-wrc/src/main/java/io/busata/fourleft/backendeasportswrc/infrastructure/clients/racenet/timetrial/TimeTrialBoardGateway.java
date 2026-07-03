@@ -23,14 +23,17 @@ public interface TimeTrialBoardGateway {
     ProbeResult probe(long locationId, long routeId, int surfaceCondition, long vehicleClassId);
 
     /**
-     * Fetch one board in full, streaming each page to {@code pageConsumer} as it arrives — the whole
-     * board is never held in memory here, so a 50k-entry board costs one page at a time. Pages via
-     * the cursor until it runs out. The consumer is not called when the board doesn't exist (404).
+     * Fetch a board's top entries, streaming each page to {@code pageConsumer} as it arrives — the
+     * board is never held in memory here, so it costs one page at a time. Pages via the cursor until
+     * {@code maxEntries} is reached or the board runs out. The consumer is not called when the board
+     * doesn't exist (404). The envelope's total entrant count is still returned even when capped, so
+     * callers know the true board size beyond what was fetched.
      *
      * @param surfaceCondition 0 = dry, 1 = wet
-     * @param pageConsumer      invoked once per non-empty page, in leaderboard order
-     * @return existence + the envelope's total entrant count
+     * @param maxEntries       stop after roughly this many entries; {@code <= 0} means the whole board
+     * @param pageConsumer     invoked once per non-empty page, in leaderboard order
+     * @return existence + the envelope's total entrant count (the full size, not the capped count)
      */
     FetchResult fetch(long locationId, long routeId, int surfaceCondition, long vehicleClassId,
-                      Consumer<List<TimeTrialLeaderboardEntryTo>> pageConsumer);
+                      int maxEntries, Consumer<List<TimeTrialLeaderboardEntryTo>> pageConsumer);
 }
