@@ -8,5 +8,7 @@ public enum JobType {
     /** Import one club (ref = clubId). */
     CLUB,
     /** Probe every time-trial board for one rally (ref = locationId): does it exist, how many entries. */
-    TT_PROBE
+    TT_PROBE,
+    /** Fetch one time-trial board in full (ref = combinationId): pull + store every entry. */
+    TT_FETCH
 }

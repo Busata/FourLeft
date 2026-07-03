@@ -24,6 +24,10 @@ public interface TimeTrialLeaderboardClient {
     /**
      * Public time-trial leaderboard for a stage. Path is {@code routeId/vehicleClassId/surface}
      * (surface 0=dry, 1=wet) — location is implied by the route. Responds 404 when no board exists.
+     *
+     * <p>{@code cursor} pages the board: pass {@code null} for the first page, then feed back the
+     * response's {@code next} until it comes back blank (same cursor scheme as the club leaderboard).
+     * The probe leaves it null and asks for a single result.
      */
     @GetMapping("/api/wrc2023Stats/leaderboard/{routeId}/{vehicleClassId}/{surfaceCondition}")
     TimeTrialLeaderboardResultTo getTimeTrialLeaderboard(@RequestHeader HttpHeaders headers,
@@ -32,6 +36,7 @@ public interface TimeTrialLeaderboardClient {
                                                          @PathVariable int surfaceCondition,
                                                          @RequestParam(name = "maxResultCount") int maxResultCount,
                                                          @RequestParam(name = "focusOnMe") boolean focusOnMe,
-                                                         @RequestParam(name = "platform") int platform
+                                                         @RequestParam(name = "platform") int platform,
+                                                         @RequestParam(name = "cursor", required = false) String cursor
     );
 }

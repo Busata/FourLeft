@@ -77,4 +77,14 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             WHERE status = 'RUNNING' AND locked_at < now() - make_interval(secs => :staleSeconds)
             """, nativeQuery = true)
     int requeueStale(@Param("staleSeconds") int staleSeconds);
+
+    /**
+     * Push a still-running job's stale clock forward. A long job (e.g. fetching a board with tens of
+     * thousands of entries, paged 20 at a time) calls this as it makes progress so {@link #requeueStale}
+     * doesn't mistake it for a crashed worker and run it again in parallel. A crashed worker stops
+     * touching it, so genuine orphans are still recovered.
+     */
+    @Modifying
+    @Query(value = "UPDATE job SET locked_at = now() WHERE id = :id AND status = 'RUNNING'", nativeQuery = true)
+    int touchLock(@Param("id") long id);
 }

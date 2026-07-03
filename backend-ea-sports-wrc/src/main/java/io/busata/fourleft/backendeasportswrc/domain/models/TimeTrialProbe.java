@@ -42,10 +42,18 @@ public class TimeTrialProbe {
 
     /** Probe observation: existence + count only; {@code changedEntries} stays null (not fetched). */
     public TimeTrialProbe(String combinationId, boolean boardExists, Integer totalEntries) {
+        this(combinationId, boardExists, totalEntries, null);
+    }
+
+    /**
+     * Fetch observation: existence, count, and how many entries changed since the previous fetch
+     * ({@code changedEntries} is the churn signal — new drivers plus improved times).
+     */
+    public TimeTrialProbe(String combinationId, boolean boardExists, Integer totalEntries, Integer changedEntries) {
         this.combinationId = combinationId;
         this.boardExists = boardExists;
         this.totalEntries = totalEntries;
-        this.changedEntries = null;
+        this.changedEntries = changedEntries;
         this.probedAt = Instant.now();
     }
 }

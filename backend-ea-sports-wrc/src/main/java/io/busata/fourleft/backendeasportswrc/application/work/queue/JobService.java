@@ -75,6 +75,16 @@ public class JobService {
         jobRepository.save(job);
     }
 
+    /**
+     * Keep a long-running job's stale clock fresh so it isn't reclaimed mid-flight. Its own short
+     * transaction so the progress is visible to {@link #requeueStale} while the job's main work is
+     * still going (which may not have committed anything yet).
+     */
+    @Transactional
+    public void heartbeat(long jobId) {
+        jobRepository.touchLock(jobId);
+    }
+
     /** Recover jobs orphaned by a crashed worker (RUNNING past the stale threshold). */
     @Transactional
     public int requeueStale() {

@@ -13,6 +13,19 @@
       background-color: #3a3d42; // lighten(#202225, 10%)
     }
   }
+
+  // Secondary / legal links — dimmer and lighter so they recede next to the
+  // primary navigation.
+  .menu-button--muted {
+    color: #8a8d93;
+    font-weight: 500;
+    font-size: 13px;
+
+    &:hover,
+    &.menu-button-active {
+      color: #c7c9cd;
+    }
+  }
 }
 
 .wrapper {
