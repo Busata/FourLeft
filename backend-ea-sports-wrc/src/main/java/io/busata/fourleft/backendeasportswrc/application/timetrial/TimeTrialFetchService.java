@@ -16,9 +16,11 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Fetches a board's top entries (up to {@code maxEntries}) and stores them: stream every page from the
@@ -74,11 +76,16 @@ public class TimeTrialFetchService {
 
         Instant fetchedAt = Instant.now();
         int[] totalAndChanged = {0, 0};
+        // Racenet pins the authenticated fetch account's own row into every page (regardless of
+        // focusOnMe), so walking N pages would otherwise store that one player N times on this board.
+        // Track the player keys already stored this fetch and skip repeats — a board holds at most one
+        // row per player. Bounded by board size, same order as previousTimes.
+        Set<String> seen = new HashSet<>();
 
         FetchResult result = boardGateway.fetch(combination.getLocationId(), combination.getRouteId(),
                 combination.getSurfaceCondition(), combination.getVehicleClassId(), maxEntries,
                 page -> {
-                    persistPage(combinationId, page, previousTimes, fetchedAt, totalAndChanged);
+                    persistPage(combinationId, page, previousTimes, fetchedAt, totalAndChanged, seen);
                     heartbeat.run();
                 });
 
@@ -104,11 +111,19 @@ public class TimeTrialFetchService {
         return new FetchReport(true, stored, boardSize, changed);
     }
 
-    /** Persist one page in its own transaction (via the repository) and tally churn against the previous snapshot. */
+    /**
+     * Persist one page in its own transaction (via the repository) and tally churn against the previous
+     * snapshot. Entries whose player key was already stored this fetch (the pinned self-row that repeats
+     * on every page) are skipped, so a player lands on the board exactly once.
+     */
     private void persistPage(String combinationId, List<TimeTrialLeaderboardEntryTo> page,
-                             Map<String, String> previousTimes, Instant fetchedAt, int[] totalAndChanged) {
+                             Map<String, String> previousTimes, Instant fetchedAt, int[] totalAndChanged,
+                             Set<String> seen) {
         List<TimeTrialLeaderboardEntry> rows = new ArrayList<>(page.size());
         for (TimeTrialLeaderboardEntryTo entry : page) {
+            if (!seen.add(playerKey(entry))) {
+                continue; // already stored this player on this board (repeated pinned row)
+            }
             String previous = previousTimes.get(playerKey(entry));
             if (previous == null || !previous.equals(timeOf(entry))) {
                 totalAndChanged[1]++;
