@@ -10,13 +10,26 @@ import java.time.LocalDateTime;
 
 interface ClubRepository extends JpaRepository<Club, String> {
 
-    // The stage subquery MUST be correlated to e (e2.id = e.id): without it, ":leaderboardId IN
-    // (every stage leaderboard id in the table)" is true for a stage board on EVERY event row,
-    // making this UPDATE stamp + lock the whole event table across all clubs (full-table write ->
-    // deadlocks under concurrent imports). Correlated, it targets only the owning event.
-    @Query("UPDATE Event e SET e.lastLeaderboardUpdate=:timestamp " +
-            "WHERE e.leaderboardId = :leaderboardId OR :leaderboardId IN " +
-            "(SELECT s.leaderboardId FROM Event e2 JOIN e2.stages s WHERE e2.id = e.id)")
+    // Stamp the event that owns this leaderboard, either directly (event.leaderboard_id) or via one
+    // of its stages. Resolve the (usually single) target event id up front, then update it by PK.
+    //
+    // The two ways an event can own the board are UNIONed rather than OR'd: an `OR` in the WHERE
+    // (or an OR nested inside a correlated sub-select, the previous shape) forces Postgres to walk
+    // EVERY event row and re-evaluate the stage sub-select per row -> a ~10.8k x 54k scan, ~20-30s
+    // per call. Fired once per board per import and run 5-wide, that scan saturated the DB and
+    // wedged the whole import queue. As a UNION, each branch is driven by its own index
+    // (idx_event_leaderboard_id / idx_stage_leaderboard_id, added in V014) and returns a tiny id
+    // set, so the outer UPDATE only touches the matching rows. See V014 migration.
+    @Query(value = """
+            UPDATE event SET last_leaderboard_update = :timestamp
+            WHERE id IN (
+                SELECT id FROM event WHERE leaderboard_id = :leaderboardId
+                UNION
+                SELECT es.event_id FROM event_stages es
+                    JOIN stage s ON s.id = es.stages_id
+                    WHERE s.leaderboard_id = :leaderboardId
+            )
+            """, nativeQuery = true)
     @Modifying
     void markBoardAsUpdated(@Param("leaderboardId") String leaderboardId, @Param("timestamp") LocalDateTime time);
 
