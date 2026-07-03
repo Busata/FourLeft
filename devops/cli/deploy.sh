@@ -48,6 +48,14 @@ function runDeploy() {
 
     # -t for a TTY so docker build progress streams live.
     local remote_cmd="cd $REMOTE_DIR && git pull && docker compose build $services && docker compose up -d $services"
+
+    # The reverse proxy resolves the frontend container's IP once at startup. A frontend redeploy
+    # recreates that container with a new IP, but `up -d` won't touch the (unchanged) proxy — so it
+    # keeps pointing at the dead container (502s) until restarted. Force it whenever the frontend ships.
+    if [[ " $services " == *" proxy.fourleft_frontend "* ]]; then
+        remote_cmd="$remote_cmd && docker compose restart proxy.fourleft-reverse-proxy"
+    fi
+
     echo "→ $REMOTE_HOST: $remote_cmd"
     ssh -t "$REMOTE_HOST" "/bin/bash -lc '$remote_cmd'"
     echo "Done."
