@@ -1,5 +1,9 @@
+// Light theme — the app renders on a white body, so this page uses white surfaces,
+// dark text and light-grey borders. Status colours stay saturated: they're small
+// pills with white text, which reads well on white.
 .work-queue {
   max-width: 1200px;
+  color: #1f2430;
 
   .iq-header {
     display: flex;
@@ -17,18 +21,18 @@
       margin: 0;
     }
     .iq-sub {
-      color: #8b91a1;
+      color: #6b7280;
       font-size: 14px;
     }
 
     &--sub {
       margin-top: 34px;
       padding-top: 20px;
-      border-top: 1px solid #21252f;
+      border-top: 1px solid #e3e6ec;
     }
     .iq-updated {
       margin-left: auto;
-      color: #8b91a1;
+      color: #8a91a0;
       font-size: 12px;
     }
   }
@@ -40,14 +44,14 @@
     border: 1px solid transparent;
 
     &--warn {
-      background: #3a2410;
-      border-color: #6b4410;
-      color: #ffcd7a;
+      background: #fff7e6;
+      border-color: #f0d488;
+      color: #8a5b00;
     }
     &--error {
-      background: #3a1414;
-      border-color: #6b1f1f;
-      color: #ff9d96;
+      background: #fdeceb;
+      border-color: #f3b7b2;
+      color: #b3271e;
     }
   }
 
@@ -71,31 +75,31 @@
     gap: 6px;
     padding: 5px 12px;
     border-radius: 999px;
-    border: 1px solid #2f3441;
-    background: transparent;
-    color: #c7ccd8;
+    border: 1px solid #d5d9e0;
+    background: #fff;
+    color: #3a4150;
     font-size: 13px;
     cursor: pointer;
-    transition: border-color 0.12s, background 0.12s;
+    transition: border-color 0.12s, background 0.12s, color 0.12s;
 
     &:hover {
-      border-color: #4a5366;
+      border-color: #9aa4b5;
     }
     &--active {
-      background: #232838;
-      border-color: #5b8cff;
-      color: #fff;
+      background: #eaf1fe;
+      border-color: #2f72d6;
+      color: #17325e;
     }
     &__n {
       font-variant-numeric: tabular-nums;
-      color: #8b91a1;
+      color: #8a91a0;
       font-size: 12px;
     }
-    // status accents on the left edge of each chip's dot
-    &--PENDING.iq-chip--active { border-color: #b08400; }
+    // status accents when a status chip is active
+    &--PENDING.iq-chip--active { border-color: #b08400; background: #fdf4e0; color: #6b5200; }
     &--RUNNING.iq-chip--active { border-color: #2f72d6; }
-    &--DONE.iq-chip--active    { border-color: #2f9e54; }
-    &--FAILED.iq-chip--active  { border-color: #d2453b; }
+    &--DONE.iq-chip--active    { border-color: #2f9e54; background: #e8f6ee; color: #1c6b3a; }
+    &--FAILED.iq-chip--active  { border-color: #d2453b; background: #fdecea; color: #a02a22; }
   }
 
   .iq-search {
@@ -103,55 +107,55 @@
     padding: 6px 12px 6px 32px;
     min-width: 220px;
     border-radius: 999px;
-    border: 1px solid #2f3441;
-    // Match the chip tokens so it reads as a sibling of the filter chips instead of a black box.
-    background: #232838
+    border: 1px solid #d5d9e0;
+    background: #fff
       // inline magnifying-glass so the field looks intentional without an extra icon element
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238b91a1' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
       no-repeat 11px center;
-    color: #e6e8ee;
+    color: #1f2430;
     font-size: 13px;
     transition: border-color 0.12s, box-shadow 0.12s;
 
     &::placeholder {
-      color: #6c7280;
+      color: #9aa1ad;
     }
     &:hover {
-      border-color: #4a5366;
+      border-color: #9aa4b5;
     }
     &:focus {
       outline: none;
-      border-color: #5b8cff;
-      box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.16);
+      border-color: #2f72d6;
+      box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
     }
   }
 
   .iq-table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid #272b36;
+    border: 1px solid #e3e6ec;
     border-radius: 10px;
     overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 
     th,
     td {
       text-align: left;
       padding: 9px 14px;
-      border-bottom: 1px solid #272b36;
+      border-bottom: 1px solid #edeff3;
     }
     th {
-      color: #8b91a1;
-      font-weight: 500;
+      color: #6b7280;
+      font-weight: 600;
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      background: #1b1e27;
+      background: #f6f7f9;
     }
     tbody tr {
       transition: background 0.1s;
     }
     tbody tr:hover {
-      background: #1b1f2b;
+      background: #f4f6fa;
     }
     tr:last-child td {
       border-bottom: none;
@@ -161,7 +165,7 @@
       font-variant-numeric: tabular-nums;
     }
     .muted {
-      color: #8b91a1;
+      color: #6b7280;
     }
   }
 
@@ -193,7 +197,7 @@
   }
 
   .iq-err {
-    color: #ff9d96;
+    color: #b3271e;
     font-size: 12px;
     max-width: 360px;
     overflow: hidden;
@@ -202,9 +206,9 @@
   }
 
   .iq-empty {
-    color: #8b91a1;
+    color: #6b7280;
     padding: 16px 14px;
-    border: 1px solid #272b36;
+    border: 1px solid #e3e6ec;
     border-radius: 10px;
   }
 }
