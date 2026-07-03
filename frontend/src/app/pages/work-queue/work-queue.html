@@ -107,7 +107,7 @@
     <span class="iq-sub">When each club is next scheduled</span>
   </header>
 
-  @if (targets().length) {
+  @if (visibleTargets().length) {
     <table class="iq-table">
       <thead>
         <tr>
@@ -117,7 +117,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (target of targets(); track target.id) {
+        @for (target of visibleTargets(); track target.id) {
           <tr [class.muted]="!target.enabled">
             <td>{{ target.ref }}</td>
             <td>{{ formatTime(target.nextRunAt) }}</td>
@@ -127,6 +127,6 @@
       </tbody>
     </table>
   } @else {
-    <div class="iq-empty">No scheduled targets.</div>
+    <div class="iq-empty">{{ search().trim() ? 'No matching targets.' : 'No scheduled targets.' }}</div>
   }
 </div>

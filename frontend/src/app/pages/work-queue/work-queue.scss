@@ -12,9 +12,19 @@
       font-size: 20px;
       margin: 0;
     }
+    h2 {
+      font-size: 16px;
+      margin: 0;
+    }
     .iq-sub {
       color: #8b91a1;
       font-size: 14px;
+    }
+
+    &--sub {
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: 1px solid #21252f;
     }
     .iq-updated {
       margin-left: auto;
@@ -90,20 +100,29 @@
 
   .iq-search {
     margin-left: auto;
-    padding: 6px 12px;
+    padding: 6px 12px 6px 32px;
     min-width: 220px;
-    border-radius: 8px;
+    border-radius: 999px;
     border: 1px solid #2f3441;
-    background: #14171e;
+    // Match the chip tokens so it reads as a sibling of the filter chips instead of a black box.
+    background: #232838
+      // inline magnifying-glass so the field looks intentional without an extra icon element
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238b91a1' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
+      no-repeat 11px center;
     color: #e6e8ee;
     font-size: 13px;
+    transition: border-color 0.12s, box-shadow 0.12s;
 
     &::placeholder {
       color: #6c7280;
     }
+    &:hover {
+      border-color: #4a5366;
+    }
     &:focus {
       outline: none;
       border-color: #5b8cff;
+      box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.16);
     }
   }
 
@@ -125,6 +144,14 @@
       font-weight: 500;
       font-size: 12px;
       text-transform: uppercase;
+      letter-spacing: 0.03em;
+      background: #1b1e27;
+    }
+    tbody tr {
+      transition: background 0.1s;
+    }
+    tbody tr:hover {
+      background: #1b1f2b;
     }
     tr:last-child td {
       border-bottom: none;

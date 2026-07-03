@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin, interval, merge, startWith, Subject, switchMap } from 'rxjs';
@@ -57,6 +57,13 @@ export class WorkQueue implements OnInit {
   readonly statusFilter = signal<StatusFilter>('ALL');
   readonly typeFilter = signal<TypeFilter>('ALL');
   readonly search = signal('');
+
+  /** The "Next due" targets, filtered by the same ref search box as the jobs table. */
+  readonly visibleTargets = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    const all = this.targets();
+    return term ? all.filter((t) => t.ref.toLowerCase().includes(term)) : all;
+  });
 
   ngOnInit(): void {
     merge(interval(REFRESH_MS).pipe(startWith(0)), this.reload)
