@@ -58,10 +58,19 @@ function runDeploy() {
     echo "Done."
 }
 
+# Preset service combos for the quick-build shortcuts. Values MUST match SERVICE_TAGS above
+# (which in turn match docker-compose.yml service names).
+BACKEND_ONLY="spring.fourleft.backend-ea-sports-wrc"
+FRONTEND_PROXY="proxy.fourleft_frontend proxy.fourleft-reverse-proxy"
+BACKEND_FRONTEND_PROXY="spring.fourleft.backend-ea-sports-wrc proxy.fourleft_frontend proxy.fourleft-reverse-proxy"
+
 TITLE="Deploy Tasks"
 DEPLOY_ALL="Build & deploy ALL"
+DEPLOY_BACKEND="Build & deploy backend"
+DEPLOY_FRONTEND="Build & deploy frontend + reverse proxy"
+DEPLOY_BOTH="Build & deploy backend + frontend + reverse proxy"
 DEPLOY_SELECT="Build & deploy selected..."
-TYPES=("$DEPLOY_ALL" "$DEPLOY_SELECT")
+TYPES=("$DEPLOY_ALL" "$DEPLOY_BACKEND" "$DEPLOY_FRONTEND" "$DEPLOY_BOTH" "$DEPLOY_SELECT")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -71,6 +80,15 @@ if [ -n "$selected_option_index" ]; then
             runDeploy "${SERVICE_TAGS[*]}"
             ;;
         2)
+            runDeploy "$BACKEND_ONLY"
+            ;;
+        3)
+            runDeploy "$FRONTEND_PROXY"
+            ;;
+        4)
+            runDeploy "$BACKEND_FRONTEND_PROXY"
+            ;;
+        5)
             checklist=()
             for i in "${!SERVICE_TAGS[@]}"; do
                 checklist+=("${SERVICE_TAGS[$i]}" "${SERVICE_LABELS[$i]}" "off")
