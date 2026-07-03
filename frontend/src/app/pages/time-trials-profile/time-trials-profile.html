@@ -1,0 +1,62 @@
+<div class="ttp">
+  @if (!name()) {
+    <div class="ttp-empty">
+      <h2>Player profile</h2>
+      <p>Open a board and click a driver’s name to see every board they’ve set a time on.</p>
+    </div>
+  } @else {
+    <header class="ttp-header">
+      <h1>{{ name() }}</h1>
+      @if (profile()) {
+        <span class="ttp-sub">
+          {{ profile()!.entries.length }} board{{ profile()!.entries.length === 1 ? '' : 's' }}
+        </span>
+      }
+      @if (loading()) {
+        <span class="ttp-loading">loading…</span>
+      }
+    </header>
+
+    @if (error()) {
+      <div class="iq-banner iq-banner--error">{{ error() }}</div>
+    }
+
+    @if (profile(); as p) {
+      @if (p.entries.length) {
+        <div class="ttp-tablewrap">
+          <table class="iq-table">
+            <thead>
+              <tr>
+                <th>Rally</th>
+                <th>Stage</th>
+                <th>Surface</th>
+                <th>Class</th>
+                <th class="num">Rank</th>
+                <th class="num">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (record of p.entries; track record.combinationId) {
+                <tr>
+                  <td>{{ record.location }}</td>
+                  <td>
+                    <a
+                      class="ttp-board"
+                      [routerLink]="['../boards']"
+                      [queryParams]="{ board: record.combinationId }">{{ record.route }}</a>
+                  </td>
+                  <td>{{ surfaceLabel(record.surfaceCondition) }}</td>
+                  <td>{{ record.vehicleClass }}</td>
+                  <td class="num rank">{{ record.rank }}</td>
+                  <td class="num time">{{ formatTime(record.time) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (!loading()) {
+        <div class="iq-empty">No stored times for “{{ name() }}”. They may be outside the fetched top of every board.</div>
+      }
+    }
+  }
+</div>

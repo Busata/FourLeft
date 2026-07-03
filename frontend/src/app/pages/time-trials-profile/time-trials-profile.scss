@@ -1,0 +1,125 @@
+// Light theme, matching the boards / work-queue pages.
+:host {
+  display: block;
+  color: #1f2430;
+}
+
+.ttp {
+  max-width: 1000px;
+  padding-bottom: 48px;
+}
+
+.ttp-empty {
+  border: 1px dashed #d5d9e0;
+  border-radius: 10px;
+  padding: 40px 24px;
+  text-align: center;
+  color: #6b7280;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    color: #1f2430;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.ttp-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+
+  h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+  .ttp-sub {
+    color: #6b7280;
+    font-size: 14px;
+  }
+  .ttp-loading {
+    margin-left: auto;
+    color: #8a91a0;
+    font-size: 12px;
+  }
+}
+
+.iq-banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+
+  &--error {
+    background: #fdeceb;
+    border-color: #f3b7b2;
+    color: #b3271e;
+  }
+}
+
+.ttp-tablewrap {
+  overflow-x: auto;
+}
+
+.iq-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+  th,
+  td {
+    text-align: left;
+    padding: 9px 14px;
+    border-bottom: 1px solid #edeff3;
+  }
+  th {
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #f6f7f9;
+    white-space: nowrap;
+  }
+  tbody tr:hover {
+    background: #f4f6fa;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .rank {
+    color: #8a91a0;
+  }
+  .time {
+    font-weight: 600;
+  }
+}
+
+.ttp-board {
+  color: #1f2430;
+  text-decoration: none;
+
+  &:hover {
+    color: #2f72d6;
+    text-decoration: underline;
+  }
+}
+
+.iq-empty {
+  color: #6b7280;
+  padding: 16px 14px;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+}
