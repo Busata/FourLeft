@@ -48,3 +48,25 @@ export interface TtEntryPage {
   total: number;
   totalPages: number;
 }
+
+/** One of a player's stored times, with the board it's on — a row of the profile page. */
+export interface TtPlayerEntry {
+  combinationId: string;
+  locationId: number;
+  location: string;
+  routeId: number;
+  route: string;
+  surfaceCondition: number;
+  vehicleClassId: number;
+  vehicleClass: string;
+  rank: number | null;
+  time: string;
+  differenceToFirst: string;
+  platform: number | null;
+}
+
+/** Reverse lookup: every board a player appears on. */
+export interface TtPlayerProfile {
+  name: string;
+  entries: TtPlayerEntry[];
+}

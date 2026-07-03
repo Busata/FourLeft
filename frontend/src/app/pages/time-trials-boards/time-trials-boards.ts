@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
 import {
   TtCatalog,
@@ -34,6 +34,7 @@ interface CatalogHit {
 
 @Component({
   selector: 'app-time-trials-boards',
+  imports: [RouterLink],
   templateUrl: './time-trials-boards.html',
   styleUrl: './time-trials-boards.scss',
 })
@@ -45,6 +46,37 @@ export class TimeTrialsBoards implements OnInit {
 
   readonly catalog = signal<TtCatalog | null>(null);
   readonly catalogError = signal('');
+
+  // Sidebar search over rally + stage names.
+  readonly search = signal('');
+  readonly searching = computed(() => this.search().trim().length > 0);
+
+  /**
+   * Rallies filtered by the search term (matches rally name, or prunes to matching stages). Empty
+   * search returns the full tree. While searching, the tree is force-expanded (see isRallyOpen).
+   */
+  readonly filteredRallies = computed(() => {
+    const catalog = this.catalog();
+    if (!catalog) {
+      return [];
+    }
+    const term = this.search().trim().toLowerCase();
+    if (!term) {
+      return catalog.rallies;
+    }
+    const result: TtRally[] = [];
+    for (const rally of catalog.rallies) {
+      if (rally.location.toLowerCase().includes(term)) {
+        result.push(rally); // rally name matches → keep all its stages
+        continue;
+      }
+      const stages = rally.stages.filter((s) => s.route.toLowerCase().includes(term));
+      if (stages.length) {
+        result.push({ ...rally, stages });
+      }
+    }
+    return result;
+  });
 
   // Sidebar expansion state (rallies by locationId, stages by routeId) — local UI, not in the URL.
   readonly expandedRallies = signal<ReadonlySet<number>>(new Set());
@@ -139,12 +171,17 @@ export class TimeTrialsBoards implements OnInit {
     this.expandedStages.set(toggle(this.expandedStages(), stage.routeId));
   }
 
+  onSearch(value: string): void {
+    this.search.set(value);
+  }
+
+  // While searching, the (already pruned) tree is fully expanded so matches show without clicking.
   isRallyOpen(rally: TtRally): boolean {
-    return this.expandedRallies().has(rally.locationId);
+    return this.searching() || this.expandedRallies().has(rally.locationId);
   }
 
   isStageOpen(stage: TtStage): boolean {
-    return this.expandedStages().has(stage.routeId);
+    return this.searching() || this.expandedStages().has(stage.routeId);
   }
 
   /** Pick a stage+surface leaf. Keeps the current class if it exists here, else the first one. */

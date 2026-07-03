@@ -14,7 +14,11 @@ public class QueueProperties {
     /** Master switch for the worker system. Off => {@code ClubUpdateSchedule} drives the importer directly. */
     private boolean enabled = false;
 
-    /** Max jobs importing concurrently (across ticks). Caps the virtual-thread drain. */
+    /**
+     * Max jobs importing concurrently <em>per job type</em> (across ticks). Each type gets its own
+     * budget, so one type's backlog can't starve another; total worker threads ≈ this × number of
+     * job types.
+     */
     private int maxConcurrentJobs = 5;
 
     /** Max due targets turned into jobs per scheduler tick. */

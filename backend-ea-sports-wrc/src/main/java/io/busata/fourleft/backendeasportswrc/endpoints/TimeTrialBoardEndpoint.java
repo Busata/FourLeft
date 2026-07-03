@@ -71,6 +71,28 @@ public class TimeTrialBoardEndpoint {
                 result.getTotalElements(), result.getTotalPages());
     }
 
+    /** Reverse lookup: every board a player (by display name) has a stored time on, with its context. */
+    @GetMapping("/api_v2/time-trials/player")
+    public PlayerProfileView player(@RequestParam String name) {
+        List<TimeTrialLeaderboardEntry> entries = entryRepository.findLatestByDisplayName(name);
+
+        List<String> combinationIds = entries.stream().map(TimeTrialLeaderboardEntry::getCombinationId).distinct().toList();
+        Map<String, TimeTrialCombination> combinations = combinationRepository.findAllById(combinationIds).stream()
+                .collect(java.util.stream.Collectors.toMap(TimeTrialCombination::getId, c -> c));
+
+        List<PlayerEntryView> records = entries.stream()
+                .map(e -> PlayerEntryView.from(e, combinations.get(e.getCombinationId())))
+                .filter(java.util.Objects::nonNull)
+                .sorted(Comparator
+                        .comparing(PlayerEntryView::location, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(PlayerEntryView::route, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparingInt(PlayerEntryView::surfaceCondition)
+                        .thenComparing(PlayerEntryView::vehicleClass, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+
+        return new PlayerProfileView(name, records);
+    }
+
     // --- view models -------------------------------------------------------
 
     public record CatalogView(List<RallyView> rallies) {
@@ -100,6 +122,29 @@ public class TimeTrialBoardEndpoint {
     }
 
     public record EntryPageView(List<EntryView> entries, int page, int size, long total, int totalPages) {
+    }
+
+    /** A player's stored time on one board, with the board's context — a row of the profile page. */
+    public record PlayerEntryView(String combinationId,
+                                  long locationId, String location,
+                                  long routeId, String route,
+                                  int surfaceCondition,
+                                  long vehicleClassId, String vehicleClass,
+                                  Long rank, String time, String differenceToFirst, Long platform) {
+        static PlayerEntryView from(TimeTrialLeaderboardEntry e, TimeTrialCombination c) {
+            if (c == null) {
+                return null; // catalog row vanished; nothing meaningful to show for it
+            }
+            return new PlayerEntryView(c.getId(),
+                    c.getLocationId(), c.getLocation(),
+                    c.getRouteId(), c.getRoute(),
+                    c.getSurfaceCondition(),
+                    c.getVehicleClassId(), c.getVehicleClass(),
+                    e.getRank(), e.getTime(), e.getDifferenceToFirst(), e.getPlatform());
+        }
+    }
+
+    public record PlayerProfileView(String name, List<PlayerEntryView> entries) {
     }
 
     // --- tree assembly helpers ---------------------------------------------

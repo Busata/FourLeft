@@ -8,8 +8,19 @@
     } @else if (catalog()!.rallies.length === 0) {
       <div class="ttb-side__hint">No boards fetched yet.</div>
     } @else {
+      <input
+        class="ttb-search"
+        type="search"
+        placeholder="Search rally or stage…"
+        [value]="search()"
+        (input)="onSearch($any($event.target).value)" />
+
+      @if (filteredRallies().length === 0) {
+        <div class="ttb-side__hint">No rally or stage matches “{{ search() }}”.</div>
+      }
+
       <ul class="ttb-tree">
-        @for (rally of catalog()!.rallies; track rally.locationId) {
+        @for (rally of filteredRallies(); track rally.locationId) {
           <li class="ttb-tree__rally">
             <button class="ttb-node ttb-node--rally" (click)="toggleRally(rally)">
               <span class="ttb-caret" [class.ttb-caret--open]="isRallyOpen(rally)">▸</span>
@@ -100,7 +111,13 @@
                   [class.ttb-row--open]="expandedRank() === entry.rank"
                   (click)="toggleSplits(entry.rank)">
                   <td class="num rank">{{ entry.rank }}</td>
-                  <td class="driver">{{ entry.displayName }}</td>
+                  <td class="driver">
+                    <a
+                      class="ttb-player"
+                      [routerLink]="['../profile']"
+                      [queryParams]="{ name: entry.displayName }"
+                      (click)="$event.stopPropagation()">{{ entry.displayName }}</a>
+                  </td>
                   <td class="muted">{{ entry.vehicle }}</td>
                   <td class="num time">{{ formatTime(entry.time) }}</td>
                   <td class="num gap">{{ formatDiff(entry.differenceToFirst, entry.rank) }}</td>

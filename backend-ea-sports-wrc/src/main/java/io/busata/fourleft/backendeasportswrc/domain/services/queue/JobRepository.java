@@ -46,19 +46,20 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     int deleteByStatusOlderThanHours(@Param("status") String status, @Param("hours") int hours);
 
     /**
-     * Claim the next runnable job. {@code FOR UPDATE SKIP LOCKED} means concurrent
-     * workers each grab a different row instead of blocking on the same one. The
-     * returned entity is managed, so the caller flipping it to RUNNING is flushed
-     * on transaction commit (which also releases the row lock).
+     * Claim the next runnable job of one type. Filtering by type lets the worker give each job type
+     * its own concurrency budget, so a flood of one type (e.g. a full time-trial sweep) can't starve
+     * another (e.g. club syncs). {@code FOR UPDATE SKIP LOCKED} means concurrent workers each grab a
+     * different row instead of blocking on the same one. The returned entity is managed, so the caller
+     * flipping it to RUNNING is flushed on transaction commit (which also releases the row lock).
      */
     @Query(value = """
             SELECT * FROM job
-            WHERE status = 'PENDING'
+            WHERE status = 'PENDING' AND type = :type
             ORDER BY created_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
             """, nativeQuery = true)
-    Optional<Job> claimNext();
+    Optional<Job> claimNext(@Param("type") String type);
 
     /** True if this recurring target already has a job in flight (prevents pile-up). */
     @Query(value = """

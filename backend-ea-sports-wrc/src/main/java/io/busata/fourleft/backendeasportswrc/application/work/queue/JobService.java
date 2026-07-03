@@ -45,13 +45,14 @@ public class JobService {
     }
 
     /**
-     * Atomically claim the next runnable job and mark it RUNNING. The row lock taken
-     * by the SKIP LOCKED select is held until this transaction commits, so no other
-     * worker can claim the same job in the window before it flips to RUNNING.
+     * Atomically claim the next runnable job of {@code type} and mark it RUNNING. The row lock taken
+     * by the SKIP LOCKED select is held until this transaction commits, so no other worker can claim
+     * the same job in the window before it flips to RUNNING. Claiming per type lets the worker budget
+     * concurrency per job type so one type can't monopolise the pool.
      */
     @Transactional
-    public Optional<Job> claimNext() {
-        return jobRepository.claimNext().map(job -> {
+    public Optional<Job> claimNext(JobType type) {
+        return jobRepository.claimNext(type.name()).map(job -> {
             job.markRunning();
             return job;
         });

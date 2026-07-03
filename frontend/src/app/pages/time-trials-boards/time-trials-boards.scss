@@ -33,6 +33,34 @@
   }
 }
 
+.ttb-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 7px 12px 7px 30px;
+  border-radius: 8px;
+  border: 1px solid #d5d9e0;
+  background: #fff
+    // inline magnifying glass so the field reads as search without an extra element
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
+    no-repeat 10px center;
+  color: #1f2430;
+  font-size: 13px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+
+  &::placeholder {
+    color: #9aa1ad;
+  }
+  &:hover {
+    border-color: #9aa4b5;
+  }
+  &:focus {
+    outline: none;
+    border-color: #2f72d6;
+    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+  }
+}
+
 .ttb-tree {
   list-style: none;
   margin: 0;
@@ -244,6 +272,15 @@
   }
   .driver {
     font-weight: 500;
+  }
+  .ttb-player {
+    color: #1f2430;
+    text-decoration: none;
+
+    &:hover {
+      color: #2f72d6;
+      text-decoration: underline;
+    }
   }
   .time {
     font-weight: 600;

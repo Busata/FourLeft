@@ -22,6 +22,18 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     List<String> findDistinctCombinationIds();
 
     /**
+     * Every board a player appears on, by display name — the reverse lookup behind the profile page.
+     * Only the latest generation of each board is considered (so an in-progress re-fetch doesn't
+     * surface a stale duplicate). A player has at most one row per board, so this stays small.
+     */
+    @Query("""
+            select e from TimeTrialLeaderboardEntry e
+            where e.displayName = :name
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = e.combinationId)
+            """)
+    List<TimeTrialLeaderboardEntry> findLatestByDisplayName(@Param("name") String name);
+
+    /**
      * One page of a board's live snapshot. Filters to the latest {@code fetchedAt} so an in-progress
      * re-fetch (which transiently holds two generations) still reads a single clean board; after a
      * fetch completes only one generation remains anyway. Order/paging come from the {@link Pageable}.

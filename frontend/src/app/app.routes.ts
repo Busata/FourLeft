@@ -10,6 +10,7 @@ import { WorkQueue } from './pages/work-queue/work-queue';
 import { TimeTrials } from './pages/time-trials/time-trials';
 import { TimeTrialsShell } from './pages/time-trials-shell/time-trials-shell';
 import { TimeTrialsBoards } from './pages/time-trials-boards/time-trials-boards';
+import { TimeTrialsProfile } from './pages/time-trials-profile/time-trials-profile';
 
 export const routes: Routes = [
   {
@@ -35,6 +36,7 @@ export const routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'boards' },
           { path: 'boards', component: TimeTrialsBoards, title: 'Time Trials' },
+          { path: 'profile', component: TimeTrialsProfile, title: 'Time Trials Profile' },
         ],
       },
       // Keep the old top-level work-queue URL working (bookmarks, links).

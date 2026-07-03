@@ -13,5 +13,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class TimeTrialsShell {
   /** Sub-tabs, in order. Add an entry (and a matching child route) to grow the section. */
-  readonly tabs = [{ path: 'boards', label: 'Boards' }];
+  readonly tabs = [
+    { path: 'boards', label: 'Boards' },
+    { path: 'profile', label: 'Profile' },
+  ];
 }
