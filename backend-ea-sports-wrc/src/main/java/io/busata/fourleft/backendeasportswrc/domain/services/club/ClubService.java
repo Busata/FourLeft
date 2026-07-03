@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,30 @@ public class ClubService {
         Club club = this.clubFactory.create(clubDetailsTo, championships);
 
         this.clubRepository.save(club);
+    }
+
+    /** Whether importing this club right now would do anything (drives whether a job is enqueued). */
+    @Transactional(readOnly = true)
+    public boolean requiresImport(String clubId) {
+        if (!exists(clubId)) {
+            return true;
+        }
+        return requiresDetailUpdate(clubId)
+                || requiresLeaderboardUpdate(clubId)
+                || requiresHistoryUpdate(clubId);
+    }
+
+    /**
+     * When this club is next due for import: {@code now} if it already needs work, otherwise the
+     * earliest future moment its state makes work due (empty if nothing is scheduled ahead — the
+     * caller applies a horizon). Drives the work queue's per-club {@code next_run_at}.
+     */
+    @Transactional(readOnly = true)
+    public Optional<LocalDateTime> nextDueAt(String clubId) {
+        if (requiresImport(clubId)) {
+            return Optional.of(ApplicationClock.now());
+        }
+        return findById(clubId).nextImportDueAt();
     }
 
     @Transactional(readOnly = true)

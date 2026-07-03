@@ -9,6 +9,7 @@ import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.Disc
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnProperty(name = "fourleft.importer.mode", havingValue = "legacy", matchIfMissing = true)
 @RequiredArgsConstructor
 @Slf4j
-public class ClubsImporterService {
+public class ClubsImporterService implements ClubImporter {
 
     private final DiscordGateway discordGateway;
     private final ClubConfigurationService clubConfigurationService;
@@ -27,6 +29,7 @@ public class ClubsImporterService {
 
     private final List<ClubImportProcessHandler> processHandlers;
 
+    @Override
     public int sync() {
         initiateClubProcessing();
         orchestrateRunningProcesses();

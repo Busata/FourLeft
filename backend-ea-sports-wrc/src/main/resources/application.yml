@@ -17,3 +17,18 @@ racenet-api:
 club-export:
   output-directory: /tmp/club-exports
   scheduling-enabled: true
+
+work-queue:
+  # DB-backed club import queue. When enabled it owns club scheduling and the 5s
+  # ClubUpdateSchedule cron stands down.
+  enabled: true
+  max-concurrent-jobs: 5
+  schedule-tick-ms: 5000
+  work-tick-ms: 1000
+  prune-tick-ms: 3600000
+  schedule-batch-size: 100
+  max-horizon-seconds: 3600
+  in-flight-grace-seconds: 120
+  stale-job-seconds: 600
+  done-retention-hours: 24
+  failed-retention-hours: 336

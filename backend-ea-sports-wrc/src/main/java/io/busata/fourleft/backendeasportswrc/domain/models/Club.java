@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Entity
@@ -100,6 +101,39 @@ public class Club {
     public void markUpdated() {
         this.lastDetailsUpdate = ApplicationClock.now();
         this.updateDetailsRequired = false;
+    }
+
+    /**
+     * Earliest FUTURE moment this club needs importing again — the temporal inverse of the
+     * {@code requiresX} predicates. Used by the work queue to schedule the next run instead of a
+     * fixed cadence. Returns empty when nothing is scheduled ahead (the caller applies a horizon).
+     * A club that is <i>already</i> due is decided by {@code requiresImport}, not here.
+     */
+    public Optional<LocalDateTime> nextImportDueAt() {
+        LocalDateTime now = ApplicationClock.now();
+
+        // 1. Detail refresh cadence: 24h while a championship is active, else 1h (mirrors requiresDetailsUpdate).
+        int detailHours = getActiveChampionshipSnapshot().map(activeChampionship -> 24).orElse(1);
+        Stream<LocalDateTime> detailDue = Stream.of(lastDetailsUpdate.plusHours(detailHours));
+
+        // 2. Leaderboard refresh: every 10min for the active championship's events not yet closed-out
+        //    (mirrors Event.requiresLeaderboardUpdate).
+        Stream<LocalDateTime> leaderboardDue = getActiveChampionshipSnapshot().stream()
+                .flatMap(championship -> championship.getEvents().stream())
+                .filter(event -> !event.getLastLeaderboardUpdate().isAfter(event.getAbsoluteCloseDate().toLocalDateTime()))
+                .map(event -> event.getLastLeaderboardUpdate().plusMinutes(10));
+
+        // 3. Event/championship boundaries: an open date flips a championship active; a close date
+        //    finishes it (event-ended / history). Any future one is a moment work can become due.
+        Stream<LocalDateTime> boundaries = getChampionships().stream().flatMap(championship -> Stream.concat(
+                Stream.of(championship.getAbsoluteOpenDate().toLocalDateTime(), championship.getAbsoluteCloseDate().toLocalDateTime()),
+                championship.getEvents().stream().flatMap(event -> Stream.of(
+                        event.getAbsoluteOpenDate().toLocalDateTime(), event.getAbsoluteCloseDate().toLocalDateTime()))));
+
+        return Stream.of(detailDue, leaderboardDue, boundaries)
+                .flatMap(stream -> stream)
+                .filter(candidate -> candidate.isAfter(now))
+                .min(Comparator.naturalOrder());
     }
 
     public Optional<Championship> getActiveChampionshipSnapshot() {
