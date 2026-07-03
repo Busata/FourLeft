@@ -10,6 +10,61 @@
   padding-bottom: 48px;
 }
 
+.ttp-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .iq-search {
+    flex: 1;
+    min-width: 0;
+    max-width: 340px;
+    padding: 6px 12px 6px 32px;
+    border-radius: 999px;
+    border: 1px solid #d5d9e0;
+    background: #fff
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
+      no-repeat 11px center;
+    color: #1f2430;
+    font-size: 13px;
+    transition: border-color 0.12s, box-shadow 0.12s;
+
+    &::placeholder {
+      color: #9aa1ad;
+    }
+    &:hover {
+      border-color: #9aa4b5;
+    }
+    &:focus {
+      outline: none;
+      border-color: #2f72d6;
+      box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+    }
+  }
+}
+
+.ttp-search-btn {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid #2f72d6;
+  background: #2f72d6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+
+  &:hover {
+    background: #275fb3;
+    border-color: #275fb3;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.25);
+  }
+}
+
 .ttp-empty {
   border: 1px dashed #d5d9e0;
   border-radius: 10px;
@@ -160,4 +215,131 @@
   padding: 16px 14px;
   border: 1px solid #e3e6ec;
   border-radius: 10px;
+}
+
+// --- Compare two players -------------------------------------------------
+
+.ttp-compare-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+
+  .ttp-search--sm {
+    margin-bottom: 0;
+
+    .iq-search {
+      max-width: 300px;
+    }
+  }
+}
+
+.ttp-clear {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #d5d9e0;
+  background: #fff;
+  color: #6b7280;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+
+  &:hover {
+    border-color: #9aa4b5;
+    color: #1f2430;
+  }
+}
+
+.cmp-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 15px;
+
+  .cmp-who {
+    font-weight: 700;
+  }
+  .cmp-who--a {
+    color: #1f6feb;
+  }
+  .cmp-who--b {
+    color: #b8860b;
+  }
+  .cmp-vs {
+    color: #9aa1ad;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .cmp-count {
+    margin-left: auto;
+    color: #6b7280;
+    font-size: 13px;
+  }
+}
+
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.cmp-board {
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.cmp-board-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: #f6f7f9;
+  border-bottom: 1px solid #edeff3;
+
+  .cmp-meta {
+    color: #8a91a0;
+    font-size: 12px;
+  }
+}
+
+.cmp-table {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  th {
+    background: #fff;
+  }
+  .cmp-label {
+    text-align: left;
+    color: #6b7280;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .cmp-rank {
+    color: #9aa1ad;
+    font-weight: 600;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+  // Finish row: heavier, separated from the sector splits above it.
+  .cmp-finish td {
+    font-weight: 700;
+    border-top: 2px solid #e3e6ec;
+  }
+  // Faster side on this row = green; slower side = red.
+  .cmp-win {
+    color: #1a7f37;
+    background: rgba(45, 164, 78, 0.1);
+  }
+  .cmp-lose {
+    color: #b3271e;
+    background: rgba(207, 34, 46, 0.08);
+  }
 }

@@ -130,7 +130,8 @@ public class TimeTrialBoardEndpoint {
                                   long routeId, String route,
                                   int surfaceCondition,
                                   long vehicleClassId, String vehicleClass,
-                                  Long rank, String time, String differenceToFirst, Long platform) {
+                                  Long rank, String time, String differenceToFirst, Long platform,
+                                  List<String> splits) {
         static PlayerEntryView from(TimeTrialLeaderboardEntry e, TimeTrialCombination c) {
             if (c == null) {
                 return null; // catalog row vanished; nothing meaningful to show for it
@@ -140,7 +141,7 @@ public class TimeTrialBoardEndpoint {
                     c.getRouteId(), c.getRoute(),
                     c.getSurfaceCondition(),
                     c.getVehicleClassId(), c.getVehicleClass(),
-                    e.getRank(), e.getTime(), e.getDifferenceToFirst(), e.getPlatform());
+                    e.getRank(), e.getTime(), e.getDifferenceToFirst(), e.getPlatform(), e.getSplits());
         }
     }
 

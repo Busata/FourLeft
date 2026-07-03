@@ -1,15 +1,39 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { TtPlayerEntry, TtPlayerProfile } from '../../models/time-trial-board';
 
 type SortDir = 'asc' | 'desc';
 
+/** One sector (or the finish total) with both players' values and who's ahead. */
+export interface CompareRow {
+  label: string;
+  a: string | null;
+  b: string | null;
+  /** true when that side is strictly faster on this row. */
+  aWins: boolean;
+  bWins: boolean;
+}
+
+/** One board both players have a time on, laid out for a side-by-side split comparison. */
+export interface CompareBoard {
+  combinationId: string;
+  location: string;
+  route: string;
+  surfaceCondition: number;
+  vehicleClass: string;
+  a: TtPlayerEntry;
+  b: TtPlayerEntry;
+  rows: CompareRow[];
+}
+
 /**
  * A player's time-trial profile: every board they have a stored time on (reverse lookup by display
- * name). Driven by the `?name=` query param so it's linkable straight from a board's entry.
+ * name). Driven by the `?name=` query param so it's linkable straight from a board's entry. A second
+ * `?vs=` param puts a second player alongside the first: common boards are matched and each stage is
+ * shown side by side with per-sector splits, colored for whoever is faster.
  */
 @Component({
   selector: 'app-time-trials-profile',
@@ -21,14 +45,27 @@ export class TimeTrialsProfile implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly name = signal('');
   readonly profile = signal<TtPlayerProfile | null>(null);
   readonly loading = signal(false);
   readonly error = signal('');
 
+  // Second player (comparison), driven by the `?vs=` param.
+  readonly vs = signal('');
+  readonly vsProfile = signal<TtPlayerProfile | null>(null);
+  readonly vsLoading = signal(false);
+  readonly vsError = signal('');
+
+  /** Bound to the search boxes; may differ from the loaded names until submitted. */
+  readonly query = signal('');
+  readonly vsQuery = signal('');
+
   /** Rank ascending puts the driver's best (podium) finishes first. */
   readonly sortDir = signal<SortDir>('asc');
+
+  readonly comparing = computed(() => this.vs().length > 0);
 
   /** Profile rows sorted by rank; null ranks always sort last regardless of direction. */
   readonly sortedEntries = computed<TtPlayerEntry[]>(() => {
@@ -45,15 +82,54 @@ export class TimeTrialsProfile implements OnInit {
     });
   });
 
+  /** Boards both players have a time on, in player A's order, each with a per-sector split comparison. */
+  readonly common = computed<CompareBoard[]>(() => {
+    const a = this.profile();
+    const b = this.vsProfile();
+    if (!a || !b) {
+      return [];
+    }
+    const byBoard = new Map(b.entries.map((e) => [e.combinationId, e]));
+    const boards: CompareBoard[] = [];
+    for (const ea of a.entries) {
+      const eb = byBoard.get(ea.combinationId);
+      if (!eb) {
+        continue;
+      }
+      boards.push({
+        combinationId: ea.combinationId,
+        location: ea.location,
+        route: ea.route,
+        surfaceCondition: ea.surfaceCondition,
+        vehicleClass: ea.vehicleClass,
+        a: ea,
+        b: eb,
+        rows: this.buildRows(ea, eb),
+      });
+    }
+    return boards;
+  });
+
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const name = (params.get('name') ?? '').trim();
       this.name.set(name);
+      this.query.set(name);
       if (name) {
         this.load(name);
       } else {
         this.profile.set(null);
         this.error.set('');
+      }
+
+      const vs = (params.get('vs') ?? '').trim();
+      this.vs.set(vs);
+      this.vsQuery.set(vs);
+      if (vs) {
+        this.loadVs(vs);
+      } else {
+        this.vsProfile.set(null);
+        this.vsError.set('');
       }
     });
   }
@@ -61,20 +137,114 @@ export class TimeTrialsProfile implements OnInit {
   private load(name: string): void {
     this.loading.set(true);
     this.error.set('');
+    this.fetch(name).subscribe({
+      next: (profile) => {
+        this.profile.set(profile);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load this player’s records.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private loadVs(name: string): void {
+    this.vsLoading.set(true);
+    this.vsError.set('');
+    this.fetch(name).subscribe({
+      next: (profile) => {
+        this.vsProfile.set(profile);
+        this.vsLoading.set(false);
+      },
+      error: () => {
+        this.vsError.set('Could not load the comparison player’s records.');
+        this.vsLoading.set(false);
+      },
+    });
+  }
+
+  private fetch(name: string) {
     const params = new HttpParams().set('name', name);
-    this.http
+    return this.http
       .get<TtPlayerProfile>('/api_v2/time-trials/player', { params })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (profile) => {
-          this.profile.set(profile);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Could not load this player’s records.');
-          this.loading.set(false);
-        },
-      });
+      .pipe(takeUntilDestroyed(this.destroyRef));
+  }
+
+  /** Zip both players' splits into per-sector rows plus a finish-total row, tagging the faster side. */
+  private buildRows(a: TtPlayerEntry, b: TtPlayerEntry): CompareRow[] {
+    const as = a.splits ?? [];
+    const bs = b.splits ?? [];
+    const rows: CompareRow[] = [];
+    const sectors = Math.max(as.length, bs.length);
+    for (let i = 0; i < sectors; i++) {
+      rows.push(this.compareRow(`Split ${i + 1}`, as[i] ?? null, bs[i] ?? null));
+    }
+    rows.push(this.compareRow('Finish', a.time, b.time));
+    return rows;
+  }
+
+  private compareRow(label: string, a: string | null, b: string | null): CompareRow {
+    const av = this.parseSeconds(a);
+    const bv = this.parseSeconds(b);
+    const comparable = av != null && bv != null;
+    return {
+      label,
+      a,
+      b,
+      aWins: comparable && av < bv,
+      bWins: comparable && bv < av,
+    };
+  }
+
+  /** "hh:mm:ss.fffffff" → seconds as a float (full fractional precision), or null if unparseable. */
+  private parseSeconds(raw: string | null): number | null {
+    if (!raw) {
+      return null;
+    }
+    const parts = raw.split(':');
+    if (parts.length !== 3) {
+      return null;
+    }
+    const [hh, mm, ss] = parts;
+    const seconds = Number(hh) * 3600 + Number(mm) * 60 + Number(ss);
+    return Number.isFinite(seconds) ? seconds : null;
+  }
+
+  /** Look up the typed name by pushing it to the `?name=` param, which drives the load. */
+  submitSearch(): void {
+    const name = this.query().trim();
+    if (name === this.name()) {
+      return;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { name: name || null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /** Set (or update) the comparison player via the `?vs=` param. */
+  submitVs(): void {
+    const vs = this.vsQuery().trim();
+    if (vs === this.vs()) {
+      return;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { vs: vs || null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /** Drop the comparison, returning to the single-player profile. */
+  clearVs(): void {
+    this.vsQuery.set('');
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { vs: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   /** Toggle the rank sort direction. */

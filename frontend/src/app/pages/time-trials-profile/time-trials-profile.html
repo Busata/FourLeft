@@ -1,8 +1,19 @@
 <div class="ttp">
+  <form class="ttp-search" (submit)="$event.preventDefault(); submitSearch()">
+    <input
+      class="iq-search"
+      type="search"
+      placeholder="Search for a driver by name…"
+      [value]="query()"
+      (input)="query.set($any($event.target).value)"
+      (search)="submitSearch()" />
+    <button type="submit" class="ttp-search-btn">Search</button>
+  </form>
+
   @if (!name()) {
     <div class="ttp-empty">
       <h2>Player profile</h2>
-      <p>Open a board and click a driver’s name to see every board they’ve set a time on.</p>
+      <p>Search for a driver above, or open a board and click a driver’s name to see every board they’ve set a time on.</p>
     </div>
   } @else {
     <header class="ttp-header">
@@ -17,11 +28,101 @@
       }
     </header>
 
+    <div class="ttp-compare-bar">
+      <form class="ttp-search ttp-search--sm" (submit)="$event.preventDefault(); submitVs()">
+        <input
+          class="iq-search"
+          type="search"
+          placeholder="Compare with another driver…"
+          [value]="vsQuery()"
+          (input)="vsQuery.set($any($event.target).value)"
+          (search)="submitVs()" />
+        <button type="submit" class="ttp-search-btn">Compare</button>
+      </form>
+      @if (comparing()) {
+        <button type="button" class="ttp-clear" (click)="clearVs()">Clear comparison</button>
+      }
+      @if (vsLoading()) {
+        <span class="ttp-loading">loading…</span>
+      }
+    </div>
+
     @if (error()) {
       <div class="iq-banner iq-banner--error">{{ error() }}</div>
     }
+    @if (vsError()) {
+      <div class="iq-banner iq-banner--error">{{ vsError() }}</div>
+    }
 
-    @if (profile(); as p) {
+    @if (comparing()) {
+      <!-- Comparison view: boards both drivers appear on, side by side. -->
+      @if (profile() && vsProfile()) {
+        <div class="cmp-summary">
+          <span class="cmp-who cmp-who--a">{{ name() }}</span>
+          <span class="cmp-vs">vs</span>
+          <span class="cmp-who cmp-who--b">{{ vs() }}</span>
+          <span class="cmp-count">
+            {{ common().length }} board{{ common().length === 1 ? '' : 's' }} in common
+          </span>
+        </div>
+
+        @if (common().length) {
+          <div class="cmp-grid">
+            @for (board of common(); track board.combinationId) {
+              <div class="cmp-board">
+                <div class="cmp-board-head">
+                  <a
+                    class="ttp-board"
+                    [routerLink]="['../boards']"
+                    [queryParams]="{ board: board.combinationId }">{{ board.location }} — {{ board.route }}</a>
+                  <span class="cmp-meta">{{ surfaceLabel(board.surfaceCondition) }} · {{ board.vehicleClass }}</span>
+                </div>
+                <table class="iq-table cmp-table">
+                  <thead>
+                    <tr>
+                      <th class="cmp-label"></th>
+                      <th class="num">
+                        {{ name() }}
+                        @if (podium(board.a.rank); as tier) {
+                          <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ board.a.rank }}</span>
+                        } @else {
+                          <span class="cmp-rank">#{{ board.a.rank }}</span>
+                        }
+                      </th>
+                      <th class="num">
+                        {{ vs() }}
+                        @if (podium(board.b.rank); as tier) {
+                          <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ board.b.rank }}</span>
+                        } @else {
+                          <span class="cmp-rank">#{{ board.b.rank }}</span>
+                        }
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of board.rows; track row.label) {
+                      <tr [class.cmp-finish]="row.label === 'Finish'">
+                        <td class="cmp-label">{{ row.label }}</td>
+                        <td class="num" [class.cmp-win]="row.aWins" [class.cmp-lose]="row.bWins">
+                          {{ formatTime(row.a) }}
+                        </td>
+                        <td class="num" [class.cmp-win]="row.bWins" [class.cmp-lose]="row.aWins">
+                          {{ formatTime(row.b) }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        } @else if (!loading() && !vsLoading()) {
+          <div class="iq-empty">
+            “{{ name() }}” and “{{ vs() }}” have no boards in common in the fetched data.
+          </div>
+        }
+      }
+    } @else if (profile(); as p) {
       @if (p.entries.length) {
         <div class="ttp-tablewrap">
           <table class="iq-table">

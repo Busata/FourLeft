@@ -63,6 +63,8 @@ export interface TtPlayerEntry {
   time: string;
   differenceToFirst: string;
   platform: number | null;
+  /** Per-sector cumulative split times ("hh:mm:ss.fffffff"); null/empty when not stored. */
+  splits: string[] | null;
 }
 
 /** Reverse lookup: every board a player appears on. */
