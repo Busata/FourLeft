@@ -6,11 +6,27 @@
   background-color: #202225;
   z-index: 99;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 
   .menu-button {
     &:hover,
     &.menu-button-active {
       background-color: #3a3d42; // lighten(#202225, 10%)
+    }
+  }
+
+  // Support link, pushed to the far right of the header.
+  .header-coffee {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 15px;
+
+    img {
+      height: 34px;
+      display: block;
     }
   }
 

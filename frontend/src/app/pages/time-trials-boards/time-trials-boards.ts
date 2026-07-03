@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import {
   TtCatalog,
@@ -23,6 +24,14 @@ interface Selection {
   classes: TtClass[];
 }
 
+/** Where a combination id sits in the catalog — used to restore a linked board. */
+interface CatalogHit {
+  rally: TtRally;
+  stage: TtStage;
+  surface: TtSurface;
+  cls: TtClass;
+}
+
 @Component({
   selector: 'app-time-trials-boards',
   templateUrl: './time-trials-boards.html',
@@ -31,15 +40,18 @@ interface Selection {
 export class TimeTrialsBoards implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly catalog = signal<TtCatalog | null>(null);
   readonly catalogError = signal('');
 
-  // Sidebar expansion state (rallies by locationId, stages by routeId).
+  // Sidebar expansion state (rallies by locationId, stages by routeId) — local UI, not in the URL.
   readonly expandedRallies = signal<ReadonlySet<number>>(new Set());
   readonly expandedStages = signal<ReadonlySet<number>>(new Set());
 
-  // Current drill-down + class pick. The combination id is derived from the two.
+  // Current drill-down + class pick. Driven by the URL (see applyFromUrl); the combination id is
+  // derived from the two.
   readonly selection = signal<Selection | null>(null);
   readonly selectedClassId = signal<number | null>(null);
 
@@ -68,14 +80,53 @@ export class TimeTrialsBoards implements OnInit {
       .subscribe({
         next: (catalog) => {
           this.catalog.set(catalog);
-          // Nudge discovery: open the first rally so the tree reads as explorable.
-          const first = catalog.rallies[0];
-          if (first) {
-            this.expandedRallies.set(new Set([first.locationId]));
+          // No board linked → nudge discovery by opening the first rally.
+          if (!this.route.snapshot.queryParamMap.get('board') && catalog.rallies[0]) {
+            this.expandedRallies.set(new Set([catalog.rallies[0].locationId]));
           }
+          // The URL is the source of truth for the selection — react to it (including the current
+          // value on subscribe, which restores a linked/bookmarked board once the catalog is here).
+          this.route.queryParamMap
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((params) => this.applyFromUrl(params));
         },
         error: () => this.catalogError.set('Could not load the time-trial catalog.'),
       });
+  }
+
+  /** Resolve the URL (?board=&page=) against the catalog into the shown selection + entries. */
+  private applyFromUrl(params: ParamMap): void {
+    const catalog = this.catalog();
+    if (!catalog) {
+      return;
+    }
+
+    const board = params.get('board');
+    const page = Math.max(0, Number.parseInt(params.get('page') ?? '0', 10) || 0);
+    const hit = board ? findInCatalog(catalog, board) : null;
+
+    if (!hit) {
+      this.selection.set(null);
+      this.selectedClassId.set(null);
+      this.entryPage.set(null);
+      return;
+    }
+
+    // Open the tree down to the linked board so it reads as selected.
+    this.expandedRallies.update((s) => new Set(s).add(hit.rally.locationId));
+    this.expandedStages.update((s) => new Set(s).add(hit.stage.routeId));
+
+    this.selection.set({
+      locationId: hit.rally.locationId,
+      location: hit.rally.location,
+      routeId: hit.stage.routeId,
+      route: hit.stage.route,
+      surfaceCondition: hit.surface.surfaceCondition,
+      classes: hit.surface.classes,
+    });
+    this.selectedClassId.set(hit.cls.vehicleClassId);
+    this.page.set(page);
+    this.loadEntries();
   }
 
   // --- sidebar ------------------------------------------------------------
@@ -96,23 +147,14 @@ export class TimeTrialsBoards implements OnInit {
     return this.expandedStages().has(stage.routeId);
   }
 
-  /** Pick a stage+surface leaf. Keeps the current class if it exists here, else defaults to the first. */
+  /** Pick a stage+surface leaf. Keeps the current class if it exists here, else the first one. */
   selectSurface(rally: TtRally, stage: TtStage, surface: TtSurface): void {
-    const sel: Selection = {
-      locationId: rally.locationId,
-      location: rally.location,
-      routeId: stage.routeId,
-      route: stage.route,
-      surfaceCondition: surface.surfaceCondition,
-      classes: surface.classes,
-    };
-    this.selection.set(sel);
-
     const keep = surface.classes.some((c) => c.vehicleClassId === this.selectedClassId());
-    this.selectedClassId.set(keep ? this.selectedClassId() : (surface.classes[0]?.vehicleClassId ?? null));
-
-    this.page.set(0);
-    this.loadEntries();
+    const classId = keep ? this.selectedClassId() : (surface.classes[0]?.vehicleClassId ?? null);
+    const combinationId = surface.classes.find((c) => c.vehicleClassId === classId)?.combinationId;
+    if (combinationId) {
+      this.navigateToBoard(combinationId, 0, false);
+    }
   }
 
   isSurfaceSelected(stage: TtStage, surface: TtSurface): boolean {
@@ -123,12 +165,11 @@ export class TimeTrialsBoards implements OnInit {
   // --- class selector -----------------------------------------------------
 
   selectClass(classId: number): void {
-    if (classId === this.selectedClassId()) {
-      return;
+    const sel = this.selection();
+    const combinationId = sel?.classes.find((c) => c.vehicleClassId === classId)?.combinationId;
+    if (combinationId && classId !== this.selectedClassId()) {
+      this.navigateToBoard(combinationId, 0, false);
     }
-    this.selectedClassId.set(classId);
-    this.page.set(0);
-    this.loadEntries();
   }
 
   // --- entries ------------------------------------------------------------
@@ -159,17 +200,30 @@ export class TimeTrialsBoards implements OnInit {
   }
 
   prev(): void {
-    if (this.page() > 0) {
-      this.page.update((p) => p - 1);
-      this.loadEntries();
+    const combinationId = this.combinationId();
+    if (combinationId && this.page() > 0) {
+      this.navigateToBoard(combinationId, this.page() - 1, true);
     }
   }
 
   next(): void {
-    if (this.page() < this.totalPages() - 1) {
-      this.page.update((p) => p + 1);
-      this.loadEntries();
+    const combinationId = this.combinationId();
+    if (combinationId && this.page() < this.totalPages() - 1) {
+      this.navigateToBoard(combinationId, this.page() + 1, true);
     }
+  }
+
+  /**
+   * Push the selection into the URL; {@link applyFromUrl} then drives the view. Paging replaces the
+   * history entry (so Back returns to the previous board, not page-by-page); picking a board pushes.
+   */
+  private navigateToBoard(combinationId: string, page: number, replaceUrl: boolean): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { board: combinationId, page: page > 0 ? page : null },
+      queryParamsHandling: 'merge',
+      replaceUrl,
+    });
   }
 
   toggleSplits(rank: number | null): void {
@@ -217,6 +271,21 @@ export class TimeTrialsBoards implements OnInit {
     }
     return m > 0 ? `+${m}:${secs}` : `+${secs}`;
   }
+}
+
+/** Locate a combination id in the catalog tree. */
+function findInCatalog(catalog: TtCatalog, combinationId: string): CatalogHit | null {
+  for (const rally of catalog.rallies) {
+    for (const stage of rally.stages) {
+      for (const surface of stage.surfaces) {
+        const cls = surface.classes.find((c) => c.combinationId === combinationId);
+        if (cls) {
+          return { rally, stage, surface, cls };
+        }
+      }
+    }
+  }
+  return null;
 }
 
 /** Return a new set with `value` toggled — signals need a fresh reference to notify. */

@@ -9,6 +9,7 @@
   grid-template-columns: 280px 1fr;
   gap: 24px;
   align-items: start;
+  padding-bottom: 48px;
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
