@@ -97,9 +97,10 @@ export class ClubCompare implements OnInit {
       return [];
     }
     const result: CompareChampionship[] = [];
-    for (const championship of overview.championships) {
+    // Most recent first: championships and, within each, events sorted by close date descending.
+    for (const championship of [...overview.championships].sort(this.recentFirst)) {
       const events: CompareEvent[] = [];
-      for (const event of championship.events) {
+      for (const event of [...championship.events].sort(this.recentFirst)) {
         const ea = this.entryFor(event, aId);
         const eb = this.entryFor(event, bId);
         if (ea && eb) {
@@ -112,6 +113,19 @@ export class ClubCompare implements OnInit {
     }
     return result;
   });
+
+  /** Comparator: most recent first by ISO close date; items without a date sort last. */
+  private recentFirst = (
+    a: { absoluteCloseDate?: string | null },
+    b: { absoluteCloseDate?: string | null },
+  ): number => {
+    const da = a.absoluteCloseDate;
+    const db = b.absoluteCloseDate;
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return db.localeCompare(da);
+  };
 
   /** Total events both members share across all championships. */
   readonly commonCount = computed(() =>
