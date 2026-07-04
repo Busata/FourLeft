@@ -4,6 +4,7 @@ import io.busata.fourleft.backendeasportswrc.application.timetrial.TimeTrialSync
 import io.busata.fourleft.backendeasportswrc.application.timetrial.TimeTrialSyncService.SyncResult;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialCombination;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
+import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialProbe;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialCombinationRepository;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialProbeRepository;
@@ -125,8 +126,16 @@ public class TimeTrialBoardEndpoint {
         Map<String, TimeTrialCombination> combinations = combinationRepository.findAllById(combinationIds).stream()
                 .collect(java.util.stream.Collectors.toMap(TimeTrialCombination::getId, c -> c));
 
+        // Each board's real field size (last probed on Racenet), keyed by combination, for the percentile
+        // column. Skips boards never probed (null total); empty input avoids an invalid SQL `IN ()`.
+        Map<String, Integer> fieldSizes = combinationIds.isEmpty() ? Map.of()
+                : probeRepository.findLatestByCombinationIds(combinationIds).stream()
+                        .filter(p -> p.getTotalEntries() != null)
+                        .collect(java.util.stream.Collectors.toMap(
+                                TimeTrialProbe::getCombinationId, TimeTrialProbe::getTotalEntries, (a, b) -> a));
+
         List<PlayerEntryView> records = entries.stream()
-                .map(e -> PlayerEntryView.from(e, combinations.get(e.getCombinationId())))
+                .map(e -> PlayerEntryView.from(e, combinations.get(e.getCombinationId()), fieldSizes.get(e.getCombinationId())))
                 .filter(java.util.Objects::nonNull)
                 .sorted(Comparator
                         .comparing(PlayerEntryView::location, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -178,15 +187,19 @@ public class TimeTrialBoardEndpoint {
         }
     }
 
-    /** A player's stored time on one board, with the board's context — a row of the profile page. */
+    /**
+     * A player's stored time on one board, with the board's context — a row of the profile page.
+     * {@code totalEntries} is the board's real field size (last probed on Racenet), for the percentile
+     * column; null when the board has never been probed.
+     */
     public record PlayerEntryView(String combinationId,
                                   long locationId, String location,
                                   long routeId, String route,
                                   int surfaceCondition,
                                   long vehicleClassId, String vehicleClass,
                                   Long rank, String time, String differenceToFirst, Long platform,
-                                  List<String> splits) {
-        static PlayerEntryView from(TimeTrialLeaderboardEntry e, TimeTrialCombination c) {
+                                  List<String> splits, Integer totalEntries) {
+        static PlayerEntryView from(TimeTrialLeaderboardEntry e, TimeTrialCombination c, Integer totalEntries) {
             if (c == null) {
                 return null; // catalog row vanished; nothing meaningful to show for it
             }
@@ -195,7 +208,7 @@ public class TimeTrialBoardEndpoint {
                     c.getRouteId(), c.getRoute(),
                     c.getSurfaceCondition(),
                     c.getVehicleClassId(), c.getVehicleClass(),
-                    e.getRank(), e.getTime(), e.getDifferenceToFirst(), e.getPlatform(), e.getSplits());
+                    e.getRank(), e.getTime(), e.getDifferenceToFirst(), e.getPlatform(), e.getSplits(), totalEntries);
         }
     }
 

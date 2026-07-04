@@ -13,15 +13,12 @@ import {
   TtSurface,
   TtSyncResult,
 } from '../../models/time-trial-board';
-import { formatDiff, formatTime } from '../../common/time-format';
+import { formatDiff, formatTime, percentileBand } from '../../common/time-format';
 
 const PAGE_SIZE = 50;
 
 /** Matches backend time-trial-sync.manual-cooldown-hours (used only to pre-disable the button). */
 const SYNC_COOLDOWN_HOURS = 3;
-
-/** "Top X%" standing bands, ascending: an entry's percentile rounds up to the first one it's within. */
-const PERCENTILE_BANDS = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 /** The currently drilled-to stage + surface, plus the car classes available there. */
 interface Selection {
@@ -360,17 +357,9 @@ export class TimeTrialsBoards implements OnInit {
   /**
    * Where this entry sits in the full field as a bucketed "top X%" standing, from its true rank
    * against the board's real size (totalEntries — the probed field size, not the stored slice).
-   * Rounded up to the nearest band: 1, 5, 10, then 10% steps. Blank when the field size is unknown
-   * (board never probed) or the rank is missing.
    */
   percentile(rank: number | null): string {
-    const total = this.entryPage()?.totalEntries;
-    if (rank == null || total == null || total < 1) {
-      return '';
-    }
-    const pct = (rank / total) * 100;
-    const bucket = PERCENTILE_BANDS.find((band) => pct <= band) ?? 100;
-    return `Top ${bucket}%`;
+    return percentileBand(rank, this.entryPage()?.totalEntries);
   }
 }
 

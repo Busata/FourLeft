@@ -193,6 +193,7 @@
                 <th class="num ttp-sort" (click)="toggleSort()">Rank {{ sortIndicator() }}</th>
                 <th class="num">Time</th>
                 <th class="num">Δ WR</th>
+                <th class="num">Percentile</th>
               </tr>
             </thead>
             <tbody>
@@ -216,6 +217,7 @@
                   </td>
                   <td class="num time">{{ formatTime(record.time) }}</td>
                   <td class="num gap">{{ formatDiff(record.differenceToFirst, record.rank) }}</td>
+                  <td class="num pct">{{ percentile(record.rank, record.totalEntries) }}</td>
                 </tr>
               }
             </tbody>

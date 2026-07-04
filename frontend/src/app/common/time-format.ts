@@ -171,6 +171,23 @@ export function formatGap(seconds: number | null): string {
   return `+${formatDurationClock(seconds)}`;
 }
 
+/** "Top X%" standing bands, ascending: a rank's percentile rounds up to the first band it's within. */
+const PERCENTILE_BANDS = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+/**
+ * A rank's bucketed "top X%" standing within a field of {@code total} entries — rounded up to the
+ * nearest band (1, 5, 10, then 10% steps), e.g. P1 of 1000 → "Top 1%". Blank when the rank or the
+ * field size is unknown.
+ */
+export function percentileBand(rank: number | null, total: number | null | undefined): string {
+  if (rank == null || total == null || total < 1) {
+    return '';
+  }
+  const pct = (rank / total) * 100;
+  const band = PERCENTILE_BANDS.find((b) => pct <= b) ?? 100;
+  return `Top ${band}%`;
+}
+
 /** Compare two already-parsed second values into a display row (values pre-formatted as clocks). */
 export function compareDurationRow(label: string, a: number | null, b: number | null): CompareRow {
   const comparable = a != null && b != null;

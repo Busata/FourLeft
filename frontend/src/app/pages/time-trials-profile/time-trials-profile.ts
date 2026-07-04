@@ -11,6 +11,7 @@ import {
   compareRow,
   formatDiff,
   formatTime,
+  percentileBand,
   podium,
   surfaceLabel,
 } from '../../common/time-format';
@@ -333,4 +334,5 @@ export class TimeTrialsProfile implements OnInit {
   surfaceLabel = surfaceLabel;
   formatTime = formatTime;
   formatDiff = formatDiff;
+  percentile = percentileBand;
 }

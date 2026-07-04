@@ -80,6 +80,8 @@ export interface TtPlayerEntry {
   platform: number | null;
   /** Per-sector cumulative split times ("hh:mm:ss.fffffff"); null/empty when not stored. */
   splits: string[] | null;
+  /** The board's real field size (last probed on Racenet), for the percentile; null when never probed. */
+  totalEntries: number | null;
 }
 
 /** Reverse lookup: every board a player appears on. */

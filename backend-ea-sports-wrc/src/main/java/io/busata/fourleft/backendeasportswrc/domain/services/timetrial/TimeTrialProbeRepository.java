@@ -29,4 +29,13 @@ public interface TimeTrialProbeRepository extends JpaRepository<TimeTrialProbe, 
             LIMIT 1
             """, nativeQuery = true)
     Optional<TimeTrialProbe> findLatestByCombinationId(String combinationId);
+
+    /** The most recent probe for each of the given combinations — batch form for the profile view. */
+    @Query(value = """
+            SELECT DISTINCT ON (combination_id) *
+            FROM time_trial_probe
+            WHERE combination_id IN (:combinationIds)
+            ORDER BY combination_id, probed_at DESC
+            """, nativeQuery = true)
+    List<TimeTrialProbe> findLatestByCombinationIds(List<String> combinationIds);
 }
