@@ -50,6 +50,18 @@ export interface TtEntryPage {
   totalPages: number;
   /** The board's real size as last probed on Racenet; null when never probed. */
   totalEntries: number | null;
+  /** When this board's current snapshot was fetched (ISO); null when never fetched. */
+  lastFetchedAt: string | null;
+}
+
+/** Outcome of a POST .../sync — mirrors the backend SyncResultView. */
+export interface TtSyncResult {
+  /** QUEUED | ALREADY_RUNNING | TOO_SOON | UNKNOWN_BOARD. */
+  status: string;
+  jobId: number | null;
+  lastFetchedAt: string | null;
+  /** Earliest a manual sync is allowed again (ISO), when status is TOO_SOON. */
+  availableAt: string | null;
 }
 
 /** One of a player's stored times, with the board it's on — a row of the profile page. */

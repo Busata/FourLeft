@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeTrialLeaderboardEntry, UUID> {
@@ -20,6 +21,21 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     /** The combinations that currently have stored entries — the boards worth showing in the browser. */
     @Query("select distinct e.combinationId from TimeTrialLeaderboardEntry e")
     List<String> findDistinctCombinationIds();
+
+    /**
+     * When this board was last fetched — the {@code fetchedAt} of its current snapshot (all rows of a
+     * snapshot share one generation). Empty when the board has no stored rows. Drives the per-board sync
+     * cooldown / "last synced" display.
+     */
+    @Query("select max(e.fetchedAt) from TimeTrialLeaderboardEntry e where e.combinationId = :combinationId")
+    Optional<Instant> findLatestFetchedAt(@Param("combinationId") String combinationId);
+
+    /**
+     * Last-fetched time for every board that has stored entries, as {@code [combinationId, Instant]}
+     * rows — one query drives the whole scheduled refresh sweep instead of N per-board look-ups.
+     */
+    @Query("select e.combinationId, max(e.fetchedAt) from TimeTrialLeaderboardEntry e group by e.combinationId")
+    List<Object[]> findLatestFetchedAtPerCombination();
 
     /**
      * Every board a player appears on, by display name — the reverse lookup behind the profile page.

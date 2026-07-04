@@ -25,6 +25,28 @@ SQL
   echo "Done. Watch progress on the work-queue status page (type: Time-trial probe)."
 }
 
+# Enqueue probe jobs only for rallies that still contain never-probed boards — i.e. combinations added
+# to the catalog since the last probe pass (a new vehicle class or location) that have no probe row yet.
+# TT_PROBE is per-rally and re-probes the whole location, so this enqueues one job per such rally rather
+# than per board; rallies already fully probed (and those with a probe job in flight) are skipped.
+function enqueueProbeMissing() {
+  echo "Enqueuing probe jobs for rallies with never-probed boards..."
+  ssh veevi "docker exec -i $DB_CONTAINER psql -U $DB_USER -d $DB_NAME" <<'SQL'
+INSERT INTO job (id, type, ref)
+SELECT nextval('job_seq'), 'TT_PROBE', c.location_id::text
+FROM (
+    SELECT DISTINCT tc.location_id
+    FROM time_trial_combination tc
+    WHERE NOT EXISTS (SELECT 1 FROM time_trial_probe p WHERE p.combination_id = tc.id)
+) c
+WHERE NOT EXISTS (
+    SELECT 1 FROM job j
+    WHERE j.type = 'TT_PROBE' AND j.ref = c.location_id::text AND j.status IN ('PENDING', 'RUNNING')
+);
+SQL
+  echo "Done. Watch progress on the work-queue status page (type: Time-trial probe)."
+}
+
 # Enqueue a probe job for a single rally (location id), unless one is already in flight for it.
 function enqueueProbeRally() {
   local location_id="$1"
@@ -59,6 +81,30 @@ FROM (
     ORDER BY combination_id, probed_at DESC
 ) p
 WHERE p.board_exists
+AND NOT EXISTS (
+    SELECT 1 FROM job j
+    WHERE j.type = 'TT_FETCH' AND j.ref = p.combination_id AND j.status IN ('PENDING', 'RUNNING')
+);
+SQL
+  echo "Done. Watch progress on the work-queue status page (type: Time-trial fetch)."
+}
+
+# Enqueue fetch jobs only for existing boards that have never been fetched — the latest probe found the
+# board but no entries are stored for it yet (e.g. boards discovered by a fresh probe pass for a newly
+# added class). Unlike "fetch all" this skips boards already populated, so it won't re-pull thousands of
+# unchanged boards. Boards with a fetch job already in flight are skipped.
+function enqueueFetchMissing() {
+  echo "Enqueuing fetch jobs for existing boards with no stored entries..."
+  ssh veevi "docker exec -i $DB_CONTAINER psql -U $DB_USER -d $DB_NAME" <<'SQL'
+INSERT INTO job (id, type, ref)
+SELECT nextval('job_seq'), 'TT_FETCH', p.combination_id
+FROM (
+    SELECT DISTINCT ON (combination_id) combination_id, board_exists
+    FROM time_trial_probe
+    ORDER BY combination_id, probed_at DESC
+) p
+WHERE p.board_exists
+AND NOT EXISTS (SELECT 1 FROM time_trial_entry e WHERE e.combination_id = p.combination_id)
 AND NOT EXISTS (
     SELECT 1 FROM job j
     WHERE j.type = 'TT_FETCH' AND j.ref = p.combination_id AND j.status IN ('PENDING', 'RUNNING')
@@ -117,11 +163,13 @@ SQL
 
 TITLE="Time Trial Tasks"
 PROBE_ALL="Probe all boards (one job per rally)"
+PROBE_MISSING="Probe only rallies with never-probed boards (new classes/locations)"
 PROBE_RALLY="Probe a single rally (enter location id)"
 FETCH_ALL="Fetch all existing boards (one job per board)"
+FETCH_MISSING="Fetch only existing boards with no stored entries yet"
 FETCH_RALLY="Fetch one rally's boards (enter location id)"
 FETCH_BOARD="Fetch a single board (enter combination id) — test"
-TYPES=("$PROBE_ALL" "$PROBE_RALLY" "$FETCH_ALL" "$FETCH_RALLY" "$FETCH_BOARD")
+TYPES=("$PROBE_ALL" "$PROBE_MISSING" "$PROBE_RALLY" "$FETCH_ALL" "$FETCH_MISSING" "$FETCH_RALLY" "$FETCH_BOARD")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -131,17 +179,23 @@ if [ -n "$selected_option_index" ]; then
           enqueueProbeAll
             ;;
         2)
+          enqueueProbeMissing
+            ;;
+        3)
           location_id=$(whiptail --inputbox "Location id to probe (e.g. 17 = Rallye Monte-Carlo)" 10 60 3>&2 2>&1 1>&3)
           [ -n "$location_id" ] && enqueueProbeRally "$location_id"
             ;;
-        3)
+        4)
           enqueueFetchAll
             ;;
-        4)
+        5)
+          enqueueFetchMissing
+            ;;
+        6)
           location_id=$(whiptail --inputbox "Location id to fetch (e.g. 17 = Rallye Monte-Carlo)" 10 60 3>&2 2>&1 1>&3)
           [ -n "$location_id" ] && enqueueFetchRally "$location_id"
             ;;
-        5)
+        7)
           combination_id=$(whiptail --inputbox "Combination id to fetch (location-route-surface-class, e.g. 17-252-1-19)" 10 60 3>&2 2>&1 1>&3)
           [ -n "$combination_id" ] && enqueueFetchBoard "$combination_id"
             ;;

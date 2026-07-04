@@ -1,5 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
+import io.busata.fourleft.backendeasportswrc.application.timetrial.TimeTrialSyncService;
+import io.busata.fourleft.backendeasportswrc.application.timetrial.TimeTrialSyncService.SyncResult;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialCombination;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialCombinationRepository;
@@ -10,11 +12,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -36,6 +42,7 @@ public class TimeTrialBoardEndpoint {
     private final TimeTrialCombinationRepository combinationRepository;
     private final TimeTrialLeaderboardEntryRepository entryRepository;
     private final TimeTrialProbeRepository probeRepository;
+    private final TimeTrialSyncService syncService;
 
     /** The drill-down tree, built only from combinations that currently have stored entries. */
     @GetMapping("/api_v2/time-trials/catalog")
@@ -74,8 +81,29 @@ public class TimeTrialBoardEndpoint {
         Integer totalEntries = probeRepository.findLatestByCombinationId(combinationId)
                 .map(p -> p.getTotalEntries())
                 .orElse(null);
+        // When this board's current snapshot was fetched — lets the client show freshness and gate the
+        // "Sync" button on the cooldown without a second round-trip. Null when never fetched.
+        Instant lastFetchedAt = entryRepository.findLatestFetchedAt(combinationId).orElse(null);
         return new EntryPageView(entries, result.getNumber(), result.getSize(),
-                result.getTotalElements(), result.getTotalPages(), totalEntries);
+                result.getTotalElements(), result.getTotalPages(), totalEntries, lastFetchedAt);
+    }
+
+    /**
+     * Request a fresh sync of one board. Rejects unknown boards (404), a fetch already in flight (409),
+     * and boards fetched inside the cooldown window (429); otherwise enqueues a {@code TT_FETCH} job and
+     * returns 202. The fetch itself runs in the work queue — watch its progress on the queue status page.
+     */
+    @PostMapping("/api_v2/time-trials/boards/{combinationId}/sync")
+    public ResponseEntity<SyncResultView> sync(@PathVariable String combinationId) {
+        SyncResult result = syncService.requestManualSync(combinationId);
+        SyncResultView body = SyncResultView.from(result);
+        HttpStatus status = switch (result.status()) {
+            case QUEUED -> HttpStatus.ACCEPTED;
+            case ALREADY_RUNNING -> HttpStatus.CONFLICT;
+            case TOO_SOON -> HttpStatus.TOO_MANY_REQUESTS;
+            case UNKNOWN_BOARD -> HttpStatus.NOT_FOUND;
+        };
+        return ResponseEntity.status(status).body(body);
     }
 
     /** Driver autocomplete: distinct display names matching {@code q} (case-insensitive substring). */
@@ -140,7 +168,14 @@ public class TimeTrialBoardEndpoint {
 
     /** {@code total} = synced entries we hold (capped); {@code totalEntries} = the board's real size on Racenet. */
     public record EntryPageView(List<EntryView> entries, int page, int size, long total, int totalPages,
-                                Integer totalEntries) {
+                                Integer totalEntries, Instant lastFetchedAt) {
+    }
+
+    /** Outcome of a sync request — mirrors {@link SyncResult} for the client. */
+    public record SyncResultView(String status, Long jobId, Instant lastFetchedAt, Instant availableAt) {
+        static SyncResultView from(SyncResult r) {
+            return new SyncResultView(r.status().name(), r.jobId(), r.lastFetchedAt(), r.availableAt());
+        }
     }
 
     /** A player's stored time on one board, with the board's context — a row of the profile page. */

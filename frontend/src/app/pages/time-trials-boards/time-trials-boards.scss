@@ -190,6 +190,21 @@
       font-weight: 600;
     }
   }
+
+  .ttb-sync {
+    margin-left: auto; // push to the far right of the header
+    align-self: center;
+  }
+}
+
+.ttb-sync-note {
+  margin: -6px 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f0f4fb;
+  border: 1px solid #d7e2f5;
+  color: #35507e;
+  font-size: 13px;
 }
 
 .ttb-classes {

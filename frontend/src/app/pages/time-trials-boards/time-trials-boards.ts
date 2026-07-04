@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
 import {
@@ -11,9 +11,13 @@ import {
   TtRally,
   TtStage,
   TtSurface,
+  TtSyncResult,
 } from '../../models/time-trial-board';
 
 const PAGE_SIZE = 50;
+
+/** Matches backend time-trial-sync.manual-cooldown-hours (used only to pre-disable the button). */
+const SYNC_COOLDOWN_HOURS = 3;
 
 /** The currently drilled-to stage + surface, plus the car classes available there. */
 interface Selection {
@@ -105,6 +109,22 @@ export class TimeTrialsBoards implements OnInit {
   readonly expandedRank = signal<number | null>(null);
 
   readonly totalPages = computed(() => this.entryPage()?.totalPages ?? 0);
+
+  // Sync ("refresh this board") state.
+  readonly syncing = signal(false);
+  readonly syncMessage = signal('');
+  readonly lastFetchedAt = computed(() => {
+    const raw = this.entryPage()?.lastFetchedAt;
+    return raw ? new Date(raw) : null;
+  });
+  /** Enabled when the board was never fetched or its last fetch is older than the cooldown. */
+  readonly canSync = computed(() => {
+    const last = this.lastFetchedAt();
+    if (!last) {
+      return true;
+    }
+    return Date.now() - last.getTime() >= SYNC_COOLDOWN_HOURS * 3_600_000;
+  });
 
   ngOnInit(): void {
     this.http
@@ -220,6 +240,7 @@ export class TimeTrialsBoards implements OnInit {
     this.loadingEntries.set(true);
     this.entriesError.set('');
     this.expandedRank.set(null);
+    this.syncMessage.set('');
 
     const params = new HttpParams().set('page', this.page()).set('size', PAGE_SIZE);
     this.http
@@ -235,6 +256,52 @@ export class TimeTrialsBoards implements OnInit {
           this.loadingEntries.set(false);
         },
       });
+  }
+
+  /**
+   * Ask the backend to refresh this board. The fetch runs asynchronously in the work queue; we just
+   * report whether it was queued (202) or rejected — too soon (429), already running (409). Progress is
+   * visible on the queue status page.
+   */
+  requestSync(): void {
+    const combinationId = this.combinationId();
+    if (!combinationId || this.syncing()) {
+      return;
+    }
+    this.syncing.set(true);
+    this.syncMessage.set('');
+    this.http
+      .post<TtSyncResult>(`/api_v2/time-trials/boards/${combinationId}/sync`, {})
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.syncing.set(false);
+          this.syncMessage.set('Sync queued — follow its progress on the Queue page.');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.syncing.set(false);
+          this.syncMessage.set(this.syncErrorMessage(err));
+        },
+      });
+  }
+
+  /** Turn a rejected sync (4xx + TtSyncResult body) into a human message. */
+  private syncErrorMessage(err: HttpErrorResponse): string {
+    const body = err.error as TtSyncResult | null;
+    switch (body?.status) {
+      case 'TOO_SOON': {
+        const at = body.availableAt ? new Date(body.availableAt) : null;
+        return at
+          ? `Synced recently — try again after ${at.toLocaleTimeString()}.`
+          : 'This board was synced too recently.';
+      }
+      case 'ALREADY_RUNNING':
+        return 'A sync for this board is already in progress.';
+      case 'UNKNOWN_BOARD':
+        return 'This board is no longer in the catalog.';
+      default:
+        return 'Could not queue a sync. Please try again later.';
+    }
   }
 
   prev(): void {

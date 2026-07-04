@@ -87,7 +87,20 @@
         @if (entryPage()?.totalEntries; as totalEntries) {
           <span class="ttb-crumb ttb-crumb--total">{{ totalEntries | number }} entries</span>
         }
+        @if (entryPage()) {
+          <button
+            class="iq-chip ttb-sync"
+            (click)="requestSync()"
+            [disabled]="syncing() || !canSync()"
+            [title]="canSync() ? 'Queue a fresh fetch of this board' : 'Synced recently — available again later'">
+            {{ syncing() ? 'Syncing…' : 'Sync' }}
+          </button>
+        }
       </header>
+
+      @if (syncMessage()) {
+        <div class="ttb-sync-note">{{ syncMessage() }}</div>
+      }
 
       <!-- Car class — consistently shown for the selected stage+surface -->
       <div class="ttb-classes">

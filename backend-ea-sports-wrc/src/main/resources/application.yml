@@ -18,6 +18,13 @@ club-export:
   output-directory: /tmp/club-exports
   scheduling-enabled: true
 
+time-trial-sync:
+  # Two triggers that enqueue TT_FETCH jobs: the board "Sync" button and the hourly refresh sweep.
+  manual-cooldown-hours: 3      # min age of a board's last fetch before a user may re-sync it
+  refresh-interval-hours: 48    # a board older than this is picked up by the scheduled sweep
+  sweep-enabled: true           # master switch for the scheduled refresh
+  sweep-batch-limit: 500        # max fetches enqueued per sweep tick (catch-up guard)
+
 work-queue:
   # DB-backed club import queue. When enabled it owns club scheduling and the 5s
   # ClubUpdateSchedule cron stands down.

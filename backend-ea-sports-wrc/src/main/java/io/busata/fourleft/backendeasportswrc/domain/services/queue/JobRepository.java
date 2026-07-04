@@ -70,6 +70,19 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             """, nativeQuery = true)
     boolean hasActiveJobForTarget(@Param("targetId") Long targetId);
 
+    /**
+     * True if a job of this type/ref is already queued or running. The ad-hoc dedupe guard (the
+     * target-based {@link #hasActiveJobForTarget} doesn't apply to on-demand jobs, which have no target):
+     * a user-requested or scheduled sync checks this before enqueuing so a board is never double-fetched.
+     */
+    @Query(value = """
+            SELECT EXISTS (
+                SELECT 1 FROM job
+                WHERE type = :type AND ref = :ref AND status IN ('PENDING', 'RUNNING')
+            )
+            """, nativeQuery = true)
+    boolean existsActive(@Param("type") String type, @Param("ref") String ref);
+
     /** Recover jobs whose worker died mid-flight: RUNNING for too long -> back to PENDING. */
     @Modifying
     @Query(value = """
