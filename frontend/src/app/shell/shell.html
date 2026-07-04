@@ -1,24 +1,38 @@
-<div class="public-container">
-  <div class="pure-g">
-    <div class="buttons pure-u-1">
-      <a class="menu-button dark" routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
-         routerLinkActive="menu-button-active">Fourleft.io</a>
-      <a class="menu-button dark" routerLink="/home" routerLinkActive="menu-button-active">Home</a>
-      <a class="menu-button dark" routerLink="/easportswrc/time-trials" routerLinkActive="menu-button-active">Time Trials</a>
-      <a class="menu-button dark" routerLink="/easportswrc/club-compare" routerLinkActive="menu-button-active">Club Compare</a>
-      <a class="menu-button dark menu-button--muted" routerLink="/easportswrc/status" routerLinkActive="menu-button-active">Status</a>
-      <a class="menu-button dark menu-button--muted" routerLink="/privacy" routerLinkActive="menu-button-active">Privacy Policy</a>
-      <a class="menu-button dark menu-button--muted" routerLink="/terms" routerLinkActive="menu-button-active">Terms of Service</a>
-      <a class="header-coffee" href="https://www.buymeacoffee.com/busata" target="_blank" rel="noopener">
+<header class="site-header">
+  <div class="site-header__bar">
+    <a class="site-brand" routerLink="/" (click)="closeMenu()">Fourleft.io</a>
+
+    <button
+      class="site-menu-toggle"
+      type="button"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-label="Toggle navigation">
+      <span class="site-menu-toggle__bar"></span>
+      <span class="site-menu-toggle__bar"></span>
+      <span class="site-menu-toggle__bar"></span>
+    </button>
+
+    <nav class="site-nav" [class.site-nav--open]="menuOpen()">
+      <a class="site-link" routerLink="/home" routerLinkActive="site-link--active" (click)="closeMenu()">Home</a>
+      <a class="site-link" routerLink="/easportswrc/time-trials" routerLinkActive="site-link--active" (click)="closeMenu()">Time Trials</a>
+      <a class="site-link" routerLink="/easportswrc/club-compare" routerLinkActive="site-link--active" (click)="closeMenu()">Club Compare</a>
+
+      <span class="site-nav__spacer"></span>
+
+      <a class="site-link site-link--muted" routerLink="/easportswrc/status" routerLinkActive="site-link--active" (click)="closeMenu()">Status</a>
+      <a class="site-link site-link--muted" routerLink="/privacy" routerLinkActive="site-link--active" (click)="closeMenu()">Privacy Policy</a>
+      <a class="site-link site-link--muted" routerLink="/terms" routerLinkActive="site-link--active" (click)="closeMenu()">Terms of Service</a>
+
+      <a class="site-coffee" href="https://www.buymeacoffee.com/busata" target="_blank" rel="noopener" (click)="closeMenu()">
         <img
           src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=busata&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"
           alt="Buy me a coffee" />
       </a>
-    </div>
-    <div class="wrapper">
-      <div class="main">
-        <router-outlet />
-      </div>
-    </div>
+    </nav>
   </div>
-</div>
+</header>
+
+<main class="site-main">
+  <router-outlet />
+</main>

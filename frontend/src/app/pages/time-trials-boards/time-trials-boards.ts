@@ -88,6 +88,14 @@ export class TimeTrialsBoards implements OnInit {
   readonly expandedRallies = signal<ReadonlySet<number>>(new Set());
   readonly expandedStages = signal<ReadonlySet<number>>(new Set());
 
+  // On small screens the drill-down collapses behind a toggle; picking a board closes it so the
+  // leaderboard is immediately visible. Ignored on desktop where the sidebar is always shown.
+  readonly sideOpen = signal(false);
+
+  toggleSide(): void {
+    this.sideOpen.update((open) => !open);
+  }
+
   // Current drill-down + class pick. Driven by the URL (see applyFromUrl); the combination id is
   // derived from the two.
   readonly selection = signal<Selection | null>(null);
@@ -212,6 +220,7 @@ export class TimeTrialsBoards implements OnInit {
     const classId = keep ? this.selectedClassId() : (surface.classes[0]?.vehicleClassId ?? null);
     const combinationId = surface.classes.find((c) => c.vehicleClassId === classId)?.combinationId;
     if (combinationId) {
+      this.sideOpen.set(false);
       this.navigateToBoard(combinationId, 0, false);
     }
   }

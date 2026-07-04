@@ -1,32 +1,33 @@
 .slide-toggle {
   display: inline-block;
   position: relative;
-  width: 3em;
-  height: 1.5em;
+  width: 3.25em;
+  height: 1.75em;
   border-radius: 50px;
+  transition: background-color 0.12s;
 
   .toggle-button {
     border-radius: 99px;
-    height: 1.5em;
-    width: 1.5em;
+    height: 1.75em;
+    width: 1.75em;
     background-color: white;
-    transition: margin 25ms linear;
+    transition: margin 80ms linear;
   }
 
   &.active {
-    background-color: #3fb6a3;
+    background-color: var(--accent);
 
     .toggle-button {
-      border: 3px solid #3fb6a3;
+      border: 3px solid var(--accent);
       margin-left: 1.5em;
     }
   }
 
   &.inactive {
-    background-color: #a8a3a3;
+    background-color: #b6bcc7;
 
     .toggle-button {
-      border: 3px solid #a8a3a3;
+      border: 3px solid #b6bcc7;
     }
   }
 

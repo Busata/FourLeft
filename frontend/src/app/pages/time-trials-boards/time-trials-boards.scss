@@ -4,27 +4,78 @@
   color: #1f2430;
 }
 
+// Mobile-first: single column with the drill-down collapsed behind a toggle;
+// from 880px up it becomes the classic sidebar + content grid.
 .ttb {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 16px;
   align-items: start;
-  padding-bottom: 48px;
+  padding-bottom: 32px;
 
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr;
+  @media (min-width: 880px) {
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    padding-bottom: 48px;
+  }
+}
+
+// --- mobile browse toggle ---------------------------------------------------
+.ttb-browse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #d5d9e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2430;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+  &__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__hint {
+    flex: 0 0 auto;
+    color: #2f72d6;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  @media (min-width: 880px) {
+    display: none;
   }
 }
 
 // --- sidebar --------------------------------------------------------------
 .ttb-side {
+  display: none; // mobile: collapsed behind the browse toggle
   border: 1px solid #e3e6ec;
   border-radius: 10px;
   background: #fff;
   padding: 8px;
-  max-height: calc(100vh - 160px);
+  max-height: 60vh;
   overflow: auto;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+  &--open {
+    display: block;
+  }
+
+  @media (min-width: 880px) {
+    display: block; // desktop: always visible
+    max-height: calc(100vh - 160px);
+  }
 
   &__hint {
     color: #8a91a0;
@@ -45,8 +96,12 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
     no-repeat 10px center;
   color: #1f2430;
-  font-size: 13px;
+  font-size: 16px; // avoids mobile focus zoom
   transition: border-color 0.12s, box-shadow 0.12s;
+
+  @media (min-width: 880px) {
+    font-size: 13px;
+  }
 
   &::placeholder {
     color: #9aa1ad;
@@ -89,11 +144,16 @@
   border: none;
   background: none;
   color: #3a4150;
-  font-size: 13px;
-  padding: 6px 8px;
+  font-size: 14px;
+  padding: 10px 8px; // comfortable touch target
   border-radius: 7px;
   cursor: pointer;
   transition: background 0.1s, color 0.1s;
+
+  @media (min-width: 880px) {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
 
   &:hover {
     background: #f4f6fa;
@@ -164,13 +224,17 @@
 .ttb-context {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 8px 12px;
   flex-wrap: wrap;
   margin-bottom: 16px;
 
   h1 {
-    font-size: 20px;
+    font-size: 18px;
     margin: 0;
+
+    @media (min-width: 720px) {
+      font-size: 20px;
+    }
   }
   .ttb-crumb {
     color: #6b7280;
@@ -277,8 +341,12 @@
   th,
   td {
     text-align: left;
-    padding: 9px 14px;
+    padding: 10px 8px;
     border-bottom: 1px solid #edeff3;
+
+    @media (min-width: 720px) {
+      padding: 9px 14px;
+    }
   }
   th {
     color: #6b7280;
@@ -300,6 +368,14 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
+  // Columns that only fit on wider screens (vehicle, percentile).
+  .wide-only {
+    display: none;
+
+    @media (min-width: 880px) {
+      display: table-cell;
+    }
+  }
 }
 
 .ttb-table {
@@ -309,6 +385,16 @@
   }
   .driver {
     font-weight: 500;
+  }
+  // Mobile: the vehicle rides along under the driver name instead of its own column.
+  .driver__vehicle {
+    display: block;
+    color: #9aa1ad;
+    font-size: 12px;
+
+    @media (min-width: 880px) {
+      display: none;
+    }
   }
   .ttb-player {
     color: #1f2430;
@@ -380,8 +466,14 @@
 .ttb-pager {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
   margin-top: 16px;
+
+  @media (min-width: 720px) {
+    justify-content: flex-start;
+  }
 
   &__info {
     color: #6b7280;

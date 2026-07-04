@@ -1,0 +1,31 @@
+# Profile for the club-146 real-data scoring comparison (ClubScoringTop50RealDataTest).
+# Points at a LOCAL Postgres loaded from a prod dump + a local RabbitMQ, instead of Testcontainers.
+# Schedulers/racenet are neutered (fake URLs + disabled sweeps) so booting the full context does no
+# network work; the test only reads standings.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:17001/backendeasportswrc
+    username: backendeasportswrc
+    password: backendeasportswrc
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    validate-on-migrate: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+  rabbitmq:
+    host: localhost
+    port: 5672
+
+racenet-api:
+  url: https://racenetapi
+racenetauthentication:
+  url: https://racenetauthentication
+
+club-export:
+  scheduling-enabled: false
+time-trial-sync:
+  sweep-enabled: false
+work-queue:
+  enabled: false

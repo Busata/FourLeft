@@ -1,6 +1,19 @@
 <div class="ttb">
+  <!-- Mobile only: collapses the drill-down behind a toggle showing the current selection. -->
+  <button class="ttb-browse-toggle" type="button" (click)="toggleSide()" [attr.aria-expanded]="sideOpen()">
+    <span class="ttb-caret" [class.ttb-caret--open]="sideOpen()">▸</span>
+    @if (selection(); as sel) {
+      <span class="ttb-browse-toggle__label">
+        {{ sel.location }} · {{ sel.route }} · {{ surfaceLabel(sel.surfaceCondition) }}
+      </span>
+      <span class="ttb-browse-toggle__hint">change</span>
+    } @else {
+      <span class="ttb-browse-toggle__label">Browse boards</span>
+    }
+  </button>
+
   <!-- Sidebar: rally → stage → surface drill-down -->
-  <aside class="ttb-side">
+  <aside class="ttb-side" [class.ttb-side--open]="sideOpen()">
     @if (catalogError()) {
       <div class="iq-banner iq-banner--error">{{ catalogError() }}</div>
     } @else if (!catalog()) {
@@ -126,10 +139,10 @@
               <tr>
                 <th class="num">#</th>
                 <th>Driver</th>
-                <th>Vehicle</th>
+                <th class="wide-only">Vehicle</th>
                 <th class="num">Time</th>
                 <th class="num">Gap</th>
-                <th class="num">Percentile</th>
+                <th class="num wide-only">Percentile</th>
                 <th class="splits-col"></th>
               </tr>
             </thead>
@@ -146,11 +159,12 @@
                       [routerLink]="['../profile']"
                       [queryParams]="{ name: entry.displayName }"
                       (click)="$event.stopPropagation()">{{ entry.displayName }}</a>
+                    <span class="driver__vehicle">{{ entry.vehicle }}</span>
                   </td>
-                  <td class="muted">{{ entry.vehicle }}</td>
+                  <td class="muted wide-only">{{ entry.vehicle }}</td>
                   <td class="num time">{{ formatTime(entry.time) }}</td>
                   <td class="num gap">{{ formatDiff(entry.differenceToFirst, entry.rank) }}</td>
-                  <td class="num pct">{{ percentile(entry.rank) }}</td>
+                  <td class="num pct wide-only">{{ percentile(entry.rank) }}</td>
                   <td class="splits-col">
                     @if (entry.splits && entry.splits.length) {
                       <span class="ttb-caret" [class.ttb-caret--open]="expandedRank() === entry.rank">▸</span>

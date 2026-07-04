@@ -1,58 +1,154 @@
-.public-container {
-  width: 100%;
+// Mobile-first shell: sticky dark header with a drawer menu; links inline from 880px up.
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  background: var(--header-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.buttons {
-  background-color: #202225;
-  z-index: 99;
-  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.45);
+.site-header__bar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
 
-  .menu-button {
-    &:hover,
-    &.menu-button-active {
-      background-color: #3a3d42; // lighten(#202225, 10%)
-    }
+.site-brand {
+  padding: 14px 8px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+// Hamburger — only shown on small screens.
+.site-menu-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: #3a3d42;
   }
 
-  // Support link, pushed to the far right of the header.
-  .header-coffee {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    padding: 0 15px;
+  &__bar {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+  }
+}
 
-    img {
-      height: 34px;
-      display: block;
-    }
+// Drawer: collapsed by default on mobile, a full-width column of links when open.
+.site-nav {
+  display: none;
+  flex-basis: 100%;
+  flex-direction: column;
+  padding: 6px 0 10px;
+
+  &--open {
+    display: flex;
+  }
+}
+
+.site-nav__spacer {
+  display: block;
+  margin: 6px 8px;
+  border-top: 1px solid #3a3d42;
+}
+
+.site-link {
+  display: block;
+  padding: 12px 8px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+
+  &:hover,
+  &--active {
+    background: #3a3d42;
   }
 
-  // Secondary / legal links — dimmer and lighter so they recede next to the
-  // primary navigation.
-  .menu-button--muted {
+  &--muted {
     color: #8a8d93;
     font-weight: 500;
     font-size: 13px;
 
     &:hover,
-    &.menu-button-active {
+    &.site-link--active {
       color: #c7c9cd;
     }
   }
 }
 
-.wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.site-coffee {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+
+  img {
+    height: 34px;
+    display: block;
+  }
 }
 
-.main {
-  width: 100%;
-  padding-top: 15px;
-  padding-left: 15px;
-  padding-right: 15px;
+// Desktop: inline nav, no drawer.
+@media (min-width: 880px) {
+  .site-menu-toggle {
+    display: none;
+  }
+
+  .site-nav {
+    display: flex;
+    flex-basis: auto;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    margin-left: 8px;
+  }
+
+  .site-nav__spacer {
+    margin: 0 0 0 auto;
+    border-top: none;
+  }
+
+  .site-link {
+    padding: 15px 14px;
+    border-radius: 0;
+    font-size: 14px;
+  }
+
+  .site-coffee {
+    padding: 0 0 0 12px;
+  }
+}
+
+// Content container.
+.site-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 16px 12px 32px;
+}
+
+@media (min-width: 720px) {
+  .site-main {
+    padding: 24px 20px 48px;
+  }
 }

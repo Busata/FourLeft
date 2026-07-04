@@ -1,28 +1,39 @@
 // Sub-tab strip for the Time Trials section — same treatment as the Status shell.
+// Mobile-first: the strip scrolls horizontally instead of wrapping.
 .tt-shell {
   .tt-tabs {
     display: flex;
     gap: 4px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #e3e6ec;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .tt-tab {
-    padding: 10px 16px;
+    flex: 0 0 auto;
+    padding: 12px 16px;
     font-size: 14px;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--muted);
     text-decoration: none;
+    white-space: nowrap;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     transition: color 0.12s, border-color 0.12s;
 
     &:hover {
-      color: #1f2430;
+      color: var(--ink);
     }
     &--active {
-      color: #2f72d6;
-      border-bottom-color: #2f72d6;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+  }
+
+  @media (min-width: 720px) {
+    .tt-tabs {
+      margin-bottom: 24px;
     }
   }
 }

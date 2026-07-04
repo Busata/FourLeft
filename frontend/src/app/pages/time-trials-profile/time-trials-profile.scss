@@ -20,20 +20,29 @@
     position: relative;
     flex: 1;
     min-width: 0;
-    max-width: 340px;
+
+    @media (min-width: 720px) {
+      max-width: 340px;
+    }
   }
 
   .iq-search {
     width: 100%;
-    padding: 6px 12px 6px 32px;
+    padding: 8px 12px 8px 32px;
     border-radius: 999px;
     border: 1px solid #d5d9e0;
     background: #fff
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
       no-repeat 11px center;
     color: #1f2430;
-    font-size: 13px;
+    font-size: 16px; // avoids mobile focus zoom
     transition: border-color 0.12s, box-shadow 0.12s;
+
+    @media (min-width: 720px) {
+      padding-top: 6px;
+      padding-bottom: 6px;
+      font-size: 13px;
+    }
 
     &::placeholder {
       color: #9aa1ad;
@@ -177,8 +186,20 @@
   th,
   td {
     text-align: left;
-    padding: 9px 14px;
+    padding: 10px 8px;
     border-bottom: 1px solid #edeff3;
+
+    @media (min-width: 720px) {
+      padding: 9px 14px;
+    }
+  }
+  // Columns that only fit on wider screens; on mobile they fold into the stage subline.
+  .wide-only {
+    display: none;
+
+    @media (min-width: 880px) {
+      display: table-cell;
+    }
   }
   th {
     color: #6b7280;
@@ -260,6 +281,17 @@
   }
 }
 
+// Mobile: rally / surface / class ride along under the stage name.
+.ttp-board-sub {
+  display: block;
+  color: #9aa1ad;
+  font-size: 12px;
+
+  @media (min-width: 880px) {
+    display: none;
+  }
+}
+
 .iq-empty {
   color: #6b7280;
   padding: 16px 14px;
@@ -278,9 +310,15 @@
 
   .ttp-search--sm {
     margin-bottom: 0;
+    flex: 1 1 100%; // mobile: the compare search takes its own row
 
-    .ttp-autocomplete {
-      max-width: 300px;
+    @media (min-width: 720px) {
+      flex: 0 1 auto;
+
+      .ttp-autocomplete {
+        max-width: 300px;
+        min-width: 240px;
+      }
     }
   }
 }
@@ -424,6 +462,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+
+  @media (min-width: 720px) {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  }
 }
 
 .cmp-board {

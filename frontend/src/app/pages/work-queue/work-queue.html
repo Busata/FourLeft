@@ -63,7 +63,8 @@
   </div>
 
   @if (jobs().length) {
-    <table class="iq-table">
+    <div class="g-tablewrap">
+    <table class="iq-table iq-table--jobs">
       <thead>
         <tr>
           <th class="num">#</th>
@@ -98,6 +99,7 @@
         }
       </tbody>
     </table>
+    </div>
   } @else {
     <div class="iq-empty">No matching jobs.</div>
   }
@@ -108,6 +110,7 @@
   </header>
 
   @if (visibleTargets().length) {
+    <div class="g-tablewrap">
     <table class="iq-table">
       <thead>
         <tr>
@@ -126,6 +129,7 @@
         }
       </tbody>
     </table>
+    </div>
   } @else {
     <div class="iq-empty">{{ search().trim() ? 'No matching targets.' : 'No scheduled targets.' }}</div>
   }

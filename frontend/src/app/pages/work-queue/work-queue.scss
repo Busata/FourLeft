@@ -55,12 +55,20 @@
     }
   }
 
+  // Mobile-first: chip groups and search stack; inline on wider screens.
   .iq-controls {
     display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
     margin-bottom: 18px;
+
+    @media (min-width: 720px) {
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
   }
 
   .iq-chips {
@@ -103,9 +111,8 @@
   }
 
   .iq-search {
-    margin-left: auto;
-    padding: 6px 12px 6px 32px;
-    min-width: 220px;
+    width: 100%;
+    padding: 8px 12px 8px 32px;
     border-radius: 999px;
     border: 1px solid #d5d9e0;
     background: #fff
@@ -113,8 +120,17 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
       no-repeat 11px center;
     color: #1f2430;
-    font-size: 13px;
+    font-size: 16px; // avoids mobile focus zoom
     transition: border-color 0.12s, box-shadow 0.12s;
+
+    @media (min-width: 720px) {
+      width: auto;
+      min-width: 220px;
+      margin-left: auto;
+      padding-top: 6px;
+      padding-bottom: 6px;
+      font-size: 13px;
+    }
 
     &::placeholder {
       color: #9aa1ad;
@@ -132,6 +148,11 @@
   .iq-table {
     width: 100%;
     border-collapse: collapse;
+
+    // The jobs table has nine columns — give it room and let .g-tablewrap scroll.
+    &--jobs {
+      min-width: 1000px;
+    }
     border: 1px solid #e3e6ec;
     border-radius: 10px;
     overflow: hidden;
