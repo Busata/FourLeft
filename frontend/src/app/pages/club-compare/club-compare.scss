@@ -43,34 +43,13 @@
   }
 }
 
-.cc-select {
+// The pickers themselves are app-search-select components (searchable comboboxes); the field only
+// sizes them — full-width on mobile, a fixed comfortable width inline on desktop.
+.cc-field app-search-select {
   width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid #d5d9e0;
-  background: #fff;
-  color: #1f2430;
-  font-size: 16px; // avoids mobile focus zoom
-  cursor: pointer;
-  transition: border-color 0.12s, box-shadow 0.12s;
 
   @media (min-width: 720px) {
-    width: auto;
-    min-width: 220px;
-    max-width: 320px;
-    min-height: 0;
-    padding: 7px 12px;
-    font-size: 13px;
-  }
-
-  &:hover {
-    border-color: #9aa4b5;
-  }
-  &:focus {
-    outline: none;
-    border-color: #2f72d6;
-    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+    width: 280px;
   }
 }
 

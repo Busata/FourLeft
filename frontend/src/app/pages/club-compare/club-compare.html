@@ -2,12 +2,11 @@
   <div class="cc-picker">
     <label class="cc-field">
       <span class="cc-field__label">Club</span>
-      <select class="cc-select" [value]="clubId()" (change)="selectClub($any($event.target).value)">
-        <option value="">Select a club…</option>
-        @for (club of clubs(); track club.clubId) {
-          <option [value]="club.clubId">{{ club.clubName }}</option>
-        }
-      </select>
+      <app-search-select
+        [options]="clubOptions()"
+        [value]="clubId()"
+        placeholder="Search for a club…"
+        (valueChange)="selectClub($event)" />
     </label>
   </div>
 
@@ -37,21 +36,19 @@
       <div class="ttp-compare-bar">
         <label class="cc-field">
           <span class="cc-field__label cc-field__label--a">Driver A</span>
-          <select class="cc-select" [value]="a()" (change)="selectA($any($event.target).value)">
-            <option value="">Select…</option>
-            @for (member of members(); track member.wrcPlayerId) {
-              <option [value]="member.wrcPlayerId">{{ member.playerName }}</option>
-            }
-          </select>
+          <app-search-select
+            [options]="memberOptions()"
+            [value]="a()"
+            placeholder="Search drivers…"
+            (valueChange)="selectA($event)" />
         </label>
         <label class="cc-field">
           <span class="cc-field__label cc-field__label--b">Driver B</span>
-          <select class="cc-select" [value]="b()" (change)="selectB($any($event.target).value)">
-            <option value="">Select…</option>
-            @for (member of members(); track member.wrcPlayerId) {
-              <option [value]="member.wrcPlayerId">{{ member.playerName }}</option>
-            }
-          </select>
+          <app-search-select
+            [options]="memberOptions()"
+            [value]="b()"
+            placeholder="Search drivers…"
+            (valueChange)="selectB($event)" />
         </label>
         @if (comparing()) {
           <button type="button" class="ttp-clear" (click)="clearComparison()">Clear</button>

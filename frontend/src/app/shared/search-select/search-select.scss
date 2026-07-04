@@ -1,0 +1,125 @@
+// Mirrors the time-trial profile's search box + suggestion panel so pickers read as one family.
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.ss {
+  position: relative;
+}
+
+.ss-input {
+  width: 100%;
+  min-height: 44px; // comfortable touch target
+  padding: 8px 34px 8px 32px;
+  border-radius: 999px;
+  border: 1px solid #d5d9e0;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
+    no-repeat 11px center;
+  color: #1f2430;
+  font-size: 16px; // avoids mobile focus zoom
+  text-overflow: ellipsis;
+  transition: border-color 0.12s, box-shadow 0.12s;
+
+  @media (min-width: 720px) {
+    min-height: 0;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    font-size: 13px;
+  }
+
+  &::placeholder {
+    color: #9aa1ad;
+    opacity: 1;
+  }
+  &:hover {
+    border-color: #9aa4b5;
+  }
+  &:focus {
+    outline: none;
+    border-color: #2f72d6;
+    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+  }
+}
+
+// A value is picked and the panel is closed → the placeholder holds the selected label; darken it
+// so it reads as the current value rather than a hint.
+.ss-input:not(:focus)::placeholder {
+  color: #1f2430;
+}
+
+.ss-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #9aa1ad;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #f0f2f5;
+    color: #1f2430;
+  }
+}
+
+.ss-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
+  max-height: min(280px, 45vh); // stays above the mobile keyboard
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  li {
+    margin: 0;
+  }
+}
+
+.ss-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #1f2430;
+  font-size: 14px;
+  cursor: pointer;
+
+  @media (min-width: 720px) {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  &:hover {
+    background: #f4f6fa;
+  }
+  &--selected {
+    font-weight: 700;
+    background: rgba(47, 114, 214, 0.08);
+  }
+}
+
+.ss-none {
+  padding: 10px;
+  color: #9aa1ad;
+  font-size: 13px;
+}

@@ -5,9 +5,16 @@
     display: flex;
     gap: 4px;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    // The hairline is an inset shadow (not a border): the tabs' 2px underline lands on it without
+    // a -1px margin, which would overflow the scroll container and summon a scrollbar on desktop.
+    box-shadow: inset 0 -1px 0 var(--border);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; // tab strips swipe on touch; never show a scrollbar
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .status-tab {
@@ -19,7 +26,6 @@
     text-decoration: none;
     white-space: nowrap;
     border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
     transition: color 0.12s, border-color 0.12s;
 
     &:hover {

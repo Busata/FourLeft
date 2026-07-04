@@ -1,0 +1,42 @@
+<div class="ss">
+  <input
+    #inputEl
+    class="ss-input"
+    type="text"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    role="combobox"
+    [attr.aria-expanded]="open()"
+    [placeholder]="selectedLabel() || placeholder()"
+    [value]="open() ? query() : selectedLabel()"
+    (input)="onInput($any($event.target).value)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    (keydown)="onKeydown($event)" />
+
+  @if (value() && !open()) {
+    <button
+      type="button"
+      class="ss-clear"
+      aria-label="Clear selection"
+      (mousedown)="$event.preventDefault()"
+      (click)="clear()">×</button>
+  }
+
+  @if (open()) {
+    <ul class="ss-list">
+      @for (option of filtered(); track option.value) {
+        <li>
+          <button
+            type="button"
+            class="ss-option"
+            [class.ss-option--selected]="option.value === value()"
+            (mousedown)="$event.preventDefault(); pick(option)">{{ option.label }}</button>
+        </li>
+      } @empty {
+        <li class="ss-none">No matches</li>
+      }
+    </ul>
+  }
+</div>

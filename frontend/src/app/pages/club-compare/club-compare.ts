@@ -11,6 +11,7 @@ import {
   ClubResultEntry,
 } from '../../models/club';
 import { CompareRow, compareDurationRow, parseDuration } from '../../common/time-format';
+import { SearchSelect, SearchSelectOption } from '../../shared/search-select/search-select';
 
 /** A club member, distilled from the export for the two comparison pickers. */
 interface Member {
@@ -43,7 +44,7 @@ interface CompareChampionship {
  */
 @Component({
   selector: 'app-club-compare',
-  imports: [],
+  imports: [SearchSelect],
   templateUrl: './club-compare.html',
   styleUrl: './club-compare.scss',
 })
@@ -84,6 +85,15 @@ export class ClubCompare implements OnInit {
     }
     return [...byId.values()].sort((a, b) => a.playerName.localeCompare(b.playerName));
   });
+
+  // The pickers are searchable comboboxes (a native select over hundreds of rows is unusable on
+  // mobile); these adapt clubs/members to their option shape.
+  readonly clubOptions = computed<SearchSelectOption[]>(() =>
+    this.clubs().map((c) => ({ value: c.clubId, label: c.clubName })),
+  );
+  readonly memberOptions = computed<SearchSelectOption[]>(() =>
+    this.members().map((m) => ({ value: m.wrcPlayerId, label: m.playerName })),
+  );
 
   readonly aName = computed(() => this.memberName(this.a()));
   readonly bName = computed(() => this.memberName(this.b()));

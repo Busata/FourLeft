@@ -26,13 +26,32 @@
   letter-spacing: 0.01em;
 }
 
+// Compact "buy me a coffee" badge — header bar on small screens only; the full button replaces it
+// in the inline desktop nav. BMC's cup logo on their brand yellow, sized like the hamburger.
+.site-coffee-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #ffdd00;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+  img {
+    height: 20px;
+    display: block;
+  }
+}
+
 // Hamburger — only shown on small screens.
 .site-menu-toggle {
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  margin-left: auto;
   width: 44px;
   height: 44px;
   padding: 10px;
@@ -97,8 +116,10 @@
   }
 }
 
+// Full coffee button — desktop nav only; on mobile the header-bar badge covers it instead of
+// burying it at the bottom of the drawer.
 .site-coffee {
-  display: inline-flex;
+  display: none;
   align-items: center;
   padding: 8px;
 
@@ -110,7 +131,8 @@
 
 // Desktop: inline nav, no drawer.
 @media (min-width: 880px) {
-  .site-menu-toggle {
+  .site-menu-toggle,
+  .site-coffee-badge {
     display: none;
   }
 
@@ -136,6 +158,7 @@
   }
 
   .site-coffee {
+    display: inline-flex;
     padding: 0 0 0 12px;
   }
 }
