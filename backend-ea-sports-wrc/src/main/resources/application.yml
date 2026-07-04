@@ -10,6 +10,11 @@ spring:
 
 server:
   port: 8084
+  # Gzip responses — the cached club summaries can be tens of MB of JSON, which compresses ~10-20x.
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 2048
 
 racenet-api:
   url: https://web-api.racenet.com

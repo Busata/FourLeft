@@ -188,6 +188,20 @@ export function percentileBand(rank: number | null, total: number | null | undef
   return `Top ${band}%`;
 }
 
+/**
+ * The exact (unbanded) "top X%" standing to two significant figures, e.g. P1 of 1234 → "Top 0.081%".
+ * Shown in place of {@link percentileBand} when the table is actively sorted by percentile so ties
+ * within a band become distinguishable. `toPrecision(2)` round-trips through Number to drop any
+ * exponential form (100 → "1.0e+2" → "100") and trailing zeros. Blank when rank/field size unknown.
+ */
+export function percentileExact(rank: number | null, total: number | null | undefined): string {
+  if (rank == null || total == null || total < 1) {
+    return '';
+  }
+  const pct = (rank / total) * 100;
+  return `Top ${String(Number(pct.toPrecision(2)))}%`;
+}
+
 /** Compare two already-parsed second values into a display row (values pre-formatted as clocks). */
 export function compareDurationRow(label: string, a: number | null, b: number | null): CompareRow {
   const comparable = a != null && b != null;

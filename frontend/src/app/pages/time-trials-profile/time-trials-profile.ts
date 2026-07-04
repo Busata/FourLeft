@@ -11,12 +11,23 @@ import {
   compareRow,
   formatDiff,
   formatTime,
+  parseSeconds,
   percentileBand,
+  percentileExact,
   podium,
   surfaceLabel,
 } from '../../common/time-format';
 
+/** Sortable columns of the profile table. Rank is the default order. */
+type SortKey = 'rank' | 'wrDelta' | 'percentile';
 type SortDir = 'asc' | 'desc';
+
+// The numeric sort value for each column; null values always sort last (see sortedEntries).
+const SORTERS: Record<SortKey, (e: TtPlayerEntry) => number | null> = {
+  rank: (e) => e.rank,
+  wrDelta: (e) => parseSeconds(e.differenceToFirst),
+  percentile: (e) => (e.rank != null && e.totalEntries ? e.rank / e.totalEntries : null),
+};
 
 /** One board both players have a time on, laid out for a side-by-side split comparison. */
 export interface CompareBoard {
@@ -79,23 +90,32 @@ export class TimeTrialsProfile implements OnInit {
   private readonly queryInput$ = new Subject<string>();
   private readonly vsQueryInput$ = new Subject<string>();
 
-  /** Rank ascending puts the driver's best (podium) finishes first. */
+  /** Active sort column and direction. Rank ascending (best finishes first) is the default. */
+  readonly sortKey = signal<SortKey>('rank');
   readonly sortDir = signal<SortDir>('asc');
+
+  /** True while sorting by percentile, which is when the exact (unrounded) percentile is shown. */
+  readonly percentileUnrounded = computed(() => this.sortKey() === 'percentile');
 
   readonly comparing = computed(() => this.vs().length > 0);
 
-  /** Profile rows sorted by rank; null ranks always sort last regardless of direction. */
+  /** Profile rows sorted by the active column; null values always sort last regardless of direction. */
   readonly sortedEntries = computed<TtPlayerEntry[]>(() => {
     const p = this.profile();
     if (!p) {
       return [];
     }
+    const read = SORTERS[this.sortKey()];
     const dir = this.sortDir() === 'asc' ? 1 : -1;
     return [...p.entries].sort((a, b) => {
-      if (a.rank == null && b.rank == null) return 0;
-      if (a.rank == null) return 1;
-      if (b.rank == null) return -1;
-      return (a.rank - b.rank) * dir;
+      const va = read(a);
+      const vb = read(b);
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
     });
   });
 
@@ -320,12 +340,30 @@ export class TimeTrialsProfile implements OnInit {
     });
   }
 
-  /** Toggle the rank sort direction. */
-  toggleSort(): void {
+  /**
+   * Click a column header. Rank and Δ WR toggle asc↔desc. Percentile is tristate — asc → desc → off,
+   * where "off" returns to the default rank-ascending order (and re-rounds the percentile display),
+   * so the exact percentile can be turned back off without picking another column.
+   */
+  setSort(key: SortKey): void {
+    if (this.sortKey() !== key) {
+      this.sortKey.set(key);
+      this.sortDir.set('asc');
+      return;
+    }
+    if (key === 'percentile' && this.sortDir() === 'desc') {
+      this.sortKey.set('rank');
+      this.sortDir.set('asc');
+      return;
+    }
     this.sortDir.update((d) => (d === 'asc' ? 'desc' : 'asc'));
   }
 
-  sortIndicator(): string {
+  /** Sort arrow for {@code key}, blank when it isn't the active column (so percentile-off shows none). */
+  sortIndicator(key: SortKey): string {
+    if (this.sortKey() !== key) {
+      return '';
+    }
     return this.sortDir() === 'asc' ? '▲' : '▼';
   }
 
@@ -335,4 +373,5 @@ export class TimeTrialsProfile implements OnInit {
   formatTime = formatTime;
   formatDiff = formatDiff;
   percentile = percentileBand;
+  percentileExact = percentileExact;
 }
