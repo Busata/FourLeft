@@ -11,23 +11,57 @@
       <p>{{ c.channelId }}</p>
     </div>
 
-    @if (c.configured) {
-      <div class="form-group">
-        <label>Synced club</label>
-        <p>{{ c.clubId }}</p>
-      </div>
+    <form [formGroup]="form">
+      @if (c.configured) {
+        <div class="form-group">
+          <label>Synced club (remove to change)</label>
+          <input formControlName="clubId" type="text" readonly />
+        </div>
 
-      <div class="form-group">
-        <label>Autoposting</label>
-        <p>{{ c.autopostingEnabled ? 'Enabled' : 'Disabled' }}</p>
-      </div>
+        <div class="form-group">
+          <label>Autoposting</label>
+          <div class="checkbox-group">
+            <app-slide-toggle formControlName="autopostingEnabled"></app-slide-toggle>
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label>Only track tracked players</label>
-        <p>{{ c.requiresTracking ? 'Yes' : 'No' }}</p>
-      </div>
-    } @else {
-      <p>No club is currently synced to this channel. Use <code>/fourleft configure track</code> to sync one.</p>
-    }
+        <div class="form-group">
+          <label>Only track tracked players</label>
+          <div class="checkbox-group">
+            <app-slide-toggle formControlName="requiresTracking"></app-slide-toggle>
+          </div>
+        </div>
+
+        <button class="g-button g-button-primary" type="button" (click)="save()">Save</button>
+        <button class="g-button g-button-tertiary" type="button" (click)="remove()">Remove</button>
+      } @else {
+        <p>No club is synced to this channel yet. Enter a club id to start syncing it here.</p>
+
+        <div class="form-group">
+          <label>Club id</label>
+          <input formControlName="clubId" type="text" placeholder="Found in the racenet url for your club" />
+        </div>
+
+        <div class="form-group">
+          <label>Autoposting</label>
+          <div class="checkbox-group">
+            <app-slide-toggle formControlName="autopostingEnabled"></app-slide-toggle>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Only track tracked players</label>
+          <div class="checkbox-group">
+            <app-slide-toggle formControlName="requiresTracking"></app-slide-toggle>
+          </div>
+        </div>
+
+        <button class="g-button g-button-primary" type="button" (click)="create()">Create</button>
+      }
+    </form>
   }
 </div>
+
+@if (notice()) {
+  <div class="snackbar">{{ notice() }}</div>
+}

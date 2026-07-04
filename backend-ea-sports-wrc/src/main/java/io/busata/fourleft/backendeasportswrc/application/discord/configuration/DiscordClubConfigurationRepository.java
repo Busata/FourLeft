@@ -21,4 +21,8 @@ interface DiscordClubConfigurationRepository extends JpaRepository<DiscordClubCo
     @Modifying
     @Query("delete from DiscordClubConfiguration dcc where dcc.channelId=:channelId and dcc.clubId=:clubId")
     void removeByChannelAndClubId(@Param("channelId") Long channelId, @Param("clubId") String clubId);
+
+    @Modifying
+    @Query("delete from DiscordClubConfiguration dcc where dcc.channelId=:channelId")
+    void removeByChannelId(@Param("channelId") Long channelId);
 }

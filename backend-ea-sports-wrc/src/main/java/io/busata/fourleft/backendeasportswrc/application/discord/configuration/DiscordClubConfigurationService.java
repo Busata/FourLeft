@@ -34,18 +34,40 @@ public class DiscordClubConfigurationService {
 
     @Transactional
     public void createConfiguration(Long guildId, Long channelID, String clubId, boolean autoPostingEnabled) {
+        createConfiguration(guildId, channelID, clubId, autoPostingEnabled, false);
+    }
+
+    @Transactional
+    public DiscordClubConfiguration createConfiguration(Long guildId, Long channelID, String clubId, boolean autoPostingEnabled, boolean requiresTracking) {
         this.clubConfigurationService.addClubSync(clubId);
 
-        this.repository.save(new DiscordClubConfiguration(
+        DiscordClubConfiguration configuration = new DiscordClubConfiguration(
                 guildId,
                 channelID,
                 clubId,
                 autoPostingEnabled
-        ));
+        );
+        configuration.setRequiresTracking(requiresTracking);
+
+        return this.repository.save(configuration);
+    }
+
+    @Transactional
+    public Optional<DiscordClubConfiguration> updateToggles(Long channelId, boolean autopostingEnabled, boolean requiresTracking) {
+        return this.repository.findByChannelId(channelId).map(configuration -> {
+            configuration.setAutopostingEnabled(autopostingEnabled);
+            configuration.setRequiresTracking(requiresTracking);
+            return this.repository.save(configuration);
+        });
     }
 
     @Transactional
     public void removeConfiguration(Long channelId, String clubId) {
         this.repository.removeByChannelAndClubId(channelId, clubId);
+    }
+
+    @Transactional
+    public void removeConfiguration(Long channelId) {
+        this.repository.removeByChannelId(channelId);
     }
 }

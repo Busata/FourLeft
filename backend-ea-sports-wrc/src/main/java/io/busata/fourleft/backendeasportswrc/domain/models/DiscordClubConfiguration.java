@@ -39,6 +39,14 @@ public class DiscordClubConfiguration {
         return !autopostingEnabled;
     }
 
+    public void setAutopostingEnabled(boolean autopostingEnabled) {
+        this.autopostingEnabled = autopostingEnabled;
+    }
+
+    public void setRequiresTracking(boolean requiresTracking) {
+        this.requiresTracking = requiresTracking;
+    }
+
 
     public DiscordClubConfiguration(Long guildId, Long channelId, String clubId, boolean autopostingEnabled) {
         this.guildId = guildId;

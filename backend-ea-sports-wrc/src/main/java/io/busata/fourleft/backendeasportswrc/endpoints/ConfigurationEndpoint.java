@@ -1,9 +1,11 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
 import io.busata.fourleft.api.easportswrc.events.ConfigurationUpdatedEvent;
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestResultTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationUpdateTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubRemoveConfigurationTo;
@@ -59,5 +61,35 @@ public class ConfigurationEndpoint {
     @GetMapping("/api_v2/configuration/channel/{requestId}")
     public Optional<ChannelConfigurationTo> getChannelConfiguration(@PathVariable UUID requestId) {
         return this.channelConfigurationRequestService.getConfiguration(requestId);
+    }
+
+    @PostMapping("/api_v2/configuration/channel/{requestId}")
+    public Optional<ChannelConfigurationTo> createChannelConfiguration(@PathVariable UUID requestId, @RequestBody ChannelConfigurationCreateTo request) {
+        Optional<ChannelConfigurationTo> result = this.channelConfigurationRequestService.createConfiguration(requestId, request);
+        result.ifPresent(config -> {
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Configuration created via link for channelId (%s), club (%s), autoposting: (%s), requiresTracking: (%s).".formatted(config.channelId(), config.clubId(), config.autopostingEnabled(), config.requiresTracking()), List.of()));
+            eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
+        });
+        return result;
+    }
+
+    @PutMapping("/api_v2/configuration/channel/{requestId}")
+    public Optional<ChannelConfigurationTo> updateChannelConfiguration(@PathVariable UUID requestId, @RequestBody ChannelConfigurationUpdateTo request) {
+        Optional<ChannelConfigurationTo> result = this.channelConfigurationRequestService.updateConfiguration(requestId, request);
+        result.ifPresent(config -> {
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Configuration updated via link for channelId (%s), club (%s), autoposting: (%s), requiresTracking: (%s).".formatted(config.channelId(), config.clubId(), config.autopostingEnabled(), config.requiresTracking()), List.of()));
+            eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
+        });
+        return result;
+    }
+
+    @DeleteMapping("/api_v2/configuration/channel/{requestId}")
+    public Optional<ChannelConfigurationTo> removeChannelConfiguration(@PathVariable UUID requestId) {
+        Optional<ChannelConfigurationTo> result = this.channelConfigurationRequestService.removeConfiguration(requestId);
+        result.ifPresent(config -> {
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Configuration removed via link for channelId (%s).".formatted(config.channelId()), List.of()));
+            eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
+        });
+        return result;
     }
 }

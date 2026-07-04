@@ -1,6 +1,8 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationUpdateTo;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.configuration.ChannelConfigurationRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,7 @@ import java.util.UUID;
 public class ChannelConfigurationRequestService {
 
     private final ChannelConfigurationRequestRepository requestRepository;
-    private final DiscordClubConfigurationRepository clubConfigurationRepository;
+    private final DiscordClubConfigurationService clubConfigurationService;
 
     @Transactional
     public UUID requestConfiguration(Long guildId, Long channelId, String discordId) {
@@ -27,28 +29,67 @@ public class ChannelConfigurationRequestService {
 
     @Transactional(readOnly = true)
     public Optional<ChannelConfigurationTo> getConfiguration(UUID requestId) {
-        return requestRepository.findById(requestId).map(request -> {
-            Optional<DiscordClubConfiguration> configuration = clubConfigurationRepository.findByChannelId(request.getChannelId());
+        return requestRepository.findById(requestId).map(this::toConfigurationTo);
+    }
 
-            return configuration
-                    .map(config -> new ChannelConfigurationTo(
-                            String.valueOf(request.getGuildId()),
-                            String.valueOf(request.getChannelId()),
-                            true,
-                            config.getClubId(),
-                            config.isAutopostingEnabled(),
-                            config.isRequiresTracking(),
-                            config.isEnabled()
-                    ))
-                    .orElseGet(() -> new ChannelConfigurationTo(
-                            String.valueOf(request.getGuildId()),
-                            String.valueOf(request.getChannelId()),
-                            false,
-                            null,
-                            null,
-                            null,
-                            null
-                    ));
+    @Transactional
+    public Optional<ChannelConfigurationTo> createConfiguration(UUID requestId, ChannelConfigurationCreateTo form) {
+        return requestRepository.findById(requestId).map(request -> {
+            if (clubConfigurationService.findByChannelId(request.getChannelId()).isEmpty()) {
+                clubConfigurationService.createConfiguration(
+                        request.getGuildId(),
+                        request.getChannelId(),
+                        form.clubId(),
+                        form.autopostingEnabled(),
+                        form.requiresTracking());
+            }
+
+            return toConfigurationTo(request);
         });
+    }
+
+    @Transactional
+    public Optional<ChannelConfigurationTo> updateConfiguration(UUID requestId, ChannelConfigurationUpdateTo form) {
+        return requestRepository.findById(requestId).map(request -> {
+            clubConfigurationService.updateToggles(
+                    request.getChannelId(),
+                    form.autopostingEnabled(),
+                    form.requiresTracking());
+
+            return toConfigurationTo(request);
+        });
+    }
+
+    @Transactional
+    public Optional<ChannelConfigurationTo> removeConfiguration(UUID requestId) {
+        return requestRepository.findById(requestId).map(request -> {
+            clubConfigurationService.removeConfiguration(request.getChannelId());
+
+            return toConfigurationTo(request);
+        });
+    }
+
+    private ChannelConfigurationTo toConfigurationTo(ChannelConfigurationRequest request) {
+        Optional<DiscordClubConfiguration> configuration = clubConfigurationService.findByChannelId(request.getChannelId());
+
+        return configuration
+                .map(config -> new ChannelConfigurationTo(
+                        String.valueOf(request.getGuildId()),
+                        String.valueOf(request.getChannelId()),
+                        true,
+                        config.getClubId(),
+                        config.isAutopostingEnabled(),
+                        config.isRequiresTracking(),
+                        config.isEnabled()
+                ))
+                .orElseGet(() -> new ChannelConfigurationTo(
+                        String.valueOf(request.getGuildId()),
+                        String.valueOf(request.getChannelId()),
+                        false,
+                        null,
+                        null,
+                        null,
+                        null
+                ));
     }
 }

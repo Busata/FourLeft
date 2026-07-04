@@ -39,7 +39,9 @@ RETURNING id;
 SQL
 )
 
-  request_id=$(echo "$request_id" | tr -d '[:space:]')
+  # psql prints the RETURNING uuid AND a trailing "INSERT 0 1" command tag (-t drops headers/footers
+  # but not that tag), so pull just the UUID out rather than concatenating both.
+  request_id=$(printf '%s\n' "$request_id" | grep -Eio '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -n1)
 
   if [[ -z "$request_id" ]]; then
     echo "Failed to create a configuration link (no id returned)."
