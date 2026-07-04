@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TimeTrialProbeRepository extends JpaRepository<TimeTrialProbe, Long> {
 
@@ -19,4 +20,13 @@ public interface TimeTrialProbeRepository extends JpaRepository<TimeTrialProbe, 
             ORDER BY combination_id, probed_at DESC
             """, nativeQuery = true)
     List<TimeTrialProbe> findAllLatest();
+
+    /** The most recent probe for a single combination — its current entry count / validity. */
+    @Query(value = """
+            SELECT * FROM time_trial_probe
+            WHERE combination_id = :combinationId
+            ORDER BY probed_at DESC
+            LIMIT 1
+            """, nativeQuery = true)
+    Optional<TimeTrialProbe> findLatestByCombinationId(String combinationId);
 }

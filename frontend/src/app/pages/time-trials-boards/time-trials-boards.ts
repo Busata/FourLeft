@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
@@ -34,7 +35,7 @@ interface CatalogHit {
 
 @Component({
   selector: 'app-time-trials-boards',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './time-trials-boards.html',
   styleUrl: './time-trials-boards.scss',
 })

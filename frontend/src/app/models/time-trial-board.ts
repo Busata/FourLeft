@@ -45,8 +45,11 @@ export interface TtEntryPage {
   entries: TtEntry[];
   page: number;
   size: number;
+  /** Entries we've actually synced (currently capped); paging is over these. */
   total: number;
   totalPages: number;
+  /** The board's real size as last probed on Racenet; null when never probed. */
+  totalEntries: number | null;
 }
 
 /** One of a player's stored times, with the board it's on — a row of the profile page. */

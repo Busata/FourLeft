@@ -4,6 +4,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialCombination;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialCombinationRepository;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
+import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialProbeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,7 @@ public class TimeTrialBoardEndpoint {
 
     private final TimeTrialCombinationRepository combinationRepository;
     private final TimeTrialLeaderboardEntryRepository entryRepository;
+    private final TimeTrialProbeRepository probeRepository;
 
     /** The drill-down tree, built only from combinations that currently have stored entries. */
     @GetMapping("/api_v2/time-trials/catalog")
@@ -67,8 +69,13 @@ public class TimeTrialBoardEndpoint {
         Pageable pageable = PageRequest.of(Math.max(page, 0), clamped, Sort.by("rank").ascending());
         Page<TimeTrialLeaderboardEntry> result = entryRepository.findLatestPage(combinationId, pageable);
         List<EntryView> entries = result.getContent().stream().map(EntryView::from).toList();
+        // The board's real size as last probed on Racenet — distinct from {@code total}, which counts
+        // only the entries we've synced (currently capped). Null when the board has never been probed.
+        Integer totalEntries = probeRepository.findLatestByCombinationId(combinationId)
+                .map(p -> p.getTotalEntries())
+                .orElse(null);
         return new EntryPageView(entries, result.getNumber(), result.getSize(),
-                result.getTotalElements(), result.getTotalPages());
+                result.getTotalElements(), result.getTotalPages(), totalEntries);
     }
 
     /** Driver autocomplete: distinct display names matching {@code q} (case-insensitive substring). */
@@ -131,7 +138,9 @@ public class TimeTrialBoardEndpoint {
         }
     }
 
-    public record EntryPageView(List<EntryView> entries, int page, int size, long total, int totalPages) {
+    /** {@code total} = synced entries we hold (capped); {@code totalEntries} = the board's real size on Racenet. */
+    public record EntryPageView(List<EntryView> entries, int page, int size, long total, int totalPages,
+                                Integer totalEntries) {
     }
 
     /** A player's stored time on one board, with the board's context — a row of the profile page. */

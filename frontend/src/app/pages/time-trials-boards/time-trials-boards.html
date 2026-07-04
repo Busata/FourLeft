@@ -84,6 +84,9 @@
         <h1>{{ selection()!.location }}</h1>
         <span class="ttb-crumb">{{ selection()!.route }}</span>
         <span class="ttb-crumb ttb-crumb--surface">{{ surfaceLabel(selection()!.surfaceCondition) }}</span>
+        @if (entryPage()?.totalEntries; as totalEntries) {
+          <span class="ttb-crumb ttb-crumb--total">{{ totalEntries | number }} entries</span>
+        }
       </header>
 
       <!-- Car class — consistently shown for the selected stage+surface -->
@@ -165,7 +168,12 @@
           <div class="ttb-pager">
             <button class="iq-chip" (click)="prev()" [disabled]="page() === 0 || loadingEntries()">Prev</button>
             <span class="ttb-pager__info">
-              Page {{ page() + 1 }} of {{ totalPages() }} · {{ ep.total }} entries
+              Page {{ page() + 1 }} of {{ totalPages() }} ·
+              @if (ep.totalEntries != null && ep.totalEntries > ep.total) {
+                {{ ep.total | number }} of {{ ep.totalEntries | number }} entries
+              } @else {
+                {{ ep.total | number }} entries
+              }
             </span>
             <button
               class="iq-chip"

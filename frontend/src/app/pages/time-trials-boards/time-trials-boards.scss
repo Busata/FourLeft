@@ -180,6 +180,15 @@
       color: #2f72d6;
       font-weight: 600;
     }
+    &--total {
+      align-self: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f0f2f6;
+      color: #4a5160;
+      font-size: 12px;
+      font-weight: 600;
+    }
   }
 }
 
