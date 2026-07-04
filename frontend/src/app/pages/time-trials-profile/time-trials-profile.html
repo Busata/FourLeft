@@ -95,6 +95,31 @@
         </div>
 
         @if (common().length) {
+          <div class="cmp-score">
+            <span class="cmp-score__side cmp-score__side--a" [class.cmp-score__side--lead]="tally().leader === 'a'">
+              <span class="cmp-score__num">{{ tally().a }}</span>
+              <span class="cmp-score__name">{{ name() }}</span>
+            </span>
+            <span class="cmp-score__mid">
+              @if (tally().leader === 'tie') {
+                <span class="cmp-score__verdict">All square</span>
+              } @else {
+                <span class="cmp-score__verdict">
+                  {{ tally().leader === 'a' ? name() : vs() }} leads
+                </span>
+              }
+              @if (tally().ties) {
+                <span class="cmp-score__ties">{{ tally().ties }} tied</span>
+              }
+            </span>
+            <span class="cmp-score__side cmp-score__side--b" [class.cmp-score__side--lead]="tally().leader === 'b'">
+              <span class="cmp-score__num">{{ tally().b }}</span>
+              <span class="cmp-score__name">{{ vs() }}</span>
+            </span>
+          </div>
+        }
+
+        @if (common().length) {
           @for (rally of commonByRally(); track rally.locationId) {
             <section class="cmp-rally">
               <h2 class="cmp-rally-name">{{ rally.location }}</h2>

@@ -128,6 +128,29 @@ export class TimeTrialsProfile implements OnInit {
     return boards;
   });
 
+  /**
+   * Overall head-to-head across the common boards: how many each driver has the faster finish time on
+   * (the "Finish" row is always last in each board's rows), plus any dead heats. {@code leader} names
+   * whoever is ahead — 'a', 'b', or 'tie'.
+   */
+  readonly tally = computed(() => {
+    let a = 0;
+    let b = 0;
+    let ties = 0;
+    for (const board of this.common()) {
+      const finish = board.rows[board.rows.length - 1];
+      if (finish?.aWins) {
+        a++;
+      } else if (finish?.bWins) {
+        b++;
+      } else {
+        ties++;
+      }
+    }
+    const leader = a > b ? 'a' : b > a ? 'b' : 'tie';
+    return { a, b, ties, total: a + b + ties, leader };
+  });
+
   /** Common boards grouped by rally, so the compare view shows one rally per row. */
   readonly commonByRally = computed<CompareRally[]>(() => {
     const rallies = new Map<number, CompareRally>();

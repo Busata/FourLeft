@@ -325,6 +325,77 @@
   }
 }
 
+// Overall head-to-head scoreboard: boards-won by each driver, leader emphasised.
+.cmp-score {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #e3e6ec;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fbfbfc;
+
+  &__side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  &__num {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    color: #b6bcc7;
+  }
+  &__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b7280;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  // The winning side lights up in that driver's colour.
+  &__side--a.cmp-score__side--lead {
+    background: rgba(31, 111, 235, 0.08);
+    .cmp-score__num,
+    .cmp-score__name {
+      color: #1f6feb;
+    }
+  }
+  &__side--b.cmp-score__side--lead {
+    background: rgba(184, 134, 11, 0.1);
+    .cmp-score__num,
+    .cmp-score__name {
+      color: #b8860b;
+    }
+  }
+  &__mid {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 14px 16px;
+  }
+  &__verdict {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2430;
+  }
+  &__ties {
+    font-size: 11px;
+    color: #9aa1ad;
+  }
+}
+
 // One rally per row: a labelled section holding that rally's common stage boards.
 .cmp-rally {
   margin-bottom: 24px;
