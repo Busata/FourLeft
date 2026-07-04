@@ -1,0 +1,161 @@
+<div class="ttp">
+  <div class="cc-picker">
+    <label class="cc-field">
+      <span class="cc-field__label">Club</span>
+      <select class="cc-select" [value]="clubId()" (change)="selectClub($any($event.target).value)">
+        <option value="">Select a club…</option>
+        @for (club of clubs(); track club.clubId) {
+          <option [value]="club.clubId">{{ club.clubName }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (!clubId()) {
+    <div class="ttp-empty">
+      <h2>Club head-to-head</h2>
+      <p>Pick a club above, then choose two members to see how they fared against each other, event by event.</p>
+    </div>
+  } @else {
+    <header class="ttp-header">
+      <h1>{{ overview()?.clubName || 'Club' }}</h1>
+      @if (overview()) {
+        <span class="ttp-sub">
+          {{ members().length }} member{{ members().length === 1 ? '' : 's' }}
+        </span>
+      }
+      @if (loading()) {
+        <span class="ttp-loading">loading…</span>
+      }
+    </header>
+
+    @if (error()) {
+      <div class="iq-banner iq-banner--error">{{ error() }}</div>
+    }
+
+    @if (overview()) {
+      <div class="ttp-compare-bar">
+        <label class="cc-field">
+          <span class="cc-field__label cc-field__label--a">Driver A</span>
+          <select class="cc-select" [value]="a()" (change)="selectA($any($event.target).value)">
+            <option value="">Select…</option>
+            @for (member of members(); track member.wrcPlayerId) {
+              <option [value]="member.wrcPlayerId">{{ member.playerName }}</option>
+            }
+          </select>
+        </label>
+        <label class="cc-field">
+          <span class="cc-field__label cc-field__label--b">Driver B</span>
+          <select class="cc-select" [value]="b()" (change)="selectB($any($event.target).value)">
+            <option value="">Select…</option>
+            @for (member of members(); track member.wrcPlayerId) {
+              <option [value]="member.wrcPlayerId">{{ member.playerName }}</option>
+            }
+          </select>
+        </label>
+        @if (comparing()) {
+          <button type="button" class="ttp-clear" (click)="clearComparison()">Clear</button>
+        }
+      </div>
+
+      @if (comparing()) {
+        <div class="cmp-summary">
+          <span class="cmp-who cmp-who--a">{{ aName() }}</span>
+          <span class="cmp-vs">vs</span>
+          <span class="cmp-who cmp-who--b">{{ bName() }}</span>
+          <span class="cmp-count">
+            {{ commonCount() }} event{{ commonCount() === 1 ? '' : 's' }} in common
+          </span>
+        </div>
+
+        @if (commonCount()) {
+          <div class="cmp-score">
+            <span class="cmp-score__side cmp-score__side--a" [class.cmp-score__side--lead]="tally().leader === 'a'">
+              <span class="cmp-score__num">{{ tally().a }}</span>
+              <span class="cmp-score__name">{{ aName() }}</span>
+            </span>
+            <span class="cmp-score__mid">
+              @if (tally().leader === 'tie') {
+                <span class="cmp-score__verdict">All square</span>
+              } @else {
+                <span class="cmp-score__verdict">
+                  {{ tally().leader === 'a' ? aName() : bName() }} leads
+                </span>
+              }
+              @if (tally().ties) {
+                <span class="cmp-score__ties">{{ tally().ties }} tied</span>
+              }
+            </span>
+            <span class="cmp-score__side cmp-score__side--b" [class.cmp-score__side--lead]="tally().leader === 'b'">
+              <span class="cmp-score__num">{{ tally().b }}</span>
+              <span class="cmp-score__name">{{ bName() }}</span>
+            </span>
+          </div>
+
+          @for (championship of comparison(); track championship.id) {
+            <section class="cmp-rally">
+              <h2 class="cmp-rally-name">{{ championship.name }}</h2>
+              <div class="cmp-grid">
+                @for (event of championship.events; track event.eventId) {
+                  <div class="cmp-board">
+                    <div class="cmp-board-head">
+                      <span class="cmp-board-title">{{ event.location }}</span>
+                      @if (event.meta) {
+                        <span class="cmp-meta">{{ event.meta }}</span>
+                      }
+                    </div>
+                    <table class="iq-table cmp-table">
+                      <thead>
+                        <tr>
+                          <th class="cmp-label"></th>
+                          <th class="num">
+                            {{ aName() }}
+                            @if (podium(event.aRank); as tier) {
+                              <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ event.aRank }}</span>
+                            } @else {
+                              <span class="cmp-rank">#{{ event.aRank }}</span>
+                            }
+                          </th>
+                          <th class="num">
+                            {{ bName() }}
+                            @if (podium(event.bRank); as tier) {
+                              <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ event.bRank }}</span>
+                            } @else {
+                              <span class="cmp-rank">#{{ event.bRank }}</span>
+                            }
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of event.rows; track row.label) {
+                          <tr [class.cmp-finish]="row.label === 'Total'">
+                            <td class="cmp-label">{{ row.label }}</td>
+                            <td class="num" [class.cmp-win]="row.aWins" [class.cmp-lose]="row.bWins">
+                              {{ row.a }}
+                            </td>
+                            <td class="num" [class.cmp-win]="row.bWins" [class.cmp-lose]="row.aWins">
+                              {{ row.b }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        } @else if (!loading()) {
+          <div class="iq-empty">
+            “{{ aName() }}” and “{{ bName() }}” have no events in common in this club’s results.
+          </div>
+        }
+      } @else {
+        <div class="ttp-empty">
+          <h2>Pick two drivers</h2>
+          <p>Choose Driver A and Driver B above to compare their event results across every championship.</p>
+        </div>
+      }
+    }
+  }
+</div>

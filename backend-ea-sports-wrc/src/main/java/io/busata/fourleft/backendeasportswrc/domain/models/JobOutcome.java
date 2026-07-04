@@ -26,5 +26,7 @@ public enum JobOutcome {
     /** A time-trial probe pass finished: boards checked for existence + entry counts recorded. */
     TT_PROBED,
     /** A time-trial board was fetched in full: its entries were pulled and stored. */
-    TT_FETCHED
+    TT_FETCHED,
+    /** A club's cached results export was regenerated and written. */
+    CLUB_EXPORTED
 }

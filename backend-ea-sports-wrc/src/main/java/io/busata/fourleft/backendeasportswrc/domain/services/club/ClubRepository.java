@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.domain.services.club;
 
+import io.busata.fourleft.api.easportswrc.models.ClubReferenceTo;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,8 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 interface ClubRepository extends JpaRepository<Club, String> {
+
+    /** All clubs as lightweight {id, name} references (no championship graph loaded), name-sorted. */
+    @Query("select new io.busata.fourleft.api.easportswrc.models.ClubReferenceTo(c.id, c.clubName) from Club c order by lower(c.clubName)")
+    List<ClubReferenceTo> findAllReferences();
+
+    /** Every club id — the work-list for exporting all clubs. */
+    @Query("select c.id from Club c")
+    List<String> findAllClubIds();
 
     // Stamp the event that owns this leaderboard, either directly (event.leaderboard_id) or via one
     // of its stages. Resolve the (usually single) target event id up front, then update it by PK.

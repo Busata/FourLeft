@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.domain.services.club;
 
+import io.busata.fourleft.api.easportswrc.models.ClubReferenceTo;
 import io.busata.fourleft.backendeasportswrc.application.importer.ClubFactory;
 import io.busata.fourleft.backendeasportswrc.application.importer.results.StandingsUpdatedResult;
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
@@ -175,6 +176,18 @@ public class ClubService {
     @Transactional(readOnly = true)
     public Club findById(String id) {
         return this.clubRepository.findById(id).orElseThrow();
+    }
+
+    /** Every club as a lightweight {id, name} reference, name-sorted — for the club picker. */
+    @Transactional(readOnly = true)
+    public List<ClubReferenceTo> findAllReferences() {
+        return this.clubRepository.findAllReferences();
+    }
+
+    /** Every club id — the work-list for exporting all clubs. */
+    @Transactional(readOnly = true)
+    public List<String> findAllClubIds() {
+        return this.clubRepository.findAllClubIds();
     }
 
 

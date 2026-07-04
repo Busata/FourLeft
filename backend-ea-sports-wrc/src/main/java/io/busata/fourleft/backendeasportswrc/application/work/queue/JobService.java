@@ -27,6 +27,20 @@ public class JobService {
     }
 
     /**
+     * Enqueue an ad-hoc job unless one of the same type+ref is already queued or running — the
+     * target-less dedupe guard for scheduled sweeps that fan out one job per item.
+     *
+     * @return the new job, or empty if an equivalent job was already active
+     */
+    @Transactional
+    public Optional<Job> enqueueIfAbsent(JobType type, String ref) {
+        if (jobRepository.existsActive(type.name(), ref)) {
+            return Optional.empty();
+        }
+        return Optional.of(enqueue(type, ref, null));
+    }
+
+    /**
      * Enqueue a job for a recurring target, unless one is already in flight for it
      * (prevents pile-up when an import takes longer than its cadence).
      *

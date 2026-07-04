@@ -18,8 +18,8 @@ public class ClubExportSchedule {
     private final ClubExportService clubExportService;
 
     @Scheduled(cron = "0 0 */1 * * *", zone = "UTC")
-    public void exportEnabledClubs() {
-        log.info("Starting scheduled export of enabled clubs");
-        clubExportService.exportAllEnabledClubs();
+    public void exportClubs() {
+        log.info("Enqueuing scheduled export jobs for all clubs");
+        clubExportService.enqueueScheduledExport();
     }
 }

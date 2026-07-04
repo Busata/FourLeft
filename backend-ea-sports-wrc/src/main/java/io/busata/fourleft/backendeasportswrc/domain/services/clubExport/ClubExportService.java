@@ -2,8 +2,11 @@ package io.busata.fourleft.backendeasportswrc.domain.services.clubExport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.busata.fourleft.api.easportswrc.models.ClubOverviewTo;
+import io.busata.fourleft.backendeasportswrc.application.work.queue.JobService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubExportConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import io.busata.fourleft.backendeasportswrc.domain.services.CustomOverviewService;
+import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.properties.ClubExportProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,25 @@ public class ClubExportService {
     private final ClubExportConfigurationRepository clubExportConfigurationRepository;
     private final ClubExportProperties clubExportProperties;
     private final ObjectMapper objectMapper;
+    private final ClubService clubService;
+    private final JobService jobService;
+
+    /**
+     * Enqueue a CLUB_EXPORT job for every known club (skipping any already queued/running), so exports
+     * fan out across the work-queue's virtual-thread pool — one club per job — instead of one long
+     * synchronous sweep. Each job runs {@link #exportClub}. Returns how many jobs were enqueued.
+     */
+    public int enqueueScheduledExport() {
+        List<String> clubIds = clubService.findAllClubIds();
+        int enqueued = 0;
+        for (String clubId : clubIds) {
+            if (jobService.enqueueIfAbsent(JobType.CLUB_EXPORT, clubId).isPresent()) {
+                enqueued++;
+            }
+        }
+        log.info("Enqueued {} club export job(s) ({} clubs total)", enqueued, clubIds.size());
+        return enqueued;
+    }
 
     @Transactional(readOnly = true)
     public void exportAllEnabledClubs() {

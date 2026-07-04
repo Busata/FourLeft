@@ -13,11 +13,15 @@ import {
   TtSurface,
   TtSyncResult,
 } from '../../models/time-trial-board';
+import { formatDiff, formatTime } from '../../common/time-format';
 
 const PAGE_SIZE = 50;
 
 /** Matches backend time-trial-sync.manual-cooldown-hours (used only to pre-disable the button). */
 const SYNC_COOLDOWN_HOURS = 3;
+
+/** "Top X%" standing bands, ascending: an entry's percentile rounds up to the first one it's within. */
+const PERCENTILE_BANDS = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 /** The currently drilled-to stage + surface, plus the car classes available there. */
 interface Selection {
@@ -349,37 +353,24 @@ export class TimeTrialsBoards implements OnInit {
     return `https://ecdn.codemasters.com/ecdn/Racenet/PROD/WRC2023/stats/event_location_logos/${locationId}.png`;
   }
 
-  /** "00:10:23.1400000" → "10:23.140" (drops a zero hours component, trims to milliseconds). */
-  formatTime(raw: string | null): string {
-    if (!raw) {
-      return '—';
-    }
-    const parts = raw.split(':');
-    if (parts.length !== 3) {
-      return raw;
-    }
-    const [hh, mm, ss] = parts;
-    const secs = trimFraction(ss);
-    return parseInt(hh, 10) > 0 ? `${parseInt(hh, 10)}:${mm}:${secs}` : `${mm}:${secs}`;
-  }
+  // Time / gap formatting is shared with the profile + club-compare views (see common/time-format).
+  formatTime = formatTime;
+  formatDiff = formatDiff;
 
-  /** Gap to the leader as "+2.147"; blank for the leader / a zero gap. */
-  formatDiff(raw: string | null, rank: number | null): string {
-    if (rank === 1 || !raw || raw === '00:00:00') {
+  /**
+   * Where this entry sits in the full field as a bucketed "top X%" standing, from its true rank
+   * against the board's real size (totalEntries — the probed field size, not the stored slice).
+   * Rounded up to the nearest band: 1, 5, 10, then 10% steps. Blank when the field size is unknown
+   * (board never probed) or the rank is missing.
+   */
+  percentile(rank: number | null): string {
+    const total = this.entryPage()?.totalEntries;
+    if (rank == null || total == null || total < 1) {
       return '';
     }
-    const parts = raw.split(':');
-    if (parts.length !== 3) {
-      return raw;
-    }
-    const [hh, mm, ss] = parts;
-    const h = parseInt(hh, 10);
-    const m = parseInt(mm, 10);
-    const secs = trimFraction(ss);
-    if (h > 0) {
-      return `+${h}:${mm}:${secs}`;
-    }
-    return m > 0 ? `+${m}:${secs}` : `+${secs}`;
+    const pct = (rank / total) * 100;
+    const bucket = PERCENTILE_BANDS.find((band) => pct <= band) ?? 100;
+    return `Top ${bucket}%`;
   }
 }
 
@@ -405,10 +396,4 @@ function toggle(set: ReadonlySet<number>, value: number): ReadonlySet<number> {
     next.add(value);
   }
   return next;
-}
-
-/** "23.1400000" → "23.140"; "00" → "00.000". */
-function trimFraction(ss: string): string {
-  const [sec, frac = ''] = ss.split('.');
-  return `${sec}.${(frac + '000').slice(0, 3)}`;
 }

@@ -1,7 +1,9 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
 import io.busata.fourleft.api.easportswrc.models.ClubOverviewTo;
+import io.busata.fourleft.api.easportswrc.models.ClubReferenceTo;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubExportConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubExport.ClubExportConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubExport.ClubExportService;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +20,19 @@ public class ClubExportEndpoint {
 
     private final ClubExportService clubExportService;
     private final ClubExportConfigurationService clubExportConfigurationService;
+    private final ClubService clubService;
 
     @GetMapping("/api_v2/cached/club_summary/{clubId}")
     public ResponseEntity<ClubOverviewTo> getCachedClubSummary(@PathVariable String clubId) {
         return clubExportService.getCachedClub(clubId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /** All clubs as {id, name} for the picker — every club is exported, so each has a cached summary. */
+    @GetMapping("/api_v2/clubs")
+    public List<ClubReferenceTo> listClubs() {
+        return clubService.findAllReferences();
     }
 
     @GetMapping("/api_v2/export/clubs")

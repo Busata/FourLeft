@@ -1,4 +1,4 @@
-// Light theme, matching the boards / work-queue pages.
+// Mirrors the time-trial profile/compare styling so the two head-to-head views read as one feature.
 :host {
   display: block;
   color: #1f2430;
@@ -10,102 +10,52 @@
   padding-bottom: 48px;
 }
 
-.ttp-search {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+// --- Club + driver pickers ---------------------------------------------------
+
+.cc-picker {
   margin-bottom: 20px;
+}
 
-  .ttp-autocomplete {
-    position: relative;
-    flex: 1;
-    min-width: 0;
-    max-width: 340px;
-  }
+.cc-field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
 
-  .iq-search {
-    width: 100%;
-    padding: 6px 12px 6px 32px;
-    border-radius: 999px;
-    border: 1px solid #d5d9e0;
-    background: #fff
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238a91a0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath d='M9.5 9.5 13 13'/%3E%3C/svg%3E")
-      no-repeat 11px center;
-    color: #1f2430;
-    font-size: 13px;
-    transition: border-color 0.12s, box-shadow 0.12s;
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b7280;
 
-    &::placeholder {
-      color: #9aa1ad;
+    &--a {
+      color: #1f6feb;
     }
-    &:hover {
-      border-color: #9aa4b5;
-    }
-    &:focus {
-      outline: none;
-      border-color: #2f72d6;
-      box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
+    &--b {
+      color: #b8860b;
     }
   }
 }
 
-// Autocomplete dropdown under a search box.
-.ttp-suggest {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 4px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid #e3e6ec;
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
-  max-height: 280px;
-  overflow-y: auto;
-
-  li {
-    margin: 0;
-  }
-  button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 7px 10px;
-    border: none;
-    border-radius: 7px;
-    background: transparent;
-    color: #1f2430;
-    font-size: 13px;
-    cursor: pointer;
-
-    &:hover {
-      background: #f1f5fb;
-      color: #2f72d6;
-    }
-  }
-}
-
-.ttp-search-btn {
-  padding: 6px 16px;
+.cc-select {
+  min-width: 220px;
+  max-width: 320px;
+  padding: 7px 12px;
   border-radius: 999px;
-  border: 1px solid #2f72d6;
-  background: #2f72d6;
-  color: #fff;
+  border: 1px solid #d5d9e0;
+  background: #fff;
+  color: #1f2430;
   font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: border-color 0.12s, box-shadow 0.12s;
 
   &:hover {
-    background: #275fb3;
-    border-color: #275fb3;
+    border-color: #9aa4b5;
   }
-  &:focus-visible {
+  &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.25);
+    border-color: #2f72d6;
+    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.15);
   }
 }
 
@@ -162,10 +112,6 @@
   }
 }
 
-.ttp-tablewrap {
-  overflow-x: auto;
-}
-
 .iq-table {
   width: 100%;
   border-collapse: collapse;
@@ -189,14 +135,6 @@
     background: #f6f7f9;
     white-space: nowrap;
   }
-  th.ttp-sort {
-    cursor: pointer;
-    user-select: none;
-
-    &:hover {
-      color: #2f72d6;
-    }
-  }
   tbody tr:hover {
     background: #f4f6fa;
   }
@@ -206,15 +144,6 @@
   .num {
     text-align: right;
     font-variant-numeric: tabular-nums;
-  }
-  .rank {
-    color: #8a91a0;
-  }
-  .time {
-    font-weight: 600;
-  }
-  .gap {
-    color: #8a91a0;
   }
 }
 
@@ -247,16 +176,6 @@
   }
 }
 
-.ttp-board {
-  color: #1f2430;
-  text-decoration: none;
-
-  &:hover {
-    color: #2f72d6;
-    text-decoration: underline;
-  }
-}
-
 .iq-empty {
   color: #6b7280;
   padding: 16px 14px;
@@ -264,22 +183,14 @@
   border-radius: 10px;
 }
 
-// --- Compare two players -------------------------------------------------
+// --- Compare two drivers -----------------------------------------------------
 
 .ttp-compare-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 18px;
-
-  .ttp-search--sm {
-    margin-bottom: 0;
-
-    .ttp-autocomplete {
-      max-width: 300px;
-    }
-  }
 }
 
 .ttp-clear {
@@ -328,7 +239,7 @@
   }
 }
 
-// Overall head-to-head scoreboard: boards-won by each driver, leader emphasised.
+// Overall head-to-head scoreboard: events-won by each driver, leader emphasised.
 .cmp-score {
   display: flex;
   align-items: stretch;
@@ -364,7 +275,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  // The winning side lights up in that driver's colour.
   &__side--a.cmp-score__side--lead {
     background: rgba(31, 111, 235, 0.08);
     .cmp-score__num,
@@ -399,7 +309,7 @@
   }
 }
 
-// One rally per row: a labelled section holding that rally's common stage boards.
+// One championship per row: a labelled section holding that championship's shared events.
 .cmp-rally {
   margin-bottom: 24px;
 
@@ -438,6 +348,9 @@
   background: #f6f7f9;
   border-bottom: 1px solid #edeff3;
 
+  .cmp-board-title {
+    font-weight: 600;
+  }
   .cmp-meta {
     color: #8a91a0;
     font-size: 12px;
@@ -464,7 +377,7 @@
     font-size: 12px;
     margin-left: 4px;
   }
-  // Finish row: heavier, separated from the sector splits above it.
+  // Total row: heavier, separated from the stage row above it.
   .cmp-finish td {
     font-weight: 700;
     border-top: 2px solid #e3e6ec;

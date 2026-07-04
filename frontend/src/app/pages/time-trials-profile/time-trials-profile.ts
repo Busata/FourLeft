@@ -6,18 +6,16 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap 
 import { catchError } from 'rxjs/operators';
 
 import { TtPlayerEntry, TtPlayerProfile } from '../../models/time-trial-board';
+import {
+  CompareRow,
+  compareRow,
+  formatDiff,
+  formatTime,
+  podium,
+  surfaceLabel,
+} from '../../common/time-format';
 
 type SortDir = 'asc' | 'desc';
-
-/** One sector (or the finish total) with both players' values and who's ahead. */
-export interface CompareRow {
-  label: string;
-  a: string | null;
-  b: string | null;
-  /** true when that side is strictly faster on this row. */
-  aWins: boolean;
-  bWins: boolean;
-}
 
 /** One board both players have a time on, laid out for a side-by-side split comparison. */
 export interface CompareBoard {
@@ -241,37 +239,10 @@ export class TimeTrialsProfile implements OnInit {
     const rows: CompareRow[] = [];
     const sectors = Math.max(as.length, bs.length);
     for (let i = 0; i < sectors; i++) {
-      rows.push(this.compareRow(`Split ${i + 1}`, as[i] ?? null, bs[i] ?? null));
+      rows.push(compareRow(`Split ${i + 1}`, as[i] ?? null, bs[i] ?? null));
     }
-    rows.push(this.compareRow('Finish', a.time, b.time));
+    rows.push(compareRow('Finish', a.time, b.time));
     return rows;
-  }
-
-  private compareRow(label: string, a: string | null, b: string | null): CompareRow {
-    const av = this.parseSeconds(a);
-    const bv = this.parseSeconds(b);
-    const comparable = av != null && bv != null;
-    return {
-      label,
-      a,
-      b,
-      aWins: comparable && av < bv,
-      bWins: comparable && bv < av,
-    };
-  }
-
-  /** "hh:mm:ss.fffffff" → seconds as a float (full fractional precision), or null if unparseable. */
-  private parseSeconds(raw: string | null): number | null {
-    if (!raw) {
-      return null;
-    }
-    const parts = raw.split(':');
-    if (parts.length !== 3) {
-      return null;
-    }
-    const [hh, mm, ss] = parts;
-    const seconds = Number(hh) * 3600 + Number(mm) * 60 + Number(ss);
-    return Number.isFinite(seconds) ? seconds : null;
   }
 
   /** Fetch name suggestions for {@code q} (empty for short/blank input); errors degrade to no list. */
@@ -357,30 +328,9 @@ export class TimeTrialsProfile implements OnInit {
     return this.sortDir() === 'asc' ? '▲' : '▼';
   }
 
-  /** Podium tier for a rank: 'gold' | 'silver' | 'bronze' for 1/2/3, else ''. */
-  podium(rank: number | null): string {
-    if (rank === 1) return 'gold';
-    if (rank === 2) return 'silver';
-    if (rank === 3) return 'bronze';
-    return '';
-  }
-
-  surfaceLabel(surfaceCondition: number): string {
-    return surfaceCondition === 1 ? 'Wet' : 'Dry';
-  }
-
-  /** "00:10:23.1400000" → "10:23.140" (drops a zero hours component, trims to milliseconds). */
-  formatTime(raw: string | null): string {
-    if (!raw) {
-      return '—';
-    }
-    const parts = raw.split(':');
-    if (parts.length !== 3) {
-      return raw;
-    }
-    const [hh, mm, ss] = parts;
-    const [sec, frac = ''] = ss.split('.');
-    const secs = `${sec}.${(frac + '000').slice(0, 3)}`;
-    return parseInt(hh, 10) > 0 ? `${parseInt(hh, 10)}:${mm}:${secs}` : `${mm}:${secs}`;
-  }
+  // Template-facing formatters — shared with the club-compare view (see common/time-format).
+  podium = podium;
+  surfaceLabel = surfaceLabel;
+  formatTime = formatTime;
+  formatDiff = formatDiff;
 }

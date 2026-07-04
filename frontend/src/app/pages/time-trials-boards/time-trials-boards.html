@@ -129,6 +129,7 @@
                 <th>Vehicle</th>
                 <th class="num">Time</th>
                 <th class="num">Gap</th>
+                <th class="num">Percentile</th>
                 <th class="splits-col"></th>
               </tr>
             </thead>
@@ -149,6 +150,7 @@
                   <td class="muted">{{ entry.vehicle }}</td>
                   <td class="num time">{{ formatTime(entry.time) }}</td>
                   <td class="num gap">{{ formatDiff(entry.differenceToFirst, entry.rank) }}</td>
+                  <td class="num pct">{{ percentile(entry.rank) }}</td>
                   <td class="splits-col">
                     @if (entry.splits && entry.splits.length) {
                       <span class="ttb-caret" [class.ttb-caret--open]="expandedRank() === entry.rank">▸</span>
@@ -158,7 +160,7 @@
                 @if (expandedRank() === entry.rank && entry.splits && entry.splits.length) {
                   <tr class="ttb-splits-row">
                     <td></td>
-                    <td colspan="5">
+                    <td colspan="6">
                       <div class="ttb-splits">
                         @for (split of entry.splits; track $index) {
                           <span class="ttb-split">

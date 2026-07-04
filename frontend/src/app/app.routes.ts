@@ -12,6 +12,7 @@ import { TimeTrials } from './pages/time-trials/time-trials';
 import { TimeTrialsShell } from './pages/time-trials-shell/time-trials-shell';
 import { TimeTrialsBoards } from './pages/time-trials-boards/time-trials-boards';
 import { TimeTrialsProfile } from './pages/time-trials-profile/time-trials-profile';
+import { ClubCompare } from './pages/club-compare/club-compare';
 
 export const routes: Routes = [
   {
@@ -41,6 +42,7 @@ export const routes: Routes = [
           { path: 'profile', component: TimeTrialsProfile, title: 'Time Trials Profile' },
         ],
       },
+      { path: 'easportswrc/club-compare', component: ClubCompare, title: 'Club Compare' },
       // Keep the old top-level work-queue URL working (bookmarks, links).
       { path: 'easportswrc/work-queue', pathMatch: 'full', redirectTo: 'easportswrc/status/queue' },
       { path: 'privacy', component: Privacy, title: 'Privacy Policy' },
