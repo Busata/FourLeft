@@ -75,6 +75,12 @@
       </div>
     } @else {
       <header class="ttb-context">
+        <img
+          class="ttb-badge ttb-badge--lg"
+          [src]="locationBadgeUrl(selection()!.locationId)"
+          (error)="$any($event.target).style.display = 'none'"
+          alt=""
+          loading="lazy" />
         <h1>{{ selection()!.location }}</h1>
         <span class="ttb-crumb">{{ selection()!.route }}</span>
         <span class="ttb-crumb ttb-crumb--surface">{{ surfaceLabel(selection()!.surfaceCondition) }}</span>

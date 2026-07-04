@@ -118,6 +118,12 @@
   height: 18px;
   object-fit: contain;
   flex: 0 0 auto;
+
+  &--lg {
+    width: 32px;
+    height: 32px;
+    align-self: center;
+  }
 }
 
 .ttb-caret {
