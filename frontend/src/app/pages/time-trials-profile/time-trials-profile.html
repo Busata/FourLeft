@@ -217,13 +217,7 @@
                   </td>
                   <td class="num time">{{ formatTime(record.time) }}</td>
                   <td class="num gap">{{ formatDiff(record.differenceToFirst, record.rank) }}</td>
-                  <td class="num pct">
-                    @if (percentileUnrounded()) {
-                      {{ percentileExact(record.rank, record.totalEntries) }}
-                    } @else {
-                      {{ percentile(record.rank, record.totalEntries) }}
-                    }
-                  </td>
+                  <td class="num pct">{{ percentile(record.rank, record.totalEntries) }}</td>
                 </tr>
               }
             </tbody>

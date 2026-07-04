@@ -12,7 +12,6 @@ import {
   formatDiff,
   formatTime,
   parseSeconds,
-  percentileBand,
   percentileExact,
   podium,
   surfaceLabel,
@@ -93,9 +92,6 @@ export class TimeTrialsProfile implements OnInit {
   /** Active sort column and direction. Rank ascending (best finishes first) is the default. */
   readonly sortKey = signal<SortKey>('rank');
   readonly sortDir = signal<SortDir>('asc');
-
-  /** True while sorting by percentile, which is when the exact (unrounded) percentile is shown. */
-  readonly percentileUnrounded = computed(() => this.sortKey() === 'percentile');
 
   readonly comparing = computed(() => this.vs().length > 0);
 
@@ -340,26 +336,17 @@ export class TimeTrialsProfile implements OnInit {
     });
   }
 
-  /**
-   * Click a column header. Rank and Δ WR toggle asc↔desc. Percentile is tristate — asc → desc → off,
-   * where "off" returns to the default rank-ascending order (and re-rounds the percentile display),
-   * so the exact percentile can be turned back off without picking another column.
-   */
+  /** Click a column header: toggle asc↔desc if it's already active, else make it active ascending. */
   setSort(key: SortKey): void {
     if (this.sortKey() !== key) {
       this.sortKey.set(key);
       this.sortDir.set('asc');
       return;
     }
-    if (key === 'percentile' && this.sortDir() === 'desc') {
-      this.sortKey.set('rank');
-      this.sortDir.set('asc');
-      return;
-    }
     this.sortDir.update((d) => (d === 'asc' ? 'desc' : 'asc'));
   }
 
-  /** Sort arrow for {@code key}, blank when it isn't the active column (so percentile-off shows none). */
+  /** Sort arrow for {@code key}, blank when it isn't the active column. */
   sortIndicator(key: SortKey): string {
     if (this.sortKey() !== key) {
       return '';
@@ -372,6 +359,5 @@ export class TimeTrialsProfile implements OnInit {
   surfaceLabel = surfaceLabel;
   formatTime = formatTime;
   formatDiff = formatDiff;
-  percentile = percentileBand;
-  percentileExact = percentileExact;
+  percentile = percentileExact;
 }
