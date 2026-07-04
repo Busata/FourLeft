@@ -51,10 +51,13 @@ public class ChannelConfigurationRequestService {
     @Transactional
     public Optional<ChannelConfigurationTo> updateConfiguration(UUID requestId, ChannelConfigurationUpdateTo form) {
         return requestRepository.findById(requestId).map(request -> {
-            clubConfigurationService.updateToggles(
+            clubConfigurationService.updateConfiguration(
                     request.getChannelId(),
                     form.autopostingEnabled(),
-                    form.requiresTracking());
+                    form.requiresTracking(),
+                    form.customScoringEnabled(),
+                    form.scoringStrategy(),
+                    form.scoringTable());
 
             return toConfigurationTo(request);
         });
@@ -80,12 +83,18 @@ public class ChannelConfigurationRequestService {
                         config.getClubId(),
                         config.isAutopostingEnabled(),
                         config.isRequiresTracking(),
-                        config.isEnabled()
+                        config.isEnabled(),
+                        config.isCustomScoringEnabled(),
+                        config.getScoringStrategy(),
+                        config.getScoringTable()
                 ))
                 .orElseGet(() -> new ChannelConfigurationTo(
                         String.valueOf(request.getGuildId()),
                         String.valueOf(request.getChannelId()),
                         false,
+                        null,
+                        null,
+                        null,
                         null,
                         null,
                         null,

@@ -19,14 +19,22 @@ public class ConfigurationService {
     private LocalDateTime lastUpdated;
     private List<DiscordClubConfigurationTo> configurations = new ArrayList<>();
 
-    //TODO shouldn't be cached, just updated via rabbitmq events
+    // Refreshed lazily, but primarily invalidated via invalidate() on the EA_SPORTS_WRC_READY event
+    // (published by the backend whenever a channel config is created/updated/removed). The hourly check
+    // is only a fallback in case that event is ever missed.
     public List<DiscordClubConfigurationTo> getConfigurations() {
 
-        if (configurations.isEmpty() || lastUpdated == null || Duration.between(LocalDateTime.now(), lastUpdated).toHours() > 1) {
+        if (configurations.isEmpty() || lastUpdated == null || Duration.between(lastUpdated, LocalDateTime.now()).toHours() > 1) {
             this.configurations = api.getConfigurations();
             this.lastUpdated = LocalDateTime.now();
         }
         return this.configurations;
+    }
+
+    // Drop the cached channel->club mapping so the next getConfigurations() reloads it from the backend.
+    public void invalidate() {
+        this.configurations = new ArrayList<>();
+        this.lastUpdated = null;
     }
 
     public Optional<String> getClubId(Long channelId) {

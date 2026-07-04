@@ -2,11 +2,13 @@ package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
+import io.busata.fourleft.common.ScoringStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -53,10 +55,15 @@ public class DiscordClubConfigurationService {
     }
 
     @Transactional
-    public Optional<DiscordClubConfiguration> updateToggles(Long channelId, boolean autopostingEnabled, boolean requiresTracking) {
+    public Optional<DiscordClubConfiguration> updateConfiguration(Long channelId, boolean autopostingEnabled, boolean requiresTracking,
+                                                                  boolean customScoringEnabled, ScoringStrategy scoringStrategy,
+                                                                  Map<String, Integer> scoringTable) {
         return this.repository.findByChannelId(channelId).map(configuration -> {
             configuration.setAutopostingEnabled(autopostingEnabled);
             configuration.setRequiresTracking(requiresTracking);
+            configuration.setCustomScoringEnabled(customScoringEnabled);
+            configuration.setScoringStrategy(scoringStrategy);
+            configuration.setScoringTable(scoringTable);
             return this.repository.save(configuration);
         });
     }

@@ -28,6 +28,7 @@ public class ClubResultsService {
     private final ClubService clubService;
     private final ClubLeaderboardService clubLeaderboardService;
     private final ProfileService profileService;
+    private final ScoringService scoringService;
 
 
 
@@ -120,16 +121,17 @@ public class ClubResultsService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChampionshipStanding> getStandings(String clubId) {
+    public List<ChampionshipStanding> getStandings(DiscordClubConfiguration configuration) {
+        String clubId = configuration.getClubId();
         Club club = clubService.findById(clubId);
 
-         if(Objects.equals(clubId, "146")) {
-             log.info("Calculating points for club 146");
+         if(configuration.isCustomScoringEnabled()) {
+             log.info("Calculating custom points for club {}", clubId);
 
              return club.getActiveChampionshipSnapshot()
              .filter(Championship::hasFinishedEvent)
              .or(() -> clubService.getPreviousChampionship(club))
-             .map(this::createCustomStandingsForWeeklyPowerStage)
+             .map(championship -> createCustomStandings(championship, configuration))
                      .orElse(List.of());
          }
 
@@ -142,7 +144,7 @@ public class ClubResultsService {
     }
 
     @NotNull
-    private List<ChampionshipStanding> createCustomStandingsForWeeklyPowerStage(Championship championship) {
+    private List<ChampionshipStanding> createCustomStandings(Championship championship, DiscordClubConfiguration configuration) {
         final Map<String, PlayerEntryData> playerData = new HashMap<>();
         final Map<String, ChampionshipStanding> standings = new HashMap<>();
 
@@ -151,7 +153,7 @@ public class ClubResultsService {
         .toList();
 
         for(Event event: events) {
-            var points = calculateEventPoints(event, playerData);
+            var points = calculateEventPoints(event, playerData, configuration);
 
             points.entrySet().forEach(entrySet -> {
                 if(entrySet.getKey() == null) {
@@ -199,7 +201,7 @@ public class ClubResultsService {
         return ranks;
     }
 
-    private Map<String, Integer> calculateEventPoints(Event event, Map<String, PlayerEntryData> playerData) {
+    private Map<String, Integer> calculateEventPoints(Event event, Map<String, PlayerEntryData> playerData, DiscordClubConfiguration configuration) {
         Map<String, Integer> points = new HashMap<>();
 
             String leaderboardId = event.getLastStage().getLeaderboardId();
@@ -218,7 +220,7 @@ public class ClubResultsService {
                         return oldPoints;
                     }
 
-                    return oldPoints + CustomPoints.getValue(entry.getRankAccumulated().intValue());
+                    return oldPoints + scoringService.getPoints(configuration, entry.getRankAccumulated().intValue());
                 });
 
             });

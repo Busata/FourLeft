@@ -1,3 +1,5 @@
+export type ScoringStrategy = 'LOOKUP_TABLE';
+
 export interface ChannelConfiguration {
   guildId: string;
   channelId: string;
@@ -6,4 +8,7 @@ export interface ChannelConfiguration {
   autopostingEnabled: boolean | null;
   requiresTracking: boolean | null;
   enabled: boolean | null;
+  customScoringEnabled: boolean | null;
+  scoringStrategy: ScoringStrategy | null;
+  scoringTable: Record<string, number> | null;
 }

@@ -53,7 +53,7 @@ public class ClubEventEndedMessageService {
 
         });
         // Post Standings
-        List<ChampionshipStanding> standings = clubResultsService.getStandings(eventEnded.clubId()).stream()
+        List<ChampionshipStanding> standings = clubResultsService.getStandings(configuration).stream()
                 .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
         if (!standings.isEmpty()) {
             MessageEmbed standingsPost = clubStandingsMessageFactory.createStandingsPost(standings,

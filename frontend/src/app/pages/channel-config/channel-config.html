@@ -32,6 +32,39 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Custom scoring</label>
+          <div class="checkbox-group">
+            <app-slide-toggle formControlName="customScoringEnabled"></app-slide-toggle>
+          </div>
+        </div>
+
+        @if (customScoringOn()) {
+          <div class="form-group">
+            <label>Scoring strategy</label>
+            <select formControlName="scoringStrategy">
+              <option value="LOOKUP_TABLE">Position lookup table</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Points per finishing position (positions not listed score 1)</label>
+            <div formArrayName="scoringTable">
+              @for (row of scoringTable.controls; track $index) {
+                <div class="scoring-row" [formGroupName]="$index">
+                  <input type="number" formControlName="position" placeholder="Position" min="1" />
+                  <input type="number" formControlName="points" placeholder="Points" />
+                  <button class="g-button g-button-tertiary" type="button" (click)="removeRow($index)">Remove</button>
+                </div>
+              }
+              @if (scoringTable.controls.length === 0) {
+                <p>No positions defined &mdash; every finishing position scores 1.</p>
+              }
+            </div>
+            <button class="g-button g-button-secondary" type="button" (click)="addRow()">Add position</button>
+          </div>
+        }
+
         <button class="g-button g-button-primary" type="button" (click)="save()">Save</button>
         <button class="g-button g-button-tertiary" type="button" (click)="remove()">Remove</button>
       } @else {
