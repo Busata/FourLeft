@@ -38,4 +38,7 @@ public interface EAWRCBackendApi {
     @DeleteMapping("/api_v2/configuration/channels")
     void removeChannelConfiguration(@RequestBody DiscordClubRemoveConfigurationTo request);
 
+    @PostMapping("/api_v2/configuration/channel/request")
+    ChannelConfigurationRequestResultTo requestChannelConfiguration(@RequestBody ChannelConfigurationRequestTo request);
+
 }

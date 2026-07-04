@@ -1,0 +1,33 @@
+<div class="g-card">
+  @if (error()) {
+    <p>{{ error() }}</p>
+  } @else if (!loaded()) {
+    <p>Loading channel configuration&hellip;</p>
+  } @else if (config(); as c) {
+    <h2>Channel configuration</h2>
+
+    <div class="form-group">
+      <label>Channel ID</label>
+      <p>{{ c.channelId }}</p>
+    </div>
+
+    @if (c.configured) {
+      <div class="form-group">
+        <label>Synced club</label>
+        <p>{{ c.clubId }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Autoposting</label>
+        <p>{{ c.autopostingEnabled ? 'Enabled' : 'Disabled' }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Only track tracked players</label>
+        <p>{{ c.requiresTracking ? 'Yes' : 'No' }}</p>
+      </div>
+    } @else {
+      <p>No club is currently synced to this channel. Use <code>/fourleft configure track</code> to sync one.</p>
+    }
+  }
+</div>

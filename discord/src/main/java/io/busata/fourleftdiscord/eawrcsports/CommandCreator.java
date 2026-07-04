@@ -50,7 +50,8 @@ public class CommandCreator {
                                                 .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true)
                                                 .addOption(OptionType.BOOLEAN, "autoposts", "If the bot should autopost results for this club (defaults to true)", false),
                                         new SubcommandData("untrack", "Track a club in this channel")
-                                                .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true)
+                                                .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true),
+                                        new SubcommandData("edit", "Generate a private link to view and edit this channel's configuration")
                                 )
                 );
 

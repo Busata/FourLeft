@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestResultTo;
+import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubRemoveConfigurationTo;
 import io.busata.fourleftdiscord.eawrcsports.EAWRCBackendApi;
@@ -51,6 +53,12 @@ public class ConfigureCommandHandler extends ListenerAdapter {
             api.removeChannelConfiguration(new DiscordClubRemoveConfigurationTo(guildId, channelId, clubId));
 
             event.reply("Club %s no longer tracked for this channel".formatted(clubId)).setEphemeral(true).queue();
+        } else if ("edit".equals(event.getSubcommandName())) {
+            String discordId = event.getUser().getId();
+
+            ChannelConfigurationRequestResultTo response = api.requestChannelConfiguration(new ChannelConfigurationRequestTo(guildId, channelId, discordId));
+
+            event.reply("View and edit this channel's configuration [here](https://fourleft.io/easportswrc/channel/%s).".formatted(response.requestId())).setEphemeral(true).queue();
         }
     }
 }

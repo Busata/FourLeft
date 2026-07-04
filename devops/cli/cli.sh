@@ -8,7 +8,8 @@ RESTORE_DATA="Restore data"
 FOLLOW_LOGS="Follow logs"
 LOCAL_DOCKER="Local docker actions"
 TIME_TRIALS="Time trial actions"
-TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS")
+CHANNEL="Channel configuration actions"
+TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -28,6 +29,9 @@ if [ -n "$selected_option_index" ]; then
             ;;
         5)
           . "$FOURLEFT_DEVOPS_ROOT"/cli/timetrials.sh
+            ;;
+        6)
+          . "$FOURLEFT_DEVOPS_ROOT"/cli/channel.sh
             ;;
         *)
             echo "Invalid selection or cancelled."
