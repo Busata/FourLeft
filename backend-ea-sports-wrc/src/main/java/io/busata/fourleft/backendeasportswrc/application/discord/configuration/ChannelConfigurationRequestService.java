@@ -3,12 +3,17 @@ package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationUpdateTo;
+import io.busata.fourleft.api.easportswrc.models.ScoringAnchorEntryTo;
+import io.busata.fourleft.api.easportswrc.models.ScoringAnchorsTo;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.configuration.ChannelConfigurationRequest;
+import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchorEntry;
+import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +62,8 @@ public class ChannelConfigurationRequestService {
                     form.requiresTracking(),
                     form.customScoringEnabled(),
                     form.scoringStrategy(),
-                    form.scoringTable());
+                    form.scoringTable(),
+                    toDomain(form.scoringAnchors()));
 
             return toConfigurationTo(request);
         });
@@ -86,7 +92,8 @@ public class ChannelConfigurationRequestService {
                         config.isEnabled(),
                         config.isCustomScoringEnabled(),
                         config.getScoringStrategy(),
-                        config.getScoringTable()
+                        config.getScoringTable(),
+                        toDto(config.getScoringAnchors())
                 ))
                 .orElseGet(() -> new ChannelConfigurationTo(
                         String.valueOf(request.getGuildId()),
@@ -98,7 +105,28 @@ public class ChannelConfigurationRequestService {
                         null,
                         null,
                         null,
+                        null,
                         null
                 ));
+    }
+
+    private static ScoringAnchors toDomain(ScoringAnchorsTo dto) {
+        if (dto == null) {
+            return null;
+        }
+        List<ScoringAnchorEntry> entries = dto.entries() == null ? List.of() : dto.entries().stream()
+                .map(e -> new ScoringAnchorEntry(e.position(), e.points(), e.decrease()))
+                .toList();
+        return new ScoringAnchors(dto.floor(), entries);
+    }
+
+    private static ScoringAnchorsTo toDto(ScoringAnchors anchors) {
+        if (anchors == null) {
+            return null;
+        }
+        List<ScoringAnchorEntryTo> entries = anchors.entries() == null ? List.of() : anchors.entries().stream()
+                .map(e -> new ScoringAnchorEntryTo(e.position(), e.points(), e.decrease()))
+                .toList();
+        return new ScoringAnchorsTo(anchors.floor(), entries);
     }
 }

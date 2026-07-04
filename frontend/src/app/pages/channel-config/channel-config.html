@@ -44,25 +44,65 @@
             <label>Scoring strategy</label>
             <select formControlName="scoringStrategy">
               <option value="LOOKUP_TABLE">Position lookup table</option>
+              <option value="POINT_ANCHOR">Point anchors</option>
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Points per finishing position (positions not listed score 1)</label>
-            <div formArrayName="scoringTable">
-              @for (row of scoringTable.controls; track $index) {
-                <div class="scoring-row" [formGroupName]="$index">
-                  <input type="number" formControlName="position" placeholder="Position" min="1" />
-                  <input type="number" formControlName="points" placeholder="Points" />
-                  <button class="g-button g-button-tertiary" type="button" (click)="removeRow($index)">Remove</button>
-                </div>
-              }
-              @if (scoringTable.controls.length === 0) {
-                <p>No positions defined &mdash; every finishing position scores 1.</p>
-              }
+          @if (scoringStrategySig() === 'LOOKUP_TABLE') {
+            <div class="form-group">
+              <label>Points per finishing position (positions not listed score 1)</label>
+              <div formArrayName="scoringTable">
+                @for (row of scoringTable.controls; track $index) {
+                  <div class="scoring-row" [formGroupName]="$index">
+                    <input type="number" formControlName="position" placeholder="Position" min="1" />
+                    <input type="number" formControlName="points" placeholder="Points" />
+                    <button class="g-button g-button-tertiary" type="button" (click)="removeRow($index)">Remove</button>
+                  </div>
+                }
+                @if (scoringTable.controls.length === 0) {
+                  <p>No positions defined &mdash; every finishing position scores 1.</p>
+                }
+              </div>
+              <button class="g-button g-button-secondary" type="button" (click)="addRow()">Add position</button>
             </div>
-            <button class="g-button g-button-secondary" type="button" (click)="addRow()">Add position</button>
-          </div>
+          }
+
+          @if (scoringStrategySig() === 'POINT_ANCHOR') {
+            <div class="form-group">
+              <label>Scoring anchors</label>
+              <p>
+                An <strong>anchor</strong> pins a position to a points value. A <strong>decrease</strong> subtracts
+                that many points per position (decimals allowed, e.g. 1.83) until the next entry. Positions covered
+                by neither score the floor below.
+              </p>
+              <div formArrayName="scoringAnchors">
+                @for (row of scoringAnchors.controls; track $index) {
+                  <div class="scoring-row" [formGroupName]="$index">
+                    @if (row.controls.kind.value === 'anchor') {
+                      <span class="scoring-kind">Anchor</span>
+                      <input type="number" formControlName="position" placeholder="Position" min="1" />
+                      <input type="number" formControlName="points" placeholder="Points" />
+                    } @else {
+                      <span class="scoring-kind">Decrease</span>
+                      <input type="number" formControlName="position" placeholder="From position" min="1" />
+                      <input type="number" formControlName="decrease" placeholder="Per position" step="0.01" />
+                    }
+                    <button class="g-button g-button-tertiary" type="button" (click)="removeAnchorRow($index)">Remove</button>
+                  </div>
+                }
+                @if (scoringAnchors.controls.length === 0) {
+                  <p>No anchors defined &mdash; every finishing position scores the floor.</p>
+                }
+              </div>
+              <button class="g-button g-button-secondary" type="button" (click)="addAnchor()">Add anchor</button>
+              <button class="g-button g-button-secondary" type="button" (click)="addDecrease()">Add decrease</button>
+            </div>
+
+            <div class="form-group">
+              <label>Floor (points for positions not covered by an anchor or decrease)</label>
+              <input type="number" formControlName="scoringFloor" min="0" />
+            </div>
+          }
         }
 
         <button class="g-button g-button-primary" type="button" (click)="save()">Save</button>

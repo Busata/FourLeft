@@ -2,6 +2,7 @@ package io.busata.fourleft.backendeasportswrc.domain.models;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.AutoPostMessageService;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
+import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.common.ScoringStrategy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,6 +48,10 @@ public class DiscordClubConfiguration {
     @Column(columnDefinition = "jsonb")
     Map<String, Integer> scoringTable;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    ScoringAnchors scoringAnchors;
+
 
     String resultsEntryTemplate;
     String autoPostTemplate;
@@ -74,6 +79,10 @@ public class DiscordClubConfiguration {
 
     public void setScoringTable(Map<String, Integer> scoringTable) {
         this.scoringTable = scoringTable;
+    }
+
+    public void setScoringAnchors(ScoringAnchors scoringAnchors) {
+        this.scoringAnchors = scoringAnchors;
     }
 
 

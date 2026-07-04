@@ -9,6 +9,7 @@ public record ChannelConfigurationUpdateTo(
         boolean requiresTracking,
         boolean customScoringEnabled,
         ScoringStrategy scoringStrategy,
-        Map<String, Integer> scoringTable)
+        Map<String, Integer> scoringTable,
+        ScoringAnchorsTo scoringAnchors)
 {
 }

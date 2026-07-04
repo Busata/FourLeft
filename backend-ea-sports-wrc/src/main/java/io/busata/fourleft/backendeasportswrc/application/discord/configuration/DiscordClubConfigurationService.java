@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.common.ScoringStrategy;
 import lombok.RequiredArgsConstructor;
@@ -57,13 +58,14 @@ public class DiscordClubConfigurationService {
     @Transactional
     public Optional<DiscordClubConfiguration> updateConfiguration(Long channelId, boolean autopostingEnabled, boolean requiresTracking,
                                                                   boolean customScoringEnabled, ScoringStrategy scoringStrategy,
-                                                                  Map<String, Integer> scoringTable) {
+                                                                  Map<String, Integer> scoringTable, ScoringAnchors scoringAnchors) {
         return this.repository.findByChannelId(channelId).map(configuration -> {
             configuration.setAutopostingEnabled(autopostingEnabled);
             configuration.setRequiresTracking(requiresTracking);
             configuration.setCustomScoringEnabled(customScoringEnabled);
             configuration.setScoringStrategy(scoringStrategy);
             configuration.setScoringTable(scoringTable);
+            configuration.setScoringAnchors(scoringAnchors);
             return this.repository.save(configuration);
         });
     }

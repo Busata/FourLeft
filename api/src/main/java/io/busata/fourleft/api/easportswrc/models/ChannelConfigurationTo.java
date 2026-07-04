@@ -14,6 +14,7 @@ public record ChannelConfigurationTo(
         Boolean enabled,
         Boolean customScoringEnabled,
         ScoringStrategy scoringStrategy,
-        Map<String, Integer> scoringTable)
+        Map<String, Integer> scoringTable,
+        ScoringAnchorsTo scoringAnchors)
 {
 }
