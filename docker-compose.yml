@@ -44,6 +44,9 @@ services:
     restart: always
     volumes:
       - /mnt/docker-data/backend-ea-sports-wrc:/var/lib/postgresql/data
+      # Persist the club results export cache across restarts (default output dir is /tmp/club-exports,
+      # which otherwise lives on the container's ephemeral layer and is wiped on every restart).
+      - /mnt/docker-data/backend-ea-sports-wrc-club-exports:/tmp/club-exports
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
