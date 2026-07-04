@@ -113,6 +113,13 @@
   }
 }
 
+.ttb-badge {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
 .ttb-caret {
   display: inline-block;
   font-size: 10px;

@@ -24,6 +24,12 @@
           <li class="ttb-tree__rally">
             <button class="ttb-node ttb-node--rally" (click)="toggleRally(rally)">
               <span class="ttb-caret" [class.ttb-caret--open]="isRallyOpen(rally)">▸</span>
+              <img
+                class="ttb-badge"
+                [src]="locationBadgeUrl(rally.locationId)"
+                (error)="$any($event.target).style.display = 'none'"
+                alt=""
+                loading="lazy" />
               {{ rally.location }}
             </button>
 

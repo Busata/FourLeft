@@ -276,6 +276,11 @@ export class TimeTrialsBoards implements OnInit {
     return surfaceCondition === 1 ? 'Wet' : 'Dry';
   }
 
+  /** Rally location badge; the numeric location id maps to Codemasters' event logo assets. */
+  locationBadgeUrl(locationId: number): string {
+    return `https://ecdn.codemasters.com/ecdn/Racenet/PROD/WRC2023/stats/event_location_logos/${locationId}.png`;
+  }
+
   /** "00:10:23.1400000" → "10:23.140" (drops a zero hours component, trims to milliseconds). */
   formatTime(raw: string | null): string {
     if (!raw) {
