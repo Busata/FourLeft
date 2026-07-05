@@ -108,6 +108,11 @@
             [title]="canSync() ? 'Queue a fresh fetch of this board' : 'Synced recently — available again later'">
             {{ syncing() ? 'Syncing…' : 'Sync' }}
           </button>
+          @if (csvUrl(); as url) {
+            <a class="iq-chip ttb-export" [href]="url" download title="Download this board's raw data as CSV">
+              CSV
+            </a>
+          }
         }
       </header>
 

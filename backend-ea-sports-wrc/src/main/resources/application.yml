@@ -23,6 +23,11 @@ club-export:
   output-directory: /tmp/club-exports
   scheduling-enabled: true
 
+time-trial-export:
+  # Per-board CSV files, regenerated after every fetch (TT_BOARD_FETCHED event -> TT_EXPORT job)
+  # and served as a direct download by the board page.
+  output-directory: /tmp/tt-exports
+
 time-trial-sync:
   # Two triggers that enqueue TT_FETCH jobs: the board "Sync" button and the hourly refresh sweep.
   manual-cooldown-hours: 3      # min age of a board's last fetch before a user may re-sync it

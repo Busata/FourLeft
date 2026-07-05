@@ -47,6 +47,8 @@ services:
       # Persist the club results export cache across restarts (default output dir is /tmp/club-exports,
       # which otherwise lives on the container's ephemeral layer and is wiped on every restart).
       - /mnt/docker-data/backend-ea-sports-wrc-club-exports:/tmp/club-exports
+      # Same for the per-board time-trial CSV exports (default output dir is /tmp/tt-exports).
+      - /mnt/docker-data/backend-ea-sports-wrc-tt-exports:/tmp/tt-exports
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

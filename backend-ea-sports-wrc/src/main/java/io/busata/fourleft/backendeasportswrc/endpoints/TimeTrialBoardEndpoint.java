@@ -6,6 +6,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialCombination;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialProbe;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialCombinationRepository;
+import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialExportService;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialProbeRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +47,7 @@ public class TimeTrialBoardEndpoint {
     private final TimeTrialLeaderboardEntryRepository entryRepository;
     private final TimeTrialProbeRepository probeRepository;
     private final TimeTrialSyncService syncService;
+    private final TimeTrialExportService exportService;
 
     /** The drill-down tree, built only from combinations that currently have stored entries. */
     @GetMapping("/api_v2/time-trials/catalog")
@@ -105,6 +109,33 @@ public class TimeTrialBoardEndpoint {
             case UNKNOWN_BOARD -> HttpStatus.NOT_FOUND;
         };
         return ResponseEntity.status(status).body(body);
+    }
+
+    /**
+     * The board's raw data as a CSV download — a direct, linkable file. Serves the cached export
+     * (regenerated after every fetch by the {@code TT_EXPORT} job); a known board with no file yet
+     * gets one built on the spot, so the link works from the moment a board has data. 404 only for
+     * combinations not in the catalog.
+     */
+    @GetMapping(value = "/api_v2/time-trials/boards/{combinationId}/export.csv", produces = "text/csv")
+    public ResponseEntity<String> exportCsv(@PathVariable String combinationId) {
+        return combinationRepository.findById(combinationId)
+                .map(combination -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + downloadName(combination) + "\"")
+                        .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                        .body(exportService.readOrCreateCsv(combinationId)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /** A human filename for the CSV: rally, stage, surface and class instead of the raw combination id. */
+    private String downloadName(TimeTrialCombination c) {
+        String name = String.join("_",
+                c.getLocation(), c.getRoute(),
+                c.getSurfaceCondition() == 1 ? "wet" : "dry",
+                c.getVehicleClass());
+        // keep the header simple: strip anything outside filename-safe ascii
+        return name.replaceAll("[^A-Za-z0-9._-]+", "-").replaceAll("(^-+)|(-+$)", "") + ".csv";
     }
 
     /** Driver autocomplete: distinct display names matching {@code q} (case-insensitive substring). */

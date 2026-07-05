@@ -14,13 +14,14 @@ import {
 
 const REFRESH_MS = 3000;
 const STATUS_ORDER: JobStatus[] = ['PENDING', 'RUNNING', 'DONE', 'FAILED'];
-const TYPE_ORDER: JobType[] = ['CLUB', 'CLUB_EXPORT', 'TT_PROBE', 'TT_FETCH'];
+const TYPE_ORDER: JobType[] = ['CLUB', 'CLUB_EXPORT', 'TT_PROBE', 'TT_FETCH', 'TT_EXPORT'];
 
 const TYPE_LABELS: Record<JobType, string> = {
   CLUB: 'Club',
   CLUB_EXPORT: 'Club export',
   TT_PROBE: 'Time-trial probe',
   TT_FETCH: 'Time-trial fetch',
+  TT_EXPORT: 'Time-trial export',
 };
 
 const OUTCOME_LABELS: Record<JobOutcome, string> = {
@@ -35,6 +36,7 @@ const OUTCOME_LABELS: Record<JobOutcome, string> = {
   TT_PROBED: 'Boards probed',
   TT_FETCHED: 'Board fetched',
   CLUB_EXPORTED: 'Club exported',
+  TT_EXPORTED: 'Board exported',
 };
 
 type StatusFilter = JobStatus | 'ALL';

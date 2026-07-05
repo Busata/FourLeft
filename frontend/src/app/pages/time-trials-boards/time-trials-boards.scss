@@ -259,6 +259,12 @@
     margin-left: auto; // push to the far right of the header
     align-self: center;
   }
+
+  .ttb-export {
+    margin-left: 8px; // sits right of the sync button
+    align-self: center;
+    text-decoration: none;
+  }
 }
 
 .ttb-sync-note {

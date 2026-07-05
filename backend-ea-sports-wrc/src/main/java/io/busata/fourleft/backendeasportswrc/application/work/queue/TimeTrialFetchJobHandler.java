@@ -1,11 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.application.work.queue;
 
+import io.busata.fourleft.api.easportswrc.events.TimeTrialBoardFetchedEvent;
 import io.busata.fourleft.backendeasportswrc.application.timetrial.FetchReport;
 import io.busata.fourleft.backendeasportswrc.application.timetrial.TimeTrialFetchService;
 import io.busata.fourleft.backendeasportswrc.domain.models.Job;
 import io.busata.fourleft.backendeasportswrc.domain.models.JobOutcome;
 import io.busata.fourleft.backendeasportswrc.domain.models.JobType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +32,7 @@ public class TimeTrialFetchJobHandler implements JobHandler {
 
     private final TimeTrialFetchService fetchService;
     private final JobService jobService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public JobType type() {
@@ -47,6 +50,10 @@ public class TimeTrialFetchJobHandler implements JobHandler {
         // again in parallel while it's legitimately still going.
         FetchReport report = fetchService.fetchCombination(
                 combinationId, FETCH_CAP, () -> jobService.heartbeat(job.getId()));
+        // Broadcast that this board's snapshot just changed hands; relayed onto RabbitMQ, this is what
+        // triggers the board's CSV re-export (TimeTrialExportTrigger). Sent even when the board came
+        // back empty/gone, so the exported file follows the emptied board instead of going stale.
+        eventPublisher.publishEvent(new TimeTrialBoardFetchedEvent(combinationId));
         // Reuse the club-shaped counters: board fetched -> "leaderboards", stored rows -> "entries".
         // "changed" drives the changed/unchanged signal (new or improved times this fetch).
         return new JobResult(report.changedEntries() > 0, JobOutcome.TT_FETCHED,

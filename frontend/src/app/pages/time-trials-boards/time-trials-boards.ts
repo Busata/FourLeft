@@ -110,6 +110,12 @@ export class TimeTrialsBoards implements OnInit {
     return sel.classes.find((c) => c.vehicleClassId === classId)?.combinationId ?? null;
   });
 
+  /** Direct link to the board's raw-data CSV export (served/cached by the backend). */
+  readonly csvUrl = computed(() => {
+    const combinationId = this.combinationId();
+    return combinationId ? `/api_v2/time-trials/boards/${combinationId}/export.csv` : null;
+  });
+
   // Entries table.
   readonly entryPage = signal<TtEntryPage | null>(null);
   readonly loadingEntries = signal(false);

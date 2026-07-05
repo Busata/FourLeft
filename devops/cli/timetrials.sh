@@ -161,6 +161,45 @@ SQL
   echo "Done."
 }
 
+# Enqueue a CSV export job for one board (combination id). Normally exports happen automatically
+# after every fetch (TT_BOARD_FETCHED event -> TT_EXPORT job); this is the manual per-board trigger,
+# e.g. to backfill a board that was fetched before the export pipeline existed. Requires stored
+# entries (nothing to export otherwise) and skips boards with an export job already in flight.
+function enqueueExportBoard() {
+  local combination_id="$1"
+  if ! [[ "$combination_id" =~ ^[0-9]+-[0-9]+-[0-9]+-[0-9]+$ ]]; then
+    echo "Invalid combination id: '$combination_id' (expected location-route-surface-class, e.g. 17-252-1-19)."
+    return 1
+  fi
+  echo "Enqueuing a CSV export job for board $combination_id..."
+  ssh veevi "docker exec -i $DB_CONTAINER psql -U $DB_USER -d $DB_NAME" <<SQL
+INSERT INTO job (id, type, ref)
+SELECT nextval('job_seq'), 'TT_EXPORT', '$combination_id'
+WHERE EXISTS (SELECT 1 FROM time_trial_entry WHERE combination_id = '$combination_id')
+AND NOT EXISTS (
+    SELECT 1 FROM job j
+    WHERE j.type = 'TT_EXPORT' AND j.ref = '$combination_id' AND j.status IN ('PENDING', 'RUNNING')
+);
+SQL
+  echo "Done (INSERT 0 1 = enqueued; INSERT 0 0 = board has no stored entries or export already in flight)."
+}
+
+# Enqueue a CSV export job for every board with stored entries — the bulk backfill for boards fetched
+# before the export pipeline existed. Boards with an export job already in flight are skipped.
+function enqueueExportAll() {
+  echo "Enqueuing a CSV export job per board with stored entries..."
+  ssh veevi "docker exec -i $DB_CONTAINER psql -U $DB_USER -d $DB_NAME" <<'SQL'
+INSERT INTO job (id, type, ref)
+SELECT nextval('job_seq'), 'TT_EXPORT', e.combination_id
+FROM (SELECT DISTINCT combination_id FROM time_trial_entry) e
+WHERE NOT EXISTS (
+    SELECT 1 FROM job j
+    WHERE j.type = 'TT_EXPORT' AND j.ref = e.combination_id AND j.status IN ('PENDING', 'RUNNING')
+);
+SQL
+  echo "Done. Watch progress on the work-queue status page (type: Time-trial export)."
+}
+
 TITLE="Time Trial Tasks"
 PROBE_ALL="Probe all boards (one job per rally)"
 PROBE_MISSING="Probe only rallies with never-probed boards (new classes/locations)"
@@ -169,7 +208,9 @@ FETCH_ALL="Fetch all existing boards (one job per board)"
 FETCH_MISSING="Fetch only existing boards with no stored entries yet"
 FETCH_RALLY="Fetch one rally's boards (enter location id)"
 FETCH_BOARD="Fetch a single board (enter combination id) — test"
-TYPES=("$PROBE_ALL" "$PROBE_MISSING" "$PROBE_RALLY" "$FETCH_ALL" "$FETCH_MISSING" "$FETCH_RALLY" "$FETCH_BOARD")
+EXPORT_ALL="Export all boards with stored entries to CSV (backfill)"
+EXPORT_BOARD="Export a single board to CSV (enter combination id)"
+TYPES=("$PROBE_ALL" "$PROBE_MISSING" "$PROBE_RALLY" "$FETCH_ALL" "$FETCH_MISSING" "$FETCH_RALLY" "$FETCH_BOARD" "$EXPORT_ALL" "$EXPORT_BOARD")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -198,6 +239,13 @@ if [ -n "$selected_option_index" ]; then
         7)
           combination_id=$(whiptail --inputbox "Combination id to fetch (location-route-surface-class, e.g. 17-252-1-19)" 10 60 3>&2 2>&1 1>&3)
           [ -n "$combination_id" ] && enqueueFetchBoard "$combination_id"
+            ;;
+        8)
+          enqueueExportAll
+            ;;
+        9)
+          combination_id=$(whiptail --inputbox "Combination id to export (location-route-surface-class, e.g. 17-252-1-19)" 10 60 3>&2 2>&1 1>&3)
+          [ -n "$combination_id" ] && enqueueExportBoard "$combination_id"
             ;;
         *)
             echo "Invalid selection or cancelled."

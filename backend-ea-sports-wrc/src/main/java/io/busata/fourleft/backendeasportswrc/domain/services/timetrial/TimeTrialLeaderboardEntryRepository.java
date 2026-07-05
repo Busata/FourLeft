@@ -80,6 +80,18 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     Page<TimeTrialLeaderboardEntry> findLatestPage(@Param("combinationId") String combinationId, Pageable pageable);
 
     /**
+     * Every row of a board's current snapshot, ranked ascending — the CSV export writes the whole
+     * board in one pass. Same latest-generation filter as {@link #findLatestPage}, without paging.
+     */
+    @Query("""
+            select e from TimeTrialLeaderboardEntry e
+            where e.combinationId = :combinationId
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = :combinationId)
+            order by e.rank asc
+            """)
+    List<TimeTrialLeaderboardEntry> findLatestByCombinationId(@Param("combinationId") String combinationId);
+
+    /**
      * Just (player key, time) for a board's current rows — the churn comparison needs nothing else,
      * and loading full entities for a 50k board would defeat the streaming fetch's memory ceiling.
      * The key mirrors {@code TimeTrialLeaderboardEntry.getPlayerKey()}: ssid, else wrcPlayerId, else

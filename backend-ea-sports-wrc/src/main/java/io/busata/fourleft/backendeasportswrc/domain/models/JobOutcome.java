@@ -28,5 +28,7 @@ public enum JobOutcome {
     /** A time-trial board was fetched in full: its entries were pulled and stored. */
     TT_FETCHED,
     /** A club's cached results export was regenerated and written. */
-    CLUB_EXPORTED
+    CLUB_EXPORTED,
+    /** A time-trial board's CSV export was regenerated and written. */
+    TT_EXPORTED
 }

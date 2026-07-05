@@ -12,5 +12,7 @@ public enum JobType {
     /** Probe every time-trial board for one rally (ref = locationId): does it exist, how many entries. */
     TT_PROBE,
     /** Fetch one time-trial board in full (ref = combinationId): pull + store every entry. */
-    TT_FETCH
+    TT_FETCH,
+    /** Regenerate one time-trial board's CSV export (ref = combinationId): rebuild + write its file. */
+    TT_EXPORT
 }
