@@ -1,0 +1,14 @@
+# Copy to release.conf (gitignored) to override release defaults on this machine.
+# Used by the `fourleft` CLI -> "Release AC Rally agent" (devops/cli/release-agent.sh).
+
+# WSL path to the Windows-side build dir the native toolchain builds from.
+# Must live under /mnt/<drive> so powershell.exe can reach it. Default:
+# WIN_BUILD_DIR=/mnt/c/build/acrally-agent
+
+# Windows path to the minisign secret key, if not at the release.ps1 default
+# (%USERPROFILE%\.minisign\acrally-agent.key). Example:
+# MINISIGN_KEY_WIN=C:\Users\you\.minisign\acrally-agent.key
+
+# Remote release dir on the docker host (bind-mounted into the reverse proxy).
+# REMOTE_HOST is inherited from devops/.deploy.conf (default veevi). Default:
+# REMOTE_AGENT_DIR=/mnt/docker-data/acrally-agent

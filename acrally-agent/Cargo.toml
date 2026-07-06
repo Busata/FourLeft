@@ -1,0 +1,40 @@
+[package]
+name = "acrally-agent"
+version = "0.1.0"
+edition = "2021"
+description = "Local companion agent: reads Assetto Corsa Rally shared-memory telemetry and submits completed stage times to the club backend."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+ureq = { version = "2", features = ["json"] }
+anyhow = "1"
+semver = "1"
+# Self-update: atomic self-replacement of the running exe, and verification of the
+# minisign signature over each release before it's applied.
+self-replace = "1"
+minisign-verify = "0.2"
+# default-features off to drop `accesskit` (screen-reader integration); we keep
+# the glow renderer, bundled fonts, and the Linux x11/wayland backends.
+eframe = { version = "0.32", default-features = false, features = ["glow", "default_fonts", "x11", "wayland"], optional = true }
+tray-icon = { version = "0.24.1", optional = true }
+
+[build-dependencies]
+# Embeds the exe icon + version/product metadata on Windows targets (build.rs).
+winresource = "0.1"
+
+# The shared-memory reader only exists on Windows (where the game runs). We map
+# the named segments ourselves and define the classic Assetto Corsa (acpmf)
+# structs in src/shm.rs, so no bindgen/LLVM is needed. Gated behind the `shm`
+# feature; without it (or off Windows) the agent uses the mock source, so the
+# detect -> submit pipeline always builds and runs.
+[target.'cfg(windows)'.dependencies]
+win-shared-memory = { version = "0.1", optional = true }
+
+[features]
+# Enable the real Windows shared-memory telemetry source.
+shm = ["dep:win-shared-memory"]
+# Enable the tray + window GUI (eframe/egui + tray-icon). Off by default so the
+# core pipeline builds and tests run without a display or GUI system libraries.
+ui = ["dep:eframe", "dep:tray-icon"]

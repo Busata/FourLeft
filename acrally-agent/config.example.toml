@@ -1,0 +1,29 @@
+# The agent needs no configuration for normal use: it targets the fourleft.io
+# backend out of the box, and `acrally-agent pair` writes your API key into
+# config.toml for you. You only need this file for dev / self-hosting.
+#
+# Every setting below is optional and shown with its default — uncomment to
+# override. Each also has an `ACRALLY_*` env var equivalent.
+
+# Club backend base URL. Env: ACRALLY_API_BASE.
+# api_base = "https://fourleft.io/acrally-api"
+
+# Personal API key (Authorization: Bearer <key>). Written by `acrally-agent pair`;
+# you don't normally set this by hand.
+# api_key = "your-secret-token"
+
+# Path to the game's save file. Leave unset to auto-detect at
+# %LOCALAPPDATA%\acr\Saved\SaveGames\PlayerDataSaveSlot.sav
+# save_path = "C:\\Users\\you\\AppData\\Local\\acr\\Saved\\SaveGames\\PlayerDataSaveSlot.sav"
+
+# Force the mock telemetry source (scripted session) even on Windows, to test the
+# pipeline without the game running. Env: ACRALLY_MOCK.
+# mock = false
+
+# Run on the console instead of the tray/window UI (only relevant to a `ui` build;
+# a non-`ui` build is always headless). Env: ACRALLY_HEADLESS.
+# headless = false
+
+# Print a once-per-second heartbeat (state, speed, gear, rpm, current time) so you
+# can confirm the agent is reading the game while you drive. Env: ACRALLY_VERBOSE.
+# verbose = false

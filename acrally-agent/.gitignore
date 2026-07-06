@@ -1,0 +1,8 @@
+/target
+/dist
+config.toml
+spool.ndjson
+release.conf
+# Never commit signing keys (the secret key can forge releases).
+*.key
+*.pub

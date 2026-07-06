@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import type { ApiKeyTo, LinkedIdentityTo, SteamProfileTo } from '../../models/acrally';
+import type { AgentReleaseTo, ApiKeyTo, LinkedIdentityTo, SteamProfileTo } from '../../models/acrally';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -22,6 +22,7 @@ export class AcrallyAccount implements OnInit {
   readonly steam = computed(() => this.identities().find((i) => i.provider === 'STEAM') ?? null);
   readonly steamProfile = signal<SteamProfileTo | null>(null);
   readonly keys = signal<ApiKeyTo[]>([]);
+  readonly agent = signal<AgentReleaseTo | null>(null);
 
   readonly notice = signal('');
   readonly error = signal('');
@@ -36,6 +37,15 @@ export class AcrallyAccount implements OnInit {
     this.loadIdentities();
     this.loadSteamProfile();
     this.loadKeys();
+    this.loadAgent();
+  }
+
+  private loadAgent(): void {
+    // Static release manifest served by the reverse proxy; url points at the current signed exe.
+    this.http.get<AgentReleaseTo>('/acrally-agent/latest.json').subscribe({
+      next: (rel) => this.agent.set(rel ?? null),
+      error: () => {},
+    });
   }
 
   private loadKeys(): void {

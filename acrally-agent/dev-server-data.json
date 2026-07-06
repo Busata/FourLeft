@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "stage": "",
+      "car": "HyundaiI20NRally2",
+      "driver": "Busata",
+      "raw_ms": 238874,
+      "penalty_ms": 10000,
+      "total_ms": 248874,
+      "timestamp_ticks": 639188728562700000,
+      "agent_version": "0.1.0",
+      "session_id": "srv-2",
+      "received": "20:57:56"
+    },
+    {
+      "stage": "GreeceS3ElatiaCut1Forward",
+      "car": "SubaruImprezaS3",
+      "driver": "Busata",
+      "raw_ms": 246158,
+      "penalty_ms": 0,
+      "total_ms": 246158,
+      "timestamp_ticks": 639188750897420000,
+      "agent_version": "0.1.0",
+      "session_id": "srv-8",
+      "received": "21:18:13"
+    }
+  ]
+}

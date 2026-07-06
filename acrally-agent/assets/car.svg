@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="car">
+  <!-- Side-profile car; mirrors the RGBA icon drawn in src/ui.rs (car_pixels). -->
+  <path d="M7 47 L7 40 Q7 34 13 34 L22 34 L27.5 20.5 Q28.3 19 30 19 L38 19 Q40 19 41 21 L43 34 L54 34 Q57 36 57 40 L57 47 Z"
+        fill="#4cc26a"/>
+  <!-- Windshield / cabin glass -->
+  <path d="M27 32 L30 23 L38 23 L40 32 Z" fill="#dff3e6"/>
+  <!-- Wheels -->
+  <circle cx="19" cy="47" r="8.5" fill="#22262b"/>
+  <circle cx="19" cy="47" r="3" fill="#b6bfcb"/>
+  <circle cx="45" cy="47" r="8.5" fill="#22262b"/>
+  <circle cx="45" cy="47" r="3" fill="#b6bfcb"/>
+</svg>

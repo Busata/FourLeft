@@ -57,6 +57,20 @@
     </section>
 
     <section class="account-section">
+      <h2 class="account-section__title">Agent app</h2>
+      <p class="auth-sub">
+        Install the desktop agent on the PC you play on. It records your stage runs and submits
+        them here — start pairing from the app, then approve it below.
+      </p>
+      @if (agent(); as a) {
+        <a class="g-button g-button-primary" [href]="a.url" download>Download for Windows</a>
+        <p class="key-sub">Version {{ a.version }}</p>
+      } @else {
+        <p class="auth-sub">The download is temporarily unavailable — check back shortly.</p>
+      }
+    </section>
+
+    <section class="account-section">
       <h2 class="account-section__title">Agent keys</h2>
       @if (keys().length === 0) {
         <p class="auth-sub">

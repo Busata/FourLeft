@@ -10,7 +10,8 @@ LOCAL_DOCKER="Local docker actions"
 TIME_TRIALS="Time trial actions"
 CHANNEL="Channel configuration actions"
 CLUB_EXPORT="Club export actions"
-TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT")
+RELEASE_AGENT="Release AC Rally agent"
+TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT" "$RELEASE_AGENT")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -36,6 +37,9 @@ if [ -n "$selected_option_index" ]; then
             ;;
         7)
           . "$FOURLEFT_DEVOPS_ROOT"/cli/clubs.sh
+            ;;
+        8)
+          . "$FOURLEFT_DEVOPS_ROOT"/cli/release-agent.sh
             ;;
         *)
             echo "Invalid selection or cancelled."

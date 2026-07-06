@@ -53,6 +53,15 @@ export interface PairLookupResultTo {
   expiresAt: string;
 }
 
+// Not a backend record: the static release manifest (acrally-agent/latest.json)
+// written by acrally-agent/release.ps1 and served at /acrally-agent/latest.json.
+export interface AgentReleaseTo {
+  version: string;
+  url: string;
+  min_supported: string;
+  notes: string;
+}
+
 export interface MySessionTo {
   id: string;
   driver: string | null;
