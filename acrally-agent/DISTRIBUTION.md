@@ -129,4 +129,12 @@ from `Cargo.toml` automatically. Regenerate the icon with
 - Periodic in-session update checks (startup check + manual button exist).
 - Backend enforcement of `min_supported` (the agent already sends `agent_version`).
 - Authenticode code-signing to clear the SmartScreen "unknown publisher" warning.
+  **Parked for the beta.** Azure Trusted Signing ($9.99/mo) only validates
+  *organizations* in the EU — individual validation is US/Canada only — so it's not
+  open to a solo EU dev without a registered entity (an EV cert has the same
+  org requirement). Since the exe self-updates in-process (downloaded builds carry
+  no Mark-of-the-Web, so SmartScreen never sees them), the only warning a user ever
+  hits is the first browser download — one "More info → Run anyway" click. The
+  account page calls this out instead. Revisit with a legal entity (→ Trusted
+  Signing / EV) or a Certum individual cert if we go public.
 - Optional installer (Inno Setup / MSIX) with Start-Menu entry + auto-start.

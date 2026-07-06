@@ -65,6 +65,13 @@
       @if (agent(); as a) {
         <a class="g-button g-button-primary" [href]="a.url" download>Download for Windows</a>
         <p class="key-sub">Version {{ a.version }}</p>
+        <p class="auth-hint">
+          On first launch Windows may show a “Windows protected your PC” screen. That's
+          expected for a new app — click <strong>More info</strong> → <strong>Run anyway</strong>.
+          You should only see it once; future updates install silently.
+
+          
+        </p>
       } @else {
         <p class="auth-sub">The download is temporarily unavailable — check back shortly.</p>
       }

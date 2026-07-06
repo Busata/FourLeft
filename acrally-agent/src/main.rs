@@ -5,6 +5,12 @@
 //! The telemetry source is the only platform-specific piece — on Windows it reads
 //! shared memory, elsewhere (or with `mock = true`) it replays a scripted session.
 
+// The distributed build is a GUI app (tray + window), so mark it as a Windows
+// GUI-subsystem binary: launching it must NOT pop a console window. Gated to the
+// `ui` feature so the headless/diagnostic build keeps its console. On non-Windows
+// targets the attribute is inert.
+#![cfg_attr(feature = "ui", windows_subsystem = "windows")]
+
 mod config;
 mod model;
 mod pairing;
@@ -32,6 +38,15 @@ use runner::Runner;
 use telemetry::{MockSource, TelemetrySource};
 
 fn main() -> Result<()> {
+    // With `windows_subsystem = "windows"` the GUI build has no console, so a
+    // double-click shows only the tray UI. But the same exe still has console
+    // paths — `pair`, `update`, `ACRALLY_CHECKSAVE`/`SCAN`/`DUMP`, `headless` — so
+    // if it was launched from an existing terminal, reattach to that terminal's
+    // console. It's a no-op when there's no parent console (the double-click case),
+    // which keeps that path windowless.
+    #[cfg(all(windows, feature = "ui"))]
+    attach_parent_console();
+
     let cfg = Config::load()?;
 
     // `acrally-agent update`: check for a newer signed build, apply it, and relaunch.
@@ -80,6 +95,21 @@ fn main() -> Result<()> {
     }
 
     run_headless(cfg)
+}
+
+/// Attach to the parent process's console if it has one, so console output from a
+/// GUI-subsystem exe launched from a terminal is still visible. No-op (returns 0)
+/// when launched without a console, e.g. a double-click.
+#[cfg(all(windows, feature = "ui"))]
+fn attach_parent_console() {
+    // ATTACH_PARENT_PROCESS = (DWORD)-1; AttachConsole lives in kernel32.
+    const ATTACH_PARENT_PROCESS: u32 = 0xFFFF_FFFF;
+    extern "system" {
+        fn AttachConsole(dwProcessId: u32) -> i32;
+    }
+    unsafe {
+        AttachConsole(ATTACH_PARENT_PROCESS);
+    }
 }
 
 /// The console loop: poll telemetry, drive the runner, optionally print a

@@ -1,6 +1,15 @@
 <div class="g-card auth-card">
-  <h1 class="auth-title">Sign in</h1>
+  <h1 class="auth-title">Sign in <span class="auth-beta">Beta</span></h1>
   <p class="auth-sub">Assetto Corsa Rally</p>
+
+  <p class="auth-intro">
+    A companion tool for Assetto Corsa Rally that tracks and keeps a history of your
+    stage results, so you can follow your progress. The final goal would be to offer
+    some sort of club system where the tool guides you in what race to do and track the result.
+<br/>
+    Still in beta but feel free to test and let me know bugs/quirks. Source for the tool is available on github
+
+  </p>
 
   @if (error()) {
     <p class="auth-error">{{ error() }}</p>
