@@ -129,6 +129,10 @@ services:
     build: devops/reverse-proxy
     container_name: fourleft-reverse-proxy
     restart: always
+    volumes:
+      # acrally-agent release files (exe, .minisig, latest.json). Upload here to
+      # publish; nginx serves them read-only at /acrally-agent/.
+      - /mnt/docker-data/acrally-agent:/srv/acrally-agent:ro
     environment:
       - VIRTUAL_HOST=fourleft.io
       - LETSENCRYPT_HOST=fourleft.io
