@@ -7,9 +7,14 @@
 //!     snapshot, plus a `tray-icon` entry so the app lives in the system tray.
 //!     Closing the window hides it to the tray rather than quitting.
 //!
-//! Tray events (menu clicks + a left-click on the icon) are forwarded to the egui
-//! context via `request_repaint`, so they wake the window even while it's hidden —
-//! otherwise a hidden window never ticks and "Open" would do nothing.
+//! Tray events (menu clicks + a left-click on the icon) are handled in the global
+//! tray handlers, NOT routed through `App::update`. That's deliberate: a hidden
+//! eframe window on Windows never receives `RedrawRequested`, so `update` stops
+//! running entirely while closed-to-tray. If we queued actions for `update` to
+//! apply, both "Open" and "Quit" would be dead until the window came back — which
+//! it never could. So "Quit" exits the process directly, and "Open" pokes the OS
+//! (`ShowWindow`) to un-hide the window, which restarts painting and revives the
+//! event loop; a queued `Open` then lets `update` re-sync eframe's own state.
 //!
 //! First run without an `api_key` shows an in-window **Connect** screen that drives
 //! the device-pairing flow (no CLI): it shows a code + link, opens the browser, and
@@ -34,10 +39,12 @@ use crate::status::{AgentStatus, DriveState, StatusHandle};
 /// Display name shown in the window title bar and tray tooltip.
 const APP_NAME: &str = "Fourleft.IO - AC Rally Companion";
 
-/// An action the tray raised, to be applied on the UI thread.
+/// A tray action applied on the UI thread once it's ticking again. Only "Open"
+/// flows through here (to re-sync eframe's visibility state); "Quit" exits the
+/// process straight from the tray handler, since a hidden window's `update` is
+/// parked and can't process a queue.
 enum TrayAction {
     Open,
-    Quit,
 }
 
 /// Launch the tray app: build the tray, then run the UI event loop. The telemetry
@@ -98,12 +105,24 @@ pub fn run(cfg: Config) -> Result<()> {
         update,
     };
 
+    let stop_handlers = stop.clone();
     let result = eframe::run_native(
         "acrally-agent",
         native_options,
         Box::new(move |cc| {
-            // Wake the (possibly hidden) window on any tray/menu event.
-            install_event_forwarders(&cc.egui_ctx, actions, open_id, quit_id);
+            // Capture the native window handle now (while the window exists) so a
+            // tray click can un-hide it even after eframe has parked the loop.
+            let hwnd: isize = {
+                #[cfg(windows)]
+                {
+                    hwnd_of(cc)
+                }
+                #[cfg(not(windows))]
+                {
+                    0
+                }
+            };
+            install_event_forwarders(&cc.egui_ctx, actions, open_id, quit_id, stop_handlers, hwnd);
             Ok(Box::new(app))
         }),
     )
@@ -113,30 +132,29 @@ pub fn run(cfg: Config) -> Result<()> {
     result
 }
 
-/// Route tray-icon + menu events into `actions` and repaint so `update` runs even
-/// while the window is hidden (a hidden eframe window otherwise stops ticking).
+/// Handle tray-icon + menu events. These fire inside the OS message pump on the
+/// UI thread, so they must NOT depend on `App::update` running — it's parked while
+/// the window is hidden. "Quit" exits here; "Open" un-hides the window (which
+/// revives the loop) and queues an `Open` for `update` to re-sync eframe's state.
 fn install_event_forwarders(
     ctx: &egui::Context,
     actions: Arc<Mutex<Vec<TrayAction>>>,
     open_id: MenuId,
     quit_id: MenuId,
+    stop: Arc<AtomicBool>,
+    hwnd: isize,
 ) {
     {
         let ctx = ctx.clone();
         let actions = actions.clone();
         MenuEvent::set_event_handler(Some(move |event: MenuEvent| {
-            let action = if event.id == open_id {
-                Some(TrayAction::Open)
-            } else if event.id == quit_id {
-                Some(TrayAction::Quit)
-            } else {
-                None
-            };
-            if let Some(action) = action {
-                if let Ok(mut queue) = actions.lock() {
-                    queue.push(action);
-                }
-                ctx.request_repaint();
+            if event.id == quit_id {
+                // Can't route through `update` (a hidden window's loop is parked),
+                // so tear down here. `stop` lets the pipeline thread wind down.
+                stop.store(true, Ordering::Relaxed);
+                std::process::exit(0);
+            } else if event.id == open_id {
+                wake_open(&ctx, &actions, hwnd);
             }
         }));
     }
@@ -150,12 +168,55 @@ fn install_event_forwarders(
                 ..
             } = event
             {
-                if let Ok(mut queue) = actions.lock() {
-                    queue.push(TrayAction::Open);
-                }
-                ctx.request_repaint();
+                wake_open(&ctx, &actions, hwnd);
             }
         }));
+    }
+}
+
+/// Un-hide the window and queue an `Open`. On Windows the `ShowWindow` poke is what
+/// actually revives the parked event loop (a hidden window never repaints, so
+/// `request_repaint` alone can't wake it); the queued `Open` then re-syncs eframe's
+/// own visibility once `update` starts running again.
+fn wake_open(ctx: &egui::Context, actions: &Arc<Mutex<Vec<TrayAction>>>, hwnd: isize) {
+    #[cfg(windows)]
+    win_show(hwnd);
+    #[cfg(not(windows))]
+    let _ = hwnd;
+    if let Ok(mut queue) = actions.lock() {
+        queue.push(TrayAction::Open);
+    }
+    ctx.request_repaint();
+}
+
+/// Read the main window's HWND from eframe's creation context (0 if unavailable).
+#[cfg(windows)]
+fn hwnd_of(cc: &eframe::CreationContext<'_>) -> isize {
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    match cc.window_handle().map(|h| h.as_raw()) {
+        Ok(RawWindowHandle::Win32(h)) => h.hwnd.get(),
+        _ => 0,
+    }
+}
+
+/// Force a hidden/minimised window visible and foreground it. Called from the tray
+/// handler because eframe can't show a window it has already parked.
+#[cfg(windows)]
+fn win_show(hwnd: isize) {
+    if hwnd == 0 {
+        return;
+    }
+    const SW_SHOW: i32 = 5;
+    const SW_RESTORE: i32 = 9;
+    extern "system" {
+        fn ShowWindow(hwnd: isize, n_cmd_show: i32) -> i32;
+        fn SetForegroundWindow(hwnd: isize) -> i32;
+    }
+    unsafe {
+        // SW_SHOW un-hides; SW_RESTORE also un-minimises if it was minimised.
+        ShowWindow(hwnd, SW_SHOW);
+        ShowWindow(hwnd, SW_RESTORE);
+        SetForegroundWindow(hwnd);
     }
 }
 
@@ -223,11 +284,6 @@ impl App {
         ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
         ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
         ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
-    }
-
-    fn quit(&self) -> ! {
-        self.stop.store(true, Ordering::Relaxed);
-        std::process::exit(0);
     }
 
     fn spawn_pipeline(&mut self) {
@@ -379,7 +435,6 @@ impl eframe::App for App {
         for action in queued {
             match action {
                 TrayAction::Open => Self::show_window(ctx),
-                TrayAction::Quit => self.quit(),
             }
         }
 

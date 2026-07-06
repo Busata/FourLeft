@@ -46,9 +46,9 @@ agent refuses to self-update (it will still *notice* and report a new version).
 
 ## Cutting a release (automated)
 
-Bump `version` in `Cargo.toml`, then run **one** of these. Both build the
-windows-msvc exe with `--features ui,shm`, sign it, write `latest.json`, and
-publish exe + `.minisig` first and the manifest last.
+Run **one** of these. Both build the windows-msvc exe with `--features ui,shm`,
+sign it, write `latest.json`, and publish exe + `.minisig` first and the manifest
+last.
 
 **From WSL (the usual path)** — via the `fourleft` CLI:
 
@@ -56,21 +56,26 @@ publish exe + `.minisig` first and the manifest last.
 fourleft          # -> "Release AC Rally agent"
 ```
 
-It asks for release notes, rsyncs the crate to the Windows build dir, builds +
-signs there via `release.ps1` (WSL interop), and uploads to
-`veevi:/mnt/docker-data/acrally-agent/`. See [How the WSL→Windows build
+It **prompts for the release kind (patch / minor / major) and bumps the version
+itself** — you don't edit `Cargo.toml` by hand. Then it asks for release notes,
+rsyncs the crate to the Windows build dir, builds + signs there via `release.ps1`
+(WSL interop), and uploads to `veevi:/mnt/docker-data/acrally-agent/`. The bump is
+atomic: if the build or upload fails, `Cargo.toml`/`Cargo.lock` are restored to the
+pre-release version. On success it leaves the bump in your working tree for **you
+to commit** (it does not `git commit`). See [How the WSL→Windows build
 works](#how-the-wslwindows-build-works). (`devops/cli/release-agent.sh`.)
 
-**Directly on Windows** — run the build/sign script and let it upload:
+**Directly on Windows** — bump `version` in `Cargo.toml` yourself first (this path
+does *not* auto-bump), then run the build/sign script and let it upload:
 
 ```powershell
 ./release.ps1 -Notes "What changed" -Upload
 ```
 
-Both pick up the version from `Cargo.toml` automatically. You'll be prompted once
-for your minisign key password during signing. Running agents then pick the
-release up on their next check; `acrally-agent update` downloads it, verifies the
-signature, swaps the exe, and relaunches.
+Both pick up the version from `Cargo.toml` (the CLI having just written it). You'll
+be prompted once for your minisign key password during signing. Running agents then
+pick the release up on their next check; `acrally-agent update` downloads it,
+verifies the signature, swaps the exe, and relaunches.
 
 ### How the WSL→Windows build works
 

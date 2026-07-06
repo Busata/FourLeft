@@ -63,7 +63,9 @@
         them here — start pairing from the app, then approve it below.
       </p>
       @if (agent(); as a) {
-        <a class="g-button g-button-primary" [href]="a.url" download>Download for Windows</a>
+        <!-- Save under a stable, version-less name: the agent self-replaces in place,
+             so a versioned filename would forever misreport the installed version. -->
+        <a class="g-button g-button-primary" [href]="a.url" download="acrally-agent.exe">Download for Windows</a>
         <p class="key-sub">Version {{ a.version }}</p>
         <p class="auth-hint">
           On first launch Windows may show a “Windows protected your PC” screen. That's
