@@ -1,0 +1,51 @@
+<div class="g-card auth-card">
+  <h1 class="auth-title">Authorize device</h1>
+  <p class="auth-sub">Connect your Assetto Corsa Rally agent to your account.</p>
+
+  @switch (state()) {
+    @case ('loading') {
+      <p class="auth-sub">Loading…</p>
+    }
+
+    @case ('idle') {
+      <p class="auth-sub">Enter the code shown in the app.</p>
+      <div class="form-group">
+        <label>Pairing code</label>
+        <input [(ngModel)]="codeInput" name="code" type="text" placeholder="XXXX-XXXX" autocapitalize="characters" />
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="submitCode()">Continue</button>
+    }
+
+    @case ('ready') {
+      @if (pairing(); as p) {
+        <p class="pair-prompt">
+          Authorize <strong>{{ p.label || 'this device' }}</strong> to submit results and read your
+          sessions as you?
+        </p>
+        <p class="auth-sub">Code {{ p.userCode }} · expires {{ p.expiresAt | date: 'shortTime' }}</p>
+        <div class="pair-actions">
+          <button class="g-button g-button-primary" type="button" (click)="approve()">Authorize</button>
+          <button class="g-button g-button-tertiary" type="button" (click)="deny()">Deny</button>
+        </div>
+      }
+    }
+
+    @case ('approved') {
+      <p class="auth-notice">Device authorized. You can return to the app — it will connect automatically.</p>
+    }
+
+    @case ('denied') {
+      <p class="auth-sub">Pairing denied. Nothing was connected.</p>
+    }
+
+    @case ('needs-steam') {
+      <p class="auth-error">Link your Steam account before authorizing a device.</p>
+      <a class="g-button g-button-secondary" routerLink="/acrally/account">Go to account</a>
+    }
+
+    @case ('error') {
+      <p class="auth-error">{{ error() }}</p>
+      <a class="g-button g-button-secondary" routerLink="/acrally/account">Back to account</a>
+    }
+  }
+</div>

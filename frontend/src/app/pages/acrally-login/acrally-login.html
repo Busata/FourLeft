@@ -1,0 +1,27 @@
+<div class="g-card auth-card">
+  <h1 class="auth-title">Sign in</h1>
+  <p class="auth-sub">Assetto Corsa Rally</p>
+
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label>Email</label>
+      <input formControlName="email" type="email" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input formControlName="password" type="password" autocomplete="current-password" />
+    </div>
+
+    <button class="g-button g-button-primary" type="submit" [disabled]="submitting()">
+      {{ submitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+
+  <p class="auth-alt">
+    No account yet? <a routerLink="/acrally/register">Create one</a>
+  </p>
+</div>

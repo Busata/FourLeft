@@ -15,6 +15,7 @@
 
     <modules>
         <module>backend-ea-sports-wrc</module>
+        <module>backend-acrally</module>
         <module>api</module>
         <module>discord</module>
         <module>frontend</module>

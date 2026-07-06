@@ -269,3 +269,252 @@ form .g-button + .g-button {
   box-shadow: 0 6px 20px rgba(16, 24, 40, 0.25);
   z-index: 100;
 }
+
+/* ---- ACRally auth pages (login / register / account) ---- */
+.auth-card {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.auth-title {
+  margin: 0 0 2px;
+  font-size: 22px;
+}
+
+.auth-sub {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.auth-hint {
+  display: block;
+  margin-top: 4px;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.auth-error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.auth-notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 14px;
+}
+
+.auth-alt {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.account-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0 0 18px;
+
+  dt {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.account-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+
+  &__title {
+    margin: 0 0 8px;
+    font-size: 15px;
+  }
+}
+
+.account-linked {
+  margin: 0;
+  font-weight: 600;
+}
+
+.account-steamid {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.account-logout {
+  margin-top: 18px;
+}
+
+.steam-profile {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.steam-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.steam-meta {
+  min-width: 0;
+
+  p {
+    margin: 0 0 2px;
+  }
+}
+
+.steam-persona {
+  font-weight: 700;
+}
+
+.steam-since {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.steam-ban {
+  margin-top: 4px !important;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---- Agent keys / pairing ---- */
+.key-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.key-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--revoked {
+    opacity: 0.55;
+  }
+}
+
+.key-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.key-label {
+  font-weight: 600;
+}
+
+.key-sub {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pair-prompt {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+
+.pair-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ---- Dashboard ---- */
+.dash-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.dash-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+}
+
+.dash-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dash-status {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: lowercase;
+  color: var(--muted);
+
+  &[data-status='COMPLETED'] {
+    color: #2f8f4e;
+  }
+  &[data-status='ABORTED'],
+  &[data-status='STALE'] {
+    color: var(--danger);
+  }
+  &[data-status='OPEN'] {
+    color: var(--accent);
+  }
+}
+
+/* Low-priority table columns: hidden on phones, their data folded into a subline. */
+.wide-only {
+  display: none;
+}
+
+@media (min-width: 880px) {
+  .dash-sub {
+    display: none;
+  }
+  .wide-only {
+    display: table-cell;
+  }
+}

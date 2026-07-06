@@ -2,5 +2,9 @@
   "/api_v2": {
     "target": "http://localhost:8084",
     "secure": false
+  },
+  "/acrally-api": {
+    "target": "http://localhost:8085",
+    "secure": false
   }
 }

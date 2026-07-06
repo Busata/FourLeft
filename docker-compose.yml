@@ -36,6 +36,31 @@ services:
       - POSTGRES_PASSWORD=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_PASS}
       - POSTGRES_USER=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_USER}
       - POSTGRES_DB=${DB_BACKEND_EA_SPORTS_WRC_POSTGRES_DB}
+  db.backend-acrally:
+    container_name: db.backend-acrally
+    image: postgres:16
+    restart: always
+    volumes:
+      - /mnt/docker-data/backend-acrally:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_BACKEND_ACRALLY_POSTGRES_PASS}
+      - POSTGRES_USER=${DB_BACKEND_ACRALLY_POSTGRES_USER}
+      - POSTGRES_DB=${DB_BACKEND_ACRALLY_POSTGRES_DB}
+  spring.fourleft.backend-acrally:
+    build:
+      context: .
+      dockerfile: backend-acrally/Dockerfile
+    container_name: spring.backend-acrally
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CLOUD_CONFIG_URI=http://host.docker.internal:8888
+    ports:
+      - "8085:8085"
+    depends_on:
+      - db.backend-acrally
   spring.fourleft.backend-ea-sports-wrc:
     build:
       context: .

@@ -1,0 +1,100 @@
+<div class="g-card auth-card">
+  <h1 class="auth-title">Account</h1>
+
+  @if (notice()) {
+    <p class="auth-notice">{{ notice() }}</p>
+  }
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (user(); as u) {
+    <p class="account-dash-link">
+      <a routerLink="/acrally/dashboard">View your sessions &amp; results →</a>
+    </p>
+    <dl class="account-details">
+      <dt>Display name</dt>
+      <dd>{{ u.displayName }}</dd>
+      <dt>Email</dt>
+      <dd>{{ u.email }}</dd>
+      <dt>Status</dt>
+      <dd>{{ u.status }}</dd>
+    </dl>
+
+    <section class="account-section">
+      <h2 class="account-section__title">Steam</h2>
+      @if (steam(); as s) {
+        @if (steamProfile(); as p) {
+          <div class="steam-profile">
+            @if (p.avatarUrl) {
+              <img class="steam-avatar" [src]="p.avatarUrl" alt="" />
+            }
+            <div class="steam-meta">
+              <p class="steam-persona">{{ p.personaName || 'Steam user' }}</p>
+              <p class="account-steamid">{{ s.providerUserId }}</p>
+              @if (p.accountCreated) {
+                <p class="steam-since">Steam account since {{ p.accountCreated | date: 'MMM y' }}</p>
+              }
+              @if (hasBan(p)) {
+                <p class="steam-ban">
+                  ⚠ Ban on record{{ p.vacBanned ? ' · VAC' : '' }}{{ p.gameBanCount ? ' · ' + p.gameBanCount + ' game' : '' }}{{ p.communityBanned ? ' · community' : '' }}
+                </p>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="account-linked">
+            Linked · <span class="account-steamid">{{ s.providerUserId }}</span>
+          </p>
+        }
+      } @else {
+        <p class="auth-sub">
+          Link your Steam account to verify your identity. Required before you can submit results.
+        </p>
+        <!-- Full-page navigation (not XHR): the backend 302s to Steam and Steam 302s back. -->
+        <a class="g-button g-button-secondary" href="/acrally-api/auth/steam/start">Link Steam</a>
+      }
+    </section>
+
+    <section class="account-section">
+      <h2 class="account-section__title">Agent keys</h2>
+      @if (keys().length === 0) {
+        <p class="auth-sub">
+          No agent keys yet. Start pairing in the app, then approve it here to connect your agent.
+        </p>
+      } @else {
+        <ul class="key-list">
+          @for (k of keys(); track k.id) {
+            <li class="key-item" [class.key-item--revoked]="k.revoked">
+              <div class="key-meta">
+                <span class="key-label">{{ k.label || 'Agent key' }}</span>
+                <span class="key-sub">
+                  added {{ k.createdAt | date: 'mediumDate' }}
+                  @if (k.lastUsedAt) {
+                    · last used {{ k.lastUsedAt | date: 'short' }}
+                  } @else {
+                    · never used
+                  }
+                  @if (k.revoked) {
+                    · revoked
+                  }
+                </span>
+              </div>
+              @if (!k.revoked) {
+                <button class="g-button g-button-tertiary" type="button" (click)="revokeKey(k.id)">
+                  Revoke
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <button class="g-button g-button-tertiary account-logout" type="button" (click)="logout()">
+      Sign out
+    </button>
+  } @else {
+    <p class="auth-sub">Loading…</p>
+  }
+</div>

@@ -1,0 +1,68 @@
+<div class="g-card">
+  <div class="dash-head">
+    <h1 class="auth-title">Your sessions</h1>
+    <a class="site-link" routerLink="/acrally/account">Account</a>
+  </div>
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <h2 class="account-section__title">Results</h2>
+      @if (results().length === 0) {
+        <p class="auth-sub">
+          No results yet. Drive a stage with your agent connected and finished runs show up here.
+        </p>
+      } @else {
+        <div class="g-tablewrap">
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th class="wide-only">Car</th>
+                <th>Time</th>
+                <th>Penalty</th>
+                <th class="wide-only">Recorded</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of results(); track r.id) {
+                <tr>
+                  <td>
+                    {{ r.stage }}
+                    <span class="dash-sub">{{ r.car }}</span>
+                  </td>
+                  <td class="wide-only">{{ r.car }}</td>
+                  <td class="dash-time">{{ formatTime(r.totalMs) }}</td>
+                  <td>{{ formatPenalty(r.penaltyMs) }}</td>
+                  <td class="wide-only">{{ r.recordedAt | date: 'short' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="account-section">
+      <h2 class="account-section__title">Recent sessions</h2>
+      @if (sessions().length === 0) {
+        <p class="auth-sub">No sessions recorded yet.</p>
+      } @else {
+        <ul class="key-list">
+          @for (s of sessions(); track s.id) {
+            <li class="key-item">
+              <div class="key-meta">
+                <span class="key-label">{{ s.stage || 'Unknown stage' }}</span>
+                <span class="key-sub">
+                  {{ s.car }} · {{ s.createdAt | date: 'short' }}
+                </span>
+              </div>
+              <span class="dash-status" [attr.data-status]="s.status">{{ s.status }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>

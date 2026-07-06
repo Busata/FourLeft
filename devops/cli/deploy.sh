@@ -19,6 +19,7 @@ fi
 # Buildable compose services. Tags MUST match service names in docker-compose.yml.
 SERVICE_TAGS=(
     "spring.fourleft.backend-ea-sports-wrc"
+    "spring.fourleft.backend-acrally"
     "proxy.fourleft_frontend"
     "spring.fourleft.discord"
     "spring.racenet-authenticator"
@@ -26,6 +27,7 @@ SERVICE_TAGS=(
 )
 SERVICE_LABELS=(
     "Backend - EA Sports WRC"
+    "Backend - AC Rally"
     "Frontend"
     "Discord bot"
     "Racenet authenticator"
