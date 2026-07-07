@@ -90,4 +90,9 @@ public class AgentSession {
         this.status = SessionStatus.ABORTED;
         this.abortReason = reason;
     }
+
+    /** Swept by the janitor: still OPEN long after the agent stopped reporting. */
+    public void markStale() {
+        this.status = SessionStatus.STALE;
+    }
 }

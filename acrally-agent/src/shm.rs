@@ -47,26 +47,26 @@ struct AcPhysics {
 #[repr(C)]
 #[derive(Clone, Copy)]
 struct AcGraphics {
-    packet_id: i32,                // 0
+    packet_id: i32, // 0
     /// AC_STATUS: 0 off, 1 replay, 2 live, 3 pause.
     status: i32, // 4
     /// AC_SESSION_TYPE: -1 unknown, 0 practice, 1 qualify, 2 race, 3 hotlap, ...
     session: i32, // 8
-    current_time: [u16; 15],       // 12
-    last_time: [u16; 15],          // 42
-    best_time: [u16; 15],          // 72
-    split: [u16; 15],              // 102
-    completed_laps: i32,           // 132
-    position: i32,                 // 136
-    i_current_time: i32,           // 140
-    i_last_time: i32,              // 144
-    i_best_time: i32,              // 148
-    session_time_left: f32,        // 152
-    distance_traveled: f32,        // 156
-    is_in_pit: i32,                // 160
-    current_sector_index: i32,     // 164
-    last_sector_time: i32,         // 168
-    number_of_laps: i32,           // 172
+    current_time: [u16; 15], // 12
+    last_time: [u16; 15], // 42
+    best_time: [u16; 15], // 72
+    split: [u16; 15], // 102
+    completed_laps: i32, // 132
+    position: i32,  // 136
+    i_current_time: i32, // 140
+    i_last_time: i32, // 144
+    i_best_time: i32, // 148
+    session_time_left: f32, // 152
+    distance_traveled: f32, // 156
+    is_in_pit: i32, // 160
+    current_sector_index: i32, // 164
+    last_sector_time: i32, // 168
+    number_of_laps: i32, // 172
 }
 
 /// Leading fields of the classic AC static page (up to the driver name).
@@ -90,13 +90,30 @@ struct Links {
     statics: SharedMemoryLink<AcStatic>,
 }
 
+/// Consecutive polls with unmoving packet ids before the mapping counts as
+/// stale (~1.5s at the 10 Hz poll rate — matches the finish debounce).
+///
+/// Staleness matters because our own open handle keeps the section object
+/// alive after the game stops publishing (result screen, menus, game exit):
+/// reads keep returning the last-written frame forever, so without this check
+/// `poll` would never report "no telemetry" again after the first open — the
+/// UI shows a phantom "driving" and the blank-frame finish path never runs.
+const STALE_POLLS: u32 = 15;
+
 pub struct ShmSource {
     links: Option<Links>,
+    /// Last observed (physics, graphics) packet ids, for staleness detection.
+    last_packets: (i32, i32),
+    stale_polls: u32,
 }
 
 impl ShmSource {
     pub fn new() -> Self {
-        ShmSource { links: None }
+        ShmSource {
+            links: None,
+            last_packets: (0, 0),
+            stale_polls: 0,
+        }
     }
 
     /// Open all three segments, or report failure (game not running / not yet in
@@ -137,6 +154,20 @@ impl TelemetrySource for ShmSource {
         let p = unsafe { links.physics.get() };
         let g = unsafe { links.graphics.get() };
         let s = unsafe { links.statics.get() };
+
+        // The sim bumps a packet id on every write (physics while live, graphics
+        // even while paused). Both frozen for a sustained stretch means nobody is
+        // writing anymore — report "no telemetry" instead of the stale frame.
+        let packets = (p.packet_id, g.packet_id);
+        if packets == self.last_packets {
+            self.stale_polls = self.stale_polls.saturating_add(1);
+            if self.stale_polls >= STALE_POLLS {
+                return None;
+            }
+        } else {
+            self.last_packets = packets;
+            self.stale_polls = 0;
+        }
 
         let driver = format!(
             "{} {}",
@@ -234,28 +265,29 @@ pub fn dump_hex() {
                     let hex: Vec<String> = chunk.iter().map(|b| format!("{b:02x}")).collect();
                     let ascii: String = chunk
                         .iter()
-                        .map(|&b| if (0x20..0x7f).contains(&b) { b as char } else { '.' })
+                        .map(|&b| {
+                            if (0x20..0x7f).contains(&b) {
+                                b as char
+                            } else {
+                                '.'
+                            }
+                        })
                         .collect();
                     println!("  {:3}: {}  {ascii}", row * 16, hex.join(" "));
                 }
                 // A few interpreted candidates to speed up offset-spotting.
                 let i32_at = |off: usize| {
-                    i32::from_le_bytes([
-                        bytes[off],
-                        bytes[off + 1],
-                        bytes[off + 2],
-                        bytes[off + 3],
-                    ])
+                    i32::from_le_bytes([bytes[off], bytes[off + 1], bytes[off + 2], bytes[off + 3]])
                 };
                 let f32_at = |off: usize| {
-                    f32::from_le_bytes([
-                        bytes[off],
-                        bytes[off + 1],
-                        bytes[off + 2],
-                        bytes[off + 3],
-                    ])
+                    f32::from_le_bytes([bytes[off], bytes[off + 1], bytes[off + 2], bytes[off + 3]])
                 };
-                print!("  int@0={} int@4={} int@8={}", i32_at(0), i32_at(4), i32_at(8));
+                print!(
+                    "  int@0={} int@4={} int@8={}",
+                    i32_at(0),
+                    i32_at(4),
+                    i32_at(8)
+                );
                 println!(
                     "  float@16={:.2} float@20={:.2} float@24={:.2} float@28={:.2}",
                     f32_at(16),

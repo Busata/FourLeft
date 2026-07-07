@@ -128,7 +128,10 @@ pub fn run(cfg: &Config) -> Result<()> {
     println!("  │  1. Open:  {}", started.verification_uri_complete);
     println!("  │  2. Confirm the code:  {}", started.user_code);
     println!("  │");
-    println!("  │  (or go to {} and enter {})", started.verification_uri, started.user_code);
+    println!(
+        "  │  (or go to {} and enter {})",
+        started.verification_uri, started.user_code
+    );
     println!("  └───────────────────────────────────────────────────────────");
     println!();
     if open_browser(&started.verification_uri_complete).is_ok() {
@@ -140,7 +143,9 @@ pub fn run(cfg: &Config) -> Result<()> {
     let deadline = Instant::now() + started.expires_in;
     loop {
         if Instant::now() > deadline {
-            return Err(anyhow!("pairing timed out — run `acrally-agent pair` again"));
+            return Err(anyhow!(
+                "pairing timed out — run `acrally-agent pair` again"
+            ));
         }
         std::thread::sleep(started.interval);
         match poll_once(&agent, &cfg.api_base, &started.device_code) {
@@ -184,11 +189,17 @@ pub fn open_browser(url: &str) -> std::io::Result<()> {
     }
     #[cfg(target_os = "macos")]
     {
-        std::process::Command::new("open").arg(url).spawn().map(|_| ())
+        std::process::Command::new("open")
+            .arg(url)
+            .spawn()
+            .map(|_| ())
     }
     #[cfg(all(unix, not(target_os = "macos")))]
     {
-        std::process::Command::new("xdg-open").arg(url).spawn().map(|_| ())
+        std::process::Command::new("xdg-open")
+            .arg(url)
+            .spawn()
+            .map(|_| ())
     }
     #[cfg(not(any(windows, unix)))]
     {
@@ -291,7 +302,9 @@ pub fn drive(api_base: String, phase: std::sync::Arc<std::sync::Mutex<Phase>>) {
     let deadline = Instant::now() + started.expires_in;
     loop {
         if Instant::now() > deadline {
-            return set(Phase::Failed("The code expired. Try connecting again.".into()));
+            return set(Phase::Failed(
+                "The code expired. Try connecting again.".into(),
+            ));
         }
         std::thread::sleep(started.interval);
         match poll_once(&agent, &api_base, &started.device_code) {
@@ -299,13 +312,17 @@ pub fn drive(api_base: String, phase: std::sync::Arc<std::sync::Mutex<Phase>>) {
             Ok(Poll::Approved(key)) => {
                 let path = Config::config_path();
                 if let Err(e) = persist_api_key(&path, &key) {
-                    return set(Phase::Failed(format!("Linked, but couldn't save the key: {e}")));
+                    return set(Phase::Failed(format!(
+                        "Linked, but couldn't save the key: {e}"
+                    )));
                 }
                 return set(Phase::Approved { api_key: key });
             }
             Ok(Poll::Denied) => return set(Phase::Failed("Pairing was denied.".into())),
             Ok(Poll::Expired) => {
-                return set(Phase::Failed("The code expired. Try connecting again.".into()))
+                return set(Phase::Failed(
+                    "The code expired. Try connecting again.".into(),
+                ))
             }
             Ok(Poll::Consumed) => return set(Phase::Failed("That code was already used.".into())),
             // Transient network error — keep trying until the deadline.

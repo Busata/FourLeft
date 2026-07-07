@@ -106,7 +106,9 @@ impl Config {
         let text = match std::fs::read_to_string(&path) {
             Ok(text) => text,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
-            Err(e) => return Err(e).with_context(|| format!("could not read config file '{path}'")),
+            Err(e) => {
+                return Err(e).with_context(|| format!("could not read config file '{path}'"))
+            }
         };
         let mut cfg: Config =
             toml::from_str(&text).with_context(|| format!("invalid TOML in '{path}'"))?;

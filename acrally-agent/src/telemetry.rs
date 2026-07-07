@@ -78,8 +78,16 @@ fn build_scenario() -> Vec<Frame> {
         } else {
             0.0
         },
-        gear: if matches!(status, SimStatus::Live) { 3 } else { 0 },
-        rpm: if matches!(status, SimStatus::Live) { 5400 } else { 0 },
+        gear: if matches!(status, SimStatus::Live) {
+            3
+        } else {
+            0
+        },
+        rpm: if matches!(status, SimStatus::Live) {
+            5400
+        } else {
+            0
+        },
         driver: "Dries Desmet".to_string(),
         car: "Lancia Delta HF Integrale".to_string(),
         track: "Col de Turini".to_string(),

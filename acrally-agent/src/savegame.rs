@@ -54,7 +54,10 @@ fn read_fstring(b: &[u8], o: usize) -> Option<(String, usize)> {
     let end = start + len as usize - 1; // drop trailing NUL
     let raw = b.get(start..end)?;
     if raw.iter().all(|&c| (0x20..0x7f).contains(&c)) {
-        Some((raw.iter().map(|&c| c as char).collect(), o + 4 + len as usize))
+        Some((
+            raw.iter().map(|&c| c as char).collect(),
+            o + 4 + len as usize,
+        ))
     } else {
         None
     }
@@ -177,10 +180,7 @@ pub fn locate_save(override_path: Option<&str>) -> Option<PathBuf> {
         roots.push(Path::new(&profile).join("AppData").join("Local"));
     }
 
-    roots
-        .into_iter()
-        .map(|r| r.join(REL))
-        .find(|p| p.is_file())
+    roots.into_iter().map(|r| r.join(REL)).find(|p| p.is_file())
 }
 
 #[cfg(test)]

@@ -488,7 +488,12 @@ impl App {
             RaceAction::CancelArm => self.pending_arm = None,
             RaceAction::ConfirmArm => {
                 if let Some(p) = self.pending_arm.take() {
-                    races::arm(self.cfg.clone(), self.races.clone(), p.event_id, p.variant_id);
+                    races::arm(
+                        self.cfg.clone(),
+                        self.races.clone(),
+                        p.event_id,
+                        p.variant_id,
+                    );
                 }
             }
             RaceAction::Disarm => races::disarm(self.cfg.clone(), self.races.clone()),
@@ -590,7 +595,12 @@ fn connect_screen(ui: &mut egui::Ui, phase: &Phase) -> ConnectAction {
             Phase::Waiting { user_code, url } => {
                 ui.label("In your browser, sign in and confirm this code:");
                 ui.add_space(8.0);
-                ui.label(egui::RichText::new(user_code).heading().monospace().strong());
+                ui.label(
+                    egui::RichText::new(user_code)
+                        .heading()
+                        .monospace()
+                        .strong(),
+                );
                 ui.add_space(12.0);
                 if ui.button("Open approval page").clicked() {
                     let _ = pairing::open_browser(url);
@@ -737,7 +747,13 @@ fn races_tab(ui: &mut egui::Ui, state: &RacesState, snap: &AgentStatus, action: 
 }
 
 /// The banner shown while a stage is armed: what you're waiting on, live warnings, and Disarm.
-fn arm_banner(ui: &mut egui::Ui, arm: &ArmState, snap: &AgentStatus, busy: bool, action: &mut RaceAction) {
+fn arm_banner(
+    ui: &mut egui::Ui,
+    arm: &ArmState,
+    snap: &AgentStatus,
+    busy: bool,
+    action: &mut RaceAction,
+) {
     ui.horizontal(|ui| {
         ui.label(egui::RichText::new("● Armed").color(GREEN).strong());
         if let Some(stage) = &arm.stage_label {
@@ -768,10 +784,16 @@ fn arm_banner(ui: &mut egui::Ui, arm: &ArmState, snap: &AgentStatus, busy: bool,
 
 /// The banner shown after a run finishes, reflecting the server's authoritative outcome.
 fn outcome_banner(ui: &mut egui::Ui, arm: &ArmState) {
-    let stage = arm.last_stage_label.clone().unwrap_or_else(|| "the stage".to_string());
+    let stage = arm
+        .last_stage_label
+        .clone()
+        .unwrap_or_else(|| "the stage".to_string());
     let (color, text) = match arm.last_outcome.as_deref() {
         Some("RECORDED") => {
-            let time = arm.last_total_ms.map(|ms| fmt_ms(ms as i32)).unwrap_or_default();
+            let time = arm
+                .last_total_ms
+                .map(|ms| fmt_ms(ms as i32))
+                .unwrap_or_default();
             (GREEN, format!("✓ Recorded {time} on {stage}"))
         }
         Some("SLOWER") => (
@@ -779,7 +801,10 @@ fn outcome_banner(ui: &mut egui::Ui, arm: &ArmState) {
             format!("Kept your existing time on {stage} — that run was slower."),
         ),
         Some("WRONG_STAGE") => (AMBER, format!("⚠ That wasn't {stage} — nothing recorded.")),
-        Some("WRONG_CAR") => (AMBER, "⚠ Wrong car for that stage — nothing recorded.".to_string()),
+        Some("WRONG_CAR") => (
+            AMBER,
+            "⚠ Wrong car for that stage — nothing recorded.".to_string(),
+        ),
         Some("EVENT_CLOSED") => (
             AMBER,
             "The event closed before your run finished — nothing recorded.".to_string(),
@@ -793,11 +818,22 @@ fn outcome_banner(ui: &mut egui::Ui, arm: &ArmState) {
 }
 
 /// One event, with its stages listed and a Start button per stage.
-fn event_card(ui: &mut egui::Ui, event: &RaceEvent, arm: &ArmState, busy: bool, action: &mut RaceAction) {
+fn event_card(
+    ui: &mut egui::Ui,
+    event: &RaceEvent,
+    arm: &ArmState,
+    busy: bool,
+    action: &mut RaceAction,
+) {
     egui::Frame::group(ui.style()).show(ui, |ui| {
         ui.label(egui::RichText::new(&event.label).heading());
-        ui.label(egui::RichText::new(format!("{} · {}", event.championship_name, event.club_name)).weak());
-        ui.label(egui::RichText::new(format!("closes {}", human_datetime(&event.closes_at))).weak());
+        ui.label(
+            egui::RichText::new(format!("{} · {}", event.championship_name, event.club_name))
+                .weak(),
+        );
+        ui.label(
+            egui::RichText::new(format!("closes {}", human_datetime(&event.closes_at))).weak(),
+        );
         // Permitted cars (event-wide). Empty means any car is allowed.
         let cars = event_cars(event);
         if cars.is_empty() {
@@ -813,20 +849,31 @@ fn event_card(ui: &mut egui::Ui, event: &RaceEvent, arm: &ArmState, busy: bool, 
 }
 
 /// A single stage row: label, the driver's best, and Start (or an "armed" marker).
-fn stage_row(ui: &mut egui::Ui, event: &RaceEvent, stage: &RaceStage, arm: &ArmState, busy: bool, action: &mut RaceAction) {
+fn stage_row(
+    ui: &mut egui::Ui,
+    event: &RaceEvent,
+    stage: &RaceStage,
+    arm: &ArmState,
+    busy: bool,
+    action: &mut RaceAction,
+) {
     ui.horizontal(|ui| {
         ui.label(&stage.label);
         if let Some(ms) = stage.my_best_ms {
             ui.label(egui::RichText::new(format!("best {}", fmt_ms(ms as i32))).weak());
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let armed_here = arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
+            let armed_here =
+                arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
             if armed_here {
                 ui.label(egui::RichText::new("armed").color(GREEN).strong());
             } else {
                 // One live arm at a time: Start is disabled while any stage is armed or a call is in flight.
                 let enabled = !busy && !arm.active;
-                if ui.add_enabled(enabled, egui::Button::new("Start")).clicked() {
+                if ui
+                    .add_enabled(enabled, egui::Button::new("Start"))
+                    .clicked()
+                {
                     *action = RaceAction::RequestArm {
                         event_id: event.event_id.clone(),
                         variant_id: stage.variant_id.clone(),
@@ -866,7 +913,11 @@ fn confirm_modal(ctx: &egui::Context, pending: &PendingArm, action: &mut RaceAct
 
 /// The event's permitted cars (the same list on every stage; empty = any car).
 fn event_cars(event: &RaceEvent) -> Vec<String> {
-    event.stages.first().map(|s| s.cars.clone()).unwrap_or_default()
+    event
+        .stages
+        .first()
+        .map(|s| s.cars.clone())
+        .unwrap_or_default()
 }
 
 /// A short permitted-car summary for the confirm modal.
@@ -876,7 +927,11 @@ fn car_summary(stage: &RaceStage) -> String {
     } else if stage.cars.len() <= 2 {
         stage.cars.join(", ")
     } else {
-        format!("{}, +{} more", stage.cars[..2].join(", "), stage.cars.len() - 2)
+        format!(
+            "{}, +{} more",
+            stage.cars[..2].join(", "),
+            stage.cars.len() - 2
+        )
     }
 }
 
@@ -897,7 +952,10 @@ fn arm_warnings(arm: &ArmState, snap: &AgentStatus) -> Vec<String> {
             !n.is_empty() && (n == current || n.contains(&current) || current.contains(&n))
         });
         if !allowed {
-            warnings.push(format!("This car ({}) isn't allowed for this stage.", snap.car));
+            warnings.push(format!(
+                "This car ({}) isn't allowed for this stage.",
+                snap.car
+            ));
         }
     }
     if !stage_matches(&snap.track, arm) {
@@ -923,7 +981,10 @@ fn stage_matches(track: &str, arm: &ArmState) -> bool {
 
 /// Lowercase, alphanumeric-only — for tolerant name comparison across differing formats.
 fn normalize(s: &str) -> String {
-    s.chars().filter(|c| c.is_alphanumeric()).flat_map(char::to_lowercase).collect()
+    s.chars()
+        .filter(|c| c.is_alphanumeric())
+        .flat_map(char::to_lowercase)
+        .collect()
 }
 
 /// Trim an ISO date-time ("2026-07-14T18:00:00") to a readable "2026-07-14 18:00".

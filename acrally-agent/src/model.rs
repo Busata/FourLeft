@@ -205,7 +205,12 @@ pub fn is_real_laptime(s: &str) -> bool {
 /// Format a millisecond duration as `M:SS.mmm`.
 pub fn fmt_ms(ms: i32) -> String {
     let ms = ms.max(0);
-    format!("{}:{:02}.{:03}", ms / 60_000, (ms % 60_000) / 1000, ms % 1000)
+    format!(
+        "{}:{:02}.{:03}",
+        ms / 60_000,
+        (ms % 60_000) / 1000,
+        ms % 1000
+    )
 }
 
 /// Diagnostic: scan a raw shared-memory segment and report everything that looks
@@ -315,8 +320,14 @@ mod tests {
         // i32 290937 ms at offset 40.
         bytes[40..44].copy_from_slice(&290_937i32.to_le_bytes());
         let report = scan_report(&bytes).join("\n");
-        assert!(report.contains("\"4:50.937\""), "should surface the wchar time");
-        assert!(report.contains("290937 = 4:50.937"), "should surface the int time");
+        assert!(
+            report.contains("\"4:50.937\""),
+            "should surface the wchar time"
+        );
+        assert!(
+            report.contains("290937 = 4:50.937"),
+            "should surface the int time"
+        );
     }
 
     #[test]

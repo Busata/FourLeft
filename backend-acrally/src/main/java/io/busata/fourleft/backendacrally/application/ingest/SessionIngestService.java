@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -65,6 +67,22 @@ public class SessionIngestService {
         session.abort(reason);
         // A restart/quit shouldn't burn the arm — release it so the driver's next run re-binds.
         recordingService.unbindSession(session.getId());
+    }
+
+    /**
+     * Janitor half of the contract: heartbeats/aborts are at-most-once, so a session with no
+     * result and no abort must be timed out rather than waited on forever. Marks long-silent
+     * OPEN sessions STALE and releases any arm still bound to them, so a driver whose agent
+     * died mid-run gets their arm back. Returns how many were swept (for the schedule's log).
+     */
+    @Transactional
+    public int sweepStaleSessions(LocalDateTime cutoff) {
+        List<AgentSession> silent = sessions.findOpenAndSilentSince(cutoff);
+        for (AgentSession session : silent) {
+            session.markStale();
+            recordingService.unbindSession(session.getId());
+        }
+        return silent.size();
     }
 
     /**

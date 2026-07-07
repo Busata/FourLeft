@@ -80,7 +80,10 @@ pub fn check() -> Result<Option<Available>> {
     let latest = semver::Version::parse(&manifest.version)
         .with_context(|| format!("manifest version '{}' is not semver", manifest.version))?;
     if latest > current_version() {
-        Ok(Some(Available { version: latest, manifest }))
+        Ok(Some(Available {
+            version: latest,
+            manifest,
+        }))
     } else {
         Ok(None)
     }
@@ -162,8 +165,7 @@ fn verify(data: &[u8], sig_text: &str) -> Result<()> {
 /// with a throwaway key. `allow_legacy = false` requires a prehashed signature.
 fn verify_with_key(public_key_b64: &str, data: &[u8], sig_text: &str) -> Result<()> {
     use minisign_verify::{PublicKey, Signature};
-    let pk = PublicKey::from_base64(public_key_b64)
-        .map_err(|e| anyhow!("bad public key: {e}"))?;
+    let pk = PublicKey::from_base64(public_key_b64).map_err(|e| anyhow!("bad public key: {e}"))?;
     let sig = Signature::decode(sig_text).map_err(|e| anyhow!("bad signature format: {e}"))?;
     pk.verify(data, &sig, false)
         .map_err(|e| anyhow!("signature verification failed: {e}"))?;

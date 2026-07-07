@@ -59,8 +59,8 @@ fn main() -> Result<()> {
 
     // Device pairing: `acrally-agent pair` (or ACRALLY_PAIR=1) links this agent to a
     // user account and writes the returned api_key into the config file, then exits.
-    let pair_requested = std::env::args().nth(1).as_deref() == Some("pair")
-        || std::env::var("ACRALLY_PAIR").is_ok();
+    let pair_requested =
+        std::env::args().nth(1).as_deref() == Some("pair") || std::env::var("ACRALLY_PAIR").is_ok();
     if pair_requested {
         return pairing::run(&cfg);
     }
@@ -90,8 +90,7 @@ fn main() -> Result<()> {
     // explicit `headless` setting keep the original console loop.
     #[cfg(feature = "ui")]
     {
-        let diag =
-            std::env::var("ACRALLY_SCAN").is_ok() || std::env::var("ACRALLY_DUMP").is_ok();
+        let diag = std::env::var("ACRALLY_SCAN").is_ok() || std::env::var("ACRALLY_DUMP").is_ok();
         if !cfg.headless && !diag {
             return ui::run(cfg);
         }
@@ -196,15 +195,22 @@ fn heartbeat(f: &Frame) -> String {
     } else {
         f.track.clone()
     };
-    let dash = |s: &str| if s.is_empty() { "--".to_string() } else { s.to_string() };
+    let dash = |s: &str| {
+        if s.is_empty() {
+            "--".to_string()
+        } else {
+            s.to_string()
+        }
+    };
     format!(
-        "[{status}] {loc} | {} | {} | {:.0} km/h  gear {}  {} rpm | cur {}  dist {:.0}m",
+        "[{status}] {loc} | {} | {} | {:.0} km/h  gear {}  {} rpm | cur {}  last {}  dist {:.0}m",
         dash(&f.car),
         dash(&f.driver),
         f.speed_kmh,
         f.gear,
         f.rpm,
         dash(&f.current_laptime),
+        dash(&f.last_laptime),
         f.distance_m,
     )
 }
@@ -222,7 +228,11 @@ fn check_save(cfg: &Config) {
                     match recs.iter().max_by_key(|r| r.timestamp_ticks) {
                         Some(r) => println!(
                             "newest: {} / {}  raw {} + {}s = total {}  (ticks {})",
-                            if r.stage.is_empty() { "(no stage)" } else { &r.stage },
+                            if r.stage.is_empty() {
+                                "(no stage)"
+                            } else {
+                                &r.stage
+                            },
                             r.car,
                             fmt(r.raw_ms),
                             r.penalty_ms / 1000,

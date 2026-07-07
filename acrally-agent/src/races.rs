@@ -153,19 +153,25 @@ impl Client {
     }
 
     fn arm(&self, event_id: &str, variant_id: &str) -> Result<ArmState> {
-        self.req(self.agent.post(&format!("{}/agent/races/arm", self.api_base)))
-            .send_json(serde_json::json!({ "event_id": event_id, "variant_id": variant_id }))
-            .map_err(arm_error)?
-            .into_json()
-            .context("unexpected response arming the stage")
+        self.req(
+            self.agent
+                .post(&format!("{}/agent/races/arm", self.api_base)),
+        )
+        .send_json(serde_json::json!({ "event_id": event_id, "variant_id": variant_id }))
+        .map_err(arm_error)?
+        .into_json()
+        .context("unexpected response arming the stage")
     }
 
     fn disarm(&self) -> Result<ArmState> {
-        self.req(self.agent.post(&format!("{}/agent/races/disarm", self.api_base)))
-            .call()
-            .context("could not reach the club backend")?
-            .into_json()
-            .context("unexpected response from disarm")
+        self.req(
+            self.agent
+                .post(&format!("{}/agent/races/disarm", self.api_base)),
+        )
+        .call()
+        .context("could not reach the club backend")?
+        .into_json()
+        .context("unexpected response from disarm")
     }
 }
 
