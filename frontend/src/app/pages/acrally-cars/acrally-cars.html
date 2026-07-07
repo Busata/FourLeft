@@ -1,0 +1,83 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">Rally car catalogue — name, year, group and class.</p>
+    <button class="g-button g-button-primary" type="button" (click)="toggleCreate()">
+      {{ creating() ? 'Cancel' : 'Add car' }}
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (creating()) {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" maxlength="200" [ngModel]="newName()" (ngModelChange)="newName.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Year</label>
+        <input type="number" [ngModel]="newYear()" (ngModelChange)="newYear.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Group</label>
+        <input type="text" maxlength="120" [ngModel]="newGroup()" (ngModelChange)="newGroup.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Class</label>
+        <input type="text" maxlength="120" [ngModel]="newClass()" (ngModelChange)="newClass.set($event)" />
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="create()" [disabled]="busy()">Create</button>
+    </section>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (cars().length === 0) {
+    <p class="auth-sub">No cars yet. Add the first one.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Year</th>
+            <th>Group</th>
+            <th>Class</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (car of cars(); track car.id) {
+            <tr>
+              @if (editingId() === car.id) {
+                <td><input type="text" maxlength="200" [ngModel]="editName()" (ngModelChange)="editName.set($event)" /></td>
+                <td><input type="number" [ngModel]="editYear()" (ngModelChange)="editYear.set($event)" /></td>
+                <td><input type="text" maxlength="120" [ngModel]="editGroup()" (ngModelChange)="editGroup.set($event)" /></td>
+                <td><input type="text" maxlength="120" [ngModel]="editClass()" (ngModelChange)="editClass.set($event)" /></td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(car)" [disabled]="busy()">Save</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>{{ car.name }}</td>
+                <td>{{ car.year ?? '—' }}</td>
+                <td>{{ car.groupName || '—' }}</td>
+                <td>{{ car.className || '—' }}</td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(car)">Edit</button>
+                    <button class="g-button g-button-danger" type="button" (click)="remove(car)" [disabled]="busy()">Delete</button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

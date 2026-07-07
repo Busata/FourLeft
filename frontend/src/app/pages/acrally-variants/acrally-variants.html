@@ -1,0 +1,89 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">
+      Variants are the raw stage keys collected from results. Give each a display name and assign it
+      to a stage — the app resolves the key up to its stage and location.
+    </p>
+    <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
+      {{ collecting() ? 'Collecting…' : 'Collect from results' }}
+    </button>
+  </div>
+
+  @if (collectMessage()) {
+    <p class="auth-sub">{{ collectMessage() }}</p>
+  }
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (variants().length === 0) {
+    <p class="auth-sub">No variants catalogued yet. Hit “Collect from results” to gather them.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Raw key</th>
+            <th>Display name</th>
+            <th>Stage</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (variant of variants(); track variant.id) {
+            <tr>
+              <td>{{ variant.rawName }}</td>
+              @if (editingId() === variant.id) {
+                <td>
+                  <input
+                    type="text"
+                    placeholder="Readable name"
+                    [ngModel]="editDisplayName()"
+                    (ngModelChange)="editDisplayName.set($event)"
+                  />
+                </td>
+                <td>
+                  <select [ngModel]="editStageId()" (ngModelChange)="editStageId.set($event)">
+                    <option value="">Unassigned</option>
+                    @for (stage of stages(); track stage.id) {
+                      <option [value]="stage.id">{{ stageLabel(stage) }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(variant)" [disabled]="busy()">Save</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>
+                  @if (variant.displayName) {
+                    {{ variant.displayName }}
+                  } @else {
+                    <span class="dash-sub">Not set</span>
+                  }
+                </td>
+                <td>
+                  @if (variant.stageName) {
+                    {{ variant.locationName ? variant.locationName + ' — ' : '' }}{{ variant.stageName }}
+                  } @else {
+                    <span class="dash-sub">Unassigned</span>
+                  }
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(variant)">Edit</button>
+                    <button class="g-button g-button-danger" type="button" (click)="remove(variant)" [disabled]="busy()">Delete</button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

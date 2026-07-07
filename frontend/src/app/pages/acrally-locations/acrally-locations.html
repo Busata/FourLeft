@@ -1,0 +1,86 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">Rally locations (Greece, Monte Carlo, …) and their nation.</p>
+    <button class="g-button g-button-primary" type="button" (click)="toggleCreate()">
+      {{ creating() ? 'Cancel' : 'Add location' }}
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (creating()) {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" maxlength="200" [ngModel]="newName()" (ngModelChange)="newName.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Nation</label>
+        <input type="text" maxlength="120" [ngModel]="newNation()" (ngModelChange)="newNation.set($event)" />
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="create()" [disabled]="busy()">Create</button>
+    </section>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (locations().length === 0) {
+    <p class="auth-sub">No locations yet. Add the first one.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Nation</th>
+            <th>Stages</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (location of locations(); track location.id) {
+            <tr>
+              @if (editingId() === location.id) {
+                <td><input type="text" maxlength="200" [ngModel]="editName()" (ngModelChange)="editName.set($event)" /></td>
+                <td><input type="text" maxlength="120" [ngModel]="editNation()" (ngModelChange)="editNation.set($event)" /></td>
+                <td>{{ location.stageCount }}</td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(location)" [disabled]="busy()">Save</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>{{ location.name }}</td>
+                <td>
+                  @if (location.nation) {
+                    {{ location.nation }}
+                  } @else {
+                    <span class="dash-sub">—</span>
+                  }
+                </td>
+                <td>{{ location.stageCount }}</td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(location)">Edit</button>
+                    <button
+                      class="g-button g-button-danger"
+                      type="button"
+                      (click)="remove(location)"
+                      [disabled]="busy() || location.stageCount > 0"
+                      [title]="location.stageCount > 0 ? 'Remove its stages first' : 'Delete location'"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
