@@ -57,8 +57,8 @@
 .event-card {
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
   background: var(--surface);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
@@ -92,8 +92,8 @@
 }
 
 .event-section {
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
@@ -105,12 +105,26 @@
   min-height: 32px;
 }
 
+// Eyebrow label anchoring each block (Stages / Allowed cars / Leaderboard). The accent dot and
+// stronger colour give every section a clear start so they stop blending into one another.
 .event-section__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
+
+  &::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
 }
 
 .event-empty {
@@ -120,11 +134,26 @@
 }
 
 // ---- Leaderboard ----
+// The open board sits in its own inset so the results read as a distinct module rather than
+// spilling out of the car chips above it.
+.board-wrap {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+}
+
 .board__caption {
   margin: 12px 0 4px;
   font-weight: 600;
   font-size: 13px;
   color: var(--text);
+
+  // The board's first caption shouldn't add space on top of the inset's own padding.
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .board {

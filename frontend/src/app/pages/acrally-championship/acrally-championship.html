@@ -190,6 +190,7 @@
               </button>
             </div>
             @if (isBoardOpen(event.id)) {
+              <div class="board-wrap">
               @if (isBoardLoading(event.id)) {
                 <p class="event-empty">Loading…</p>
               } @else if (board(event.id); as b) {
@@ -245,6 +246,7 @@
               } @else {
                 <p class="event-empty">Couldn’t load the leaderboard.</p>
               }
+              </div>
             }
           </div>
         </div>
