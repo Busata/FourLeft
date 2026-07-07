@@ -85,3 +85,21 @@ export interface MyResultTo {
   totalMs: number;
   recordedAt: string;
 }
+
+export interface ClubTo {
+  id: string;
+  name: string;
+  description: string | null;
+  socialLink: string | null;
+  createdByDisplayName: string | null;
+  memberCount: number;
+  member: boolean;
+  owner: boolean;
+  createdAt: string;
+}
+
+export interface CreateClubRequestTo {
+  name: string;
+  description: string;
+  socialLink: string;
+}
