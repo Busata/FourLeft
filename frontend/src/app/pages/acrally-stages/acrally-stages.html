@@ -1,0 +1,76 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">
+      Stage names collected from results. Give each a readable name — it's used to display the
+      stage across the app.
+    </p>
+    <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
+      {{ collecting() ? 'Collecting…' : 'Collect from results' }}
+    </button>
+  </div>
+
+  @if (collectMessage()) {
+    <p class="auth-sub">{{ collectMessage() }}</p>
+  }
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (stages().length === 0) {
+    <p class="auth-sub">No stages catalogued yet. Hit “Collect from results” to gather them.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Raw name</th>
+            <th>Display name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (stage of stages(); track stage.id) {
+            <tr>
+              <td>{{ stage.rawName }}</td>
+              @if (editingId() === stage.id) {
+                <td>
+                  <input
+                    type="text"
+                    [ngModel]="draft()"
+                    (ngModelChange)="draft.set($event)"
+                    placeholder="Readable name"
+                    (keyup.enter)="save(stage)"
+                    (keyup.escape)="cancelEdit()"
+                  />
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(stage)" [disabled]="saving()">
+                      Save
+                    </button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>
+                  @if (stage.displayName) {
+                    {{ stage.displayName }}
+                  } @else {
+                    <span class="dash-sub">Not set</span>
+                  }
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(stage)">Rename</button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

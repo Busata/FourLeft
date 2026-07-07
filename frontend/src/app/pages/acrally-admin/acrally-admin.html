@@ -1,0 +1,9 @@
+<div class="acr-admin">
+  <nav class="acr-subtabs">
+    @for (tab of tabs; track tab.path) {
+      <a class="acr-subtab" [routerLink]="tab.path" routerLinkActive="acr-subtab--active">{{ tab.label }}</a>
+    }
+  </nav>
+
+  <router-outlet />
+</div>

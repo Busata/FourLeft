@@ -22,6 +22,21 @@ export interface AdminUserTo {
   createdAt: string;
 }
 
+// A catalogued stage, from GET /acrally-api/admin/stage-names. displayName is null until assigned.
+export interface StageNameTo {
+  id: string;
+  rawName: string;
+  displayName: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+// The outcome of POST /acrally-api/admin/stage-names/collect.
+export interface StageNameCollectResultTo {
+  added: number;
+  stages: StageNameTo[];
+}
+
 export interface LoginRequestTo {
   email: string;
   password: string;

@@ -20,7 +20,9 @@ import { AcrallyLink } from './pages/acrally-link/acrally-link';
 import { AcrallyDashboard } from './pages/acrally-dashboard/acrally-dashboard';
 import { AcrallyClubs } from './pages/acrally-clubs/acrally-clubs';
 import { AcrallyStats } from './pages/acrally-stats/acrally-stats';
+import { AcrallyAdmin } from './pages/acrally-admin/acrally-admin';
 import { AcrallyUsers } from './pages/acrally-users/acrally-users';
+import { AcrallyStages } from './pages/acrally-stages/acrally-stages';
 import { authGuard } from './services/auth-guard';
 import { adminGuard } from './services/admin-guard';
 
@@ -64,7 +66,18 @@ export const routes: Routes = [
           { path: 'clubs', component: AcrallyClubs, title: 'AC Rally — Clubs' },
           { path: 'stats', component: AcrallyStats, title: 'AC Rally — Personal stats' },
           { path: 'account', component: AcrallyAccount, title: 'AC Rally — Account' },
-          { path: 'users', component: AcrallyUsers, canActivate: [adminGuard], title: 'AC Rally — Users' },
+          {
+            path: 'admin',
+            component: AcrallyAdmin,
+            canActivate: [adminGuard],
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'users' },
+              { path: 'users', component: AcrallyUsers, title: 'AC Rally — Users' },
+              { path: 'stages', component: AcrallyStages, title: 'AC Rally — Stages' },
+            ],
+          },
+          // Old admin URL (bookmarks) → the admin section's Users tab.
+          { path: 'users', pathMatch: 'full', redirectTo: 'admin/users' },
         ],
       },
       // Old standalone account URL (Steam link return path, bookmarks) → the account tab.

@@ -1,0 +1,38 @@
+// Second-level sub-tab strip for the AC Rally admin section — a lighter treatment than the
+// primary dashboard tabs (pill style) so the two levels read as distinct. Mobile-first: the
+// strip scrolls horizontally instead of wrapping.
+.acr-admin {
+  .acr-subtabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .acr-subtab {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    transition: color 0.12s, border-color 0.12s, background-color 0.12s;
+
+    &:hover {
+      color: var(--ink);
+    }
+    &--active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  }
+}
