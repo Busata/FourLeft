@@ -44,8 +44,10 @@ public class SessionIngestService {
     @Transactional
     public void recordResult(UUID userId, String rawSessionId, IngestPayloads.Result p) {
         AgentSession session = ownedSession(userId, rawSessionId);
-        // De-dupe by the save-file tick: retries re-deliver the same result (contract §Delivery).
-        if (results.findByUserIdAndTimestampTicks(userId, p.timestampTicks()).isEmpty()) {
+        // De-dupe by save-file tick + total: retries re-deliver the same result (contract
+        // §Delivery), but the tick alone is shared by every run of one event entry — a second
+        // run of the same event arrives with the same tick and different times, and is NOT a dupe.
+        if (results.findByUserIdAndTimestampTicksAndTotalMs(userId, p.timestampTicks(), p.totalMs()).isEmpty()) {
             try {
                 StageResult saved = results.save(new StageResult(
                         session.getId(), userId, p.stage(), p.car(), p.driver(),

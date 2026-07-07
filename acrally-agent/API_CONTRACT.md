@@ -32,12 +32,17 @@ A session is opened when the agent detects the car moving on a stage.
 
 **Results are decoupled from the session lifecycle.** The agent watches the
 game's save file continuously and posts *every* record that appears while it is
-running (newer than the newest record at agent startup, de-duped by
-`timestamp_ticks`). Each result is attached to the most plausible session: the
-oldest finished session still waiting for its record, else the currently live
-session, else the most recently opened one. Live-session detection is heuristic
-(a glitchy shared-memory timer), so this attachment is best-effort — the result
-payload itself is always authoritative.
+running, plus — on launch — records that landed while it was closed (everything
+newer than the last successfully delivered record, whose identity is persisted
+locally). Novelty is judged on `timestamp_ticks` **and** the times together:
+the tick is stamped when the player *enters* an event and the game overwrites
+that event's single record slot on each completed run, so a second run of the
+same event arrives with the same tick and different times. Each result is
+attached to the most plausible session: the oldest finished session still
+waiting for its record, else the currently live session, else the most recently
+opened one, else a fresh recovery session opened just for it (empty `driver`).
+Live-session detection is heuristic (a glitchy shared-memory timer), so this
+attachment is best-effort — the result payload itself is always authoritative.
 
 Sessions still end with an abort when no result is expected. Reasons the agent
 sends:
@@ -50,8 +55,8 @@ sends:
   this same session id.
 
 Consequently a server must accept a result for a session it already saw
-complete or abort (storing it and de-duping by `timestamp_ticks`); see
-*Delivery guarantees* below.
+complete or abort (storing it and de-duping by `(timestamp_ticks, total_ms)`);
+see *Delivery guarantees* below.
 
 ---
 
@@ -116,8 +121,8 @@ Sent when a new record is read from the game's save file. This is the payload
 that matters for leaderboards. The `{id}` is the agent's best attribution (see
 *Session lifecycle*); it may belong to a session that already received a result
 or an abort, and the same session id can receive more than one result when
-run-detection missed a start — de-dupe on `timestamp_ticks`, not on session
-state.
+run-detection missed a start — de-dupe on `(timestamp_ticks, total_ms)`, not
+on session state.
 
 Request body (`ResultPayload`):
 
@@ -129,7 +134,7 @@ Request body (`ResultPayload`):
 | `raw_ms`          | integer (u32) | yes      | Raw stage time, ms                                          |
 | `penalty_ms`      | integer (u32) | yes      | Penalty time, ms                                            |
 | `total_ms`        | integer (u32) | yes      | Penalised total (`raw_ms + penalty_ms`), ms                 |
-| `timestamp_ticks` | integer (i64) | yes      | Save-file timestamp in .NET ticks — **stable de-dupe key**  |
+| `timestamp_ticks` | integer (i64) | yes      | Save-file event-entry timestamp in .NET ticks — de-dupe key **together with `total_ms`** (runs of one event share the tick) |
 | `agent_version`   | string        | yes      | Agent version                                               |
 
 Response: any 2xx; body ignored (dev server returns `{ "ok": true }`).
@@ -158,10 +163,15 @@ above). Response: any 2xx.
 
 1. **Results are best-effort with bounded retries.** A result is sent up to 3
    times in a row while the agent is running, then dropped. There is no
-   on-disk spool and no replay after an agent restart: what the server didn't
-   receive during the run is gone. Retries mean the same result can still
-   arrive more than once, so **de-duplicate by `timestamp_ticks`** (the dev
-   server does exactly this).
+   on-disk spool of result payloads. The agent does persist the *identity*
+   (tick + times) of the last delivered record, and on launch re-reads the
+   game's save and posts anything newer — so a result missed while the agent
+   was closed, or whose delivery failed, is usually recovered from the save
+   itself on the next start (the save keeps only the ~10 most recent event
+   entries, one slot each, so this recovery is bounded and can still miss
+   overwritten runs). Retries and recovery mean the same result can arrive
+   more than once, so **de-duplicate by `(timestamp_ticks, total_ms)`** —
+   the tick alone is shared by every run of one event entry.
 2. **Unknown session ids may appear.** When `/sessions` failed, the result of
    that run arrives under an agent-generated `local-<ns>` id. Whether to
    accept those is server policy: rejecting closes a forgery avenue, accepting

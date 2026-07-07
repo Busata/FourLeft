@@ -36,9 +36,14 @@ with the WRC backend. Full design rationale lives in `docs/acrally-module-plan.m
 
 ## Auth model (three principals — do not conflate)
 
-1. **Browser = cookie session** (not JWT). `HttpOnly` session cookie, same-origin behind the
-   proxy. CSRF via `XSRF-TOKEN` cookie ↔ `X-XSRF-TOKEN` header (Angular's standard setup,
-   plain non-XOR handler). Instantly revocable server-side — critical for banning abusers.
+1. **Browser = cookie session** (not JWT), established exclusively by **Steam OpenID sign-in**
+   (`SteamAuthEndpoint`) — no email/password since 2026-07 (V018 dropped `password_hash`; `email`
+   is an optional contact field). First sign-in auto-provisions the account (`SteamSignInService`,
+   display name from the Steam persona, editable via `POST /account/display-name`). `HttpOnly`
+   session cookie, same-origin behind the proxy. CSRF via `XSRF-TOKEN` cookie ↔ `X-XSRF-TOKEN`
+   header (Angular's standard setup, plain non-XOR handler). Login-CSRF on the Steam round-trip is
+   covered by single-use `ACR_STEAM_NONCE`/`ACR_STEAM_REDIRECT` cookies. Instantly revocable
+   server-side — critical for banning abusers.
 2. **Agent = personal API key** — opaque `acr_`-prefixed bearer token, stored **SHA-256 hashed**,
    shown once. Sent as `Authorization: Bearer <key>` on `/sessions/**`. Handled by
    `ApiKeyAuthFilter` → `AgentPrincipal` (rejects revoked key / banned user). CSRF-exempt.
@@ -46,7 +51,7 @@ with the WRC backend. Full design rationale lives in `docs/acrally-module-plan.m
 3. **Admin** — a session with `ROLE_ADMIN`. Guards everything under `/acrally-api/admin/**`.
 
 Route auth is declared in `infrastructure/security/SecurityConfig.java`:
-- Public: `/health`, `POST /auth/register`, `POST /auth/login`, `POST /agent/pair/{start,token}`.
+- Public: `/health`, `GET /auth/steam/{start,return}`, `POST /agent/pair/{start,token}`.
 - Admin-only: `/admin/**`.
 - Everything else: authenticated session.
 - Watch out: the `.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()` line is load-bearing
@@ -58,12 +63,13 @@ submitting results. `linked_identity` has unique `(provider, provider_user_id)` 
 
 ## Endpoint surface (all under `/acrally-api`)
 
-- `auth/` — register, login, logout, me; `auth/steam/{start,return}` (OpenID 2.0 link flow).
-- `account/` — identities, steam profile, API keys (`keys`, `keys/{id}/revoke`).
+- `auth/` — logout, me; `auth/steam/{start,return}` (OpenID 2.0 sign-in, auto-provisions accounts).
+- `account/` — identities, steam profile, `display-name`, API keys (`keys`, `keys/{id}/revoke`).
 - `agent/pair/` — `start`, `token` (agent-side); `lookup`, `approve`, `deny` (browser-side).
 - `sessions/` — agent ingestion: create, `{id}/heartbeat`, `{id}/result`, `{id}/abort`.
   Server issues UUID ids; `local-*`/unknown/other-user ids → 404. De-dupe on
-  `(user_id, timestamp_ticks)`.
+  `(user_id, timestamp_ticks, total_ms)` — the tick is stamped at event entry and shared by
+  every run of that event (the game overwrites the event's save slot per run).
 - `me/` — `sessions`, `results` (personal dashboard, scoped to `user_id`).
 - `clubs/` — list, `mine`, create, `{id}/join`, `{id}/leave`.
 - championships — `clubs/{clubId}/championships`, `championships/{id}` (+ `events`, `events/order`),

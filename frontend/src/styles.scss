@@ -384,6 +384,45 @@ form .g-button + .g-button {
   margin-top: 18px;
 }
 
+/* Inline display-name editor: scaled to the definition-list row it sits in,
+   not the full-size form controls (44px targets would dwarf the 13px labels). */
+.account-name-change {
+  margin-left: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.account-name-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+
+  input {
+    flex: 1 1 140px;
+    min-width: 0;
+    width: auto;
+    min-height: 34px;
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+
+  .g-button {
+    min-height: 34px;
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+}
+
 .steam-profile {
   display: flex;
   gap: 14px;

@@ -16,15 +16,16 @@
       <dt>Display name</dt>
       <dd>
         @if (editingName()) {
-          <input class="account-name-input" [formControl]="nameControl" maxlength="60"
-                 (keydown.enter)="saveName()" (keydown.escape)="cancelEditName()" />
-          <button class="g-button g-button-primary" type="button" (click)="saveName()"
-                  [disabled]="savingName()">{{ savingName() ? 'Saving…' : 'Save' }}</button>
-          <button class="g-button g-button-secondary" type="button" (click)="cancelEditName()">Cancel</button>
+          <span class="account-name-edit">
+            <input [formControl]="nameControl" maxlength="60" autofocus
+                   (keydown.enter)="saveName()" (keydown.escape)="cancelEditName()" />
+            <button class="g-button g-button-primary" type="button" (click)="saveName()"
+                    [disabled]="savingName()">{{ savingName() ? 'Saving…' : 'Save' }}</button>
+            <button class="g-button g-button-secondary" type="button" (click)="cancelEditName()">Cancel</button>
+          </span>
         } @else {
           {{ u.displayName }}
-          <button class="g-button g-button-secondary account-name-edit" type="button"
-                  (click)="startEditName()">Change</button>
+          <button class="account-name-change" type="button" (click)="startEditName()">Change</button>
         }
       </dd>
       <dt>Status</dt>
@@ -88,14 +89,14 @@
 
     <section class="account-section">
       <h2 class="account-section__title">Agent keys</h2>
-      @if (keys().length === 0) {
+      @if (activeKeys().length === 0) {
         <p class="auth-sub">
           No agent keys yet. Start pairing in the app, then approve it here to connect your agent.
         </p>
       } @else {
         <ul class="key-list">
-          @for (k of keys(); track k.id) {
-            <li class="key-item" [class.key-item--revoked]="k.revoked">
+          @for (k of activeKeys(); track k.id) {
+            <li class="key-item">
               <div class="key-meta">
                 <span class="key-label">{{ k.label || 'Agent key' }}</span>
                 <span class="key-sub">

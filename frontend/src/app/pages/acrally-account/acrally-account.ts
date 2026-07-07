@@ -22,6 +22,8 @@ export class AcrallyAccount implements OnInit {
   readonly steam = computed(() => this.identities().find((i) => i.provider === 'STEAM') ?? null);
   readonly steamProfile = signal<SteamProfileTo | null>(null);
   readonly keys = signal<ApiKeyTo[]>([]);
+  // Revoked keys are dead weight on this page — only show what can still connect.
+  readonly activeKeys = computed(() => this.keys().filter((k) => !k.revoked));
   readonly agent = signal<AgentReleaseTo | null>(null);
 
   readonly notice = signal('');

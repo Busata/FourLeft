@@ -10,7 +10,12 @@ import java.util.UUID;
 
 public interface StageResultRepository extends JpaRepository<StageResult, UUID> {
 
-    Optional<StageResult> findByUserIdAndTimestampTicks(UUID userId, long timestampTicks);
+    /**
+     * Idempotency lookup. The tick is stamped at *event entry* and shared by every run of that
+     * event (the game overwrites the event's save slot per run), so the total time is part of
+     * the key — ticks alone would swallow a second run of the same event as a "retry".
+     */
+    Optional<StageResult> findByUserIdAndTimestampTicksAndTotalMs(UUID userId, long timestampTicks, int totalMs);
 
     List<StageResult> findTop100ByUserIdOrderByCreatedAtDesc(UUID userId);
 

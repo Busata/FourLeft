@@ -10,11 +10,18 @@
 //! missed start or a mistimed finish can no longer lose a result, and a finished
 //! run's record is never abandoned because a new run began.
 //!
-//! Result resolution is content-based, never mtime-based: only a record with a
-//! timestamp newer than the newest one at agent startup (and newer than the last
-//! posted) is a result; a restart writes no record, so nothing fires. The save also
-//! carries non-record data (progress/career), so its mtime moves at times that have
-//! nothing to do with a result landing — an mtime gate would misfire on those.
+//! Result resolution is content-based, never mtime-based: a result is a newest
+//! record whose identity — timestamp *plus* times, see [`StageRecord::content_key`]
+//! — differs from the floor. The timestamp alone is not enough: the game keeps one
+//! record slot per event entry, stamped at event entry and overwritten by each
+//! completed run in that event, so a second run of the same event changes the times
+//! but not the timestamp. A restart writes no record, so nothing fires; the save
+//! also carries non-record data (progress/career), so its mtime moves at times that
+//! have nothing to do with a result landing — an mtime gate would misfire on those.
+//!
+//! The floor of the last posted record is persisted (`last_result` in the config
+//! dir) so records that land while the agent is closed are posted on the next
+//! launch, each attached to a fresh recovery session.
 
 use std::collections::VecDeque;
 use std::path::PathBuf;
@@ -24,7 +31,7 @@ use crate::config::Config;
 use crate::logfile::agent_log;
 use crate::model::{fmt_ms, parse_laptime_ms, Frame, Heartbeat, ResultPayload, SessionStart};
 use crate::savegame;
-use crate::savegame::StageRecord;
+use crate::savegame::{RecordKey, StageRecord};
 use crate::session::{SessionEvent, SessionMachine};
 use crate::status::{AgentStatus, StatusHandle};
 use crate::submit::Client;
@@ -48,52 +55,87 @@ struct AwaitingResult {
     deadline: Instant,
 }
 
-/// Content-based novelty gate over the save file: tracks what already existed at
-/// startup / has been posted (`floor_ticks`), and requires a new record to be
-/// sighted twice before it's trusted — a read racing the game's save write can
-/// see a half-written file.
+/// Content-based novelty gate over the save file: tracks the identity of the
+/// record that already existed at startup / was last posted (`floor`), and
+/// requires a new record to be sighted twice before it's trusted — a read racing
+/// the game's save write can see a half-written file. Keyed on the full
+/// [`RecordKey`], not just the timestamp: a second run of the same event
+/// overwrites the slot's times under an unchanged timestamp and must still post.
 struct SaveWatcher {
-    floor_ticks: i64,
-    candidate_ticks: Option<i64>,
+    floor: Option<RecordKey>,
+    candidate: Option<RecordKey>,
 }
 
 #[derive(Debug, PartialEq)]
 enum WatchDecision {
     Nothing,
     /// A new record was sighted once; re-read soon to confirm it.
-    Confirming(i64),
+    Confirming(RecordKey),
     /// The sighting was reproduced — post it.
     Post(StageRecord),
 }
 
 impl SaveWatcher {
-    fn new(floor_ticks: i64) -> Self {
+    fn new(floor: Option<RecordKey>) -> Self {
         SaveWatcher {
-            floor_ticks,
-            candidate_ticks: None,
+            floor,
+            candidate: None,
         }
+    }
+
+    fn floor_ticks(&self) -> i64 {
+        self.floor.map_or(0, |(ticks, _, _)| ticks)
     }
 
     fn observe(&mut self, newest: Option<StageRecord>) -> WatchDecision {
         let Some(rec) = newest else {
-            self.candidate_ticks = None;
+            self.candidate = None;
             return WatchDecision::Nothing;
         };
-        if rec.timestamp_ticks <= self.floor_ticks {
-            self.candidate_ticks = None;
+        let key = rec.content_key();
+        // Known content, or an older event entry resurfacing as "newest" (the
+        // game's bounded history evicted the floor record): not a new run.
+        if Some(key) == self.floor || rec.timestamp_ticks < self.floor_ticks() {
+            self.candidate = None;
             return WatchDecision::Nothing;
         }
-        if self.candidate_ticks == Some(rec.timestamp_ticks) {
+        if self.candidate == Some(key) {
             // Confirmed. Raise the floor now, before delivery: per the contract
             // results are never spooled, so a failed POST drops the record rather
-            // than retrying it forever.
-            self.candidate_ticks = None;
-            self.floor_ticks = rec.timestamp_ticks;
+            // than retrying it forever (a restart retries it via the persisted
+            // floor, which only advances on successful delivery).
+            self.candidate = None;
+            self.floor = Some(key);
             WatchDecision::Post(rec)
         } else {
-            self.candidate_ticks = Some(rec.timestamp_ticks);
-            WatchDecision::Confirming(rec.timestamp_ticks)
+            self.candidate = Some(key);
+            WatchDecision::Confirming(key)
         }
+    }
+}
+
+/// Where the last successfully posted record's identity is persisted, so runs
+/// that finish while the agent is closed are recovered on the next launch. This
+/// is a bookmark into the game's own save, not a spooled result (see the no-spool
+/// rationale in `submit.rs`): tampering with it can only cause records still in
+/// the save to be re-delivered, which the backend de-dupes.
+fn floor_path() -> PathBuf {
+    crate::config::config_dir().join("last_result")
+}
+
+fn load_floor() -> Option<RecordKey> {
+    let text = std::fs::read_to_string(floor_path()).ok()?;
+    let mut parts = text.split_whitespace();
+    let ticks = parts.next()?.parse().ok()?;
+    let raw_ms = parts.next()?.parse().ok()?;
+    let penalty_ms = parts.next()?.parse().ok()?;
+    Some((ticks, raw_ms, penalty_ms))
+}
+
+fn store_floor(key: RecordKey) {
+    let (ticks, raw_ms, penalty_ms) = key;
+    if let Err(e) = std::fs::write(floor_path(), format!("{ticks} {raw_ms} {penalty_ms}\n")) {
+        agent_log!("could not persist result floor: {e}");
     }
 }
 
@@ -133,21 +175,57 @@ impl Runner {
         }
         let session = SessionMachine::new(cfg.finish_frames());
         let client = Client::new(&cfg);
-        // Everything already in the save predates this agent run and must never
-        // be posted; only records newer than this floor are results.
-        let floor = newest_ticks(save_path.as_deref());
-        Runner {
+        // The watcher's floor starts at the newest record already on disk: within
+        // this process, only records that change past it are results. Records that
+        // landed while the agent was closed — everything between the persisted
+        // floor (last successful post) and that newest record — are recovered
+        // explicitly below. Without a persisted floor (first run) history is left
+        // alone: there is no way to tell a missed run from an ancient one.
+        let persisted = load_floor();
+        let newest = newest_key(save_path.as_deref());
+        let mut runner = Runner {
             cfg,
             session,
             client,
             save_path,
             active: None,
             awaiting: VecDeque::new(),
-            watcher: SaveWatcher::new(floor),
+            watcher: SaveWatcher::new(newest.or(persisted)),
             next_save_check: Instant::now(),
             last_session: None,
             last_heartbeat: None,
             status,
+        };
+        if let Some(floor) = persisted {
+            runner.recover_missed(floor);
+        }
+        runner
+    }
+
+    /// Post records that landed in the save while the agent was closed: everything
+    /// newer than the persisted floor, plus the floor event's slot if a later run
+    /// overwrote its times. Oldest first, each via [`Runner::post_record`], which
+    /// opens a recovery session when nothing else is live.
+    fn recover_missed(&mut self, floor: RecordKey) {
+        let Some(path) = self.save_path.as_deref() else {
+            return;
+        };
+        let Ok(bytes) = std::fs::read(path) else {
+            return;
+        };
+        let mut missed: Vec<StageRecord> = savegame::parse_records(&bytes)
+            .into_iter()
+            .filter(|r| r.timestamp_ticks >= floor.0 && r.content_key() != floor)
+            .collect();
+        missed.sort_by_key(|r| r.timestamp_ticks);
+        for rec in missed {
+            agent_log!(
+                "recovering record missed while the agent was closed (ticks {}, {} @ {})",
+                rec.timestamp_ticks,
+                rec.car,
+                rec.stage,
+            );
+            self.post_record(rec);
         }
     }
 
@@ -274,8 +352,11 @@ impl Runner {
 
         match self.watcher.observe(self.read_newest_record()) {
             WatchDecision::Nothing => {}
-            WatchDecision::Confirming(ticks) => {
-                agent_log!("new save record sighted (ticks {ticks}) — confirming");
+            WatchDecision::Confirming((ticks, raw_ms, penalty_ms)) => {
+                agent_log!(
+                    "new save record sighted (ticks {ticks}, total {}ms) — confirming",
+                    raw_ms + penalty_ms
+                );
                 // Confirm promptly even when otherwise idle.
                 self.next_save_check = now + self.cfg.save_check_interval();
             }
@@ -300,7 +381,9 @@ impl Runner {
 
     /// Post a confirmed new record, attached to the most plausible session:
     /// the oldest finished run still waiting for one, else the live session,
-    /// else the most recent session this process opened.
+    /// else the most recent session this process opened, else a fresh recovery
+    /// session — a record is never dropped for lack of a session (run-start
+    /// detection is heuristic and does miss runs).
     fn post_record(&mut self, rec: StageRecord) {
         let (id, driver) = if let Some(a) = self.awaiting.pop_front() {
             (a.id, a.driver)
@@ -310,11 +393,20 @@ impl Runner {
         } else if let Some((id, driver)) = &self.last_session {
             (id.clone(), driver.clone())
         } else {
+            let body = SessionStart {
+                driver: String::new(),
+                car: rec.car.clone(),
+                stage: rec.stage.clone(),
+                track: rec.stage.clone(),
+                started_at_ms: now_ms(),
+                agent_version: env!("CARGO_PKG_VERSION").to_string(),
+            };
+            let id = self.client.start_session(&body);
             agent_log!(
-                "save record (ticks {}) appeared but no session was ever opened — not submitting",
+                "no session to attach record (ticks {}) to — opened recovery session {id}",
                 rec.timestamp_ticks
             );
-            return;
+            (id, String::new())
         };
 
         let result = ResultPayload {
@@ -335,7 +427,13 @@ impl Runner {
             fmt_ms(result.raw_ms as i32),
             result.penalty_ms / 1000,
         );
+        let key = (result.timestamp_ticks, result.raw_ms, result.penalty_ms);
         let ok = self.client.post_result(&id, &result);
+        if ok {
+            // Only a delivered record advances the persisted floor — an
+            // undelivered one is retried by recovery on the next launch.
+            store_floor(key);
+        }
         self.set_status(|s| {
             s.backend_connected = ok;
             if ok {
@@ -353,13 +451,12 @@ impl Runner {
     }
 }
 
-/// The newest record's timestamp in the save at `path` — the startup floor.
-/// 0 when the save is missing/unreadable/recordless.
-fn newest_ticks(path: Option<&std::path::Path>) -> i64 {
+/// The newest record's identity in the save at `path` — the in-process startup
+/// floor. `None` when the save is missing/unreadable/recordless.
+fn newest_key(path: Option<&std::path::Path>) -> Option<RecordKey> {
     path.and_then(|p| std::fs::read(p).ok())
         .and_then(|bytes| savegame::newest_record(&bytes))
-        .map(|r| r.timestamp_ticks)
-        .unwrap_or(0)
+        .map(|r| r.content_key())
 }
 
 fn now_ms() -> u128 {
@@ -373,20 +470,28 @@ fn now_ms() -> u128 {
 mod tests {
     use super::*;
 
-    fn rec(ticks: i64) -> StageRecord {
+    fn timed(ticks: i64, raw_ms: u32) -> StageRecord {
         StageRecord {
             timestamp_ticks: ticks,
             stage: "S".into(),
             car: "C".into(),
-            raw_ms: 100_000,
+            raw_ms,
             penalty_ms: 0,
-            total_ms: 100_000,
+            total_ms: raw_ms,
         }
+    }
+
+    fn rec(ticks: i64) -> StageRecord {
+        timed(ticks, 100_000)
+    }
+
+    fn key(ticks: i64) -> RecordKey {
+        rec(ticks).content_key()
     }
 
     #[test]
     fn ignores_records_at_or_below_the_floor() {
-        let mut w = SaveWatcher::new(100);
+        let mut w = SaveWatcher::new(Some(key(100)));
         assert_eq!(w.observe(Some(rec(100))), WatchDecision::Nothing);
         assert_eq!(w.observe(Some(rec(50))), WatchDecision::Nothing);
         assert_eq!(w.observe(None), WatchDecision::Nothing);
@@ -394,8 +499,8 @@ mod tests {
 
     #[test]
     fn posts_after_a_confirming_second_sighting() {
-        let mut w = SaveWatcher::new(100);
-        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(200));
+        let mut w = SaveWatcher::new(Some(key(100)));
+        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(key(200)));
         assert_eq!(w.observe(Some(rec(200))), WatchDecision::Post(rec(200)));
         // Posted records raise the floor: re-reads go quiet.
         assert_eq!(w.observe(Some(rec(200))), WatchDecision::Nothing);
@@ -405,29 +510,54 @@ mod tests {
     fn a_changed_sighting_restarts_confirmation() {
         // A read racing the game's save write can see a half-written record;
         // only two identical consecutive sightings are trusted.
-        let mut w = SaveWatcher::new(100);
-        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(200));
-        assert_eq!(w.observe(Some(rec(201))), WatchDecision::Confirming(201));
+        let mut w = SaveWatcher::new(Some(key(100)));
+        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(key(200)));
+        assert_eq!(w.observe(Some(rec(201))), WatchDecision::Confirming(key(201)));
         assert_eq!(w.observe(Some(rec(201))), WatchDecision::Post(rec(201)));
     }
 
     #[test]
     fn an_unreadable_save_resets_the_candidate() {
-        let mut w = SaveWatcher::new(100);
-        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(200));
+        let mut w = SaveWatcher::new(Some(key(100)));
+        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(key(200)));
         assert_eq!(w.observe(None), WatchDecision::Nothing);
         // The sighting must be rebuilt from scratch.
-        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(200));
+        assert_eq!(w.observe(Some(rec(200))), WatchDecision::Confirming(key(200)));
         assert_eq!(w.observe(Some(rec(200))), WatchDecision::Post(rec(200)));
     }
 
     #[test]
     fn successive_runs_each_post_once() {
-        let mut w = SaveWatcher::new(0);
-        assert_eq!(w.observe(Some(rec(10))), WatchDecision::Confirming(10));
+        let mut w = SaveWatcher::new(None);
+        assert_eq!(w.observe(Some(rec(10))), WatchDecision::Confirming(key(10)));
         assert_eq!(w.observe(Some(rec(10))), WatchDecision::Post(rec(10)));
         assert_eq!(w.observe(Some(rec(10))), WatchDecision::Nothing);
-        assert_eq!(w.observe(Some(rec(20))), WatchDecision::Confirming(20));
+        assert_eq!(w.observe(Some(rec(20))), WatchDecision::Confirming(key(20)));
         assert_eq!(w.observe(Some(rec(20))), WatchDecision::Post(rec(20)));
+    }
+
+    #[test]
+    fn a_rerun_of_the_same_event_posts_despite_the_unchanged_timestamp() {
+        // The game keeps one slot per event entry and overwrites its times on
+        // each completed run — even a slower one (verified live 2026-07-07:
+        // 4:52.888 then 4:55.631 under the same ticks). Both must post.
+        let mut w = SaveWatcher::new(None);
+        assert!(matches!(w.observe(Some(timed(100, 292_888))), WatchDecision::Confirming(_)));
+        assert!(matches!(w.observe(Some(timed(100, 292_888))), WatchDecision::Post(_)));
+        let slower = timed(100, 295_631);
+        assert_eq!(
+            w.observe(Some(slower.clone())),
+            WatchDecision::Confirming(slower.content_key())
+        );
+        assert_eq!(w.observe(Some(slower.clone())), WatchDecision::Post(slower));
+    }
+
+    #[test]
+    fn an_older_record_resurfacing_after_eviction_stays_quiet() {
+        // The save keeps a bounded history; if the floor record is evicted the
+        // newest can be an older, already-known entry — never re-post it.
+        let mut w = SaveWatcher::new(Some(key(200)));
+        assert_eq!(w.observe(Some(rec(150))), WatchDecision::Nothing);
+        assert_eq!(w.observe(Some(rec(150))), WatchDecision::Nothing);
     }
 }

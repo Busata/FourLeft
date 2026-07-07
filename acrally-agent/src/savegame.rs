@@ -12,20 +12,39 @@
 //!   total   = raw + penalty                 (the official result)
 //!   stage, car = the two content strings immediately preceding
 //!
-//! The newest run is simply the record with the largest timestamp.
+//! Slot semantics (observed 2026-07-07 against live play): the save keeps a
+//! bounded history (~10 entries) with ONE record per *event entry*. The
+//! timestamp is stamped in UTC when the player enters the event — NOT when a
+//! run finishes — and each completed run in that event OVERWRITES the slot's
+//! times while keeping the timestamp. So the newest record is the record with
+//! the largest timestamp, but its times can change without the timestamp
+//! moving; see [`StageRecord::content_key`].
 
 use std::path::{Path, PathBuf};
 
 /// One completed stage record from the save file.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StageRecord {
-    /// .NET ticks (100 ns since 0001-01-01) — sortable; newest = largest.
+    /// .NET ticks (100 ns since 0001-01-01, UTC), stamped at *event entry* —
+    /// sortable; newest = largest. Two runs in the same event share this value.
     pub timestamp_ticks: i64,
     pub stage: String,
     pub car: String,
     pub raw_ms: u32,
     pub penalty_ms: u32,
     pub total_ms: u32,
+}
+
+/// A record's identity for novelty detection: (timestamp, raw, penalty).
+/// The timestamp alone can't distinguish two runs of the same event — the game
+/// overwrites the event's slot with each completed run's times — so the times
+/// are part of the identity.
+pub type RecordKey = (i64, u32, u32);
+
+impl StageRecord {
+    pub fn content_key(&self) -> RecordKey {
+        (self.timestamp_ticks, self.raw_ms, self.penalty_ms)
+    }
 }
 
 /// .NET ticks range for plausible recent save dates (~2000..2200).
