@@ -3,7 +3,7 @@
 
   <div class="dash-head">
     <div class="key-meta">
-      <span class="key-label" style="font-size: 18px">{{ club()?.name ?? 'Club' }}</span>
+      <span class="club-title">{{ club()?.name ?? 'Club' }}</span>
       @if (club()?.description) {
         <span class="key-sub">{{ club()?.description }}</span>
       }
@@ -37,7 +37,7 @@
   }
 
   <section class="account-section" style="border-top: none; padding-top: 0">
-    <h2 class="account-section__title">Championships</h2>
+    <h2 class="champ-eyebrow">Championships</h2>
     @if (!loaded()) {
       <p class="auth-sub">Loading…</p>
     } @else if (championships().length === 0) {
@@ -49,23 +49,23 @@
         }
       </p>
     } @else {
-      <ul class="key-list">
+      <ul class="champ-list">
         @for (c of championships(); track c.id) {
-          <li class="key-item">
-            <div class="key-meta">
-              <a class="key-label title-link" [routerLink]="['championships', c.id]">{{ c.name }}</a>
-              <span class="key-sub">
-                Starts {{ c.startsAt | date: 'MMM d, y · HH:mm' }} ·
-                {{ c.eventCount }} {{ c.eventCount === 1 ? 'event' : 'events' }}
+          <li>
+            <a class="champ-card" [routerLink]="['championships', c.id]">
+              <span class="champ-card__body">
+                <span class="champ-card__name">{{ c.name }}</span>
+                <span class="key-sub">
+                  Starts {{ c.startsAt | date: 'MMM d, y · HH:mm' }} ·
+                  {{ c.eventCount }} {{ c.eventCount === 1 ? 'event' : 'events' }}
+                </span>
               </span>
-            </div>
-            <div class="club-actions">
               @if (c.status !== 'PUBLISHED') {
                 <span class="status-pill status-pill--draft">Draft</span>
               } @else {
                 <span class="status-pill status-pill--live">Published</span>
               }
-            </div>
+            </a>
           </li>
         }
       </ul>

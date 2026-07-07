@@ -1,0 +1,80 @@
+// Club detail: a clear three-level hierarchy — club title, a subordinate "Championships" eyebrow,
+// then each championship as its own clickable card so the individual entries stand out.
+
+.club-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+// Group label for the list below — deliberately small and quiet so it doesn't compete with the
+// club title above or the championship names below. Matches the section eyebrows on the
+// championship page (accent dot + uppercase).
+.champ-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+
+  &::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+}
+
+.champ-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Each championship is a card, and the whole card is the click target.
+.champ-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+
+  &:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+  }
+
+  &:hover .champ-card__name {
+    color: var(--accent);
+  }
+}
+
+.champ-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.champ-card__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: color 0.12s;
+}

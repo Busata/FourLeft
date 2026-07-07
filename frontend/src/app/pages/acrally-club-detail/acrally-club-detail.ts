@@ -14,6 +14,7 @@ import type { ChampionshipDetailTo, ChampionshipTo, ClubTo } from '../../models/
   selector: 'app-acrally-club-detail',
   imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './acrally-club-detail.html',
+  styleUrl: './acrally-club-detail.scss',
 })
 export class AcrallyClubDetail implements OnInit {
   private readonly http = inject(HttpClient);
