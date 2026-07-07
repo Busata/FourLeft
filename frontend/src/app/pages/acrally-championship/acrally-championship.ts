@@ -51,6 +51,8 @@ export class AcrallyChampionship implements OnInit {
 
   readonly owner = computed(() => this.detail()?.owner ?? false);
   readonly published = computed(() => this.detail()?.status === 'PUBLISHED');
+  /** Editing is locked once published — a published championship is read-only bar the unpublish. */
+  readonly canEdit = computed(() => this.owner() && !this.published());
 
   /** variantId → catalogue variant, for labelling the ordered selection. */
   private readonly variantById = computed(

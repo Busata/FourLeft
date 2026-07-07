@@ -24,12 +24,16 @@
         }
         @if (owner()) {
           <div class="club-actions">
-            <button class="g-button g-button-secondary" type="button" (click)="startEditMeta()">Edit</button>
+            @if (!published()) {
+              <button class="g-button g-button-secondary" type="button" (click)="startEditMeta()">Edit</button>
+            }
             <button class="g-button" [class.g-button-primary]="!published()" [class.g-button-secondary]="published()"
                     type="button" (click)="togglePublish()">
               {{ published() ? 'Unpublish' : 'Publish' }}
             </button>
-            <button class="g-button g-button-danger" type="button" (click)="deleteChampionship()">Delete</button>
+            @if (!published()) {
+              <button class="g-button g-button-danger" type="button" (click)="deleteChampionship()">Delete</button>
+            }
           </div>
         }
       </div>
@@ -63,14 +67,14 @@
     <section class="account-section" style="border-top: none; padding-top: 0">
       <div class="section-head">
         <h2 class="account-section__title" style="margin: 0">Events</h2>
-        @if (owner() && !addingEvent()) {
+        @if (canEdit() && !addingEvent()) {
           <button class="g-button g-button-primary" type="button" (click)="startAddEvent()">+ Add event</button>
         }
       </div>
 
       @if (d.events.length === 0 && !addingEvent()) {
         <p class="auth-sub" style="margin-top: 8px">
-          No events yet.@if (owner()) { Add the first round to build the calendar. }
+          No events yet.@if (canEdit()) { Add the first round to build the calendar. }
         </p>
       }
 
@@ -86,7 +90,7 @@
                 · {{ event.durationDays }}d open@if (event.gapDays > 0) { · +{{ event.gapDays }}d gap }
               </span>
             </div>
-            @if (owner()) {
+            @if (canEdit()) {
               <div class="club-actions">
                 <button class="g-button g-button-secondary mini" type="button" [disabled]="i === 0" (click)="moveEvent(event, -1)">↑</button>
                 <button class="g-button g-button-secondary mini" type="button" [disabled]="i === d.events.length - 1" (click)="moveEvent(event, 1)">↓</button>
@@ -96,7 +100,7 @@
             }
           </div>
 
-          @if (owner() && editingEventId() === event.id) {
+          @if (canEdit() && editingEventId() === event.id) {
             <div class="panel">
               <div class="form-row">
                 <div class="form-group form-group--num">
@@ -125,7 +129,7 @@
           <div class="event-section">
             <div class="event-section__head">
               <span class="event-section__title">Stages</span>
-              @if (owner() && editingVariantsEventId() !== event.id) {
+              @if (canEdit() && editingVariantsEventId() !== event.id) {
                 <button class="g-button g-button-secondary mini" type="button" (click)="startEditVariants(event)">Edit stages</button>
               }
             </div>
@@ -141,7 +145,7 @@
               </ol>
             }
 
-            @if (owner() && editingVariantsEventId() === event.id) {
+            @if (canEdit() && editingVariantsEventId() === event.id) {
               <div class="panel">
                 <ng-container [ngTemplateOutlet]="stagePicker" />
                 <div class="club-actions" style="margin-top: 12px">
@@ -156,7 +160,7 @@
           <div class="event-section">
             <div class="event-section__head">
               <span class="event-section__title">Allowed cars</span>
-              @if (owner() && editingCarsEventId() !== event.id) {
+              @if (canEdit() && editingCarsEventId() !== event.id) {
                 <button class="g-button g-button-secondary mini" type="button" (click)="startEditCars(event)">Edit cars</button>
               }
             </div>
@@ -170,7 +174,7 @@
               </div>
             }
 
-            @if (owner() && editingCarsEventId() === event.id) {
+            @if (canEdit() && editingCarsEventId() === event.id) {
               <div class="panel">
                 <ng-container [ngTemplateOutlet]="carPicker" />
                 <div class="club-actions" style="margin-top: 12px">
@@ -253,7 +257,7 @@
       }
 
       <!-- Add event -->
-      @if (owner() && addingEvent()) {
+      @if (canEdit() && addingEvent()) {
         <div class="panel panel--add">
           <p class="panel__title">Add an event</p>
           <p class="auth-sub" style="margin: -6px 0 12px">
