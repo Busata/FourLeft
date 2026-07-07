@@ -26,8 +26,12 @@ const FINISH_SECS: f64 = 1.5;
 /// is content-based (a record newer than the run-start snapshot), so a long
 /// window can't mis-post old data.
 const SAVE_WAIT_SECS: f64 = 180.0;
-/// Pause between save-file reads while a finish is pending (full-file parse).
+/// Pause between save-file reads while a run is live or a finish is pending
+/// (full-file parse).
 const SAVE_CHECK_SECS: f64 = 0.5;
+/// Pause between save-file reads when nothing is driving — the watcher never
+/// stops, it just idles slower.
+const SAVE_IDLE_CHECK_SECS: f64 = 5.0;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
@@ -153,5 +157,9 @@ impl Config {
 
     pub fn save_check_interval(&self) -> Duration {
         Duration::from_secs_f64(SAVE_CHECK_SECS)
+    }
+
+    pub fn save_idle_check_interval(&self) -> Duration {
+        Duration::from_secs_f64(SAVE_IDLE_CHECK_SECS)
     }
 }

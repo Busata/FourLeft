@@ -12,6 +12,7 @@
 #![cfg_attr(feature = "ui", windows_subsystem = "windows")]
 
 mod config;
+mod logfile;
 mod model;
 mod pairing;
 mod runner;
@@ -85,6 +86,13 @@ fn main() -> Result<()> {
         check_save(&cfg);
         return Ok(());
     }
+
+    logfile::agent_log!(
+        "acrally-agent v{} starting — backend {} (log: {})",
+        env!("CARGO_PKG_VERSION"),
+        cfg.api_base,
+        logfile::path().display(),
+    );
 
     // Normal running goes to the tray UI. Console diagnostics (scan/dump) and an
     // explicit `headless` setting keep the original console loop.

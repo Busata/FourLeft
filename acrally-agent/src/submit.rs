@@ -14,6 +14,7 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::config::Config;
+use crate::logfile::agent_log;
 use crate::model::{Heartbeat, ResultPayload, SessionStart};
 
 /// In-process retries for a failed result POST (with a short pause between).
@@ -61,7 +62,7 @@ impl Client {
                 })
                 .unwrap_or_else(local_session_id),
             Err(e) => {
-                eprintln!("start_session failed ({e}); using local session id");
+                agent_log!("start_session failed ({e}); using local session id");
                 local_session_id()
             }
         }
@@ -82,7 +83,7 @@ impl Client {
         for attempt in 1..=RESULT_RETRIES {
             match self.req(&url).send_json(result) {
                 Ok(_) => {
-                    println!(
+                    agent_log!(
                         "result: {} @ {} ({}) total {} [raw {} + pen {}]",
                         result.car,
                         result.stage,
@@ -94,14 +95,14 @@ impl Client {
                     return true;
                 }
                 Err(e) => {
-                    eprintln!("result POST failed (attempt {attempt}/{RESULT_RETRIES}): {e}");
+                    agent_log!("result POST failed (attempt {attempt}/{RESULT_RETRIES}): {e}");
                     if attempt < RESULT_RETRIES {
                         std::thread::sleep(RESULT_RETRY_PAUSE);
                     }
                 }
             }
         }
-        eprintln!(
+        agent_log!(
             "result for session {session_id} could not be delivered — dropped ({} @ {}, total {})",
             result.car,
             result.stage,

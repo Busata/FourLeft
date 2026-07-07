@@ -99,6 +99,7 @@ Build/sign/release steps are in [`DISTRIBUTION.md`](DISTRIBUTION.md).
 | File | Role |
 |---|---|
 | `telemetry.rs` | `TelemetrySource` trait + `MockSource` (scripted, runs anywhere) |
+| `logfile.rs` | Persistent `agent.log` (config dir) — every pipeline event, timestamped |
 | `shm.rs` | Windows-only reader of the classic `acpmf_*` shared memory |
 | `session.rs` | Session state machine: Start / Progress / Restart / Finish |
 | `savegame.rs` | Locate + parse `PlayerDataSaveSlot.sav` (penalised records) |
@@ -125,6 +126,13 @@ Verbose heartbeat (confirm the game is being read while you drive):
 ```powershell
 $env:ACRALLY_VERBOSE=1; cargo run --features shm
 ```
+
+Every pipeline event (session started / restart / finish, save-record sightings,
+aborts with their reason, result POSTs, telemetry stale/resumed) is also appended
+to **`%LOCALAPPDATA%\acrally\agent.log`** with a UTC timestamp — the windowless
+GUI build has no console, so when a run doesn't show up on the leaderboard this
+file is the place to see what the agent actually observed. It's rotated to
+`agent.log.old` at startup once it passes ~1 MB.
 
 ## Tray UI
 

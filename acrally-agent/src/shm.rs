@@ -18,6 +18,7 @@
 
 use win_shared_memory::SharedMemoryLink;
 
+use crate::logfile::agent_log;
 use crate::model::{scan_report, utf16_to_string, Frame, SimStatus};
 use crate::telemetry::TelemetrySource;
 
@@ -128,6 +129,7 @@ impl ShmSource {
             SharedMemoryLink::<AcStatic>::open(STATIC),
         ) {
             (Ok(physics), Ok(graphics), Ok(statics)) => {
+                agent_log!("shared memory opened — game telemetry available");
                 self.links = Some(Links {
                     physics,
                     graphics,
@@ -162,9 +164,18 @@ impl TelemetrySource for ShmSource {
         if packets == self.last_packets {
             self.stale_polls = self.stale_polls.saturating_add(1);
             if self.stale_polls >= STALE_POLLS {
+                // Log the moment telemetry goes stale (once, on the threshold
+                // crossing) — whether a gap was seen between two runs is exactly
+                // what a missed-run investigation needs to know.
+                if self.stale_polls == STALE_POLLS {
+                    agent_log!("telemetry stale — game stopped publishing (menus/result screen/exit)");
+                }
                 return None;
             }
         } else {
+            if self.stale_polls >= STALE_POLLS {
+                agent_log!("telemetry resumed — game is publishing again");
+            }
             self.last_packets = packets;
             self.stale_polls = 0;
         }

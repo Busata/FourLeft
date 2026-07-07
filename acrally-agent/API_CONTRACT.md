@@ -28,19 +28,30 @@ stage finishes        POST /sessions/{id}/result      (authoritative, penalised 
 run abandoned         POST /sessions/{id}/abort       { "reason": "..." }
 ```
 
-A session is opened when the agent detects the car moving on a stage. It ends
-in exactly one of two ways:
+A session is opened when the agent detects the car moving on a stage.
 
-- **result** — the stage was completed and the penalised time was read from the
-  game's save file, or
-- **abort** — the run ended without a usable result. Reasons the agent sends:
-  - `"restart"` — the driver restarted the stage mid-run,
-  - `"superseded"` — a new run started while the previous session was still open,
-  - `"no-result"` — the stage finished but the save file never produced a
-    result within the save-wait window (20 s).
+**Results are decoupled from the session lifecycle.** The agent watches the
+game's save file continuously and posts *every* record that appears while it is
+running (newer than the newest record at agent startup, de-duped by
+`timestamp_ticks`). Each result is attached to the most plausible session: the
+oldest finished session still waiting for its record, else the currently live
+session, else the most recently opened one. Live-session detection is heuristic
+(a glitchy shared-memory timer), so this attachment is best-effort — the result
+payload itself is always authoritative.
 
-A session receives **at most one** of result/abort from the live flow, but see
-*Delivery guarantees* below for result redelivery.
+Sessions still end with an abort when no result is expected. Reasons the agent
+sends:
+
+- `"restart"` — the driver restarted the stage mid-run,
+- `"superseded"` — a new run started while the previous session was still open,
+- `"no-result"` — the stage finished but no save record appeared within the
+  save-wait window (3 minutes). This is bookkeeping, not a verdict: the watcher
+  keeps running, and a record that lands later is still posted — possibly to
+  this same session id.
+
+Consequently a server must accept a result for a session it already saw
+complete or abort (storing it and de-duping by `timestamp_ticks`); see
+*Delivery guarantees* below.
 
 ---
 
@@ -101,8 +112,12 @@ Response: any 2xx; body ignored (dev server returns `{ "ok": true }`).
 
 ### 3. `POST /sessions/{id}/result` — authoritative result
 
-Sent once when the stage completes and the result has been read from the game's
-save file. This is the payload that matters for leaderboards.
+Sent when a new record is read from the game's save file. This is the payload
+that matters for leaderboards. The `{id}` is the agent's best attribution (see
+*Session lifecycle*); it may belong to a session that already received a result
+or an abort, and the same session id can receive more than one result when
+run-detection missed a start — de-dupe on `timestamp_ticks`, not on session
+state.
 
 Request body (`ResultPayload`):
 
@@ -186,5 +201,7 @@ POST /sessions/srv-7/result
 | `api_base`       | `https://fourleft.io/acrally-api`| Base URL all endpoint paths are appended to |
 | `api_key`        | unset                            | Enables `Authorization: Bearer` header      |
 
-The heartbeat interval (1s) and the post-finish save-wait (20s, after which the
-session aborts with `"no-result"`) are fixed internal timings, not configurable.
+The heartbeat interval (1s), the save-poll cadence (0.5s while driving or
+awaiting a record, 5s idle) and the post-finish save-wait (3 minutes, after
+which the session aborts with `"no-result"` while the watcher keeps running)
+are fixed internal timings, not configurable.
