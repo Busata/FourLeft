@@ -15,7 +15,7 @@ export class AcrallyLogin implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   // Where to go after sign-in — used by the device-pairing link to return to approval.
-  private readonly redirect = this.route.snapshot.queryParamMap.get('redirect') || '/acrally/account';
+  private readonly redirect = this.route.snapshot.queryParamMap.get('redirect') || '/acrally/dashboard';
 
   readonly error = signal('');
   readonly submitting = signal(false);

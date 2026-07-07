@@ -26,9 +26,9 @@ acrally:
   # proxy on the public host; local dev talks to the backend port directly (override).
   public-base-url: https://fourleft.io
   steam:
-    # Where the browser lands after the Steam round-trip (frontend routes, Phase 3).
-    success-path: /acrally/account
-    failure-path: /acrally/account
+    # Where the browser lands after the Steam round-trip (the account tab of the dashboard).
+    success-path: /acrally/dashboard/account
+    failure-path: /acrally/dashboard/account
     # Steam Web API key (steamcommunity.com/dev/apikey). Prod supplies it via the config
     # server; blank here means the profile fetch is skipped (linking still works).
     web-api-key: ""

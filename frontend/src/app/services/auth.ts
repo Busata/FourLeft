@@ -20,6 +20,7 @@ export class AuthService {
   readonly currentUser = this.user.asReadonly();
   readonly resolved = computed(() => this.user() !== undefined);
   readonly isAuthenticated = computed(() => !!this.user());
+  readonly isAdmin = computed(() => !!this.user()?.admin);
 
   /** Resolves current session; also primes the XSRF cookie for later POSTs. */
   loadMe(): Observable<AuthUserTo | null> {

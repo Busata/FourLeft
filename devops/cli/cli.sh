@@ -11,7 +11,8 @@ TIME_TRIALS="Time trial actions"
 CHANNEL="Channel configuration actions"
 CLUB_EXPORT="Club export actions"
 RELEASE_AGENT="Release AC Rally agent"
-TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT" "$RELEASE_AGENT")
+ACRALLY_ADMIN="AC Rally - manage admins"
+TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT" "$RELEASE_AGENT" "$ACRALLY_ADMIN")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -40,6 +41,9 @@ if [ -n "$selected_option_index" ]; then
             ;;
         8)
           . "$FOURLEFT_DEVOPS_ROOT"/cli/release-agent.sh
+            ;;
+        9)
+          . "$FOURLEFT_DEVOPS_ROOT"/cli/admin.sh
             ;;
         *)
             echo "Invalid selection or cancelled."

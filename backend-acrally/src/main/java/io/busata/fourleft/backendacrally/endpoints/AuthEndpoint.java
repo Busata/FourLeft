@@ -100,10 +100,10 @@ public class AuthEndpoint {
     }
 
     private AuthUserTo toAuthUser(AppUser user) {
-        return new AuthUserTo(user.getId(), user.getEmail(), user.getDisplayName(), user.getStatus().name());
+        return new AuthUserTo(user.getId(), user.getEmail(), user.getDisplayName(), user.getStatus().name(), user.isAdmin());
     }
 
     private AuthUserTo toAuthUser(AppUserDetails principal) {
-        return new AuthUserTo(principal.getId(), principal.getEmail(), principal.getDisplayName(), principal.getStatus());
+        return new AuthUserTo(principal.getId(), principal.getEmail(), principal.getDisplayName(), principal.getStatus(), principal.isAdmin());
     }
 }

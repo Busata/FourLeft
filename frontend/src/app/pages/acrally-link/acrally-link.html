@@ -40,12 +40,12 @@
 
     @case ('needs-steam') {
       <p class="auth-error">Link your Steam account before authorizing a device.</p>
-      <a class="g-button g-button-secondary" routerLink="/acrally/account">Go to account</a>
+      <a class="g-button g-button-secondary" routerLink="/acrally/dashboard/account">Go to account</a>
     }
 
     @case ('error') {
       <p class="auth-error">{{ error() }}</p>
-      <a class="g-button g-button-secondary" routerLink="/acrally/account">Back to account</a>
+      <a class="g-button g-button-secondary" routerLink="/acrally/dashboard/account">Back to account</a>
     }
   }
 </div>

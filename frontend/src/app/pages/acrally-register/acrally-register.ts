@@ -26,7 +26,7 @@ export class AcrallyRegister implements OnInit {
     // Prime session/XSRF; a signed-in user has no business on the register page.
     this.auth.loadMe().subscribe(() => {
       if (this.auth.isAuthenticated()) {
-        this.router.navigateByUrl('/acrally/account');
+        this.router.navigateByUrl('/acrally/dashboard');
       }
     });
   }
@@ -38,7 +38,7 @@ export class AcrallyRegister implements OnInit {
     this.error.set('');
     this.submitting.set(true);
     this.auth.register(this.form.getRawValue()).subscribe({
-      next: () => this.router.navigateByUrl('/acrally/account'),
+      next: () => this.router.navigateByUrl('/acrally/dashboard'),
       error: (err) => {
         if (err.status === 409) {
           this.error.set('That email or display name is already taken.');

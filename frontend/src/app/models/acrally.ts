@@ -9,6 +9,17 @@ export interface AuthUserTo {
   email: string;
   displayName: string;
   status: string;
+  admin: boolean;
+}
+
+// Admin-only view of a user, from GET /acrally-api/admin/users.
+export interface AdminUserTo {
+  id: string;
+  email: string;
+  displayName: string;
+  status: string;
+  admin: boolean;
+  createdAt: string;
 }
 
 export interface LoginRequestTo {

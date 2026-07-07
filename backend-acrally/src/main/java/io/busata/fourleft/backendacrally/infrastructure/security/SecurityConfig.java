@@ -74,6 +74,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/acrally-api/auth/register", "/acrally-api/auth/login").permitAll()
                         // Agent device-pairing handshake: no session, authenticated by the device_code itself.
                         .requestMatchers(HttpMethod.POST, "/acrally-api/agent/pair/start", "/acrally-api/agent/pair/token").permitAll()
+                        // Administration surface: only ROLE_ADMIN principals. A non-admin session hits 403.
+                        .requestMatchers("/acrally-api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // REST semantics: unauthenticated access to a guarded route is 401, not a redirect.
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));

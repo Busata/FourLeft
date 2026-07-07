@@ -1,0 +1,36 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">All AC Rally users.</p>
+    @if (loaded() && !error()) {
+      <span class="key-sub">{{ users().length }} total · {{ adminCount() }} admin</span>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  } @else if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (users().length === 0) {
+    <p class="auth-sub">No users yet.</p>
+  } @else {
+    <ul class="key-list">
+      @for (user of users(); track user.id) {
+        <li class="key-item">
+          <div class="key-meta">
+            <span class="key-label">
+              {{ user.displayName }}
+              @if (user.admin) {
+                <span class="key-sub">· Admin</span>
+              }
+              @if (user.status !== 'ACTIVE') {
+                <span class="key-sub">· {{ user.status }}</span>
+              }
+            </span>
+            <span class="key-sub">{{ user.email }}</span>
+            <span class="key-sub">Joined {{ user.createdAt | date: 'mediumDate' }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

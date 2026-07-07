@@ -39,6 +39,11 @@ public class AppUser {
     @Setter
     private UserStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Setter
+    private UserRole role;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -48,10 +53,15 @@ public class AppUser {
         this.passwordHash = passwordHash;
         this.displayName = displayName;
         this.status = UserStatus.ACTIVE;
+        this.role = UserRole.USER;
         this.createdAt = LocalDateTime.now();
     }
 
     public boolean isBanned() {
         return this.status == UserStatus.BANNED;
+    }
+
+    public boolean isAdmin() {
+        return this.role == UserRole.ADMIN;
     }
 }

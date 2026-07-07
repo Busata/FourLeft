@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class AppUserDetails implements UserDetails {
     private final String displayName;
     private final String status;
     private final boolean banned;
+    private final boolean admin;
 
     public AppUserDetails(AppUser user) {
         this.id = user.getId();
@@ -29,6 +31,7 @@ public class AppUserDetails implements UserDetails {
         this.displayName = user.getDisplayName();
         this.status = user.getStatus().name();
         this.banned = user.isBanned();
+        this.admin = user.isAdmin();
     }
 
     public UUID getId() {
@@ -47,9 +50,18 @@ public class AppUserDetails implements UserDetails {
         return status;
     }
 
+    public boolean isAdmin() {
+        return admin;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if (admin) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
+        return authorities;
     }
 
     @Override
