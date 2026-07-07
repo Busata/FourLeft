@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,7 +48,7 @@ public class EventArmService {
         if (!membershipRepository.existsByClubIdAndUserId(championship.getClubId(), userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Join the club to enter its events.");
         }
-        if (!championshipService.isOpen(eventId, LocalDateTime.now())) {
+        if (!championshipService.isOpenNow(eventId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This event isn't open for entries right now.");
         }
         boolean variantInEvent = eventVariantRepository.findAllByEventIdOrderByPositionAsc(eventId).stream()

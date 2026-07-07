@@ -69,6 +69,24 @@ public class VariantService {
 
     /** A variant's resolved labels for display: its own label plus its stage and location names. */
     public record VariantLabel(String label, String stageName, String locationName) {
+        /**
+         * The full, human-readable stage label in "Location - Stage - Alias" order, skipping any
+         * unassigned parts. The alias alone (e.g. "Variant 1") is meaningless without its location and
+         * stage, so racing/leaderboard views show this composed form.
+         */
+        public String fullLabel() {
+            java.util.List<String> parts = new java.util.ArrayList<>();
+            if (locationName != null && !locationName.isBlank()) {
+                parts.add(locationName);
+            }
+            if (stageName != null && !stageName.isBlank()) {
+                parts.add(stageName);
+            }
+            if (label != null && !label.isBlank()) {
+                parts.add(label);
+            }
+            return parts.isEmpty() ? (label == null ? "(stage)" : label) : String.join(" - ", parts);
+        }
     }
 
     /**

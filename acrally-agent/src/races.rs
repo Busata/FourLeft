@@ -62,8 +62,13 @@ pub struct RaceStage {
     #[serde(default)]
     #[allow(dead_code)]
     pub location_name: Option<String>,
+    /// Readable catalogue names of the permitted cars (for display).
     #[serde(default)]
     pub cars: Vec<String>,
+    /// Raw strings the game may report for those cars (names + aliases), matched against telemetry.
+    #[serde(default)]
+    #[allow(dead_code)]
+    pub car_keys: Vec<String>,
     #[serde(default)]
     pub my_best_ms: Option<i64>,
 }
@@ -84,8 +89,12 @@ pub struct ArmState {
     pub stage_label: Option<String>,
     #[serde(default)]
     pub raw_name: Option<String>,
+    /// Readable permitted car names for the armed stage (display).
     #[serde(default)]
     pub cars: Vec<String>,
+    /// Raw car strings the game may report for the permitted cars (matched against telemetry).
+    #[serde(default)]
+    pub car_keys: Vec<String>,
     #[serde(default)]
     pub last_outcome: Option<String>,
     #[serde(default)]

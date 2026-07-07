@@ -32,7 +32,11 @@ public final class RacePayloads {
             @JsonProperty("stages") List<RaceStage> stages) {
     }
 
-    /** A stage a driver can arm, with the raw key + car list the agent uses for live warnings. */
+    /**
+     * A stage a driver can arm. {@code cars} are the readable catalogue names to display; {@code carKeys}
+     * are the raw strings the game may report for those cars (catalogue names + assigned aliases), which
+     * the agent matches live telemetry against.
+     */
     public record RaceStage(
             @JsonProperty("variant_id") UUID variantId,
             @JsonProperty("raw_name") String rawName,
@@ -40,6 +44,7 @@ public final class RacePayloads {
             @JsonProperty("stage_name") String stageName,
             @JsonProperty("location_name") String locationName,
             @JsonProperty("cars") List<String> cars,
+            @JsonProperty("car_keys") List<String> carKeys,
             @JsonProperty("my_best_ms") Integer myBestMs) {
     }
 
@@ -62,12 +67,13 @@ public final class RacePayloads {
             @JsonProperty("stage_label") String stageLabel,
             @JsonProperty("raw_name") String rawName,
             @JsonProperty("cars") List<String> cars,
+            @JsonProperty("car_keys") List<String> carKeys,
             @JsonProperty("last_outcome") String lastOutcome,
             @JsonProperty("last_stage_label") String lastStageLabel,
             @JsonProperty("last_total_ms") Integer lastTotalMs) {
 
         public static ArmState idle() {
-            return new ArmState(false, null, null, null, null, null, List.of(), null, null, null);
+            return new ArmState(false, null, null, null, null, null, List.of(), List.of(), null, null, null);
         }
     }
 }

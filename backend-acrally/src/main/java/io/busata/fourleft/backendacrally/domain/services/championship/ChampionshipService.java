@@ -10,6 +10,7 @@ import io.busata.fourleft.backendacrally.domain.models.club.Club;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
 import io.busata.fourleft.backendacrally.domain.services.club.ClubRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
+import io.busata.fourleft.backendacrally.infrastructure.properties.AcrallyProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class ChampionshipService {
     private final ClubRepository clubRepository;
     private final VariantRepository variantRepository;
     private final CarRepository carRepository;
+    private final AcrallyProperties properties;
 
     // --- Championship ---------------------------------------------------------------------------
 
@@ -232,6 +234,20 @@ public class ChampionshipService {
         List<ChampionshipEvent> events =
                 eventRepository.findAllByChampionshipIdOrderByPositionAsc(championship.getId());
         return windows(championship, events).get(eventId);
+    }
+
+    /**
+     * The current wall-clock in the configured scheduling zone. Championship start times are authored
+     * as naive local times in the browser, so "now" must be read in the same zone to compare correctly
+     * (otherwise a server running in a different zone — e.g. UTC — opens events hours off).
+     */
+    public LocalDateTime now() {
+        return LocalDateTime.now(properties.zoneId());
+    }
+
+    /** {@link #isOpen(UUID, LocalDateTime)} evaluated at {@link #now()} in the scheduling zone. */
+    public boolean isOpenNow(UUID eventId) {
+        return isOpen(eventId, now());
     }
 
     /**

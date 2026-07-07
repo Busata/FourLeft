@@ -135,12 +135,7 @@
               <ol class="stage-list">
                 @for (v of event.variants; track v.variantId) {
                   <li>
-                    <span>{{ v.label }}</span>
-                    @if (v.locationName || v.stageName) {
-                      <span class="key-sub">
-                        {{ v.locationName }}@if (v.locationName && v.stageName) { — }{{ v.stageName }}
-                      </span>
-                    }
+                    <span>{{ stageFullLabel(v) }}</span>
                   </li>
                 }
               </ol>

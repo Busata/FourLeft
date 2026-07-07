@@ -9,6 +9,7 @@ import type {
   ChampionshipDetailTo,
   ChampionshipEventTo,
   EventLeaderboardTo,
+  EventVariantTo,
   VariantTo,
 } from '../../models/acrally';
 
@@ -164,6 +165,11 @@ export class AcrallyChampionship implements OnInit {
     return this.variantById().get(variantId)?.displayName
       ?? this.variantById().get(variantId)?.rawName
       ?? '(removed variant)';
+  }
+
+  /** Full stage label in "Location - Stage - Alias" order (the alias alone is usually just "Variant X"). */
+  stageFullLabel(v: EventVariantTo): string {
+    return [v.locationName, v.stageName, v.label].filter((p) => !!p && p.trim()).join(' - ');
   }
 
   // --- Leaderboards ---

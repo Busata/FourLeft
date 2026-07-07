@@ -94,6 +94,25 @@ export interface CarRequestTo {
   className: string | null;
 }
 
+// A raw car string collected from results, mapped to a catalogue car (null until assigned).
+export interface CarAliasTo {
+  id: string;
+  rawName: string;
+  carId: string | null;
+  carName: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface UpdateCarAliasRequestTo {
+  carId: string | null;
+}
+
+export interface CarAliasCollectResultTo {
+  added: number;
+  aliases: CarAliasTo[];
+}
+
 export interface LoginRequestTo {
   email: string;
   password: string;

@@ -1,0 +1,73 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">
+      Car aliases are the raw car names the game reports in results. Assign each to a catalogue car so
+      results and the companion’s live check match on what the game says, not the catalogue name.
+    </p>
+    <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
+      {{ collecting() ? 'Collecting…' : 'Collect from results' }}
+    </button>
+  </div>
+
+  @if (collectMessage()) {
+    <p class="auth-sub">{{ collectMessage() }}</p>
+  }
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (aliases().length === 0) {
+    <p class="auth-sub">No car names collected yet. Drive a run, then hit “Collect from results”.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Game reports</th>
+            <th>Catalogue car</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (alias of aliases(); track alias.id) {
+            <tr>
+              <td>{{ alias.rawName }}</td>
+              @if (editingId() === alias.id) {
+                <td>
+                  <select [ngModel]="editCarId()" (ngModelChange)="editCarId.set($event)">
+                    <option value="">Unassigned</option>
+                    @for (car of cars(); track car.id) {
+                      <option [value]="car.id">{{ car.name }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(alias)" [disabled]="busy()">Save</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>
+                  @if (alias.carName) {
+                    {{ alias.carName }}
+                  } @else {
+                    <span class="dash-sub">Unassigned</span>
+                  }
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(alias)">Edit</button>
+                    <button class="g-button g-button-danger" type="button" (click)="remove(alias)" [disabled]="busy()">Delete</button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -17,4 +17,8 @@ public interface StageResultRepository extends JpaRepository<StageResult, UUID> 
     /** Every distinct, non-blank raw stage identifier seen across all recorded results. */
     @Query("SELECT DISTINCT s.stage FROM StageResult s WHERE s.stage IS NOT NULL AND s.stage <> ''")
     List<String> findDistinctStageNames();
+
+    /** Every distinct, non-blank raw car string seen across all recorded results (for car aliases). */
+    @Query("SELECT DISTINCT s.car FROM StageResult s WHERE s.car IS NOT NULL AND s.car <> ''")
+    List<String> findDistinctCarNames();
 }

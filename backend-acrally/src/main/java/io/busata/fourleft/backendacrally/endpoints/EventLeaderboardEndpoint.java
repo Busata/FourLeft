@@ -79,7 +79,7 @@ public class EventLeaderboardEndpoint {
         }
         return new StageBoardTo(
                 board.variantId(),
-                label == null ? "(stage)" : label.label(),
+                label == null ? "(stage)" : label.fullLabel(),
                 label == null ? null : label.stageName(),
                 label == null ? null : label.locationName(),
                 entries);

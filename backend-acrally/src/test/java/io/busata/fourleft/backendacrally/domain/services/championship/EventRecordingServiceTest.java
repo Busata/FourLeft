@@ -8,6 +8,7 @@ import io.busata.fourleft.backendacrally.domain.models.championship.EventCar;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
 import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
+import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ class EventRecordingServiceTest {
     @Mock EventCarRepository eventCarRepository;
     @Mock VariantRepository variantRepository;
     @Mock CarRepository carRepository;
+    @Mock CarAliasRepository carAliasRepository;
     @Mock ChampionshipService championshipService;
 
     @InjectMocks EventRecordingService service;
@@ -102,7 +104,7 @@ class EventRecordingServiceTest {
         EventArm arm = boundArm(variant.getId());
         when(variantRepository.findByRawName("StageKey")).thenReturn(Optional.of(variant));
         when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of()); // any car
-        when(championshipService.isOpen(eq(eventId), any())).thenReturn(true);
+        when(championshipService.isOpenNow(eventId)).thenReturn(true);
         when(entryRepository.findByEventIdAndVariantIdAndUserId(eventId, variant.getId(), userId))
                 .thenReturn(Optional.empty());
 
@@ -145,7 +147,7 @@ class EventRecordingServiceTest {
         EventArm arm = boundArm(variant.getId());
         when(variantRepository.findByRawName("StageKey")).thenReturn(Optional.of(variant));
         when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of());
-        when(championshipService.isOpen(eq(eventId), any())).thenReturn(false);
+        when(championshipService.isOpenNow(eventId)).thenReturn(false);
 
         service.recordIfArmed(sessionId, result("StageKey", "Lancia", 100_000));
 
@@ -161,7 +163,7 @@ class EventRecordingServiceTest {
                 UUID.randomUUID(), 90_000, 0, 90_000, LocalDateTime.now());
         when(variantRepository.findByRawName("StageKey")).thenReturn(Optional.of(variant));
         when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of());
-        when(championshipService.isOpen(eq(eventId), any())).thenReturn(true);
+        when(championshipService.isOpenNow(eventId)).thenReturn(true);
         when(entryRepository.findByEventIdAndVariantIdAndUserId(eventId, variant.getId(), userId))
                 .thenReturn(Optional.of(existing));
 
@@ -180,7 +182,7 @@ class EventRecordingServiceTest {
                 UUID.randomUUID(), 200_000, 0, 200_000, LocalDateTime.now());
         when(variantRepository.findByRawName("StageKey")).thenReturn(Optional.of(variant));
         when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of());
-        when(championshipService.isOpen(eq(eventId), any())).thenReturn(true);
+        when(championshipService.isOpenNow(eventId)).thenReturn(true);
         when(entryRepository.findByEventIdAndVariantIdAndUserId(eventId, variant.getId(), userId))
                 .thenReturn(Optional.of(existing));
         // Belt-and-braces: this test never saves a new entry, only replaces in place.

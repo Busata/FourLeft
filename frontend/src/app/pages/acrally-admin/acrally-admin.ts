@@ -19,5 +19,6 @@ export class AcrallyAdmin {
     { path: 'stages', label: 'Stages' },
     { path: 'variants', label: 'Variants' },
     { path: 'cars', label: 'Cars' },
+    { path: 'car-aliases', label: 'Car aliases' },
   ];
 }

@@ -8,12 +8,12 @@ import io.busata.fourleft.backendacrally.domain.models.championship.EventCar;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
 import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
+import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +34,7 @@ public class EventRecordingService {
     private final EventCarRepository eventCarRepository;
     private final VariantRepository variantRepository;
     private final CarRepository carRepository;
+    private final CarAliasRepository carAliasRepository;
     private final ChampionshipService championshipService;
 
     /** A freshly opened session binds the driver's waiting arm — that run is the one that counts. */
@@ -72,8 +73,7 @@ public class EventRecordingService {
         Set<UUID> permitted = eventCarRepository.findAllByEventId(arm.getEventId()).stream()
                 .map(EventCar::getCarId)
                 .collect(Collectors.toSet());
-        Optional<Car> matchedCar = result.getCar() == null ? Optional.empty()
-                : carRepository.findFirstByNameIgnoreCase(result.getCar());
+        Optional<Car> matchedCar = resolveCar(result.getCar());
         if (!permitted.isEmpty()
                 && (matchedCar.isEmpty() || !permitted.contains(matchedCar.get().getId()))) {
             arm.consume(EventArmOutcome.WRONG_CAR, result.getId());
@@ -81,7 +81,7 @@ public class EventRecordingService {
         }
 
         // 3. Still open? The window might have closed while the run was in progress.
-        if (!championshipService.isOpen(arm.getEventId(), LocalDateTime.now())) {
+        if (!championshipService.isOpenNow(arm.getEventId())) {
             arm.consume(EventArmOutcome.EVENT_CLOSED, result.getId());
             return;
         }
@@ -105,5 +105,24 @@ public class EventRecordingService {
                     result.getRawMs(), result.getPenaltyMs(), result.getTotalMs(), result.getCreatedAt());
         }
         arm.consume(EventArmOutcome.RECORDED, result.getId());
+    }
+
+    /**
+     * Resolve the raw car string a result carries to a catalogue car: first via an assigned
+     * {@code car_alias} (the game's reported name, e.g. "Lancia Delta Integrale Evo"), falling back
+     * to an exact catalogue-name match for cars whose game name already equals their catalogue name.
+     */
+    private Optional<Car> resolveCar(String rawCar) {
+        if (rawCar == null || rawCar.isBlank()) {
+            return Optional.empty();
+        }
+        Optional<Car> viaAlias = carAliasRepository.findByRawName(rawCar)
+                .map(alias -> alias.getCarId())
+                .filter(java.util.Objects::nonNull)
+                .flatMap(carRepository::findById);
+        if (viaAlias.isPresent()) {
+            return viaAlias;
+        }
+        return carRepository.findFirstByNameIgnoreCase(rawCar);
     }
 }

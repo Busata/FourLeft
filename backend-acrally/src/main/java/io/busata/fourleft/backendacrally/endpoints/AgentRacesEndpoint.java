@@ -6,6 +6,7 @@ import io.busata.fourleft.backendacrally.application.races.RacePayloads.RaceEven
 import io.busata.fourleft.backendacrally.application.races.RacePayloads.RaceStage;
 import io.busata.fourleft.backendacrally.application.races.RacePayloads.RacesView;
 import io.busata.fourleft.backendacrally.domain.models.car.Car;
+import io.busata.fourleft.backendacrally.domain.models.car.CarAlias;
 import io.busata.fourleft.backendacrally.domain.models.championship.Championship;
 import io.busata.fourleft.backendacrally.domain.models.championship.ChampionshipEvent;
 import io.busata.fourleft.backendacrally.domain.models.championship.ChampionshipStatus;
@@ -16,6 +17,7 @@ import io.busata.fourleft.backendacrally.domain.models.championship.EventCar;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventVariant;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
+import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.ChampionshipEventRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.ChampionshipRepository;
@@ -65,6 +67,7 @@ public class AgentRacesEndpoint {
     private final EventEntryRepository entryRepository;
     private final VariantRepository variantRepository;
     private final CarRepository carRepository;
+    private final CarAliasRepository carAliasRepository;
     private final VariantService variantService;
     private final ChampionshipService championshipService;
     private final EventArmService armService;
@@ -72,12 +75,13 @@ public class AgentRacesEndpoint {
     @GetMapping
     public RacesView list(@AuthenticationPrincipal AgentPrincipal agent) {
         UUID userId = agent.userId();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = championshipService.now();
 
         Map<UUID, Variant> variants = byId(variantRepository.findAll(), Variant::getId);
         Map<UUID, VariantService.VariantLabel> labels = variantService.labelsById();
         Map<UUID, String> carNames = carRepository.findAll().stream()
                 .collect(Collectors.toMap(Car::getId, Car::getName));
+        Map<UUID, List<String>> aliasesByCar = aliasesByCar();
 
         List<RaceEvent> events = new java.util.ArrayList<>();
         Set<UUID> clubIds = membershipRepository.findClubIdsByUserId(userId);
@@ -96,11 +100,11 @@ public class AgentRacesEndpoint {
                         continue; // only events currently open for entries
                     }
                     events.add(toRaceEvent(userId, champ, clubNames.get(champ.getClubId()),
-                            event, window, variants, labels, carNames));
+                            event, window, variants, labels, carNames, aliasesByCar));
                 }
             }
         }
-        return new RacesView(events, buildArmState(userId, variants, labels, carNames));
+        return new RacesView(events, buildArmState(userId, variants, labels, carNames, aliasesByCar));
     }
 
     @PostMapping("/arm")
@@ -124,16 +128,19 @@ public class AgentRacesEndpoint {
 
     private RaceEvent toRaceEvent(UUID userId, Championship champ, String clubName, ChampionshipEvent event,
                                   ChampionshipService.EventWindow window, Map<UUID, Variant> variants,
-                                  Map<UUID, VariantService.VariantLabel> labels, Map<UUID, String> carNames) {
-        List<String> permittedCars = eventCarRepository.findAllByEventId(event.getId()).stream()
-                .map(EventCar::getCarId).map(carNames::get).filter(Objects::nonNull)
+                                  Map<UUID, VariantService.VariantLabel> labels, Map<UUID, String> carNames,
+                                  Map<UUID, List<String>> aliasesByCar) {
+        List<UUID> permittedCarIds = eventCarRepository.findAllByEventId(event.getId()).stream()
+                .map(EventCar::getCarId).toList();
+        List<String> permittedCars = permittedCarIds.stream().map(carNames::get).filter(Objects::nonNull)
                 .sorted(String.CASE_INSENSITIVE_ORDER).toList();
+        List<String> carKeys = carKeysFor(permittedCarIds, carNames, aliasesByCar);
         Map<UUID, Integer> myBest = entryRepository.findByEventIdAndUserId(event.getId(), userId).stream()
                 .collect(Collectors.toMap(EventEntry::getVariantId, EventEntry::getTotalMs, Math::min));
 
         List<RaceStage> stages = eventVariantRepository.findAllByEventIdOrderByPositionAsc(event.getId()).stream()
                 .map(EventVariant::getVariantId)
-                .map(variantId -> toRaceStage(variantId, variants, labels, permittedCars, myBest.get(variantId)))
+                .map(variantId -> toRaceStage(variantId, variants, labels, permittedCars, carKeys, myBest.get(variantId)))
                 .toList();
 
         return new RaceEvent(event.getId(), champ.getId(), champ.getName(), clubName,
@@ -142,15 +149,15 @@ public class AgentRacesEndpoint {
 
     private RaceStage toRaceStage(UUID variantId, Map<UUID, Variant> variants,
                                   Map<UUID, VariantService.VariantLabel> labels,
-                                  List<String> permittedCars, Integer myBestMs) {
+                                  List<String> permittedCars, List<String> carKeys, Integer myBestMs) {
         Variant variant = variants.get(variantId);
         VariantService.VariantLabel label = labels.get(variantId);
         String rawName = variant == null ? null : variant.getRawName();
-        String display = label != null ? label.label() : (rawName != null ? rawName : "(stage)");
+        String display = label != null ? label.fullLabel() : (rawName != null ? rawName : "(stage)");
         return new RaceStage(variantId, rawName, display,
                 label == null ? null : label.stageName(),
                 label == null ? null : label.locationName(),
-                permittedCars, myBestMs);
+                permittedCars, carKeys, myBestMs);
     }
 
     private ArmState currentArmState(UUID userId) {
@@ -158,23 +165,26 @@ public class AgentRacesEndpoint {
         Map<UUID, VariantService.VariantLabel> labels = variantService.labelsById();
         Map<UUID, String> carNames = carRepository.findAll().stream()
                 .collect(Collectors.toMap(Car::getId, Car::getName));
-        return buildArmState(userId, variants, labels, carNames);
+        return buildArmState(userId, variants, labels, carNames, aliasesByCar());
     }
 
     private ArmState buildArmState(UUID userId, Map<UUID, Variant> variants,
-                                   Map<UUID, VariantService.VariantLabel> labels, Map<UUID, String> carNames) {
+                                   Map<UUID, VariantService.VariantLabel> labels, Map<UUID, String> carNames,
+                                   Map<UUID, List<String>> aliasesByCar) {
         Optional<EventArm> live = armService.liveArm(userId);
         if (live.isPresent()) {
             EventArm arm = live.get();
             Variant variant = variants.get(arm.getVariantId());
             VariantService.VariantLabel label = labels.get(arm.getVariantId());
-            List<String> cars = eventCarRepository.findAllByEventId(arm.getEventId()).stream()
-                    .map(EventCar::getCarId).map(carNames::get).filter(Objects::nonNull)
+            List<UUID> permittedCarIds = eventCarRepository.findAllByEventId(arm.getEventId()).stream()
+                    .map(EventCar::getCarId).toList();
+            List<String> cars = permittedCarIds.stream().map(carNames::get).filter(Objects::nonNull)
                     .sorted(String.CASE_INSENSITIVE_ORDER).toList();
-            String stageLabel = label != null ? label.label()
+            List<String> carKeys = carKeysFor(permittedCarIds, carNames, aliasesByCar);
+            String stageLabel = label != null ? label.fullLabel()
                     : (variant != null ? variant.getRawName() : null);
             return new ArmState(true, arm.getStatus().name(), arm.getEventId(), arm.getVariantId(),
-                    stageLabel, variant == null ? null : variant.getRawName(), cars, null, null, null);
+                    stageLabel, variant == null ? null : variant.getRawName(), cars, carKeys, null, null, null);
         }
 
         Optional<EventArm> latest = armService.latestArm(userId);
@@ -182,17 +192,39 @@ public class AgentRacesEndpoint {
                 && latest.get().getOutcome() != null) {
             EventArm arm = latest.get();
             VariantService.VariantLabel label = labels.get(arm.getVariantId());
-            String stageLabel = label != null ? label.label() : null;
+            String stageLabel = label != null ? label.fullLabel() : null;
             Integer total = null;
             if (arm.getOutcome() == EventArmOutcome.RECORDED || arm.getOutcome() == EventArmOutcome.SLOWER) {
                 total = entryRepository
                         .findByEventIdAndVariantIdAndUserId(arm.getEventId(), arm.getVariantId(), userId)
                         .map(EventEntry::getTotalMs).orElse(null);
             }
-            return new ArmState(false, null, null, null, null, null, List.of(),
+            return new ArmState(false, null, null, null, null, null, List.of(), List.of(),
                     arm.getOutcome().name(), stageLabel, total);
         }
         return ArmState.idle();
+    }
+
+    /** Raw match strings for a set of cars: each car's catalogue name plus its assigned aliases. */
+    private List<String> carKeysFor(List<UUID> carIds, Map<UUID, String> carNames,
+                                    Map<UUID, List<String>> aliasesByCar) {
+        java.util.LinkedHashSet<String> keys = new java.util.LinkedHashSet<>();
+        for (UUID carId : carIds) {
+            String name = carNames.get(carId);
+            if (name != null) {
+                keys.add(name);
+            }
+            keys.addAll(aliasesByCar.getOrDefault(carId, List.of()));
+        }
+        return new java.util.ArrayList<>(keys);
+    }
+
+    /** Assigned aliases grouped by the car they map to (raw game-reported strings). */
+    private Map<UUID, List<String>> aliasesByCar() {
+        return carAliasRepository.findAll().stream()
+                .filter(alias -> alias.getCarId() != null)
+                .collect(Collectors.groupingBy(CarAlias::getCarId,
+                        Collectors.mapping(CarAlias::getRawName, Collectors.toList())));
     }
 
     private String deriveLabel(List<RaceStage> stages) {

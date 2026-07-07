@@ -28,6 +28,7 @@ import { AcrallyLocations } from './pages/acrally-locations/acrally-locations';
 import { AcrallyStages } from './pages/acrally-stages/acrally-stages';
 import { AcrallyVariants } from './pages/acrally-variants/acrally-variants';
 import { AcrallyCars } from './pages/acrally-cars/acrally-cars';
+import { AcrallyCarAliases } from './pages/acrally-car-aliases/acrally-car-aliases';
 import { authGuard } from './services/auth-guard';
 import { adminGuard } from './services/admin-guard';
 
@@ -88,6 +89,7 @@ export const routes: Routes = [
               { path: 'stages', component: AcrallyStages, title: 'AC Rally — Stages' },
               { path: 'variants', component: AcrallyVariants, title: 'AC Rally — Variants' },
               { path: 'cars', component: AcrallyCars, title: 'AC Rally — Cars' },
+              { path: 'car-aliases', component: AcrallyCarAliases, title: 'AC Rally — Car aliases' },
             ],
           },
           // Old admin URL (bookmarks) → the admin section's Users tab.

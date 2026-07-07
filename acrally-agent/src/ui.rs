@@ -794,6 +794,13 @@ fn event_card(ui: &mut egui::Ui, event: &RaceEvent, arm: &ArmState, busy: bool, 
         ui.label(egui::RichText::new(&event.label).heading());
         ui.label(egui::RichText::new(format!("{} · {}", event.championship_name, event.club_name)).weak());
         ui.label(egui::RichText::new(format!("closes {}", human_datetime(&event.closes_at))).weak());
+        // Permitted cars (event-wide). Empty means any car is allowed.
+        let cars = event_cars(event);
+        if cars.is_empty() {
+            ui.label(egui::RichText::new("Cars: any").weak());
+        } else {
+            ui.label(egui::RichText::new(format!("Cars: {}", cars.join(", "))).weak());
+        }
         ui.add_space(6.0);
         for stage in &event.stages {
             stage_row(ui, event, stage, arm, busy, action);
@@ -853,6 +860,11 @@ fn confirm_modal(ctx: &egui::Context, pending: &PendingArm, action: &mut RaceAct
         });
 }
 
+/// The event's permitted cars (the same list on every stage; empty = any car).
+fn event_cars(event: &RaceEvent) -> Vec<String> {
+    event.stages.first().map(|s| s.cars.clone()).unwrap_or_default()
+}
+
 /// A short permitted-car summary for the confirm modal.
 fn car_summary(stage: &RaceStage) -> String {
     if stage.cars.is_empty() {
@@ -872,9 +884,11 @@ fn arm_warnings(arm: &ArmState, snap: &AgentStatus) -> Vec<String> {
     if snap.state != DriveState::Driving {
         return warnings;
     }
-    if !arm.cars.is_empty() && !snap.car.is_empty() {
+    // Match the live car against the raw keys the game reports for permitted cars (catalogue names +
+    // admin-assigned aliases). Empty keys means "any car", so nothing to warn about.
+    if !arm.car_keys.is_empty() && !snap.car.is_empty() {
         let current = normalize(&snap.car);
-        let allowed = arm.cars.iter().any(|c| {
+        let allowed = arm.car_keys.iter().any(|c| {
             let n = normalize(c);
             !n.is_empty() && (n == current || n.contains(&current) || current.contains(&n))
         });
