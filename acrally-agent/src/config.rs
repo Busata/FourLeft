@@ -21,7 +21,13 @@ const DEFAULT_API_BASE: &str = "https://fourleft.io/acrally-api";
 const POLL_HZ: f64 = 10.0;
 const HEARTBEAT_SECS: f64 = 1.0;
 const FINISH_SECS: f64 = 1.5;
-const SAVE_WAIT_SECS: f64 = 60.0;
+/// How long a finished run waits for its save record. Generous: the game may
+/// only write the save when the player leaves the result screen, and resolution
+/// is content-based (a record newer than the run-start snapshot), so a long
+/// window can't mis-post old data.
+const SAVE_WAIT_SECS: f64 = 180.0;
+/// Pause between save-file reads while a finish is pending (full-file parse).
+const SAVE_CHECK_SECS: f64 = 0.5;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
@@ -143,5 +149,9 @@ impl Config {
 
     pub fn save_wait(&self) -> Duration {
         Duration::from_secs_f64(SAVE_WAIT_SECS)
+    }
+
+    pub fn save_check_interval(&self) -> Duration {
+        Duration::from_secs_f64(SAVE_CHECK_SECS)
     }
 }

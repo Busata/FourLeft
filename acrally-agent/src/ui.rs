@@ -777,8 +777,23 @@ fn arm_banner(
     }
 
     ui.add_space(4.0);
-    if ui.add_enabled(!busy, egui::Button::new("Disarm")).clicked() {
+    // Once a run is bound, its outcome must be recorded — the server refuses to
+    // disarm (bailing out of a bad run before the finish would be a cheat
+    // vector), so don't offer the button either.
+    let bound = arm.status.as_deref() == Some("BOUND");
+    if ui
+        .add_enabled(!busy && !bound, egui::Button::new("Disarm"))
+        .clicked()
+    {
         *action = RaceAction::Disarm;
+    }
+    if bound {
+        ui.label(
+            egui::RichText::new(
+                "Run in progress — finish it (or restart/quit the stage) to release the arm.",
+            )
+            .weak(),
+        );
     }
 }
 
@@ -808,6 +823,10 @@ fn outcome_banner(ui: &mut egui::Ui, arm: &ArmState) {
         Some("EVENT_CLOSED") => (
             AMBER,
             "The event closed before your run finished — nothing recorded.".to_string(),
+        ),
+        Some("DNF") => (
+            AMBER,
+            format!("⚠ Your entry on {stage} expired without a run — recorded as DNF."),
         ),
         other => (
             egui::Color32::GRAY,

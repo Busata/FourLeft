@@ -187,8 +187,11 @@ public class AgentRacesEndpoint {
                     stageLabel, variant == null ? null : variant.getRawName(), cars, carKeys, null, null, null);
         }
 
+        // Consumed (run finished) and expired (no run — DNF) arms both carry an outcome to surface.
         Optional<EventArm> latest = armService.latestArm(userId);
-        if (latest.isPresent() && latest.get().getStatus() == EventArmStatus.CONSUMED
+        if (latest.isPresent()
+                && (latest.get().getStatus() == EventArmStatus.CONSUMED
+                        || latest.get().getStatus() == EventArmStatus.EXPIRED)
                 && latest.get().getOutcome() != null) {
             EventArm arm = latest.get();
             VariantService.VariantLabel label = labels.get(arm.getVariantId());

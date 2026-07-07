@@ -4,6 +4,13 @@
 //!
 //! Restarts write no save record, so a restart aborts the session rather than
 //! posting a result.
+//!
+//! Result resolution is content-based, never mtime-based: the newest record's
+//! timestamp is snapshotted when the run starts, and a finish only resolves when
+//! a record NEWER than that snapshot appears. The save also carries non-record
+//! data (progress/career), so its mtime moves at times that have nothing to do
+//! with a result landing — an mtime gate reads the previous run's record as
+//! "the" result and either drops the finish or posts stale data.
 
 use std::path::PathBuf;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -11,6 +18,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::config::Config;
 use crate::model::{fmt_ms, parse_laptime_ms, Frame, Heartbeat, ResultPayload, SessionStart};
 use crate::savegame;
+use crate::savegame::StageRecord;
 use crate::session::{SessionEvent, SessionMachine};
 use crate::status::{AgentStatus, StatusHandle};
 use crate::submit::Client;
@@ -18,13 +26,21 @@ use crate::submit::Client;
 struct Active {
     id: String,
     driver: String,
-    save_mtime_at_start: Option<SystemTime>,
+    /// Newest save-record timestamp when the run began; only a record newer
+    /// than this can be this run's result.
+    baseline_ticks: i64,
 }
 
 struct Pending {
     id: String,
     driver: String,
-    save_mtime_at_start: Option<SystemTime>,
+    baseline_ticks: i64,
+    /// A new record sighted on the previous check, awaiting one confirming
+    /// re-read — a read that races the game's save write can see a half-written
+    /// file, so a single sighting isn't trusted (unless force-resolving).
+    candidate_ticks: Option<i64>,
+    /// Earliest time of the next save read (throttles full-file parses).
+    next_check: Instant,
     deadline: Instant,
 }
 
@@ -131,7 +147,7 @@ impl Runner {
         self.active = Some(Active {
             id,
             driver: f.driver.clone(),
-            save_mtime_at_start: self.save_mtime(),
+            baseline_ticks: self.newest_save_ticks(),
         });
         self.last_heartbeat = None;
     }
@@ -158,37 +174,68 @@ impl Runner {
 
     fn finish(&mut self) {
         let Some(a) = self.active.take() else { return };
-        println!("finish detected — awaiting save file for session {}", a.id);
+        println!(
+            "finish detected — awaiting a save record newer than ticks {} for session {}",
+            a.baseline_ticks, a.id
+        );
         self.pending = Some(Pending {
             id: a.id,
             driver: a.driver,
-            save_mtime_at_start: a.save_mtime_at_start,
+            baseline_ticks: a.baseline_ticks,
+            candidate_ticks: None,
+            next_check: Instant::now(),
             deadline: Instant::now() + self.cfg.save_wait(),
         });
     }
 
-    /// If a finish is pending, post the result once the save file updates, or
-    /// abort if the wait times out (`force` = resolve now, even before timeout).
+    /// If a finish is pending, post the result once a record newer than the
+    /// run-start snapshot appears in the save, or abort if the wait times out
+    /// (`force` = resolve now: commit an unconfirmed sighting rather than lose
+    /// it, abort if nothing new has landed).
     fn resolve_pending(&mut self, force: bool) {
         // Snapshot the fields we need so we don't hold a borrow of self.pending
         // while mutating self below.
-        let (baseline, deadline, id, driver) = match &self.pending {
+        let (id, driver, baseline, candidate, next_check, deadline) = match &self.pending {
             Some(p) => (
-                p.save_mtime_at_start,
-                p.deadline,
                 p.id.clone(),
                 p.driver.clone(),
+                p.baseline_ticks,
+                p.candidate_ticks,
+                p.next_check,
+                p.deadline,
             ),
             None => return,
         };
 
-        if mtime_changed(baseline, self.save_mtime()) {
-            if let Some(result) = self.read_result(&driver) {
+        let now = Instant::now();
+        if !force && now < next_check {
+            return;
+        }
+
+        // Only a record newer than the run-start snapshot (and not one we've
+        // already delivered) can be this run's result — anything else means the
+        // save was written for reasons that aren't a new stage record.
+        let fresh = self.read_newest_record().filter(|r| {
+            r.timestamp_ticks > baseline && Some(r.timestamp_ticks) != self.last_posted_ticks
+        });
+
+        if let Some(rec) = fresh {
+            // Trust the record once a re-read reproduces it (a read racing the
+            // game's save write can see a half-written file). When forced (a new
+            // run is starting), commit the sighting now rather than abort it.
+            if force || candidate == Some(rec.timestamp_ticks) {
                 self.pending = None;
-                if self.last_posted_ticks == Some(result.timestamp_ticks) {
-                    return; // already posted this record
-                }
-                self.last_posted_ticks = Some(result.timestamp_ticks);
+                self.last_posted_ticks = Some(rec.timestamp_ticks);
+                let result = ResultPayload {
+                    stage: rec.stage,
+                    car: rec.car,
+                    driver,
+                    raw_ms: rec.raw_ms,
+                    penalty_ms: rec.penalty_ms,
+                    total_ms: rec.total_ms,
+                    timestamp_ticks: rec.timestamp_ticks,
+                    agent_version: env!("CARGO_PKG_VERSION").to_string(),
+                };
                 let summary = format!(
                     "{} @ {} — {} (raw {} + {}s)",
                     result.car,
@@ -205,45 +252,40 @@ impl Runner {
                         s.last_result = Some(summary);
                     }
                 });
-                return;
+            } else if let Some(p) = &mut self.pending {
+                println!(
+                    "new save record sighted (ticks {}) — confirming",
+                    rec.timestamp_ticks
+                );
+                p.candidate_ticks = Some(rec.timestamp_ticks);
+                p.next_check = now + self.cfg.save_check_interval();
             }
+            return;
         }
 
-        if force || Instant::now() >= deadline {
+        if force || now >= deadline {
             self.pending = None;
-            eprintln!("no save result for session {id} — aborting");
+            eprintln!("no new save record for session {id} — aborting");
             self.client.abort_session(&id, "no-result");
+        } else if let Some(p) = &mut self.pending {
+            p.candidate_ticks = None;
+            p.next_check = now + self.cfg.save_check_interval();
         }
     }
 
-    /// Read the newest record from the save file as a result payload.
-    fn read_result(&self, driver: &str) -> Option<ResultPayload> {
+    /// The newest record currently in the save file, if it can be read.
+    fn read_newest_record(&self) -> Option<StageRecord> {
         let path = self.save_path.as_ref()?;
         let bytes = std::fs::read(path).ok()?;
-        let rec = savegame::newest_record(&bytes)?;
-        Some(ResultPayload {
-            stage: rec.stage,
-            car: rec.car,
-            driver: driver.to_string(),
-            raw_ms: rec.raw_ms,
-            penalty_ms: rec.penalty_ms,
-            total_ms: rec.total_ms,
-            timestamp_ticks: rec.timestamp_ticks,
-            agent_version: env!("CARGO_PKG_VERSION").to_string(),
-        })
+        savegame::newest_record(&bytes)
     }
 
-    fn save_mtime(&self) -> Option<SystemTime> {
-        let p = self.save_path.as_ref()?;
-        std::fs::metadata(p).ok()?.modified().ok()
-    }
-}
-
-fn mtime_changed(baseline: Option<SystemTime>, current: Option<SystemTime>) -> bool {
-    match (baseline, current) {
-        (Some(b), Some(c)) => c > b,
-        (None, Some(_)) => true,
-        _ => false,
+    /// The newest record's timestamp right now — the baseline a finishing run's
+    /// record must beat. 0 when the save is missing/unreadable/recordless.
+    fn newest_save_ticks(&self) -> i64 {
+        self.read_newest_record()
+            .map(|r| r.timestamp_ticks)
+            .unwrap_or(0)
     }
 }
 

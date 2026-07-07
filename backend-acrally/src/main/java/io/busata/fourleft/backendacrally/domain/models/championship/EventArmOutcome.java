@@ -1,6 +1,6 @@
 package io.busata.fourleft.backendacrally.domain.models.championship;
 
-/** Why a consumed {@link EventArm}'s run did or didn't land on the leaderboard. */
+/** How a resolved {@link EventArm} ended: why its run did or didn't land on the leaderboard. */
 public enum EventArmOutcome {
     /** The run matched and set a new best — an {@code event_entry} was written/updated. */
     RECORDED,
@@ -11,5 +11,7 @@ public enum EventArmOutcome {
     /** The car wasn't one the event permits. */
     WRONG_CAR,
     /** The event's window had closed by the time the result arrived. */
-    EVENT_CLOSED
+    EVENT_CLOSED,
+    /** No run ever completed — the arm sat idle until it expired (did not finish). */
+    DNF
 }

@@ -169,7 +169,9 @@ impl Client {
                 .post(&format!("{}/agent/races/disarm", self.api_base)),
         )
         .call()
-        .context("could not reach the club backend")?
+        // Surface the backend's reason on a 4xx — disarm is refused (409) while
+        // a bound run is in progress, and that message should reach the driver.
+        .map_err(arm_error)?
         .into_json()
         .context("unexpected response from disarm")
     }

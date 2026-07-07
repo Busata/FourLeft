@@ -35,9 +35,10 @@ public class EventArmService {
     private final ChampionshipService championshipService;
 
     /**
-     * Arm a stage: replace any existing live arm and start waiting for the driver's next run. The
+     * Arm a stage: replace any existing ARMED arm and start waiting for the driver's next run. The
      * event must be open (published + within its window) and the variant must be one it runs, and the
-     * driver must belong to the club. Returns the fresh {@code ARMED} arm.
+     * driver must belong to the club. Rejected (409) while a BOUND run is in progress — switching
+     * stages mid-run would be a disarm by another name. Returns the fresh {@code ARMED} arm.
      */
     @Transactional
     public EventArm arm(UUID userId, UUID eventId, UUID variantId) {
@@ -62,7 +63,12 @@ public class EventArmService {
         return armRepository.save(new EventArm(userId, eventId, variantId));
     }
 
-    /** Cancel the driver's live arm, if any. Idempotent. */
+    /**
+     * Cancel the driver's live arm, if any. Idempotent while ARMED; rejected while BOUND — once a
+     * run is in progress its outcome must be recorded, or disarming becomes a cherry-picking tool
+     * (bail out of a bad run before the finish and keep the old time). The run itself is the escape
+     * hatch: restarting or quitting the stage aborts the session, which releases the arm.
+     */
     @Transactional
     public void disarm(UUID userId) {
         cancelLive(userId);
@@ -78,9 +84,31 @@ public class EventArmService {
         return armRepository.findFirstByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    /** Cancel the live arm and flush, so a subsequent insert doesn't collide on the live-arm index. */
+    /**
+     * Janitor: expire ARMED arms with no activity since the cutoff, resolving them as DNF. An arm
+     * binds to the driver's NEXT session, so one left waiting would otherwise capture whatever run
+     * they happen to start days later. Only ARMED arms qualify: a BOUND arm belongs to a run in
+     * progress, and the stale-session sweep unbinds it (back to ARMED, refreshing its activity)
+     * if that run dies. Returns how many were expired (for the schedule's log).
+     */
+    @Transactional
+    public int expireIdleArms(java.time.LocalDateTime cutoff) {
+        List<EventArm> idle = armRepository.findArmedAndIdleSince(cutoff);
+        idle.forEach(EventArm::expire);
+        return idle.size();
+    }
+
+    /**
+     * Cancel the live arm and flush, so a subsequent insert doesn't collide on the live-arm index.
+     * A BOUND arm is never cancelled — not by disarm, not by arming another stage — so a run in
+     * progress cannot be un-entered; it resolves via its session (result, abort, or the stale sweep).
+     */
     private void cancelLive(UUID userId) {
         armRepository.findFirstByUserIdAndStatusIn(userId, LIVE).ifPresent(arm -> {
+            if (arm.getStatus() == EventArmStatus.BOUND) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "A run is in progress on your armed stage — it has to finish (or be restarted/quit) first.");
+            }
             arm.cancel();
             armRepository.saveAndFlush(arm);
         });

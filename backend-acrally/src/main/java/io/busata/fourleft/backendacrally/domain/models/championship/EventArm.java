@@ -96,4 +96,11 @@ public class EventArm {
         this.status = EventArmStatus.CANCELLED;
         this.updatedAt = LocalDateTime.now();
     }
+
+    /** Armed but no run ever completed — timed out by the janitor as a DNF. */
+    public void expire() {
+        this.status = EventArmStatus.EXPIRED;
+        this.outcome = EventArmOutcome.DNF;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
