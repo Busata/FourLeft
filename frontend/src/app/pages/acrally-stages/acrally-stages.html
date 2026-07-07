@@ -1,69 +1,91 @@
 <div class="g-card">
   <div class="dash-head">
-    <p class="auth-sub" style="margin: 0">
-      Stage names collected from results. Give each a readable name — it's used to display the
-      stage across the app.
-    </p>
-    <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
-      {{ collecting() ? 'Collecting…' : 'Collect from results' }}
+    <p class="auth-sub" style="margin: 0">Stages, each assignable to a location.</p>
+    <button class="g-button g-button-primary" type="button" (click)="toggleCreate()">
+      {{ creating() ? 'Cancel' : 'Add stage' }}
     </button>
   </div>
 
-  @if (collectMessage()) {
-    <p class="auth-sub">{{ collectMessage() }}</p>
-  }
   @if (error()) {
     <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (creating()) {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" maxlength="200" [ngModel]="newName()" (ngModelChange)="newName.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select [ngModel]="newLocationId()" (ngModelChange)="newLocationId.set($event)">
+          <option value="">Unassigned</option>
+          @for (location of locations(); track location.id) {
+            <option [value]="location.id">{{ location.name }}</option>
+          }
+        </select>
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="create()" [disabled]="busy()">Create</button>
+    </section>
   }
 
   @if (!loaded()) {
     <p class="auth-sub">Loading…</p>
   } @else if (stages().length === 0) {
-    <p class="auth-sub">No stages catalogued yet. Hit “Collect from results” to gather them.</p>
+    <p class="auth-sub">No stages yet. Add the first one.</p>
   } @else {
     <div class="g-tablewrap">
       <table class="dash-table">
         <thead>
           <tr>
-            <th>Raw name</th>
-            <th>Display name</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Variants</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           @for (stage of stages(); track stage.id) {
             <tr>
-              <td>{{ stage.rawName }}</td>
               @if (editingId() === stage.id) {
+                <td><input type="text" maxlength="200" [ngModel]="editName()" (ngModelChange)="editName.set($event)" /></td>
                 <td>
-                  <input
-                    type="text"
-                    [ngModel]="draft()"
-                    (ngModelChange)="draft.set($event)"
-                    placeholder="Readable name"
-                    (keyup.enter)="save(stage)"
-                    (keyup.escape)="cancelEdit()"
-                  />
+                  <select [ngModel]="editLocationId()" (ngModelChange)="editLocationId.set($event)">
+                    <option value="">Unassigned</option>
+                    @for (location of locations(); track location.id) {
+                      <option [value]="location.id">{{ location.name }}</option>
+                    }
+                  </select>
                 </td>
+                <td>{{ stage.variantCount }}</td>
                 <td>
                   <div class="club-actions">
-                    <button class="g-button g-button-primary" type="button" (click)="save(stage)" [disabled]="saving()">
-                      Save
-                    </button>
+                    <button class="g-button g-button-primary" type="button" (click)="save(stage)" [disabled]="busy()">Save</button>
                     <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
                   </div>
                 </td>
               } @else {
+                <td>{{ stage.name }}</td>
                 <td>
-                  @if (stage.displayName) {
-                    {{ stage.displayName }}
+                  @if (stage.locationName) {
+                    {{ stage.locationName }}
                   } @else {
-                    <span class="dash-sub">Not set</span>
+                    <span class="dash-sub">Unassigned</span>
                   }
                 </td>
+                <td>{{ stage.variantCount }}</td>
                 <td>
                   <div class="club-actions">
-                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(stage)">Rename</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(stage)">Edit</button>
+                    <button
+                      class="g-button g-button-danger"
+                      type="button"
+                      (click)="remove(stage)"
+                      [disabled]="busy() || stage.variantCount > 0"
+                      [title]="stage.variantCount > 0 ? 'Reassign its variants first' : 'Delete stage'"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               }

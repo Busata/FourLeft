@@ -22,19 +22,76 @@ export interface AdminUserTo {
   createdAt: string;
 }
 
-// A catalogued stage, from GET /acrally-api/admin/stage-names. displayName is null until assigned.
-export interface StageNameTo {
+// A rally location, from GET /acrally-api/admin/locations. stageCount > 0 blocks deletion.
+export interface LocationTo {
   id: string;
-  rawName: string;
-  displayName: string | null;
+  name: string;
+  nation: string | null;
+  stageCount: number;
   createdAt: string;
   updatedAt: string | null;
 }
 
-// The outcome of POST /acrally-api/admin/stage-names/collect.
-export interface StageNameCollectResultTo {
+export interface LocationRequestTo {
+  name: string;
+  nation: string;
+}
+
+// A stage, from GET /acrally-api/admin/stages. variantCount > 0 blocks deletion.
+export interface StageTo {
+  id: string;
+  name: string;
+  locationId: string | null;
+  locationName: string | null;
+  variantCount: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface StageRequestTo {
+  name: string;
+  locationId: string | null;
+}
+
+// A collected variant (the raw result key), from GET /acrally-api/admin/variants.
+export interface VariantTo {
+  id: string;
+  rawName: string;
+  displayName: string | null;
+  stageId: string | null;
+  stageName: string | null;
+  locationName: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface UpdateVariantRequestTo {
+  displayName: string;
+  stageId: string | null;
+}
+
+// The outcome of POST /acrally-api/admin/variants/collect.
+export interface VariantCollectResultTo {
   added: number;
-  stages: StageNameTo[];
+  variants: VariantTo[];
+}
+
+// A rally car, from GET /acrally-api/admin/cars.
+export interface CarTo {
+  id: string;
+  name: string;
+  year: number | null;
+  groupName: string | null;
+  className: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface CarRequestTo {
+  name: string;
+  year: number | null;
+  groupName: string | null;
+  className: string | null;
 }
 
 export interface LoginRequestTo {

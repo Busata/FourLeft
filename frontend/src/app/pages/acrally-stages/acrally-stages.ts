@@ -1,13 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import type { StageNameCollectResultTo, StageNameTo } from '../../models/acrally';
+import type { LocationTo, StageRequestTo, StageTo } from '../../models/acrally';
 
 /**
- * Admin: the stage-name catalogue. "Collect" scans results for distinct raw stage identifiers
- * and adds any new ones (existing rows are untouched); each row's readable display name can be
- * edited inline. The display name is what the app renders for that stage in results.
+ * Admin CRUD for stages. Each stage can be assigned to a location. A stage with variants assigned
+ * to it can't be deleted.
  */
 @Component({
   selector: 'app-acrally-stages',
@@ -16,24 +15,32 @@ import type { StageNameCollectResultTo, StageNameTo } from '../../models/acrally
 })
 export class AcrallyStages implements OnInit {
   private readonly http = inject(HttpClient);
+  private readonly base = '/acrally-api/admin/stages';
 
-  readonly stages = signal<StageNameTo[]>([]);
+  readonly stages = signal<StageTo[]>([]);
+  readonly locations = signal<LocationTo[]>([]);
   readonly loaded = signal(false);
   readonly error = signal('');
-  readonly collecting = signal(false);
-  readonly collectMessage = signal('');
 
-  /** The id of the row currently being edited, plus the working draft of its display name. */
+  readonly creating = signal(false);
+  readonly newName = signal('');
+  readonly newLocationId = signal<string>('');
+
   readonly editingId = signal<string | null>(null);
-  readonly draft = signal('');
-  readonly saving = signal(false);
+  readonly editName = signal('');
+  readonly editLocationId = signal<string>('');
+  readonly busy = signal(false);
 
   ngOnInit(): void {
+    this.http.get<LocationTo[]>('/acrally-api/admin/locations').subscribe({
+      next: (list) => this.locations.set(list),
+      error: () => {},
+    });
     this.load();
   }
 
   private load(): void {
-    this.http.get<StageNameTo[]>('/acrally-api/admin/stage-names').subscribe({
+    this.http.get<StageTo[]>(this.base).subscribe({
       next: (list) => {
         this.stages.set(list);
         this.loaded.set(true);
@@ -45,57 +52,77 @@ export class AcrallyStages implements OnInit {
     });
   }
 
-  collect(): void {
-    if (this.collecting()) {
+  toggleCreate(): void {
+    this.error.set('');
+    this.newName.set('');
+    this.newLocationId.set('');
+    this.creating.update((open) => !open);
+  }
+
+  create(): void {
+    if (this.busy() || !this.newName().trim()) {
       return;
     }
     this.error.set('');
-    this.collectMessage.set('');
-    this.collecting.set(true);
-    this.http.post<StageNameCollectResultTo>('/acrally-api/admin/stage-names/collect', {}).subscribe({
-      next: (result) => {
-        this.stages.set(result.stages);
-        this.collectMessage.set(
-          result.added === 0
-            ? 'No new stages — the catalogue is up to date.'
-            : `Collected ${result.added} new stage${result.added === 1 ? '' : 's'}.`,
-        );
-        this.collecting.set(false);
+    this.busy.set(true);
+    const body: StageRequestTo = { name: this.newName(), locationId: this.newLocationId() || null };
+    this.http.post<StageTo>(this.base, body).subscribe({
+      next: (created) => {
+        this.stages.update((list) => [...list, created].sort((a, b) => a.name.localeCompare(b.name)));
+        this.busy.set(false);
+        this.toggleCreate();
       },
-      error: () => {
-        this.error.set('Could not collect stages.');
-        this.collecting.set(false);
-      },
+      error: (err) => this.fail(err, 'Could not create the stage.'),
     });
   }
 
-  startEdit(stage: StageNameTo): void {
+  startEdit(stage: StageTo): void {
+    this.error.set('');
     this.editingId.set(stage.id);
-    this.draft.set(stage.displayName ?? '');
+    this.editName.set(stage.name);
+    this.editLocationId.set(stage.locationId ?? '');
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
-    this.draft.set('');
   }
 
-  save(stage: StageNameTo): void {
-    if (this.saving()) {
+  save(stage: StageTo): void {
+    if (this.busy() || !this.editName().trim()) {
       return;
     }
-    this.saving.set(true);
-    this.http
-      .put<StageNameTo>(`/acrally-api/admin/stage-names/${stage.id}`, { displayName: this.draft() })
-      .subscribe({
-        next: (updated) => {
-          this.stages.update((list) => list.map((s) => (s.id === updated.id ? updated : s)));
-          this.saving.set(false);
-          this.cancelEdit();
-        },
-        error: () => {
-          this.error.set('Could not save the display name.');
-          this.saving.set(false);
-        },
-      });
+    this.error.set('');
+    this.busy.set(true);
+    const body: StageRequestTo = { name: this.editName(), locationId: this.editLocationId() || null };
+    this.http.put<StageTo>(`${this.base}/${stage.id}`, body).subscribe({
+      next: (updated) => {
+        this.stages.update((list) =>
+          list.map((s) => (s.id === updated.id ? updated : s)).sort((a, b) => a.name.localeCompare(b.name)),
+        );
+        this.busy.set(false);
+        this.cancelEdit();
+      },
+      error: (err) => this.fail(err, 'Could not save the stage.'),
+    });
+  }
+
+  remove(stage: StageTo): void {
+    if (this.busy()) {
+      return;
+    }
+    this.error.set('');
+    this.busy.set(true);
+    this.http.delete(`${this.base}/${stage.id}`).subscribe({
+      next: () => {
+        this.stages.update((list) => list.filter((s) => s.id !== stage.id));
+        this.busy.set(false);
+      },
+      error: (err) => this.fail(err, 'Could not delete the stage.'),
+    });
+  }
+
+  private fail(err: HttpErrorResponse, fallback: string): void {
+    this.error.set(err.status === 409 ? err.error?.message ?? 'That action conflicts with existing data.' : fallback);
+    this.busy.set(false);
   }
 }

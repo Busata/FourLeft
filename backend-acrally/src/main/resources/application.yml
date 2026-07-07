@@ -16,6 +16,10 @@ server:
   # Behind the TLS-terminating reverse proxy in prod: honour X-Forwarded-* so the app
   # knows requests are https (correct scheme + Secure session/CSRF cookies). No-op locally.
   forward-headers-strategy: framework
+  error:
+    # Surface ResponseStatusException reasons in the JSON body so the admin UI can show why an
+    # action was rejected (e.g. "This location still has stages assigned to it."). Admin-only API.
+    include-message: always
   compression:
     enabled: true
     mime-types: application/json

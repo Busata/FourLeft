@@ -15,6 +15,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class AcrallyAdmin {
   readonly tabs = [
     { path: 'users', label: 'Users' },
+    { path: 'locations', label: 'Locations' },
     { path: 'stages', label: 'Stages' },
+    { path: 'variants', label: 'Variants' },
+    { path: 'cars', label: 'Cars' },
   ];
 }

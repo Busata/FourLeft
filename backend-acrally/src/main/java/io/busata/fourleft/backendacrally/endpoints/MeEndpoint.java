@@ -4,7 +4,7 @@ import io.busata.fourleft.api.acrally.models.MyResultTo;
 import io.busata.fourleft.api.acrally.models.MySessionTo;
 import io.busata.fourleft.backendacrally.domain.services.session.AgentSessionRepository;
 import io.busata.fourleft.backendacrally.domain.services.session.StageResultRepository;
-import io.busata.fourleft.backendacrally.domain.services.stage.StageNameService;
+import io.busata.fourleft.backendacrally.domain.services.stage.VariantService;
 import io.busata.fourleft.backendacrally.infrastructure.security.AppUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,12 +25,12 @@ public class MeEndpoint {
 
     private final AgentSessionRepository sessionRepository;
     private final StageResultRepository resultRepository;
-    private final StageNameService stageNameService;
+    private final VariantService variantService;
 
     @GetMapping("/sessions")
     public List<MySessionTo> mySessions(@AuthenticationPrincipal AppUserDetails principal) {
         requireLogin(principal);
-        Map<String, String> displayNames = stageNameService.displayNameLookup();
+        Map<String, String> displayNames = variantService.displayNameLookup();
         return sessionRepository.findTop50ByUserIdOrderByCreatedAtDesc(principal.getId()).stream()
                 .map(session -> new MySessionTo(
                         session.getId(),
@@ -49,7 +49,7 @@ public class MeEndpoint {
     @GetMapping("/results")
     public List<MyResultTo> myResults(@AuthenticationPrincipal AppUserDetails principal) {
         requireLogin(principal);
-        Map<String, String> displayNames = stageNameService.displayNameLookup();
+        Map<String, String> displayNames = variantService.displayNameLookup();
         return resultRepository.findTop100ByUserIdOrderByCreatedAtDesc(principal.getId()).stream()
                 .map(result -> new MyResultTo(
                         result.getId(),
