@@ -6,16 +6,20 @@
 
 export interface AuthUserTo {
   id: string;
-  email: string;
   displayName: string;
   status: string;
   admin: boolean;
 }
 
-// Admin-only view of a user, from GET /acrally-api/admin/users.
+export interface UpdateDisplayNameRequestTo {
+  displayName: string;
+}
+
+// Admin-only view of a user, from GET /acrally-api/admin/users. Email is an optional
+// contact field (Steam-only sign-in has no email credential), so it may be null.
 export interface AdminUserTo {
   id: string;
-  email: string;
+  email: string | null;
   displayName: string;
   status: string;
   admin: boolean;
@@ -116,17 +120,6 @@ export interface CreateCarAliasRequestTo {
 export interface CarAliasCollectResultTo {
   added: number;
   aliases: CarAliasTo[];
-}
-
-export interface LoginRequestTo {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequestTo {
-  email: string;
-  password: string;
-  displayName: string;
 }
 
 export interface LinkedIdentityTo {

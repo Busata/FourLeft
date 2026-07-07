@@ -27,6 +27,7 @@ class EventLeaderboardServiceTest {
     @Mock EventEntryRepository entryRepository;
     @Mock EventVariantRepository eventVariantRepository;
     @Mock AppUserRepository appUserRepository;
+    @Mock io.busata.fourleft.backendacrally.domain.services.car.CarRepository carRepository;
 
     @InjectMocks EventLeaderboardService service;
 

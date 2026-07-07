@@ -15,22 +15,11 @@
     <p class="auth-error">{{ error() }}</p>
   }
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="form-group">
-      <label>Email</label>
-      <input formControlName="email" type="email" autocomplete="email" />
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input formControlName="password" type="password" autocomplete="current-password" />
-    </div>
-
-    <button class="g-button g-button-primary" type="submit" [disabled]="submitting()">
-      {{ submitting() ? 'Signing in…' : 'Sign in' }}
-    </button>
-  </form>
+  <!-- Full-page navigation (not XHR): the backend 302s to Steam and Steam 302s back.
+       First sign-in creates the account automatically — there is no registration. -->
+  <a class="g-button g-button-primary" [href]="steamHref">Sign in through Steam</a>
 
   <p class="auth-alt">
-    No account yet? <a routerLink="/acrally/register">Create one</a>
+    Your account is your Steam identity — signing in for the first time creates it.
   </p>
 </div>

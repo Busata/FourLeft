@@ -138,3 +138,24 @@ The four `API_CONTRACT.md` endpoints, authenticated by the personal key.
 **Sequencing:** Phases 0→3 deliver the "register + authenticate with Steam" loop;
 2.5 enriches the Steam profile; 4a→4b add low-friction agent login + ingestion; 5 the
 dashboard. Each phase is independently shippable.
+
+---
+
+## Addendum (2026-07-07) — Steam-only sign-in
+
+The email/password credential was removed; **Steam OpenID is the only sign-in** and the
+account is provisioned automatically on first sign-in (display name seeded from the Steam
+persona, unique-suffixed, user-editable via `POST /account/display-name`). Rationale: the
+trust model was always the Steam anchor (pairing + results already required a linked
+Steam), so the password was a second credential that unlocked nothing — plus password
+storage and an unbuilt reset/verification flow.
+
+Changes vs. the "Key decisions" above:
+- `auth/register` + `auth/login` are gone; `auth/steam/{start,return}` are public and do
+  login-or-provision. Login-CSRF is covered by a single-use `ACR_STEAM_NONCE` cookie
+  checked against a nonce in `return_to`; a post-login redirect (pairing flow) rides in
+  `ACR_STEAM_REDIRECT` (same-origin relative paths only). Session id is rotated on login.
+- `app_user.password_hash` dropped, `email` nullable (optional contact, not a credential) —
+  migration `V018`. Cookie-session model unchanged (still instantly revocable).
+- `SteamLinkService`/link flow deleted — the identity row is created at sign-in.
+- Account recovery is now "recover your Steam account"; admin role stays a manual DB flag.

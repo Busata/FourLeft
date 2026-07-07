@@ -17,8 +17,6 @@ import java.util.UUID;
 public class AppUserDetails implements UserDetails {
 
     private final UUID id;
-    private final String email;
-    private final String passwordHash;
     private final String displayName;
     private final String status;
     private final boolean banned;
@@ -26,8 +24,6 @@ public class AppUserDetails implements UserDetails {
 
     public AppUserDetails(AppUser user) {
         this.id = user.getId();
-        this.email = user.getEmail();
-        this.passwordHash = user.getPasswordHash();
         this.displayName = user.getDisplayName();
         this.status = user.getStatus().name();
         this.banned = user.isBanned();
@@ -36,10 +32,6 @@ public class AppUserDetails implements UserDetails {
 
     public UUID getId() {
         return id;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public String getDisplayName() {
@@ -66,12 +58,13 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return passwordHash;
+        // Steam-only sign-in: there is no password credential.
+        return null;
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return id.toString();
     }
 
     @Override

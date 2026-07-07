@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, tap } from 'rxjs';
 
-import type { AuthUserTo, LoginRequestTo, RegisterRequestTo } from '../models/acrally';
+import type { AuthUserTo } from '../models/acrally';
 
 /**
  * Session-backed auth for the ACRally module. The browser talks to /acrally-api with the
@@ -33,15 +33,20 @@ export class AuthService {
     );
   }
 
-  register(body: RegisterRequestTo): Observable<AuthUserTo> {
-    return this.http
-      .post<AuthUserTo>(`${this.base}/register`, body)
-      .pipe(tap((user) => this.user.set(user)));
+  /**
+   * Signing in is a full-page round-trip through Steam (the backend 302s to Steam and
+   * back), not an XHR — navigate to this URL to start it. `redirect` is the in-app path
+   * to land on afterwards.
+   */
+  steamSignInUrl(redirect?: string): string {
+    return redirect
+      ? `${this.base}/steam/start?redirect=${encodeURIComponent(redirect)}`
+      : `${this.base}/steam/start`;
   }
 
-  login(body: LoginRequestTo): Observable<AuthUserTo> {
+  updateDisplayName(displayName: string): Observable<AuthUserTo> {
     return this.http
-      .post<AuthUserTo>(`${this.base}/login`, body)
+      .post<AuthUserTo>('/acrally-api/account/display-name', { displayName })
       .pipe(tap((user) => this.user.set(user)));
   }
 

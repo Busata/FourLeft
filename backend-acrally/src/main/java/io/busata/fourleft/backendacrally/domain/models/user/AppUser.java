@@ -22,13 +22,10 @@ public class AppUser {
     @Id
     private UUID id;
 
-    @Column(nullable = false)
+    /** Optional contact address, volunteered by the user — not a credential. */
+    @Column
     @Setter
     private String email;
-
-    @Column(name = "password_hash", nullable = false)
-    @Setter
-    private String passwordHash;
 
     @Column(name = "display_name", nullable = false)
     @Setter
@@ -47,10 +44,8 @@ public class AppUser {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public AppUser(String email, String passwordHash, String displayName) {
+    public AppUser(String displayName) {
         this.id = UUID.randomUUID();
-        this.email = email;
-        this.passwordHash = passwordHash;
         this.displayName = displayName;
         this.status = UserStatus.ACTIVE;
         this.role = UserRole.USER;

@@ -1,12 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-acrally-login',
-  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './acrally-login.html',
 })
 export class AcrallyLogin implements OnInit {
@@ -15,37 +13,28 @@ export class AcrallyLogin implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   // Where to go after sign-in — used by the device-pairing link to return to approval.
+  // Carried through the Steam round-trip by the backend (validated same-origin there).
   private readonly redirect = this.route.snapshot.queryParamMap.get('redirect') || '/acrally/dashboard';
 
-  readonly error = signal('');
-  readonly submitting = signal(false);
+  /** Full-page navigation target — the backend 302s to Steam and Steam 302s back. */
+  readonly steamHref = this.auth.steamSignInUrl(this.redirect);
 
-  readonly form = new FormGroup({
-    email: new FormControl<string>('', { nonNullable: true }),
-    password: new FormControl<string>('', { nonNullable: true }),
-  });
+  readonly error = signal('');
 
   ngOnInit(): void {
+    // A failed Steam round-trip lands back here with ?steam=<outcome>.
+    const flag = this.route.snapshot.queryParamMap.get('steam');
+    if (flag === 'banned') {
+      this.error.set('This account is banned.');
+    } else if (flag === 'error') {
+      this.error.set('Steam sign-in failed — please try again.');
+    }
+
     // Primes the session/XSRF state; if already signed in, skip straight on.
     this.auth.loadMe().subscribe(() => {
       if (this.auth.isAuthenticated()) {
         this.router.navigateByUrl(this.redirect);
       }
-    });
-  }
-
-  submit(): void {
-    if (this.submitting()) {
-      return;
-    }
-    this.error.set('');
-    this.submitting.set(true);
-    this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => this.router.navigateByUrl(this.redirect),
-      error: (err) => {
-        this.error.set(err.status === 401 ? 'Invalid email or password.' : 'Could not sign in.');
-        this.submitting.set(false);
-      },
     });
   }
 }

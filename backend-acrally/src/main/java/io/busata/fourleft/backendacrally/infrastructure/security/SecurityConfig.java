@@ -5,12 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -24,20 +20,10 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 public class SecurityConfig {
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityContextRepository securityContextRepository() {
-        // Session-backed context: the login endpoint saves the authentication here and
+        // Session-backed context: the Steam sign-in saves the authentication here and
         // the browser carries it via the HttpOnly session cookie on subsequent requests.
         return new HttpSessionSecurityContextRepository();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 
     @Bean
@@ -72,7 +58,8 @@ public class SecurityConfig {
                         // re-authorized unauthenticated on the error dispatch and masked as 401.
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/acrally-api/health").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/acrally-api/auth/register", "/acrally-api/auth/login").permitAll()
+                        // Steam sign-in round-trip: the user has no session yet by definition.
+                        .requestMatchers(HttpMethod.GET, "/acrally-api/auth/steam/start", "/acrally-api/auth/steam/return").permitAll()
                         // Agent device-pairing handshake: no session, authenticated by the device_code itself.
                         .requestMatchers(HttpMethod.POST, "/acrally-api/agent/pair/start", "/acrally-api/agent/pair/token").permitAll()
                         // Administration surface: only ROLE_ADMIN principals. A non-admin session hits 403.

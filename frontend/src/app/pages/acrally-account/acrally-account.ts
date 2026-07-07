@@ -1,20 +1,20 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 import type { AgentReleaseTo, ApiKeyTo, LinkedIdentityTo, SteamProfileTo } from '../../models/acrally';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-acrally-account',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './acrally-account.html',
 })
 export class AcrallyAccount implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly user = this.auth.currentUser;
@@ -27,17 +27,48 @@ export class AcrallyAccount implements OnInit {
   readonly notice = signal('');
   readonly error = signal('');
 
+  // Display name is the only editable profile field; identity itself is the Steam anchor.
+  readonly editingName = signal(false);
+  readonly savingName = signal(false);
+  readonly nameControl = new FormControl<string>('', { nonNullable: true });
+
   ngOnInit(): void {
-    const flag = this.route.snapshot.queryParamMap.get('steam');
-    if (flag === 'linked') {
-      this.notice.set('Steam account linked.');
-    } else if (flag === 'error') {
-      this.error.set('Could not link that Steam account — it may already be linked to another account.');
-    }
     this.loadIdentities();
     this.loadSteamProfile();
     this.loadKeys();
     this.loadAgent();
+  }
+
+  startEditName(): void {
+    this.nameControl.setValue(this.user()?.displayName ?? '');
+    this.error.set('');
+    this.editingName.set(true);
+  }
+
+  cancelEditName(): void {
+    this.editingName.set(false);
+  }
+
+  saveName(): void {
+    if (this.savingName()) {
+      return;
+    }
+    this.savingName.set(true);
+    this.auth.updateDisplayName(this.nameControl.value.trim()).subscribe({
+      next: () => {
+        this.savingName.set(false);
+        this.editingName.set(false);
+        this.notice.set('Display name updated.');
+      },
+      error: (err) => {
+        this.savingName.set(false);
+        this.error.set(
+          err.status === 409
+            ? 'This display name is taken.'
+            : err.error?.message || 'Could not update the display name.',
+        );
+      },
+    });
   }
 
   private loadAgent(): void {
