@@ -79,9 +79,11 @@
       <h2 class="account-section__title">All clubs</h2>
       @if (clubs().length === 0) {
         <p class="auth-sub">No clubs yet. Create the first one.</p>
+      } @else if (otherClubs().length === 0) {
+        <p class="auth-sub">You’ve joined every club here.</p>
       } @else {
         <ul class="key-list">
-          @for (club of clubs(); track club.id) {
+          @for (club of otherClubs(); track club.id) {
             <li class="key-item">
               <div class="key-meta">
                 <a class="key-label title-link" [routerLink]="[club.id]">{{ club.name }}</a>

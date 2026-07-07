@@ -163,6 +163,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+// The penalty baked into a total time, called out beside it.
+.board__penalty {
+  margin-left: 6px;
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 600;
+}
+
 // Wide-only columns (car, stages-completed): hidden on narrow screens, shown from 720px.
 .board__wide {
   display: none;

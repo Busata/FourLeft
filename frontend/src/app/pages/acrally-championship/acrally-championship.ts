@@ -129,6 +129,7 @@ export class AcrallyChampionship implements OnInit {
         next: (detail) => {
           this.detail.set(detail);
           this.loaded.set(true);
+          this.openAllBoards(detail);
         },
         error: (err) => {
           this.notFound.set(err.status === 404 || err.status === 403);
@@ -185,6 +186,17 @@ export class AcrallyChampionship implements OnInit {
     return this.leaderboards().get(eventId);
   }
 
+  /** Open every event's leaderboard on load, fetching each once. Users can still collapse them. */
+  private openAllBoards(detail: ChampionshipDetailTo): void {
+    const ids = detail.events.map((e) => e.id);
+    this.openBoards.set(new Set(ids));
+    for (const id of ids) {
+      if (!this.leaderboards().has(id)) {
+        this.loadLeaderboard(id);
+      }
+    }
+  }
+
   /** Toggle an event's leaderboard, fetching it the first time it's opened. */
   toggleLeaderboard(eventId: string): void {
     const open = new Set(this.openBoards());
@@ -226,6 +238,11 @@ export class AcrallyChampionship implements OnInit {
     const seconds = totalSeconds % 60;
     const millis = ms % 1000;
     return `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`;
+  }
+
+  /** Penalty seconds baked into a total, e.g. "+2.0s". Only shown when there is a penalty. */
+  formatPenalty(ms: number): string {
+    return `+${(ms / 1000).toFixed(1)}s`;
   }
 
   // --- Championship meta ---

@@ -452,6 +452,21 @@ form .g-button + .g-button {
   flex-direction: column;
 }
 
+/* A single-line key-item body: a title followed by inline muted meta (location · car · time · …). */
+.session-line {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  overflow: hidden;
+
+  .key-sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .key-label {
   font-weight: 600;
 }

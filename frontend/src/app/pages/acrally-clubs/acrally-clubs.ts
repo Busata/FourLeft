@@ -17,6 +17,8 @@ export class AcrallyClubs implements OnInit {
   readonly clubs = signal<ClubTo[]>([]);
   readonly clubsLoaded = signal(false);
   readonly myClubs = computed(() => this.clubs().filter((c) => c.member));
+  /** Clubs the user hasn't joined — "All clubs" excludes the ones already under "My clubs". */
+  readonly otherClubs = computed(() => this.clubs().filter((c) => !c.member));
 
   readonly creating = signal(false);
   readonly submitting = signal(false);

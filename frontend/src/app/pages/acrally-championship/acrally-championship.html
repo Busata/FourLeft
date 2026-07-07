@@ -229,7 +229,12 @@
                               <td class="board__pos">{{ e.rank }}</td>
                               <td>{{ e.driver }}</td>
                               <td class="board__wide">{{ e.carName || '—' }}</td>
-                              <td class="board__num">{{ formatTime(e.totalMs) }}</td>
+                              <td class="board__num">
+                                {{ formatTime(e.totalMs) }}
+                                @if (e.penaltyMs > 0) {
+                                  <span class="board__penalty">{{ formatPenalty(e.penaltyMs) }}</span>
+                                }
+                              </td>
                             </tr>
                           }
                         </tbody>

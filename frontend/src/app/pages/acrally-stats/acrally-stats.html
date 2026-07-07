@@ -46,12 +46,10 @@
       <ul class="key-list">
         @for (s of sessions(); track s.id) {
           <li class="key-item">
-            <div class="key-meta">
-              <span class="key-label">{{ s.stage || 'Unknown stage' }}</span>
-              <span class="key-sub">
-                {{ s.car }} · {{ s.createdAt | date: 'short' }}
-              </span>
-            </div>
+            <span class="session-line">
+              <span class="key-label">{{ s.stage || s.track || 'Unknown stage' }}</span>
+              <span class="key-sub">@if (s.car) {· {{ s.car }} }@if (s.currentMs != null) {· {{ formatTime(s.currentMs) }} }· {{ s.createdAt | date: 'short' }}</span>
+            </span>
             <span class="dash-status" [attr.data-status]="s.status">{{ s.status }}</span>
           </li>
         }
