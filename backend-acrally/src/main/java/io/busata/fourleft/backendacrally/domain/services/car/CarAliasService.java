@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendacrally.domain.services.car;
 
+import io.busata.fourleft.backendacrally.domain.models.car.Car;
 import io.busata.fourleft.backendacrally.domain.models.car.CarAlias;
 import io.busata.fourleft.backendacrally.domain.services.session.StageResultRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +28,21 @@ public class CarAliasService {
 
     public List<CarAlias> list() {
         return aliasRepository.findAllByOrderByRawNameAsc();
+    }
+
+    /**
+     * A lookup from raw car string to the catalogue car name to render, for callers (the personal
+     * dashboard) that surface raw {@code stage_result.car}/{@code agent_session.car} values. Only
+     * assigned aliases appear; callers fall back to the raw string for anything not present here
+     * (which, for cars whose game name already equals their catalogue name, reads identically).
+     */
+    public Map<String, String> displayNameLookup() {
+        Map<UUID, String> carNames = carRepository.findAll().stream()
+                .collect(Collectors.toMap(Car::getId, Car::getName));
+        return aliasRepository.findAll().stream()
+                .filter(alias -> alias.getCarId() != null && carNames.containsKey(alias.getCarId()))
+                .collect(Collectors.toMap(CarAlias::getRawName,
+                        alias -> carNames.get(alias.getCarId()), (a, b) -> a));
     }
 
     /**

@@ -44,7 +44,7 @@
       <p class="auth-sub">No sessions recorded yet.</p>
     } @else {
       <ul class="key-list">
-        @for (s of sessions(); track s.id) {
+        @for (s of visibleSessions(); track s.id) {
           <li class="key-item">
             <span class="session-line">
               <span class="key-label">{{ s.stage || s.track || 'Unknown stage' }}</span>
@@ -54,6 +54,13 @@
           </li>
         }
       </ul>
+      @if (sessionsTotalPages() > 1) {
+        <div class="list-pager">
+          <button class="g-button g-button-secondary" (click)="prevSessionsPage()" [disabled]="sessionsPage() === 0">Prev</button>
+          <span class="list-pager__info">Page {{ sessionsPage() + 1 }} of {{ sessionsTotalPages() }}</span>
+          <button class="g-button g-button-secondary" (click)="nextSessionsPage()" [disabled]="sessionsPage() >= sessionsTotalPages() - 1">Next</button>
+        </div>
+      }
     }
   </section>
 </div>

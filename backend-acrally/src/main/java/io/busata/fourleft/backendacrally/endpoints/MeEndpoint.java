@@ -2,6 +2,7 @@ package io.busata.fourleft.backendacrally.endpoints;
 
 import io.busata.fourleft.api.acrally.models.MyResultTo;
 import io.busata.fourleft.api.acrally.models.MySessionTo;
+import io.busata.fourleft.backendacrally.domain.services.car.CarAliasService;
 import io.busata.fourleft.backendacrally.domain.services.session.AgentSessionRepository;
 import io.busata.fourleft.backendacrally.domain.services.session.StageResultRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantService;
@@ -26,16 +27,18 @@ public class MeEndpoint {
     private final AgentSessionRepository sessionRepository;
     private final StageResultRepository resultRepository;
     private final VariantService variantService;
+    private final CarAliasService carAliasService;
 
     @GetMapping("/sessions")
     public List<MySessionTo> mySessions(@AuthenticationPrincipal AppUserDetails principal) {
         requireLogin(principal);
         Map<String, String> displayNames = variantService.displayNameLookup();
+        Map<String, String> carNames = carAliasService.displayNameLookup();
         return sessionRepository.findTop50ByUserIdOrderByCreatedAtDesc(principal.getId()).stream()
                 .map(session -> new MySessionTo(
                         session.getId(),
                         session.getDriver(),
-                        session.getCar(),
+                        displayCar(session.getCar(), carNames),
                         displayStage(session.getStage(), displayNames),
                         session.getTrack(),
                         session.getStatus().name(),
@@ -50,11 +53,12 @@ public class MeEndpoint {
     public List<MyResultTo> myResults(@AuthenticationPrincipal AppUserDetails principal) {
         requireLogin(principal);
         Map<String, String> displayNames = variantService.displayNameLookup();
+        Map<String, String> carNames = carAliasService.displayNameLookup();
         return resultRepository.findTop100ByUserIdOrderByCreatedAtDesc(principal.getId()).stream()
                 .map(result -> new MyResultTo(
                         result.getId(),
                         displayStage(result.getStage(), displayNames),
-                        result.getCar(),
+                        displayCar(result.getCar(), carNames),
                         result.getDriver(),
                         result.getRawMs(),
                         result.getPenaltyMs(),
@@ -69,6 +73,14 @@ public class MeEndpoint {
             return null;
         }
         return displayNames.getOrDefault(rawStage, rawStage);
+    }
+
+    /** Renders the catalogue car name for a raw game car string, falling back to the raw string. */
+    private String displayCar(String rawCar, Map<String, String> carNames) {
+        if (rawCar == null) {
+            return null;
+        }
+        return carNames.getOrDefault(rawCar, rawCar);
     }
 
     private void requireLogin(AppUserDetails principal) {

@@ -487,6 +487,26 @@ form .g-button + .g-button {
   font-size: 12px;
 }
 
+/* Prev/Next pager under a client-paged list (e.g. the dashboard's recent sessions). */
+.list-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+
+  .g-button {
+    min-height: 36px;
+    padding: 6px 16px;
+  }
+
+  &__info {
+    color: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .club-actions {
   flex-shrink: 0;
   display: flex;
