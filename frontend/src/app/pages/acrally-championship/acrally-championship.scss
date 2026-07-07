@@ -142,6 +142,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-alt);
+  overflow-x: auto; // the stage board's extra columns can outgrow a narrow screen.
 }
 
 .board__caption {
@@ -187,17 +188,28 @@
   color: var(--muted);
 }
 
+// Numeric columns: left-aligned so the values sit under their (left-aligned) headers, with
+// tabular figures so the digits line up row to row.
 .board__num {
-  text-align: right;
+  text-align: left;
   font-variant-numeric: tabular-nums;
 }
 
-// The penalty baked into a total time, called out beside it.
+// The penalty column — the "+Xs" is called out in red; a zero penalty shows a muted dash.
 .board__penalty {
-  margin-left: 6px;
   color: var(--danger);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
+}
+
+// Gap to the stage leader — secondary to the absolute time, so it reads muted.
+.board__diff {
+  color: var(--muted);
+}
+
+// Placeholder dash for an empty numeric cell (no penalty / the leader's diff).
+.board__muted {
+  color: var(--faint);
 }
 
 // Wide-only columns (car, stages-completed): hidden on narrow screens, shown from 720px.

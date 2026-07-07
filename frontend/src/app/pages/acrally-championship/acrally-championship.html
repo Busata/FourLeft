@@ -226,18 +226,34 @@
                     } @else {
                       <table class="board">
                         <thead>
-                          <tr><th class="board__pos">#</th><th>Driver</th><th class="board__wide">Car</th><th class="board__num">Time</th></tr>
+                          <tr>
+                            <th class="board__pos">#</th>
+                            <th>Driver</th>
+                            <th class="board__wide">Car</th>
+                            <th class="board__num">Time</th>
+                            <th class="board__num">Penalty</th>
+                            <th class="board__num">Diff</th>
+                          </tr>
                         </thead>
                         <tbody>
-                          @for (e of stage.entries; track e.userId) {
+                          @for (e of stage.entries; track e.userId; let i = $index) {
                             <tr>
                               <td class="board__pos">{{ e.rank }}</td>
                               <td>{{ e.driver }}</td>
                               <td class="board__wide">{{ e.carName || '—' }}</td>
+                              <td class="board__num">{{ formatTime(e.totalMs) }}</td>
                               <td class="board__num">
-                                {{ formatTime(e.totalMs) }}
                                 @if (e.penaltyMs > 0) {
                                   <span class="board__penalty">{{ formatPenalty(e.penaltyMs) }}</span>
+                                } @else {
+                                  <span class="board__muted">—</span>
+                                }
+                              </td>
+                              <td class="board__num board__diff">
+                                @if (i === 0) {
+                                  <span class="board__muted">—</span>
+                                } @else {
+                                  {{ formatDiff(e.totalMs - stage.entries[0].totalMs) }}
                                 }
                               </td>
                             </tr>

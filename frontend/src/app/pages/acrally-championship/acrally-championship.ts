@@ -247,6 +247,21 @@ export class AcrallyChampionship implements OnInit {
     return `+${(ms / 1000).toFixed(1)}s`;
   }
 
+  /** Gap behind the stage leader, e.g. "+1.234" or "+1:02.345". Empty for the leader / no gap. */
+  formatDiff(gapMs: number): string {
+    if (gapMs <= 0) {
+      return '';
+    }
+    const totalSeconds = Math.floor(gapMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const millis = gapMs % 1000;
+    const body = minutes > 0
+      ? `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`
+      : `${seconds}.${millis.toString().padStart(3, '0')}`;
+    return `+${body}`;
+  }
+
   // --- Championship meta ---
   startEditMeta(): void {
     const d = this.detail();
