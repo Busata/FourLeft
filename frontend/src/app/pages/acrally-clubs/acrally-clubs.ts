@@ -10,6 +10,7 @@ import type { ClubTo } from '../../models/acrally';
   selector: 'app-acrally-clubs',
   imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './acrally-clubs.html',
+  styleUrl: './acrally-clubs.scss',
 })
 export class AcrallyClubs implements OnInit {
   private readonly http = inject(HttpClient);

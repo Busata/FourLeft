@@ -36,12 +36,12 @@
   } @else {
     @if (myClubs().length > 0) {
       <section class="account-section" style="border-top: none; padding-top: 0">
-        <h2 class="account-section__title">My clubs</h2>
-        <ul class="key-list">
+        <h2 class="club-eyebrow">My clubs</h2>
+        <ul class="club-list">
           @for (club of myClubs(); track club.id) {
-            <li class="key-item">
-              <div class="key-meta">
-                <a class="key-label title-link" [routerLink]="[club.id]">{{ club.name }}</a>
+            <li class="club-card">
+              <div class="club-card__body">
+                <a class="club-card__name" [routerLink]="[club.id]">{{ club.name }}</a>
                 @if (club.description) {
                   <span class="key-sub">{{ club.description }}</span>
                 }
@@ -76,17 +76,17 @@
 
     <section class="account-section" [style.border-top]="myClubs().length > 0 ? null : 'none'"
              [style.padding-top]="myClubs().length > 0 ? null : '0'">
-      <h2 class="account-section__title">All clubs</h2>
+      <h2 class="club-eyebrow">All clubs</h2>
       @if (clubs().length === 0) {
         <p class="auth-sub">No clubs yet. Create the first one.</p>
       } @else if (otherClubs().length === 0) {
         <p class="auth-sub">You’ve joined every club here.</p>
       } @else {
-        <ul class="key-list">
+        <ul class="club-list">
           @for (club of otherClubs(); track club.id) {
-            <li class="key-item">
-              <div class="key-meta">
-                <a class="key-label title-link" [routerLink]="[club.id]">{{ club.name }}</a>
+            <li class="club-card">
+              <div class="club-card__body">
+                <a class="club-card__name" [routerLink]="[club.id]">{{ club.name }}</a>
                 @if (club.description) {
                   <span class="key-sub">{{ club.description }}</span>
                 }

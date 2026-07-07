@@ -1,0 +1,75 @@
+// Clubs list: two labelled groups (My clubs / All clubs), each club a card so entries stand out.
+// Mirrors the club-detail treatment — quiet section eyebrows, prominent card names.
+
+// Group label — small and quiet so it doesn't compete with the club names below. Accent dot +
+// uppercase, matching the section eyebrows on the club-detail and championship pages.
+.club-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+
+  &::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+}
+
+.club-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Each club is a card. Unlike a championship card it isn't a single link — it carries its own
+// Join/Leave/social actions — so only the name navigates; the card just lifts on hover.
+.club-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: border-color 0.12s, box-shadow 0.12s;
+
+  &:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+  }
+}
+
+.club-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.club-card__name {
+  width: fit-content;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.12s;
+
+  &:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+}
