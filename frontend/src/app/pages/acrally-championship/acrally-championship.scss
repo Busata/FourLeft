@@ -1,23 +1,99 @@
-// Championship editor. Leans on the global CSS vars/classes (g-card, g-button, form-group, chip-less
-// bits) and adds the event-card + picker layout. Mobile-first: rows stack, then spread at 720px.
+// Championship editor. Leans on the global CSS vars/classes (g-card, g-button, form-group) and adds
+// the header, event-card and picker layout. Mobile-first: rows stack, then spread at 720px.
 
+// ---- Header -------------------------------------------------------------------------------------
+.champ-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 14px 0 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.champ-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.champ-head__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+// ---- Section header (title + primary action) ----------------------------------------------------
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+// ---- Inset panel: the edit/add forms and the pickers live in one consistent container ------------
+.panel {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-alt);
+
+  &--add {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(47, 114, 214, 0.08);
+  }
+}
+
+.panel__title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+// ---- Event card ---------------------------------------------------------------------------------
 .event-card {
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px 16px;
   margin-bottom: 12px;
-  background: var(--surface-alt);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .event-card__head {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.event-card__name {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.event-card__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .event-section {
-  margin-top: 12px;
-  padding-top: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
@@ -26,59 +102,102 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-height: 32px;
 }
 
 .event-section__title {
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.event-empty {
+  margin: 6px 0 0;
   color: var(--muted);
-  margin: 0;
+  font-size: 13px;
 }
 
-.event-edit {
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
-}
-
+// ---- Forms ----
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .form-group--num {
   max-width: 160px;
 }
 
-// Ordered stage list.
+// ---- Ordered stage list -------------------------------------------------------------------------
 .stage-list {
-  margin: 6px 0 0;
-  padding-left: 20px;
+  margin: 8px 0 0;
+  padding-left: 22px;
 
   li {
-    margin: 2px 0;
+    margin: 3px 0;
 
     .key-sub {
       margin-left: 6px;
     }
   }
 
-  &--editable li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    list-style-position: inside;
+  &--editable {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: stage;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      margin: 4px 0;
+
+      &::before {
+        counter-increment: stage;
+        content: counter(stage);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border-radius: 999px;
+        background: var(--surface-alt);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      > span:first-of-type {
+        flex: 1;
+        min-width: 0;
+      }
+    }
   }
 }
 
-.picker {
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
+// ---- Pickers ------------------------------------------------------------------------------------
+.picker__label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.picker__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .picker__row-actions {
@@ -88,13 +207,21 @@
 }
 
 .picker__catalogue {
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
-  margin-top: 6px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .picker__group {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .picker__group-title {
@@ -112,6 +239,7 @@
   background: none;
   color: var(--accent);
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   padding: 2px 4px;
 }
@@ -119,24 +247,30 @@
 .picker__stage-title {
   font-size: 12px;
   color: var(--muted);
-  margin: 4px 0 2px;
+  margin: 6px 0 2px;
 }
 
+// ---- Chips --------------------------------------------------------------------------------------
 .chip-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .chip {
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  &:hover:not(.chip--static) {
+    border-color: #9aa4b5;
+  }
 
   &--on {
     background: var(--accent-soft);
@@ -147,10 +281,24 @@
 
   &--static {
     cursor: default;
+    background: var(--surface-alt);
   }
 }
 
+// ---- Compact icon buttons (reorder / remove) ----------------------------------------------------
+.g-button.mini {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
 @media (min-width: 720px) {
+  .champ-head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
   .event-card__head {
     flex-direction: row;
     align-items: flex-start;
@@ -163,6 +311,7 @@
 
     .form-group {
       flex: 1;
+      margin-bottom: 0;
     }
   }
 }

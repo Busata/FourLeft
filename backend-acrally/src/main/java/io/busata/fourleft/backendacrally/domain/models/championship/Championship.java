@@ -9,14 +9,13 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * A championship scheduled by a club owner: a named season anchored on a start date, holding an
- * ordered set of {@link ChampionshipEvent}s. The {@code createdBy} user is the club owner who
- * scheduled it.
+ * A championship scheduled by a club owner: a named season anchored on a start moment (date + time),
+ * holding an ordered set of {@link ChampionshipEvent}s. The {@code createdBy} user is the club owner
+ * who scheduled it.
  */
 @Entity
 @Table(name = "championship")
@@ -33,8 +32,8 @@ public class Championship {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    @Column(name = "starts_at", nullable = false)
+    private LocalDateTime startsAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -49,19 +48,19 @@ public class Championship {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Championship(UUID clubId, String name, LocalDate startDate, UUID createdBy) {
+    public Championship(UUID clubId, String name, LocalDateTime startsAt, UUID createdBy) {
         this.id = UUID.randomUUID();
         this.clubId = clubId;
         this.name = name.strip();
-        this.startDate = startDate;
+        this.startsAt = startsAt;
         this.status = ChampionshipStatus.DRAFT;
         this.createdBy = createdBy;
         this.createdAt = LocalDateTime.now();
     }
 
-    public void update(String name, LocalDate startDate, ChampionshipStatus status) {
+    public void update(String name, LocalDateTime startsAt, ChampionshipStatus status) {
         this.name = name.strip();
-        this.startDate = startDate;
+        this.startsAt = startsAt;
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }

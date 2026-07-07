@@ -9,7 +9,7 @@
       }
     </div>
     @if (owner()) {
-      <button class="g-button" type="button" (click)="toggleCreate()">
+      <button class="g-button g-button-secondary" type="button" (click)="toggleCreate()">
         {{ creating() ? 'Cancel' : 'Schedule championship' }}
       </button>
     }
@@ -26,8 +26,8 @@
           <input formControlName="name" type="text" maxlength="120" placeholder="e.g. Summer Series" />
         </div>
         <div class="form-group">
-          <label>Start date</label>
-          <input formControlName="startDate" type="date" />
+          <label>Start date &amp; time</label>
+          <input formControlName="startsAt" type="datetime-local" />
         </div>
         <button class="g-button g-button-primary" type="submit" [disabled]="submitting()">
           {{ submitting() ? 'Creating…' : 'Create & add events' }}
@@ -53,19 +53,18 @@
         @for (c of championships(); track c.id) {
           <li class="key-item">
             <div class="key-meta">
-              <span class="key-label">{{ c.name }}</span>
+              <a class="key-label title-link" [routerLink]="['championships', c.id]">{{ c.name }}</a>
               <span class="key-sub">
-                Starts {{ c.startDate | date: 'mediumDate' }} ·
+                Starts {{ c.startsAt | date: 'MMM d, y · HH:mm' }} ·
                 {{ c.eventCount }} {{ c.eventCount === 1 ? 'event' : 'events' }}
-                @if (c.status !== 'PUBLISHED') {
-                  · <span style="color: var(--danger)">Draft</span>
-                }
               </span>
             </div>
             <div class="club-actions">
-              <a class="g-button" [routerLink]="['championships', c.id]">
-                {{ owner() ? 'Manage' : 'View' }}
-              </a>
+              @if (c.status !== 'PUBLISHED') {
+                <span class="status-pill status-pill--draft">Draft</span>
+              } @else {
+                <span class="status-pill status-pill--live">Published</span>
+              }
             </div>
           </li>
         }

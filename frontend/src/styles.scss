@@ -13,6 +13,10 @@
   --accent-soft: #eaf1fe;
   --danger: #b3271e;
   --danger-soft: #fdeceb;
+  --ok: #1f7a44;
+  --ok-soft: #e7f3ec;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1da;
   --header-bg: #202225;
 }
 
@@ -452,6 +456,17 @@ form .g-button + .g-button {
   font-weight: 600;
 }
 
+/* A list item's title rendered as a link (e.g. a club/championship name that opens its page). */
+.title-link {
+  color: var(--ink);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+}
+
 .key-sub {
   color: var(--muted);
   font-size: 12px;
@@ -462,6 +477,38 @@ form .g-button + .g-button {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Draft / Published (and similar) status pills. */
+.status-pill {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  &--draft {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+
+  &--live {
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+}
+
+/* A small static status pill (e.g. "Owner") sitting among a row's actions. */
+.key-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .pair-prompt {

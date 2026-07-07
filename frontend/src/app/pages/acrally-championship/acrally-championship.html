@@ -11,27 +11,28 @@
     @let d = detail()!;
 
     <!-- Header -->
-    <div class="dash-head">
+    <div class="champ-head">
       <div class="key-meta">
-        <span class="key-label" style="font-size: 18px">{{ d.name }}</span>
-        <span class="key-sub">
-          Starts {{ d.startDate | date: 'mediumDate' }} ·
-          @if (published()) {
-            <span style="color: var(--accent)">Published</span>
-          } @else {
-            <span style="color: var(--danger)">Draft</span>
-          }
-        </span>
+        <span class="champ-title">{{ d.name }}</span>
+        <span class="key-sub">Starts {{ d.startsAt | date: 'EEE MMM d, y · HH:mm' }}</span>
       </div>
-      @if (owner()) {
-        <div class="club-actions">
-          <button class="g-button" type="button" (click)="startEditMeta()">Edit</button>
-          <button class="g-button" type="button" (click)="togglePublish()">
-            {{ published() ? 'Unpublish' : 'Publish' }}
-          </button>
-          <button class="g-button" type="button" (click)="deleteChampionship()">Delete</button>
-        </div>
-      }
+      <div class="champ-head__aside">
+        @if (published()) {
+          <span class="status-pill status-pill--live">Published</span>
+        } @else {
+          <span class="status-pill status-pill--draft">Draft</span>
+        }
+        @if (owner()) {
+          <div class="club-actions">
+            <button class="g-button g-button-secondary" type="button" (click)="startEditMeta()">Edit</button>
+            <button class="g-button" [class.g-button-primary]="!published()" [class.g-button-secondary]="published()"
+                    type="button" (click)="togglePublish()">
+              {{ published() ? 'Unpublish' : 'Publish' }}
+            </button>
+            <button class="g-button g-button-danger" type="button" (click)="deleteChampionship()">Delete</button>
+          </div>
+        }
+      </div>
     </div>
 
     @if (error()) {
@@ -39,52 +40,64 @@
     }
 
     @if (editingMeta()) {
-      <section class="account-section" style="border-top: none; padding-top: 0">
-        <div class="form-group">
-          <label>Name</label>
-          <input type="text" maxlength="120" [ngModel]="metaName()" (ngModelChange)="metaName.set($event)" />
-        </div>
-        <div class="form-group">
-          <label>Start date</label>
-          <input type="date" [ngModel]="metaStartDate()" (ngModelChange)="metaStartDate.set($event)" />
+      <div class="panel">
+        <p class="panel__title">Edit championship</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" maxlength="120" [ngModel]="metaName()" (ngModelChange)="metaName.set($event)" />
+          </div>
+          <div class="form-group">
+            <label>Start date &amp; time</label>
+            <input type="datetime-local" [ngModel]="metaStartsAt()" (ngModelChange)="metaStartsAt.set($event)" />
+          </div>
         </div>
         <div class="club-actions">
           <button class="g-button g-button-primary" type="button" (click)="saveMeta()">Save</button>
-          <button class="g-button" type="button" (click)="editingMeta.set(false)">Cancel</button>
+          <button class="g-button g-button-secondary" type="button" (click)="editingMeta.set(false)">Cancel</button>
         </div>
-      </section>
+      </div>
     }
 
     <!-- Events -->
     <section class="account-section" style="border-top: none; padding-top: 0">
-      <h2 class="account-section__title">Events</h2>
+      <div class="section-head">
+        <h2 class="account-section__title" style="margin: 0">Events</h2>
+        @if (owner() && !addingEvent()) {
+          <button class="g-button g-button-primary" type="button" (click)="startAddEvent()">+ Add event</button>
+        }
+      </div>
 
-      @if (d.events.length === 0) {
-        <p class="auth-sub">No events yet.@if (owner()) { Add the first round below. }</p>
+      @if (d.events.length === 0 && !addingEvent()) {
+        <p class="auth-sub" style="margin-top: 8px">
+          No events yet.@if (owner()) { Add the first round to build the calendar. }
+        </p>
       }
 
       @for (event of d.events; track event.id; let i = $index) {
         <div class="event-card">
           <div class="event-card__head">
             <div class="key-meta">
-              <span class="key-label">{{ i + 1 }}. {{ event.name }}</span>
+              <span class="event-card__name">
+                <span class="event-card__num">{{ i + 1 }}</span>{{ event.name }}
+              </span>
               <span class="key-sub">
-                {{ event.openDate | date: 'mediumDate' }} → {{ event.closeDate | date: 'mediumDate' }}
-                · {{ event.durationDays }}d@if (event.gapDays > 0) { · +{{ event.gapDays }}d gap }
+                {{ event.opensAt | date: 'MMM d, HH:mm' }} → {{ event.closesAt | date: 'MMM d, HH:mm' }}
+                · {{ event.durationDays }}d open@if (event.gapDays > 0) { · +{{ event.gapDays }}d gap }
               </span>
             </div>
             @if (owner()) {
               <div class="club-actions">
-                <button class="g-button" type="button" [disabled]="i === 0" (click)="moveEvent(event, -1)">↑</button>
-                <button class="g-button" type="button" [disabled]="i === d.events.length - 1" (click)="moveEvent(event, 1)">↓</button>
-                <button class="g-button" type="button" (click)="startEditEvent(event)">Edit</button>
-                <button class="g-button" type="button" (click)="deleteEvent(event)">Delete</button>
+                <button class="g-button g-button-secondary mini" type="button" [disabled]="i === 0" (click)="moveEvent(event, -1)">↑</button>
+                <button class="g-button g-button-secondary mini" type="button" [disabled]="i === d.events.length - 1" (click)="moveEvent(event, 1)">↓</button>
+                <button class="g-button g-button-secondary" type="button" (click)="startEditEvent(event)">Edit</button>
+                <button class="g-button g-button-tertiary" type="button" (click)="deleteEvent(event)">Delete</button>
               </div>
             }
           </div>
 
           @if (owner() && editingEventId() === event.id) {
-            <div class="event-edit">
+            <div class="panel">
               <div class="form-row">
                 <div class="form-group">
                   <label>Name</label>
@@ -101,7 +114,7 @@
               </div>
               <div class="club-actions">
                 <button class="g-button g-button-primary" type="button" (click)="saveEvent()">Save</button>
-                <button class="g-button" type="button" (click)="editingEventId.set(null)">Cancel</button>
+                <button class="g-button g-button-secondary" type="button" (click)="editingEventId.set(null)">Cancel</button>
               </div>
             </div>
           }
@@ -110,12 +123,12 @@
           <div class="event-section">
             <div class="event-section__head">
               <span class="event-section__title">Stages</span>
-              @if (owner()) {
-                <button class="g-button" type="button" (click)="startEditVariants(event)">Edit stages</button>
+              @if (owner() && editingVariantsEventId() !== event.id) {
+                <button class="g-button g-button-secondary mini" type="button" (click)="startEditVariants(event)">Edit stages</button>
               }
             </div>
             @if (event.variants.length === 0) {
-              <p class="auth-sub" style="margin: 4px 0">No stages selected.</p>
+              <p class="event-empty">No stages selected.</p>
             } @else {
               <ol class="stage-list">
                 @for (v of event.variants; track v.variantId) {
@@ -130,68 +143,28 @@
                 }
               </ol>
             }
+
+            @if (owner() && editingVariantsEventId() === event.id) {
+              <div class="panel">
+                <ng-container [ngTemplateOutlet]="stagePicker" />
+                <div class="club-actions" style="margin-top: 12px">
+                  <button class="g-button g-button-primary" type="button" (click)="saveVariants()">Save stages</button>
+                  <button class="g-button g-button-secondary" type="button" (click)="editingVariantsEventId.set(null)">Cancel</button>
+                </div>
+              </div>
+            }
           </div>
-
-          @if (owner() && editingVariantsEventId() === event.id) {
-            <div class="picker">
-              <p class="event-section__title">Running order</p>
-              @if (editVariantIds().length === 0) {
-                <p class="auth-sub" style="margin: 4px 0">Nothing selected yet — add stages below.</p>
-              } @else {
-                <ol class="stage-list stage-list--editable">
-                  @for (id of editVariantIds(); track id; let vi = $index) {
-                    <li>
-                      <span>{{ variantLabel(id) }}</span>
-                      <span class="picker__row-actions">
-                        <button class="g-button" type="button" [disabled]="vi === 0" (click)="moveVariant(vi, -1)">↑</button>
-                        <button class="g-button" type="button" [disabled]="vi === editVariantIds().length - 1" (click)="moveVariant(vi, 1)">↓</button>
-                        <button class="g-button" type="button" (click)="removeVariant(id)">✕</button>
-                      </span>
-                    </li>
-                  }
-                </ol>
-              }
-
-              <p class="event-section__title" style="margin-top: 10px">Add stages</p>
-              <div class="picker__catalogue">
-                @for (group of variantGroups(); track group.location) {
-                  <div class="picker__group">
-                    <p class="picker__group-title">{{ group.location }}</p>
-                    @for (stage of group.stages; track stage.stage) {
-                      <p class="picker__stage-title">{{ stage.stage }}</p>
-                      <div class="chip-row">
-                        @for (v of stage.variants; track v.id) {
-                          <button
-                            class="chip"
-                            type="button"
-                            [class.chip--on]="isVariantSelected(v.id)"
-                            (click)="isVariantSelected(v.id) ? removeVariant(v.id) : addVariant(v.id)">
-                            {{ v.displayName || v.rawName }}
-                          </button>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <div class="club-actions" style="margin-top: 10px">
-                <button class="g-button g-button-primary" type="button" (click)="saveVariants()">Save stages</button>
-                <button class="g-button" type="button" (click)="editingVariantsEventId.set(null)">Cancel</button>
-              </div>
-            </div>
-          }
 
           <!-- Cars -->
           <div class="event-section">
             <div class="event-section__head">
               <span class="event-section__title">Allowed cars</span>
-              @if (owner()) {
-                <button class="g-button" type="button" (click)="startEditCars(event)">Edit cars</button>
+              @if (owner() && editingCarsEventId() !== event.id) {
+                <button class="g-button g-button-secondary mini" type="button" (click)="startEditCars(event)">Edit cars</button>
               }
             </div>
             @if (event.cars.length === 0) {
-              <p class="auth-sub" style="margin: 4px 0">No cars selected — no restriction set yet.</p>
+              <p class="event-empty">No cars selected — every car is allowed.</p>
             } @else {
               <div class="chip-row">
                 @for (c of event.cars; track c.id) {
@@ -199,52 +172,24 @@
                 }
               </div>
             }
-          </div>
 
-          @if (owner() && editingCarsEventId() === event.id) {
-            <div class="picker">
-              <div class="event-section__head">
-                <span class="event-section__title">Pick cars ({{ editCarIds().size }} selected)</span>
-                <button class="g-button" type="button" (click)="toggleAllCars()">
-                  {{ allCarsSelected ? 'Clear all' : 'Select all' }}
-                </button>
+            @if (owner() && editingCarsEventId() === event.id) {
+              <div class="panel">
+                <ng-container [ngTemplateOutlet]="carPicker" />
+                <div class="club-actions" style="margin-top: 12px">
+                  <button class="g-button g-button-primary" type="button" (click)="saveCars()">Save cars</button>
+                  <button class="g-button g-button-secondary" type="button" (click)="editingCarsEventId.set(null)">Cancel</button>
+                </div>
               </div>
-              <div class="picker__catalogue">
-                @for (group of carGroups(); track group.group) {
-                  <div class="picker__group">
-                    <p class="picker__group-title">
-                      {{ group.group }}
-                      <button class="picker__group-all" type="button" (click)="toggleGroup(group)">
-                        {{ isGroupFullySelected(group) ? 'Clear group' : 'All in group' }}
-                      </button>
-                    </p>
-                    <div class="chip-row">
-                      @for (c of group.cars; track c.id) {
-                        <button
-                          class="chip"
-                          type="button"
-                          [class.chip--on]="isCarSelected(c.id)"
-                          (click)="toggleCar(c.id)">
-                          {{ c.name }}
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-              <div class="club-actions" style="margin-top: 10px">
-                <button class="g-button g-button-primary" type="button" (click)="saveCars()">Save cars</button>
-                <button class="g-button" type="button" (click)="editingCarsEventId.set(null)">Cancel</button>
-              </div>
-            </div>
-          }
+            }
+          </div>
         </div>
       }
 
       <!-- Add event -->
-      @if (owner()) {
-        <div class="event-edit" style="margin-top: 12px">
-          <p class="event-section__title">Add an event</p>
+      @if (owner() && addingEvent()) {
+        <div class="panel panel--add">
+          <p class="panel__title">Add an event</p>
           <div class="form-row">
             <div class="form-group">
               <label>Name</label>
@@ -260,11 +205,101 @@
               <input type="number" min="1" [ngModel]="newEventDuration()" (ngModelChange)="newEventDuration.set(+$event)" />
             </div>
           </div>
-          <button class="g-button g-button-primary" type="button" [disabled]="!newEventName().trim()" (click)="addEvent()">
-            Add event
-          </button>
+
+          <div class="event-section">
+            <span class="event-section__title">Stages</span>
+            <ng-container [ngTemplateOutlet]="stagePicker" />
+          </div>
+
+          <div class="event-section">
+            <span class="event-section__title">Allowed cars</span>
+            <ng-container [ngTemplateOutlet]="carPicker" />
+          </div>
+
+          <div class="club-actions" style="margin-top: 12px">
+            <button class="g-button g-button-primary" type="button" [disabled]="!newEventName().trim()" (click)="addEvent()">
+              Add event
+            </button>
+            <button class="g-button g-button-secondary" type="button" (click)="addingEvent.set(false)">Cancel</button>
+          </div>
         </div>
       }
     </section>
   }
 </div>
+
+<!-- Reusable pickers (shared by the per-event editors and the add-event form) -->
+<ng-template #stagePicker>
+  <p class="picker__label">Running order</p>
+  @if (editVariantIds().length === 0) {
+    <p class="event-empty">Nothing selected yet — pick stages below.</p>
+  } @else {
+    <ol class="stage-list stage-list--editable">
+      @for (id of editVariantIds(); track id; let vi = $index) {
+        <li>
+          <span>{{ variantLabel(id) }}</span>
+          <span class="picker__row-actions">
+            <button class="g-button g-button-secondary mini" type="button" [disabled]="vi === 0" (click)="moveVariant(vi, -1)">↑</button>
+            <button class="g-button g-button-secondary mini" type="button" [disabled]="vi === editVariantIds().length - 1" (click)="moveVariant(vi, 1)">↓</button>
+            <button class="g-button g-button-tertiary mini" type="button" (click)="removeVariant(id)">✕</button>
+          </span>
+        </li>
+      }
+    </ol>
+  }
+
+  <p class="picker__label" style="margin-top: 12px">Add stages</p>
+  <div class="picker__catalogue">
+    @for (group of variantGroups(); track group.location) {
+      <div class="picker__group">
+        <p class="picker__group-title">{{ group.location }}</p>
+        @for (stage of group.stages; track stage.stage) {
+          <p class="picker__stage-title">{{ stage.stage }}</p>
+          <div class="chip-row">
+            @for (v of stage.variants; track v.id) {
+              <button
+                class="chip"
+                type="button"
+                [class.chip--on]="isVariantSelected(v.id)"
+                (click)="isVariantSelected(v.id) ? removeVariant(v.id) : addVariant(v.id)">
+                {{ v.displayName || v.rawName }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+<ng-template #carPicker>
+  <div class="picker__label-row">
+    <span class="picker__label">{{ editCarIds().size }} selected</span>
+    <button class="g-button g-button-secondary mini" type="button" (click)="toggleAllCars()">
+      {{ allCarsSelected ? 'Clear all' : 'Select all' }}
+    </button>
+  </div>
+  <div class="picker__catalogue">
+    @for (group of carGroups(); track group.group) {
+      <div class="picker__group">
+        <p class="picker__group-title">
+          {{ group.group }}
+          <button class="picker__group-all" type="button" (click)="toggleGroup(group)">
+            {{ isGroupFullySelected(group) ? 'Clear group' : 'All in group' }}
+          </button>
+        </p>
+        <div class="chip-row">
+          @for (c of group.cars; track c.id) {
+            <button
+              class="chip"
+              type="button"
+              [class.chip--on]="isCarSelected(c.id)"
+              (click)="toggleCar(c.id)">
+              {{ c.name }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</ng-template>

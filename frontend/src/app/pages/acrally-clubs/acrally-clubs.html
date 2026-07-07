@@ -1,7 +1,7 @@
 <div class="g-card">
   <div class="dash-head">
     <p class="auth-sub" style="margin: 0">Community clubs on AC Rally.</p>
-    <button class="g-button" type="button" (click)="toggleCreate()">
+    <button class="g-button g-button-secondary" type="button" (click)="toggleCreate()">
       {{ creating() ? 'Cancel' : 'Create club' }}
     </button>
   </div>
@@ -41,7 +41,7 @@
           @for (club of myClubs(); track club.id) {
             <li class="key-item">
               <div class="key-meta">
-                <span class="key-label">{{ club.name }}</span>
+                <a class="key-label title-link" [routerLink]="[club.id]">{{ club.name }}</a>
                 @if (club.description) {
                   <span class="key-sub">{{ club.description }}</span>
                 }
@@ -54,11 +54,10 @@
                 @if (club.socialLink) {
                   <a class="site-link" [href]="club.socialLink" target="_blank" rel="noopener noreferrer">Link</a>
                 }
-                <a class="g-button" [routerLink]="[club.id]">Open</a>
                 @if (club.owner) {
-                  <span class="key-sub">Owner</span>
+                  <span class="key-badge">Owner</span>
                 } @else {
-                  <button class="g-button" type="button" (click)="leave(club)">Leave</button>
+                  <button class="g-button g-button-tertiary" type="button" (click)="leave(club)">Leave</button>
                 }
               </div>
             </li>
@@ -77,7 +76,7 @@
           @for (club of clubs(); track club.id) {
             <li class="key-item">
               <div class="key-meta">
-                <span class="key-label">{{ club.name }}</span>
+                <a class="key-label title-link" [routerLink]="[club.id]">{{ club.name }}</a>
                 @if (club.description) {
                   <span class="key-sub">{{ club.description }}</span>
                 }
@@ -90,11 +89,10 @@
                 @if (club.socialLink) {
                   <a class="site-link" [href]="club.socialLink" target="_blank" rel="noopener noreferrer">Link</a>
                 }
-                <a class="g-button" [routerLink]="[club.id]">Open</a>
                 @if (club.owner) {
-                  <span class="key-sub">Owner</span>
+                  <span class="key-badge">Owner</span>
                 } @else if (club.member) {
-                  <button class="g-button" type="button" (click)="leave(club)">Leave</button>
+                  <button class="g-button g-button-tertiary" type="button" (click)="leave(club)">Leave</button>
                 } @else {
                   <button class="g-button g-button-primary" type="button" (click)="join(club)">Join</button>
                 }

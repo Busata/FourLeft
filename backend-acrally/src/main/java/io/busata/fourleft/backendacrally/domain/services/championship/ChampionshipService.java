@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,23 +47,23 @@ public class ChampionshipService {
     // --- Championship ---------------------------------------------------------------------------
 
     @Transactional
-    public Championship create(UUID clubId, UUID userId, String rawName, LocalDate startDate) {
+    public Championship create(UUID clubId, UUID userId, String rawName, LocalDateTime startsAt) {
         requireOwnedClub(clubId, userId);
         String name = requireName(rawName);
-        if (startDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A start date is required.");
+        if (startsAt == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A start date and time are required.");
         }
-        return championshipRepository.save(new Championship(clubId, name, startDate, userId));
+        return championshipRepository.save(new Championship(clubId, name, startsAt, userId));
     }
 
     @Transactional
-    public Championship update(UUID championshipId, UUID userId, String rawName, LocalDate startDate, String rawStatus) {
+    public Championship update(UUID championshipId, UUID userId, String rawName, LocalDateTime startsAt, String rawStatus) {
         Championship championship = requireOwnedChampionship(championshipId, userId);
         String name = requireName(rawName);
-        if (startDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A start date is required.");
+        if (startsAt == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A start date and time are required.");
         }
-        championship.update(name, startDate, parseStatus(rawStatus));
+        championship.update(name, startsAt, parseStatus(rawStatus));
         return championship;
     }
 
@@ -77,12 +77,17 @@ public class ChampionshipService {
     // --- Events ---------------------------------------------------------------------------------
 
     @Transactional
-    public ChampionshipEvent addEvent(UUID championshipId, UUID userId, String rawName, Integer gapDays, Integer durationDays) {
+    public ChampionshipEvent addEvent(UUID championshipId, UUID userId, String rawName, Integer gapDays,
+                                      Integer durationDays, List<UUID> variantIds, List<UUID> carIds) {
         requireOwnedChampionship(championshipId, userId);
         String name = requireName(rawName);
         int position = (int) eventRepository.countByChampionshipId(championshipId);
-        return eventRepository.save(new ChampionshipEvent(
+        ChampionshipEvent event = eventRepository.save(new ChampionshipEvent(
                 championshipId, name, position, cleanGap(gapDays), cleanDuration(durationDays)));
+        // Set the stages and cars up front so the owner never has to re-open the event to finish it.
+        replaceEventVariants(event.getId(), variantIds);
+        replaceEventCars(event.getId(), carIds);
+        return event;
     }
 
     @Transactional
@@ -135,6 +140,17 @@ public class ChampionshipService {
     @Transactional
     public void setEventVariants(UUID eventId, UUID userId, List<UUID> variantIds) {
         requireOwnedEvent(eventId, userId);
+        replaceEventVariants(eventId, variantIds);
+    }
+
+    @Transactional
+    public void setEventCars(UUID eventId, UUID userId, List<UUID> carIds) {
+        requireOwnedEvent(eventId, userId);
+        replaceEventCars(eventId, carIds);
+    }
+
+    /** Replace an event's ordered variants. Caller must have already verified ownership. */
+    private void replaceEventVariants(UUID eventId, List<UUID> variantIds) {
         List<UUID> ids = dedupePreservingOrder(variantIds);
         for (UUID variantId : ids) {
             if (!variantRepository.existsById(variantId)) {
@@ -150,9 +166,8 @@ public class ChampionshipService {
         eventVariantRepository.saveAll(rows);
     }
 
-    @Transactional
-    public void setEventCars(UUID eventId, UUID userId, List<UUID> carIds) {
-        requireOwnedEvent(eventId, userId);
+    /** Replace an event's permitted cars. Caller must have already verified ownership. */
+    private void replaceEventCars(UUID eventId, List<UUID> carIds) {
         List<UUID> ids = dedupePreservingOrder(carIds);
         for (UUID carId : ids) {
             if (!carRepository.existsById(carId)) {
@@ -168,7 +183,7 @@ public class ChampionshipService {
     // --- Reads ----------------------------------------------------------------------------------
 
     public List<Championship> listForClub(UUID clubId) {
-        return championshipRepository.findAllByClubIdOrderByStartDateAsc(clubId);
+        return championshipRepository.findAllByClubIdOrderByStartsAtAsc(clubId);
     }
 
     public Championship get(UUID championshipId) {

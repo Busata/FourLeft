@@ -33,7 +33,7 @@ export class AcrallyClubDetail implements OnInit {
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    startDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    startsAt: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   ngOnInit(): void {

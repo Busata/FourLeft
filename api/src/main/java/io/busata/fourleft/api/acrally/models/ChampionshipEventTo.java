@@ -1,12 +1,12 @@
 package io.busata.fourleft.api.acrally.models;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * An event within a championship. {@code openDate}/{@code closeDate} are derived from the
- * championship start and the running gap/duration of the preceding events.
+ * An event within a championship. {@code opensAt}/{@code closesAt} are derived from the championship
+ * start moment and the running gap/duration of the preceding events, preserving the time-of-day.
  */
 public record ChampionshipEventTo(
         UUID id,
@@ -14,8 +14,8 @@ public record ChampionshipEventTo(
         int position,
         int gapDays,
         int durationDays,
-        LocalDate openDate,
-        LocalDate closeDate,
+        LocalDateTime opensAt,
+        LocalDateTime closesAt,
         List<EventVariantTo> variants,
         List<CarTo> cars) {
 }

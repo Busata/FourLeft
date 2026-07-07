@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -28,7 +28,7 @@ interface CarGroup {
  */
 @Component({
   selector: 'app-acrally-championship',
-  imports: [DatePipe, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, NgTemplateOutlet, RouterLink],
   templateUrl: './acrally-championship.html',
   styleUrl: './acrally-championship.scss',
 })
@@ -92,7 +92,7 @@ export class AcrallyChampionship implements OnInit {
   // --- Inline editor state ---
   readonly editingMeta = signal(false);
   readonly metaName = signal('');
-  readonly metaStartDate = signal('');
+  readonly metaStartsAt = signal('');
 
   readonly addingEvent = signal(false);
   readonly newEventName = signal('');
@@ -167,7 +167,9 @@ export class AcrallyChampionship implements OnInit {
     const d = this.detail();
     if (!d) return;
     this.metaName.set(d.name);
-    this.metaStartDate.set(d.startDate);
+    // datetime-local wants "yyyy-MM-ddTHH:mm"; the server sends full ISO with seconds.
+    this.metaStartsAt.set(d.startsAt.slice(0, 16));
+    this.addingEvent.set(false);
     this.editingMeta.set(true);
   }
 
@@ -177,7 +179,7 @@ export class AcrallyChampionship implements OnInit {
     this.http
       .put<ChampionshipDetailTo>(`/acrally-api/championships/${d.id}`, {
         name: this.metaName(),
-        startDate: this.metaStartDate(),
+        startsAt: this.metaStartsAt(),
         status: d.status,
       })
       .subscribe({ next: (detail) => this.apply(detail), error: this.fail() });
@@ -189,7 +191,7 @@ export class AcrallyChampionship implements OnInit {
     this.http
       .put<ChampionshipDetailTo>(`/acrally-api/championships/${d.id}`, {
         name: d.name,
-        startDate: d.startDate,
+        startsAt: d.startsAt,
         status: this.published() ? 'DRAFT' : 'PUBLISHED',
       })
       .subscribe({ next: (detail) => this.apply(detail), error: this.fail() });
@@ -205,6 +207,24 @@ export class AcrallyChampionship implements OnInit {
   }
 
   // --- Events ---
+  /**
+   * Open the add-event form. It reuses the same variant/car picker state as the per-event editors
+   * (only one editor is ever open at a time), so a new event can be fully configured — stages and
+   * cars included — before it's created, with no follow-up edit.
+   */
+  startAddEvent(): void {
+    this.newEventName.set('');
+    this.newEventGap.set(0);
+    this.newEventDuration.set(7);
+    this.editVariantIds.set([]);
+    this.editCarIds.set(new Set());
+    this.editingMeta.set(false);
+    this.editingEventId.set(null);
+    this.editingVariantsEventId.set(null);
+    this.editingCarsEventId.set(null);
+    this.addingEvent.set(true);
+  }
+
   addEvent(): void {
     const d = this.detail();
     if (!d || !this.newEventName().trim()) return;
@@ -213,22 +233,17 @@ export class AcrallyChampionship implements OnInit {
         name: this.newEventName(),
         gapDays: this.newEventGap(),
         durationDays: this.newEventDuration(),
+        variantIds: this.editVariantIds(),
+        carIds: [...this.editCarIds()],
       })
-      .subscribe({
-        next: (detail) => {
-          this.apply(detail);
-          this.newEventName.set('');
-          this.newEventGap.set(0);
-          this.newEventDuration.set(7);
-        },
-        error: this.fail(),
-      });
+      .subscribe({ next: (detail) => this.apply(detail), error: this.fail() });
   }
 
   startEditEvent(event: ChampionshipEventTo): void {
     this.editEventName.set(event.name);
     this.editEventGap.set(event.gapDays);
     this.editEventDuration.set(event.durationDays);
+    this.addingEvent.set(false);
     this.editingEventId.set(event.id);
   }
 
@@ -267,6 +282,7 @@ export class AcrallyChampionship implements OnInit {
   // --- Event variants ---
   startEditVariants(event: ChampionshipEventTo): void {
     this.editVariantIds.set(event.variants.map((v) => v.variantId));
+    this.addingEvent.set(false);
     this.editingCarsEventId.set(null);
     this.editingVariantsEventId.set(event.id);
   }
@@ -308,6 +324,7 @@ export class AcrallyChampionship implements OnInit {
   // --- Event cars ---
   startEditCars(event: ChampionshipEventTo): void {
     this.editCarIds.set(new Set(event.cars.map((c) => c.id)));
+    this.addingEvent.set(false);
     this.editingVariantsEventId.set(null);
     this.editingCarsEventId.set(event.id);
   }

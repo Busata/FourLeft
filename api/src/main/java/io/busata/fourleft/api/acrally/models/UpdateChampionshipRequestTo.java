@@ -1,10 +1,10 @@
 package io.busata.fourleft.api.acrally.models;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/** Payload to update a championship's name, start date and publication status. */
+/** Payload to update a championship's name, start moment and publication status. */
 public record UpdateChampionshipRequestTo(
         String name,
-        LocalDate startDate,
+        LocalDateTime startsAt,
         String status) {
 }

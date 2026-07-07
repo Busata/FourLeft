@@ -192,7 +192,7 @@ export interface ChampionshipTo {
   id: string;
   clubId: string;
   name: string;
-  startDate: string; // ISO date (yyyy-MM-dd)
+  startsAt: string; // ISO date-time (yyyy-MM-ddTHH:mm:ss)
   status: string; // DRAFT | PUBLISHED
   eventCount: number;
   owner: boolean;
@@ -205,7 +205,7 @@ export interface ChampionshipDetailTo {
   clubId: string;
   clubName: string | null;
   name: string;
-  startDate: string; // ISO date
+  startsAt: string; // ISO date-time
   status: string; // DRAFT | PUBLISHED
   owner: boolean;
   events: ChampionshipEventTo[];
@@ -217,8 +217,8 @@ export interface ChampionshipEventTo {
   position: number;
   gapDays: number;
   durationDays: number;
-  openDate: string; // ISO date, derived
-  closeDate: string; // ISO date, derived
+  opensAt: string; // ISO date-time, derived
+  closesAt: string; // ISO date-time, derived
   variants: EventVariantTo[];
   cars: CarTo[];
 }
@@ -233,13 +233,22 @@ export interface EventVariantTo {
 
 export interface CreateChampionshipRequestTo {
   name: string;
-  startDate: string; // ISO date
+  startsAt: string; // ISO date-time
 }
 
 export interface UpdateChampionshipRequestTo {
   name: string;
-  startDate: string; // ISO date
+  startsAt: string; // ISO date-time
   status: string;
+}
+
+// Add an event with its stages and cars in one shot.
+export interface CreateEventRequestTo {
+  name: string;
+  gapDays: number;
+  durationDays: number;
+  variantIds: string[];
+  carIds: string[];
 }
 
 export interface UpsertEventRequestTo {

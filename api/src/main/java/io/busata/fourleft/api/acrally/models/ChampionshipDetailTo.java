@@ -1,6 +1,6 @@
 package io.busata.fourleft.api.acrally.models;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +10,7 @@ public record ChampionshipDetailTo(
         UUID clubId,
         String clubName,
         String name,
-        LocalDate startDate,
+        LocalDateTime startsAt,
         String status,
         boolean owner,
         List<ChampionshipEventTo> events) {

@@ -5,6 +5,7 @@ import io.busata.fourleft.api.acrally.models.ChampionshipDetailTo;
 import io.busata.fourleft.api.acrally.models.ChampionshipEventTo;
 import io.busata.fourleft.api.acrally.models.ChampionshipTo;
 import io.busata.fourleft.api.acrally.models.CreateChampionshipRequestTo;
+import io.busata.fourleft.api.acrally.models.CreateEventRequestTo;
 import io.busata.fourleft.api.acrally.models.EventVariantTo;
 import io.busata.fourleft.api.acrally.models.ReorderEventsRequestTo;
 import io.busata.fourleft.api.acrally.models.SetEventCarsRequestTo;
@@ -45,7 +46,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -83,7 +84,7 @@ public class ChampionshipEndpoint {
                         c.getId(),
                         c.getClubId(),
                         c.getName(),
-                        c.getStartDate(),
+                        c.getStartsAt(),
                         c.getStatus().name(),
                         (int) eventRepository.countByChampionshipId(c.getId()),
                         owner,
@@ -97,7 +98,7 @@ public class ChampionshipEndpoint {
                                        @RequestBody CreateChampionshipRequestTo request,
                                        @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
-        Championship championship = championshipService.create(clubId, userId, request.name(), request.startDate());
+        Championship championship = championshipService.create(clubId, userId, request.name(), request.startsAt());
         return buildDetail(championship, userId);
     }
 
@@ -119,7 +120,7 @@ public class ChampionshipEndpoint {
                                        @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
         Championship championship = championshipService.update(
-                id, userId, request.name(), request.startDate(), request.status());
+                id, userId, request.name(), request.startsAt(), request.status());
         return buildDetail(championship, userId);
     }
 
@@ -133,10 +134,11 @@ public class ChampionshipEndpoint {
     @PostMapping("/championships/{id}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public ChampionshipDetailTo addEvent(@PathVariable UUID id,
-                                         @RequestBody UpsertEventRequestTo request,
+                                         @RequestBody CreateEventRequestTo request,
                                          @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
-        championshipService.addEvent(id, userId, request.name(), request.gapDays(), request.durationDays());
+        championshipService.addEvent(id, userId, request.name(), request.gapDays(), request.durationDays(),
+                request.variantIds(), request.carIds());
         return buildDetail(championshipService.get(id), userId);
     }
 
@@ -213,11 +215,11 @@ public class ChampionshipEndpoint {
         Map<UUID, Car> cars = carRepository.findAll().stream()
                 .collect(Collectors.toMap(Car::getId, c -> c));
 
-        LocalDate runningStart = championship.getStartDate();
+        LocalDateTime runningStart = championship.getStartsAt();
         List<ChampionshipEventTo> eventTos = new java.util.ArrayList<>();
         for (ChampionshipEvent event : events) {
-            LocalDate open = runningStart.plusDays(event.getGapDays());
-            LocalDate close = open.plusDays(event.getDurationDays());
+            LocalDateTime open = runningStart.plusDays(event.getGapDays());
+            LocalDateTime close = open.plusDays(event.getDurationDays());
             runningStart = close;
 
             List<EventVariantTo> variantTos = variantsByEvent.getOrDefault(event.getId(), List.of()).stream()
@@ -242,7 +244,7 @@ public class ChampionshipEndpoint {
                 championship.getClubId(),
                 club == null ? null : club.getName(),
                 championship.getName(),
-                championship.getStartDate(),
+                championship.getStartsAt(),
                 championship.getStatus().name(),
                 championshipService.isOwner(championship, viewerId),
                 eventTos);
