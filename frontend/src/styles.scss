@@ -512,6 +512,11 @@ form .g-button + .g-button {
     background: var(--ok-soft);
     color: var(--ok);
   }
+
+  &--muted {
+    background: var(--surface-alt);
+    color: var(--muted);
+  }
 }
 
 /* Icon button linking out to a club's social page (Discord/Twitter/etc.). */

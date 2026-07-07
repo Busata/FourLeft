@@ -112,6 +112,9 @@ export class AcrallyChampionship implements OnInit {
   readonly editingCarsEventId = signal<string | null>(null);
   readonly editCarIds = signal<Set<string>>(new Set());
 
+  // --- Event collapse: open events expand by default, the rest collapse to a summary line ---
+  readonly expandedEvents = signal<Set<string>>(new Set());
+
   // --- Leaderboards (lazy-loaded + collapsible per event) ---
   readonly leaderboards = signal<Map<string, EventLeaderboardTo>>(new Map());
   readonly openBoards = signal<Set<string>>(new Set());
@@ -131,7 +134,7 @@ export class AcrallyChampionship implements OnInit {
         next: (detail) => {
           this.detail.set(detail);
           this.loaded.set(true);
-          this.openAllBoards(detail);
+          this.initEventState(detail);
         },
         error: (err) => {
           this.notFound.set(err.status === 404 || err.status === 403);
@@ -175,6 +178,68 @@ export class AcrallyChampionship implements OnInit {
     return [v.locationName, v.stageName, v.label].filter((p) => !!p && p.trim()).join(' - ');
   }
 
+  // --- Event collapse ---
+  /**
+   * Expand the events that are currently open (and, while editing a draft, all of them so the owner
+   * can build it); collapse the rest to their summary line. Each expanded event's leaderboard opens
+   * with it.
+   */
+  private initEventState(detail: ChampionshipDetailTo): void {
+    const expanded = new Set<string>();
+    for (const event of detail.events) {
+      if (this.eventPhase(event) === 'open' || this.canEdit()) {
+        expanded.add(event.id);
+        this.openBoard(event.id);
+      }
+    }
+    this.expandedEvents.set(expanded);
+  }
+
+  isEventExpanded(eventId: string): boolean {
+    return this.expandedEvents().has(eventId);
+  }
+
+  toggleEvent(eventId: string): void {
+    const open = new Set(this.expandedEvents());
+    if (open.has(eventId)) {
+      open.delete(eventId);
+    } else {
+      open.add(eventId);
+      this.openBoard(eventId); // reveal its board straight away, matching the default-open behaviour
+    }
+    this.expandedEvents.set(open);
+  }
+
+  /** open | upcoming | closed, from the event's derived window against now. */
+  eventPhase(event: ChampionshipEventTo): 'open' | 'upcoming' | 'closed' {
+    const now = Date.now();
+    if (now < new Date(event.opensAt).getTime()) return 'upcoming';
+    if (now < new Date(event.closesAt).getTime()) return 'open';
+    return 'closed';
+  }
+
+  eventPhaseLabel(event: ChampionshipEventTo): string {
+    return { open: 'Open', upcoming: 'Upcoming', closed: 'Closed' }[this.eventPhase(event)];
+  }
+
+  /** Status-pill modifier for the phase badge. */
+  eventPhaseClass(event: ChampionshipEventTo): string {
+    return {
+      open: 'status-pill--live',
+      upcoming: 'status-pill--draft',
+      closed: 'status-pill--muted',
+    }[this.eventPhase(event)];
+  }
+
+  /** One-line summary shown as the collapsed event's title, e.g. "3 stages · 5 cars". */
+  eventSummary(event: ChampionshipEventTo): string {
+    const stages = `${event.variants.length} ${event.variants.length === 1 ? 'stage' : 'stages'}`;
+    const cars = event.cars.length === 0
+      ? 'any car'
+      : `${event.cars.length} ${event.cars.length === 1 ? 'car' : 'cars'}`;
+    return `${stages} · ${cars}`;
+  }
+
   // --- Leaderboards ---
   isBoardOpen(eventId: string): boolean {
     return this.openBoards().has(eventId);
@@ -188,14 +253,13 @@ export class AcrallyChampionship implements OnInit {
     return this.leaderboards().get(eventId);
   }
 
-  /** Open every event's leaderboard on load, fetching each once. Users can still collapse them. */
-  private openAllBoards(detail: ChampionshipDetailTo): void {
-    const ids = detail.events.map((e) => e.id);
-    this.openBoards.set(new Set(ids));
-    for (const id of ids) {
-      if (!this.leaderboards().has(id)) {
-        this.loadLeaderboard(id);
-      }
+  /** Open one event's leaderboard, fetching it the first time. */
+  private openBoard(eventId: string): void {
+    if (!this.openBoards().has(eventId)) {
+      this.openBoards.set(new Set(this.openBoards()).add(eventId));
+    }
+    if (!this.leaderboards().has(eventId)) {
+      this.loadLeaderboard(eventId);
     }
   }
 

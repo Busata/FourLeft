@@ -79,17 +79,21 @@
       }
 
       @for (event of d.events; track event.id; let i = $index) {
-        <div class="event-card">
+        <div class="event-card" [class.event-card--collapsed]="!isEventExpanded(event.id)">
           <div class="event-card__head">
-            <div class="key-meta">
-              <span class="event-card__name">
-                <span class="event-card__num">{{ i + 1 }}</span>{{ event.label }}
+            <button class="event-card__toggle" type="button" (click)="toggleEvent(event.id)"
+                    [attr.aria-expanded]="isEventExpanded(event.id)">
+              <span class="event-card__num">{{ i + 1 }}</span>
+              <span class="event-card__headline">
+                <span class="event-card__name">{{ event.label }}</span>
+                <span class="key-sub">
+                  {{ eventSummary(event) }} ·
+                  {{ event.opensAt | date: 'MMM d, HH:mm' }} → {{ event.closesAt | date: 'MMM d, HH:mm' }}
+                </span>
               </span>
-              <span class="key-sub">
-                {{ event.opensAt | date: 'MMM d, HH:mm' }} → {{ event.closesAt | date: 'MMM d, HH:mm' }}
-                · {{ event.durationDays }}d open@if (event.gapDays > 0) { · +{{ event.gapDays }}d gap }
-              </span>
-            </div>
+              <span class="status-pill {{ eventPhaseClass(event) }}">{{ eventPhaseLabel(event) }}</span>
+              <span class="event-card__chevron" aria-hidden="true">▾</span>
+            </button>
             @if (canEdit()) {
               <div class="club-actions">
                 <button class="g-button g-button-secondary mini" type="button" [disabled]="i === 0" (click)="moveEvent(event, -1)">↑</button>
@@ -125,6 +129,7 @@
             </div>
           }
 
+          @if (isEventExpanded(event.id)) {
           <!-- Stages / variants -->
           <div class="event-section">
             <div class="event-section__head">
@@ -269,6 +274,7 @@
               </div>
             }
           </div>
+          }
         </div>
       }
 

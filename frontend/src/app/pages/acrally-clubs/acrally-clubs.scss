@@ -1,6 +1,76 @@
 // Clubs list: two labelled groups (My clubs / All clubs), each club a card so entries stand out.
 // Mirrors the club-detail treatment — quiet section eyebrows, prominent card names.
 
+// ---- Intro / "how it works" card above the overview ----
+.intro-card {
+  margin-bottom: 16px;
+}
+
+.intro-card__title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.intro-card__lead {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.intro-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.intro-step {
+  display: flex;
+  gap: 12px;
+}
+
+.intro-step__num {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.intro-step__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.intro-step__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+// The three steps sit side by side once there's room.
+@media (min-width: 720px) {
+  .intro-steps {
+    flex-direction: row;
+  }
+
+  .intro-step {
+    flex: 1;
+  }
+}
+
 // Group label — small and quiet so it doesn't compete with the club names below. Accent dot +
 // uppercase, matching the section eyebrows on the club-detail and championship pages.
 .club-eyebrow {
