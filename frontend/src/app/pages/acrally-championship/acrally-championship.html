@@ -79,7 +79,7 @@
           <div class="event-card__head">
             <div class="key-meta">
               <span class="event-card__name">
-                <span class="event-card__num">{{ i + 1 }}</span>{{ event.name }}
+                <span class="event-card__num">{{ i + 1 }}</span>{{ event.label }}
               </span>
               <span class="key-sub">
                 {{ event.opensAt | date: 'MMM d, HH:mm' }} → {{ event.closesAt | date: 'MMM d, HH:mm' }}
@@ -99,16 +99,18 @@
           @if (owner() && editingEventId() === event.id) {
             <div class="panel">
               <div class="form-row">
-                <div class="form-group">
-                  <label>Name</label>
-                  <input type="text" maxlength="120" [ngModel]="editEventName()" (ngModelChange)="editEventName.set($event)" />
-                </div>
                 <div class="form-group form-group--num">
-                  <label>Gap (days)</label>
+                  <label>
+                    Gap (days)
+                    <span class="hint" tabindex="0" aria-label="Days to wait before this event opens — from the championship start for the first event, otherwise from the previous event's close.">?<span class="hint__bubble">Days to wait before this event opens — from the championship start for the first event, otherwise from the previous event's close.</span></span>
+                  </label>
                   <input type="number" min="0" [ngModel]="editEventGap()" (ngModelChange)="editEventGap.set(+$event)" />
                 </div>
                 <div class="form-group form-group--num">
-                  <label>Duration (days)</label>
+                  <label>
+                    Duration (days)
+                    <span class="hint" tabindex="0" aria-label="How many days this event stays open once it opens.">?<span class="hint__bubble">How many days this event stays open once it opens.</span></span>
+                  </label>
                   <input type="number" min="1" [ngModel]="editEventDuration()" (ngModelChange)="editEventDuration.set(+$event)" />
                 </div>
               </div>
@@ -190,18 +192,22 @@
       @if (owner() && addingEvent()) {
         <div class="panel panel--add">
           <p class="panel__title">Add an event</p>
+          <p class="auth-sub" style="margin: -6px 0 12px">
+            The event is named automatically from the locations of the stages you add.
+          </p>
           <div class="form-row">
-            <div class="form-group">
-              <label>Name</label>
-              <input type="text" maxlength="120" placeholder="e.g. Rally Greece"
-                     [ngModel]="newEventName()" (ngModelChange)="newEventName.set($event)" />
-            </div>
             <div class="form-group form-group--num">
-              <label>Gap (days)</label>
+              <label>
+                Gap (days)
+                <span class="hint" tabindex="0" aria-label="Days to wait before this event opens — from the championship start for the first event, otherwise from the previous event's close.">?<span class="hint__bubble">Days to wait before this event opens — from the championship start for the first event, otherwise from the previous event's close.</span></span>
+              </label>
               <input type="number" min="0" [ngModel]="newEventGap()" (ngModelChange)="newEventGap.set(+$event)" />
             </div>
             <div class="form-group form-group--num">
-              <label>Duration (days)</label>
+              <label>
+                Duration (days)
+                <span class="hint" tabindex="0" aria-label="How many days this event stays open once it opens.">?<span class="hint__bubble">How many days this event stays open once it opens.</span></span>
+              </label>
               <input type="number" min="1" [ngModel]="newEventDuration()" (ngModelChange)="newEventDuration.set(+$event)" />
             </div>
           </div>
@@ -217,7 +223,7 @@
           </div>
 
           <div class="club-actions" style="margin-top: 12px">
-            <button class="g-button g-button-primary" type="button" [disabled]="!newEventName().trim()" (click)="addEvent()">
+            <button class="g-button g-button-primary" type="button" (click)="addEvent()">
               Add event
             </button>
             <button class="g-button g-button-secondary" type="button" (click)="addingEvent.set(false)">Cancel</button>

@@ -137,7 +137,7 @@ public class ChampionshipEndpoint {
                                          @RequestBody CreateEventRequestTo request,
                                          @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
-        championshipService.addEvent(id, userId, request.name(), request.gapDays(), request.durationDays(),
+        championshipService.addEvent(id, userId, request.gapDays(), request.durationDays(),
                 request.variantIds(), request.carIds());
         return buildDetail(championshipService.get(id), userId);
     }
@@ -157,7 +157,7 @@ public class ChampionshipEndpoint {
                                             @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
         ChampionshipEvent event = championshipService.updateEvent(
-                eventId, userId, request.name(), request.gapDays(), request.durationDays());
+                eventId, userId, request.gapDays(), request.durationDays());
         return buildDetail(championshipService.get(event.getChampionshipId()), userId);
     }
 
@@ -233,8 +233,18 @@ public class ChampionshipEndpoint {
                     .map(this::toCarTo)
                     .toList();
 
+            // Label the event by the distinct locations of its stages (order preserved).
+            String label = variantTos.stream()
+                    .map(EventVariantTo::locationName)
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.joining(" · "));
+            if (label.isBlank()) {
+                label = "New event";
+            }
+
             eventTos.add(new ChampionshipEventTo(
-                    event.getId(), event.getName(), event.getPosition(),
+                    event.getId(), label, event.getPosition(),
                     event.getGapDays(), event.getDurationDays(), open, close, variantTos, carTos));
         }
 

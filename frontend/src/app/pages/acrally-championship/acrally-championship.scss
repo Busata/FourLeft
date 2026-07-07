@@ -130,6 +130,67 @@
   max-width: 160px;
 }
 
+// Inline "(?)" help affordance next to a field label; reveals a tooltip on hover/focus.
+.hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+
+  &__bubble {
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    width: max-content;
+    max-width: 220px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: normal;
+    text-transform: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s;
+    pointer-events: none;
+
+    // Little pointer under the bubble.
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--ink);
+    }
+  }
+
+  &:hover &__bubble,
+  &:focus &__bubble,
+  &:focus-visible &__bubble {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 // ---- Ordered stage list -------------------------------------------------------------------------
 .stage-list {
   margin: 8px 0 0;

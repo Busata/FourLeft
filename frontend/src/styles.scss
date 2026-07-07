@@ -499,6 +499,26 @@ form .g-button + .g-button {
   }
 }
 
+/* Icon button linking out to a club's social page (Discord/Twitter/etc.). */
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  transition: color 0.12s, border-color 0.12s;
+
+  &:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+
 /* A small static status pill (e.g. "Owner") sitting among a row's actions. */
 .key-badge {
   flex-shrink: 0;

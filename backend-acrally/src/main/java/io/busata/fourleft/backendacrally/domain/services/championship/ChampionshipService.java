@@ -77,13 +77,12 @@ public class ChampionshipService {
     // --- Events ---------------------------------------------------------------------------------
 
     @Transactional
-    public ChampionshipEvent addEvent(UUID championshipId, UUID userId, String rawName, Integer gapDays,
+    public ChampionshipEvent addEvent(UUID championshipId, UUID userId, Integer gapDays,
                                       Integer durationDays, List<UUID> variantIds, List<UUID> carIds) {
         requireOwnedChampionship(championshipId, userId);
-        String name = requireName(rawName);
         int position = (int) eventRepository.countByChampionshipId(championshipId);
         ChampionshipEvent event = eventRepository.save(new ChampionshipEvent(
-                championshipId, name, position, cleanGap(gapDays), cleanDuration(durationDays)));
+                championshipId, position, cleanGap(gapDays), cleanDuration(durationDays)));
         // Set the stages and cars up front so the owner never has to re-open the event to finish it.
         replaceEventVariants(event.getId(), variantIds);
         replaceEventCars(event.getId(), carIds);
@@ -91,9 +90,9 @@ public class ChampionshipService {
     }
 
     @Transactional
-    public ChampionshipEvent updateEvent(UUID eventId, UUID userId, String rawName, Integer gapDays, Integer durationDays) {
+    public ChampionshipEvent updateEvent(UUID eventId, UUID userId, Integer gapDays, Integer durationDays) {
         ChampionshipEvent event = requireOwnedEvent(eventId, userId);
-        event.update(requireName(rawName), cleanGap(gapDays), cleanDuration(durationDays));
+        event.update(cleanGap(gapDays), cleanDuration(durationDays));
         return event;
     }
 

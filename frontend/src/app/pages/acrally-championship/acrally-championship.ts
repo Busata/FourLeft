@@ -95,12 +95,10 @@ export class AcrallyChampionship implements OnInit {
   readonly metaStartsAt = signal('');
 
   readonly addingEvent = signal(false);
-  readonly newEventName = signal('');
   readonly newEventGap = signal(0);
   readonly newEventDuration = signal(7);
 
   readonly editingEventId = signal<string | null>(null);
-  readonly editEventName = signal('');
   readonly editEventGap = signal(0);
   readonly editEventDuration = signal(7);
 
@@ -213,7 +211,6 @@ export class AcrallyChampionship implements OnInit {
    * cars included — before it's created, with no follow-up edit.
    */
   startAddEvent(): void {
-    this.newEventName.set('');
     this.newEventGap.set(0);
     this.newEventDuration.set(7);
     this.editVariantIds.set([]);
@@ -227,10 +224,9 @@ export class AcrallyChampionship implements OnInit {
 
   addEvent(): void {
     const d = this.detail();
-    if (!d || !this.newEventName().trim()) return;
+    if (!d) return;
     this.http
       .post<ChampionshipDetailTo>(`/acrally-api/championships/${d.id}/events`, {
-        name: this.newEventName(),
         gapDays: this.newEventGap(),
         durationDays: this.newEventDuration(),
         variantIds: this.editVariantIds(),
@@ -240,7 +236,6 @@ export class AcrallyChampionship implements OnInit {
   }
 
   startEditEvent(event: ChampionshipEventTo): void {
-    this.editEventName.set(event.name);
     this.editEventGap.set(event.gapDays);
     this.editEventDuration.set(event.durationDays);
     this.addingEvent.set(false);
@@ -249,10 +244,9 @@ export class AcrallyChampionship implements OnInit {
 
   saveEvent(): void {
     const id = this.editingEventId();
-    if (!id || !this.editEventName().trim()) return;
+    if (!id) return;
     this.http
       .put<ChampionshipDetailTo>(`/acrally-api/events/${id}`, {
-        name: this.editEventName(),
         gapDays: this.editEventGap(),
         durationDays: this.editEventDuration(),
       })
@@ -260,7 +254,7 @@ export class AcrallyChampionship implements OnInit {
   }
 
   deleteEvent(event: ChampionshipEventTo): void {
-    if (!confirm(`Delete event “${event.name}”?`)) return;
+    if (!confirm(`Delete event “${event.label}”?`)) return;
     this.http
       .delete<ChampionshipDetailTo>(`/acrally-api/events/${event.id}`)
       .subscribe({ next: (detail) => this.apply(detail), error: this.fail() });

@@ -213,7 +213,7 @@ export interface ChampionshipDetailTo {
 
 export interface ChampionshipEventTo {
   id: string;
-  name: string;
+  label: string; // derived from the distinct locations of the event's stages
   position: number;
   gapDays: number;
   durationDays: number;
@@ -242,9 +242,9 @@ export interface UpdateChampionshipRequestTo {
   status: string;
 }
 
-// Add an event with its stages and cars in one shot.
+// Add an event with its stages and cars in one shot. Events aren't named — they're labelled from
+// their stages' locations.
 export interface CreateEventRequestTo {
-  name: string;
   gapDays: number;
   durationDays: number;
   variantIds: string[];
@@ -252,7 +252,6 @@ export interface CreateEventRequestTo {
 }
 
 export interface UpsertEventRequestTo {
-  name: string;
   gapDays: number;
   durationDays: number;
 }
