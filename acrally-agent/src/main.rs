@@ -87,6 +87,15 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    // One agent per user — a second instance would double-post every result and
+    // fight over the persisted floor. (The transient subcommands above — pair,
+    // update, checksave — are allowed alongside a running agent.)
+    if !single_instance() {
+        logfile::agent_log!("another acrally-agent instance is already running — exiting");
+        already_running_notice();
+        return Ok(());
+    }
+
     logfile::agent_log!(
         "acrally-agent v{} starting — backend {} (log: {})",
         env!("CARGO_PKG_VERSION"),
@@ -105,6 +114,78 @@ fn main() -> Result<()> {
     }
 
     run_headless(cfg)
+}
+
+/// Claim this user's single-instance slot. Uses a named mutex, which Windows
+/// frees automatically when the process dies (a lock file could go stale after a
+/// crash); the handle is deliberately never closed so the claim lives exactly as
+/// long as the process. `Local\` scopes it to the current desktop session.
+/// Returns `false` when another instance already holds the slot; fails open if
+/// the mutex can't be created at all — better two agents than none.
+#[cfg(windows)]
+fn single_instance() -> bool {
+    const ERROR_ALREADY_EXISTS: u32 = 183;
+    extern "system" {
+        fn CreateMutexW(
+            attrs: *mut core::ffi::c_void,
+            initial_owner: i32,
+            name: *const u16,
+        ) -> *mut core::ffi::c_void;
+        fn GetLastError() -> u32;
+    }
+    let name: Vec<u16> = "Local\\acrally-agent-single-instance\0"
+        .encode_utf16()
+        .collect();
+    unsafe {
+        let handle = CreateMutexW(core::ptr::null_mut(), 0, name.as_ptr());
+        if handle.is_null() {
+            return true;
+        }
+        GetLastError() != ERROR_ALREADY_EXISTS
+    }
+}
+
+/// Dev builds on other platforms don't self-distribute; skip the check.
+#[cfg(not(windows))]
+fn single_instance() -> bool {
+    true
+}
+
+/// Tell the user why this launch did nothing. The GUI build has no console, so a
+/// double-click on an already-running agent would otherwise be indistinguishable
+/// from a broken exe — pop a message box pointing at the tray instead.
+#[cfg(all(windows, feature = "ui"))]
+fn already_running_notice() {
+    const MB_ICONINFORMATION: u32 = 0x40;
+    #[link(name = "user32")]
+    extern "system" {
+        fn MessageBoxW(
+            hwnd: *mut core::ffi::c_void,
+            text: *const u16,
+            caption: *const u16,
+            flags: u32,
+        ) -> i32;
+    }
+    let wide = |s: &str| {
+        s.encode_utf16()
+            .chain(std::iter::once(0))
+            .collect::<Vec<u16>>()
+    };
+    let text = wide("acrally-agent is already running — look for its icon in the system tray.");
+    let caption = wide("acrally-agent");
+    unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            text.as_ptr(),
+            caption.as_ptr(),
+            MB_ICONINFORMATION,
+        );
+    }
+}
+
+#[cfg(not(all(windows, feature = "ui")))]
+fn already_running_notice() {
+    eprintln!("acrally-agent is already running — exiting.");
 }
 
 /// Attach to the parent process's console if it has one, so console output from a
