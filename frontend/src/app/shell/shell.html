@@ -44,6 +44,18 @@
   </div>
 </header>
 
+@if (acRallyActive()) {
+  <div class="ac-disclaimer" role="note">
+    <div class="ac-disclaimer__inner">
+      <strong>Unofficial community project.</strong>
+      Fourleft.io is not affiliated with, endorsed by, or associated with
+      <em>Assetto Corsa Rally</em> or its developers &mdash; Supernova Games Studios,
+      Kunos Simulazioni, or its publisher 505 Games. This is a fan-run, community effort.
+      All trademarks are the property of their respective owners.
+    </div>
+  </div>
+}
+
 <main class="site-main">
   <router-outlet />
 </main>
