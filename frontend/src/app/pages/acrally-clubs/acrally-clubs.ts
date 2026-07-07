@@ -2,12 +2,13 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import type { ClubTo } from '../../models/acrally';
 
 @Component({
   selector: 'app-acrally-clubs',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './acrally-clubs.html',
 })
 export class AcrallyClubs implements OnInit {

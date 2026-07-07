@@ -54,6 +54,7 @@
                 @if (club.socialLink) {
                   <a class="site-link" [href]="club.socialLink" target="_blank" rel="noopener noreferrer">Link</a>
                 }
+                <a class="g-button" [routerLink]="[club.id]">Open</a>
                 @if (club.owner) {
                   <span class="key-sub">Owner</span>
                 } @else {
@@ -89,6 +90,7 @@
                 @if (club.socialLink) {
                   <a class="site-link" [href]="club.socialLink" target="_blank" rel="noopener noreferrer">Link</a>
                 }
+                <a class="g-button" [routerLink]="[club.id]">Open</a>
                 @if (club.owner) {
                   <span class="key-sub">Owner</span>
                 } @else if (club.member) {

@@ -19,6 +19,8 @@ import { AcrallyAccount } from './pages/acrally-account/acrally-account';
 import { AcrallyLink } from './pages/acrally-link/acrally-link';
 import { AcrallyDashboard } from './pages/acrally-dashboard/acrally-dashboard';
 import { AcrallyClubs } from './pages/acrally-clubs/acrally-clubs';
+import { AcrallyClubDetail } from './pages/acrally-club-detail/acrally-club-detail';
+import { AcrallyChampionship } from './pages/acrally-championship/acrally-championship';
 import { AcrallyStats } from './pages/acrally-stats/acrally-stats';
 import { AcrallyAdmin } from './pages/acrally-admin/acrally-admin';
 import { AcrallyUsers } from './pages/acrally-users/acrally-users';
@@ -67,6 +69,12 @@ export const routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'clubs' },
           { path: 'clubs', component: AcrallyClubs, title: 'AC Rally — Clubs' },
+          { path: 'clubs/:clubId', component: AcrallyClubDetail, title: 'AC Rally — Club' },
+          {
+            path: 'clubs/:clubId/championships/:championshipId',
+            component: AcrallyChampionship,
+            title: 'AC Rally — Championship',
+          },
           { path: 'stats', component: AcrallyStats, title: 'AC Rally — Personal stats' },
           { path: 'account', component: AcrallyAccount, title: 'AC Rally — Account' },
           {

@@ -186,3 +186,76 @@ export interface CreateClubRequestTo {
   description: string;
   socialLink: string;
 }
+
+// A championship summary, from GET /acrally-api/clubs/{clubId}/championships.
+export interface ChampionshipTo {
+  id: string;
+  clubId: string;
+  name: string;
+  startDate: string; // ISO date (yyyy-MM-dd)
+  status: string; // DRAFT | PUBLISHED
+  eventCount: number;
+  owner: boolean;
+  createdAt: string;
+}
+
+// A championship with its ordered events, from GET /acrally-api/championships/{id}.
+export interface ChampionshipDetailTo {
+  id: string;
+  clubId: string;
+  clubName: string | null;
+  name: string;
+  startDate: string; // ISO date
+  status: string; // DRAFT | PUBLISHED
+  owner: boolean;
+  events: ChampionshipEventTo[];
+}
+
+export interface ChampionshipEventTo {
+  id: string;
+  name: string;
+  position: number;
+  gapDays: number;
+  durationDays: number;
+  openDate: string; // ISO date, derived
+  closeDate: string; // ISO date, derived
+  variants: EventVariantTo[];
+  cars: CarTo[];
+}
+
+export interface EventVariantTo {
+  variantId: string;
+  position: number;
+  label: string;
+  stageName: string | null;
+  locationName: string | null;
+}
+
+export interface CreateChampionshipRequestTo {
+  name: string;
+  startDate: string; // ISO date
+}
+
+export interface UpdateChampionshipRequestTo {
+  name: string;
+  startDate: string; // ISO date
+  status: string;
+}
+
+export interface UpsertEventRequestTo {
+  name: string;
+  gapDays: number;
+  durationDays: number;
+}
+
+export interface SetEventVariantsRequestTo {
+  variantIds: string[];
+}
+
+export interface SetEventCarsRequestTo {
+  carIds: string[];
+}
+
+export interface ReorderEventsRequestTo {
+  eventIds: string[];
+}
