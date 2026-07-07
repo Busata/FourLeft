@@ -22,8 +22,35 @@ public class CarAliasService {
     private final CarRepository carRepository;
     private final StageResultRepository stageResultRepository;
 
+    private static final int MAX_RAW_LENGTH = 190;
+
     public List<CarAlias> list() {
         return aliasRepository.findAllByOrderByRawNameAsc();
+    }
+
+    /**
+     * Add an alias by hand: the exact raw car string the game reports, optionally already assigned to a
+     * catalogue car. Complements {@link #collect()} for cases where the admin knows the string upfront.
+     */
+    @Transactional
+    public CarAlias create(String rawName, UUID carId) {
+        String raw = rawName == null ? "" : rawName.strip();
+        if (raw.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The car name the game reports is required.");
+        }
+        if (raw.length() > MAX_RAW_LENGTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "That car name is too long (max %d characters).".formatted(MAX_RAW_LENGTH));
+        }
+        if (aliasRepository.existsByRawName(raw)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "That car name is already listed.");
+        }
+        if (carId != null && !carRepository.existsById(carId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected car does not exist.");
+        }
+        CarAlias alias = new CarAlias(raw);
+        alias.assign(carId);
+        return aliasRepository.save(alias);
     }
 
     /**

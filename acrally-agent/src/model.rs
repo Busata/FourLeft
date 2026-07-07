@@ -72,6 +72,39 @@ pub struct Frame {
     pub track_config: String,
 }
 
+impl Frame {
+    /// A synthetic "no telemetry" frame whose timer reads blank. Fed to the session machine when the
+    /// live source stops publishing — AC Rally drops its shared memory the instant a stage finishes
+    /// and the result screen appears, so without this the frozen/blank finish path never gets a frame
+    /// and the run never finalises (the save is never read). The blank timer drives the existing
+    /// debounced blank-finish path; `finish()` uses the session's stored driver, not this frame.
+    pub fn blank() -> Self {
+        Frame {
+            status: SimStatus::Off,
+            session_type: -1,
+            current_lap: 0,
+            end_session: false,
+            current_laptime: String::new(),
+            last_laptime: String::new(),
+            best_laptime: String::new(),
+            current_time_ms: 0,
+            last_time_ms: 0,
+            best_time_ms: 0,
+            completed_laps: 0,
+            current_sector: 0,
+            distance_m: 0.0,
+            is_invalid: false,
+            speed_kmh: 0.0,
+            gear: 0,
+            rpm: 0,
+            driver: String::new(),
+            car: String::new(),
+            track: String::new(),
+            track_config: String::new(),
+        }
+    }
+}
+
 /// Body of `POST /sessions` — opens a live session when driving starts.
 #[derive(Debug, Clone, Serialize)]
 pub struct SessionStart {

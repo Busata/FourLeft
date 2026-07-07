@@ -252,6 +252,10 @@ fn pipeline_loop(cfg: Config, status: StatusHandle, stop: Arc<AtomicBool>) {
                 }
             }
             None => {
+                // The source stopped publishing (menus, or the result screen the moment a stage
+                // ends). Feed a blank frame so an open run can finalise (finish → read the save)
+                // instead of being stranded mid-run when telemetry simply vanishes at the finish.
+                runner.on_frame(&crate::model::Frame::blank());
                 if let Ok(mut s) = status.lock() {
                     s.mark_no_game();
                 }

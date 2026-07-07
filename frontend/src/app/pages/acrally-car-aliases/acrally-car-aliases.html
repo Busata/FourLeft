@@ -4,10 +4,40 @@
       Car aliases are the raw car names the game reports in results. Assign each to a catalogue car so
       results and the companion’s live check match on what the game says, not the catalogue name.
     </p>
-    <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
-      {{ collecting() ? 'Collecting…' : 'Collect from results' }}
-    </button>
+    <div class="club-actions">
+      <button class="g-button g-button-secondary" type="button" (click)="toggleCreate()">
+        {{ creating() ? 'Cancel' : '+ Add manually' }}
+      </button>
+      <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
+        {{ collecting() ? 'Collecting…' : 'Collect from results' }}
+      </button>
+    </div>
   </div>
+
+  @if (creating()) {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <div class="form-group">
+        <label>Name the game reports</label>
+        <input
+          type="text"
+          maxlength="190"
+          placeholder="e.g. Lancia Delta Integrale Evo"
+          [ngModel]="newRawName()"
+          (ngModelChange)="newRawName.set($event)"
+        />
+      </div>
+      <div class="form-group">
+        <label>Catalogue car</label>
+        <select [ngModel]="newCarId()" (ngModelChange)="newCarId.set($event)">
+          <option value="">Unassigned</option>
+          @for (car of cars(); track car.id) {
+            <option [value]="car.id">{{ car.name }}</option>
+          }
+        </select>
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="create()" [disabled]="busy() || !newRawName().trim()">Add</button>
+    </section>
+  }
 
   @if (collectMessage()) {
     <p class="auth-sub">{{ collectMessage() }}</p>

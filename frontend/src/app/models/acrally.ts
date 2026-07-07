@@ -108,6 +108,11 @@ export interface UpdateCarAliasRequestTo {
   carId: string | null;
 }
 
+export interface CreateCarAliasRequestTo {
+  rawName: string;
+  carId: string | null;
+}
+
 export interface CarAliasCollectResultTo {
   added: number;
   aliases: CarAliasTo[];

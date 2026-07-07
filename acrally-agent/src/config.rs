@@ -21,7 +21,7 @@ const DEFAULT_API_BASE: &str = "https://fourleft.io/acrally-api";
 const POLL_HZ: f64 = 10.0;
 const HEARTBEAT_SECS: f64 = 1.0;
 const FINISH_SECS: f64 = 1.5;
-const SAVE_WAIT_SECS: f64 = 20.0;
+const SAVE_WAIT_SECS: f64 = 60.0;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {

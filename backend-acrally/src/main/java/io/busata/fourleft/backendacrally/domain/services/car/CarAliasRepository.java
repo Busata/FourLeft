@@ -13,4 +13,6 @@ public interface CarAliasRepository extends JpaRepository<CarAlias, UUID> {
 
     /** Resolve a raw car string from a result/telemetry to its alias (exact match). */
     Optional<CarAlias> findByRawName(String rawName);
+
+    boolean existsByRawName(String rawName);
 }

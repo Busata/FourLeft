@@ -2,7 +2,13 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import type { CarAliasCollectResultTo, CarAliasTo, CarTo, UpdateCarAliasRequestTo } from '../../models/acrally';
+import type {
+  CarAliasCollectResultTo,
+  CarAliasTo,
+  CarTo,
+  CreateCarAliasRequestTo,
+  UpdateCarAliasRequestTo,
+} from '../../models/acrally';
 
 /**
  * Admin: car aliases. "Collect" scans results for the distinct raw car strings the game reports and
@@ -28,6 +34,10 @@ export class AcrallyCarAliases implements OnInit {
   readonly editingId = signal<string | null>(null);
   readonly editCarId = signal<string>('');
   readonly busy = signal(false);
+
+  readonly creating = signal(false);
+  readonly newRawName = signal('');
+  readonly newCarId = signal<string>('');
 
   ngOnInit(): void {
     this.http.get<CarTo[]>('/acrally-api/admin/cars').subscribe({
@@ -71,6 +81,30 @@ export class AcrallyCarAliases implements OnInit {
         this.error.set('Could not collect car aliases.');
         this.collecting.set(false);
       },
+    });
+  }
+
+  toggleCreate(): void {
+    this.error.set('');
+    this.newRawName.set('');
+    this.newCarId.set('');
+    this.creating.update((open) => !open);
+  }
+
+  create(): void {
+    if (this.busy() || !this.newRawName().trim()) {
+      return;
+    }
+    this.error.set('');
+    this.busy.set(true);
+    const body: CreateCarAliasRequestTo = { rawName: this.newRawName().trim(), carId: this.newCarId() || null };
+    this.http.post<CarAliasTo>(this.base, body).subscribe({
+      next: (created) => {
+        this.aliases.update((list) => [...list, created].sort((a, b) => a.rawName.localeCompare(b.rawName)));
+        this.busy.set(false);
+        this.toggleCreate();
+      },
+      error: (err) => this.fail(err, 'Could not add the car alias.'),
     });
   }
 

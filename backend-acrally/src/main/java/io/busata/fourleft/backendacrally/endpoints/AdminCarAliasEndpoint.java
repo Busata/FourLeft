@@ -2,6 +2,7 @@ package io.busata.fourleft.backendacrally.endpoints;
 
 import io.busata.fourleft.api.acrally.models.CarAliasCollectResultTo;
 import io.busata.fourleft.api.acrally.models.CarAliasTo;
+import io.busata.fourleft.api.acrally.models.CreateCarAliasRequestTo;
 import io.busata.fourleft.api.acrally.models.UpdateCarAliasRequestTo;
 import io.busata.fourleft.backendacrally.domain.models.car.Car;
 import io.busata.fourleft.backendacrally.domain.models.car.CarAlias;
@@ -39,6 +40,13 @@ public class AdminCarAliasEndpoint {
     @GetMapping("")
     public List<CarAliasTo> list() {
         return toTos(aliasService.list());
+    }
+
+    /** Add an alias by hand (the exact string the game reports), optionally assigned to a car. */
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CarAliasTo create(@RequestBody CreateCarAliasRequestTo request) {
+        return toTos(List.of(aliasService.create(request.rawName(), request.carId()))).get(0);
     }
 
     /** Scans results for distinct raw car strings and catalogues any new ones (existing rows untouched). */

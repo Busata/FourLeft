@@ -149,8 +149,11 @@ fn run_headless(cfg: Config) -> Result<()> {
     let mut last_scan: Option<Instant> = None;
     loop {
         let polled = source.poll();
-        if let Some(frame) = &polled {
-            runner.on_frame(frame);
+        match &polled {
+            Some(frame) => runner.on_frame(frame),
+            // No telemetry (menus / the result screen at stage end): feed a blank frame so an open
+            // run finalises and its save result is read, rather than hanging until superseded.
+            None => runner.on_frame(&Frame::blank()),
         }
 
         if scan_mode {
