@@ -185,6 +185,68 @@
               </div>
             }
           </div>
+
+          <!-- Leaderboard -->
+          <div class="event-section">
+            <div class="event-section__head">
+              <span class="event-section__title">Leaderboard</span>
+              <button class="g-button g-button-secondary mini" type="button" (click)="toggleLeaderboard(event.id)">
+                {{ isBoardOpen(event.id) ? 'Hide' : 'Show' }}
+              </button>
+            </div>
+            @if (isBoardOpen(event.id)) {
+              @if (isBoardLoading(event.id)) {
+                <p class="event-empty">Loading…</p>
+              } @else if (board(event.id); as b) {
+                @if (b.overall.length === 0) {
+                  <p class="event-empty">No times yet — be the first to set one.</p>
+                } @else {
+                  @if (b.totalStages > 1) {
+                    <p class="board__caption">Overall standings</p>
+                    <table class="board">
+                      <thead>
+                        <tr><th class="board__pos">#</th><th>Driver</th><th class="board__num">Total</th><th class="board__wide board__num">Stages</th></tr>
+                      </thead>
+                      <tbody>
+                        @for (s of b.overall; track s.userId) {
+                          <tr>
+                            <td class="board__pos">{{ s.rank }}</td>
+                            <td>{{ s.driver }}</td>
+                            <td class="board__num">{{ formatTime(s.totalMs) }}</td>
+                            <td class="board__wide board__num">{{ s.stagesCompleted }} / {{ b.totalStages }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                  @for (stage of b.stages; track stage.variantId) {
+                    <p class="board__caption">{{ stage.label }}</p>
+                    @if (stage.entries.length === 0) {
+                      <p class="event-empty">No times yet.</p>
+                    } @else {
+                      <table class="board">
+                        <thead>
+                          <tr><th class="board__pos">#</th><th>Driver</th><th class="board__wide">Car</th><th class="board__num">Time</th></tr>
+                        </thead>
+                        <tbody>
+                          @for (e of stage.entries; track e.userId) {
+                            <tr>
+                              <td class="board__pos">{{ e.rank }}</td>
+                              <td>{{ e.driver }}</td>
+                              <td class="board__wide">{{ e.carName || '—' }}</td>
+                              <td class="board__num">{{ formatTime(e.totalMs) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    }
+                  }
+                }
+              } @else {
+                <p class="event-empty">Couldn’t load the leaderboard.</p>
+              }
+            }
+          </div>
         </div>
       }
 

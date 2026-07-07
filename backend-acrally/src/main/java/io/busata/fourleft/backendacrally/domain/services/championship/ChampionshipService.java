@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -195,6 +196,61 @@ public class ChampionshipService {
         return clubRepository.findById(championship.getClubId())
                 .map(club -> club.getCreatedBy().equals(userId))
                 .orElse(false);
+    }
+
+    // --- Derived event windows ------------------------------------------------------------------
+
+    /** An event's open/close moment, derived from the championship start plus each event's gap/duration. */
+    public record EventWindow(LocalDateTime opensAt, LocalDateTime closesAt) {
+        public boolean contains(LocalDateTime at) {
+            return !at.isBefore(opensAt) && at.isBefore(closesAt);
+        }
+    }
+
+    /**
+     * The open/close window of every event in a championship, keyed by event id. Windows chain: the
+     * first event opens {@code gapDays} after the championship start, each subsequent event opens
+     * {@code gapDays} after the previous one closed. The single source of truth for this derivation.
+     */
+    public Map<UUID, EventWindow> windows(Championship championship, List<ChampionshipEvent> orderedEvents) {
+        Map<UUID, EventWindow> windows = new java.util.HashMap<>();
+        LocalDateTime runningStart = championship.getStartsAt();
+        for (ChampionshipEvent event : orderedEvents) {
+            LocalDateTime open = runningStart.plusDays(event.getGapDays());
+            LocalDateTime close = open.plusDays(event.getDurationDays());
+            windows.put(event.getId(), new EventWindow(open, close));
+            runningStart = close;
+        }
+        return windows;
+    }
+
+    /** The derived window of a single event (loads its championship and siblings). */
+    public EventWindow windowFor(UUID eventId) {
+        ChampionshipEvent event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such event."));
+        Championship championship = get(event.getChampionshipId());
+        List<ChampionshipEvent> events =
+                eventRepository.findAllByChampionshipIdOrderByPositionAsc(championship.getId());
+        return windows(championship, events).get(eventId);
+    }
+
+    /**
+     * True when an event is currently accepting results: its championship is published and the moment
+     * falls inside the derived window. Used by the ingestion pipeline to decide whether a run scores.
+     */
+    public boolean isOpen(UUID eventId, LocalDateTime at) {
+        ChampionshipEvent event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) {
+            return false;
+        }
+        Championship championship = championshipRepository.findById(event.getChampionshipId()).orElse(null);
+        if (championship == null || championship.getStatus() != ChampionshipStatus.PUBLISHED) {
+            return false;
+        }
+        List<ChampionshipEvent> events =
+                eventRepository.findAllByChampionshipIdOrderByPositionAsc(championship.getId());
+        EventWindow window = windows(championship, events).get(eventId);
+        return window != null && window.contains(at);
     }
 
     // --- Guards & helpers -----------------------------------------------------------------------

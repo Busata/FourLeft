@@ -20,15 +20,18 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Authenticates the agent's ingestion calls by {@code Authorization: Bearer <api_key>}. Only acts
- * on {@code /acrally-api/sessions/**}; a valid, non-revoked key belonging to an active user sets an
- * {@link AgentPrincipal}. Anything else is left unauthenticated so the authorization layer 401s.
+ * Authenticates the agent's ingestion + races calls by {@code Authorization: Bearer <api_key>}. Acts
+ * on {@code /acrally-api/sessions/**} (ingestion) and {@code /acrally-api/agent/races/**} (the Races
+ * tab); a valid, non-revoked key belonging to an active user sets an {@link AgentPrincipal}. Anything
+ * else is left unauthenticated so the authorization layer 401s. Note: {@code /agent/pair/**} is NOT
+ * covered here — pairing is browser (session) driven, so the prefix is the narrower {@code races}.
  */
 @Component
 @RequiredArgsConstructor
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
-    private static final String PATH_PREFIX = "/acrally-api/sessions";
+    private static final List<String> PATH_PREFIXES =
+            List.of("/acrally-api/sessions", "/acrally-api/agent/races");
     private static final String BEARER = "Bearer ";
 
     private final ApiKeyService apiKeyService;
@@ -36,7 +39,8 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith(PATH_PREFIX);
+        String uri = request.getRequestURI();
+        return PATH_PREFIXES.stream().noneMatch(uri::startsWith);
     }
 
     @Override

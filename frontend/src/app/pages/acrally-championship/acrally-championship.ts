@@ -8,6 +8,7 @@ import type {
   CarTo,
   ChampionshipDetailTo,
   ChampionshipEventTo,
+  EventLeaderboardTo,
   VariantTo,
 } from '../../models/acrally';
 
@@ -108,6 +109,11 @@ export class AcrallyChampionship implements OnInit {
   readonly editingCarsEventId = signal<string | null>(null);
   readonly editCarIds = signal<Set<string>>(new Set());
 
+  // --- Leaderboards (lazy-loaded + collapsible per event) ---
+  readonly leaderboards = signal<Map<string, EventLeaderboardTo>>(new Map());
+  readonly openBoards = signal<Set<string>>(new Set());
+  readonly loadingBoards = signal<Set<string>>(new Set());
+
   ngOnInit(): void {
     this.clubId.set(this.route.snapshot.paramMap.get('clubId') ?? '');
     this.championshipId.set(this.route.snapshot.paramMap.get('championshipId') ?? '');
@@ -158,6 +164,62 @@ export class AcrallyChampionship implements OnInit {
     return this.variantById().get(variantId)?.displayName
       ?? this.variantById().get(variantId)?.rawName
       ?? '(removed variant)';
+  }
+
+  // --- Leaderboards ---
+  isBoardOpen(eventId: string): boolean {
+    return this.openBoards().has(eventId);
+  }
+
+  isBoardLoading(eventId: string): boolean {
+    return this.loadingBoards().has(eventId);
+  }
+
+  board(eventId: string): EventLeaderboardTo | undefined {
+    return this.leaderboards().get(eventId);
+  }
+
+  /** Toggle an event's leaderboard, fetching it the first time it's opened. */
+  toggleLeaderboard(eventId: string): void {
+    const open = new Set(this.openBoards());
+    if (open.has(eventId)) {
+      open.delete(eventId);
+      this.openBoards.set(open);
+      return;
+    }
+    open.add(eventId);
+    this.openBoards.set(open);
+    if (!this.leaderboards().has(eventId)) {
+      this.loadLeaderboard(eventId);
+    }
+  }
+
+  private loadLeaderboard(eventId: string): void {
+    const loading = new Set(this.loadingBoards());
+    loading.add(eventId);
+    this.loadingBoards.set(loading);
+    this.http.get<EventLeaderboardTo>(`/acrally-api/events/${eventId}/leaderboard`).subscribe({
+      next: (board) => {
+        this.leaderboards.set(new Map(this.leaderboards()).set(eventId, board));
+        this.clearLoading(eventId);
+      },
+      error: () => this.clearLoading(eventId),
+    });
+  }
+
+  private clearLoading(eventId: string): void {
+    const loading = new Set(this.loadingBoards());
+    loading.delete(eventId);
+    this.loadingBoards.set(loading);
+  }
+
+  /** ms → m:ss.mmm (penalised totals), matching the personal-stats formatting. */
+  formatTime(ms: number): string {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const millis = ms % 1000;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`;
   }
 
   // --- Championship meta ---

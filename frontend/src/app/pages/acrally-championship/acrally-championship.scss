@@ -119,6 +119,55 @@
   font-size: 13px;
 }
 
+// ---- Leaderboard ----
+.board__caption {
+  margin: 12px 0 4px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.board {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.board__pos {
+  width: 2.5em;
+  color: var(--muted);
+}
+
+.board__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// Wide-only columns (car, stages-completed): hidden on narrow screens, shown from 720px.
+.board__wide {
+  display: none;
+}
+
 // ---- Forms ----
 .form-row {
   display: flex;
@@ -374,5 +423,9 @@
       flex: 1;
       margin-bottom: 0;
     }
+  }
+
+  .board__wide {
+    display: table-cell;
   }
 }

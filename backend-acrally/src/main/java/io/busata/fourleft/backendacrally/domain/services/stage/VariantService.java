@@ -67,6 +67,32 @@ public class VariantService {
         variantRepository.delete(variant);
     }
 
+    /** A variant's resolved labels for display: its own label plus its stage and location names. */
+    public record VariantLabel(String label, String stageName, String locationName) {
+    }
+
+    /**
+     * Resolved display labels keyed by variant id (variant → stage → location), for callers that
+     * render variants selected into events (the schedule, leaderboards, the agent's race list).
+     */
+    public Map<UUID, VariantLabel> labelsById() {
+        Map<UUID, Stage> stages = stageRepository.findAll().stream()
+                .collect(Collectors.toMap(Stage::getId, s -> s));
+        Map<UUID, String> locationNames = locationRepository.findAll().stream()
+                .collect(Collectors.toMap(Location::getId, Location::getName));
+        return variantRepository.findAll().stream()
+                .collect(Collectors.toMap(Variant::getId, variant -> toLabel(variant, stages, locationNames)));
+    }
+
+    private VariantLabel toLabel(Variant variant, Map<UUID, Stage> stages, Map<UUID, String> locationNames) {
+        String label = variant.getDisplayName() != null ? variant.getDisplayName() : variant.getRawName();
+        Stage stage = variant.getStageId() == null ? null : stages.get(variant.getStageId());
+        String stageName = stage == null ? null : stage.getName();
+        String locationName = stage == null || stage.getLocationId() == null ? null
+                : locationNames.get(stage.getLocationId());
+        return new VariantLabel(label, stageName, locationName);
+    }
+
     /**
      * A lookup from raw stage identifier to the readable name to render, resolving each variant up
      * the hierarchy (variant → stage → location). Callers fall back to the raw name for anything

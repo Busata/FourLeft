@@ -215,12 +215,12 @@ public class ChampionshipEndpoint {
         Map<UUID, Car> cars = carRepository.findAll().stream()
                 .collect(Collectors.toMap(Car::getId, c -> c));
 
-        LocalDateTime runningStart = championship.getStartsAt();
+        Map<UUID, ChampionshipService.EventWindow> windows = championshipService.windows(championship, events);
         List<ChampionshipEventTo> eventTos = new java.util.ArrayList<>();
         for (ChampionshipEvent event : events) {
-            LocalDateTime open = runningStart.plusDays(event.getGapDays());
-            LocalDateTime close = open.plusDays(event.getDurationDays());
-            runningStart = close;
+            ChampionshipService.EventWindow window = windows.get(event.getId());
+            LocalDateTime open = window.opensAt();
+            LocalDateTime close = window.closesAt();
 
             List<EventVariantTo> variantTos = variantsByEvent.getOrDefault(event.getId(), List.of()).stream()
                     .sorted(java.util.Comparator.comparingInt(EventVariant::getPosition))

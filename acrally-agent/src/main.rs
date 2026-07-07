@@ -23,6 +23,9 @@ mod submit;
 mod telemetry;
 
 #[cfg(feature = "ui")]
+mod races;
+
+#[cfg(feature = "ui")]
 mod ui;
 
 #[cfg(all(windows, feature = "shm"))]

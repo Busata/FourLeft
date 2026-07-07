@@ -182,6 +182,25 @@ POST /sessions/srv-7/result
 ← 200 {"ok":true}
 ```
 
+## Appendix: Races / arming (agent UI only — not part of the ingest contract)
+
+The agent's **Races** tab uses a separate, API-key-authenticated control channel to drive club event
+leaderboards. It does **not** change the four ingest endpoints above. A driver arms a specific stage;
+the arm is bound **server-side** to the driver's next opened session, so a run already in progress
+when Start is pressed can never be captured (this is what makes "only the next run counts"
+un-forgeable). When that run's `POST /sessions/{id}/result` arrives, the backend records the time to
+the event's stage leaderboard if it matches the armed stage in a permitted car while the event is open.
+
+```
+GET  {api_base}/agent/races          -> { events:[…], arm:{…} }   open events for the driver's clubs + arm state
+POST {api_base}/agent/races/arm      { event_id, variant_id }     -> arm state
+POST {api_base}/agent/races/disarm                                -> arm state
+```
+
+`arm` outcomes reported back (on the next poll after a run): `RECORDED`, `SLOWER`, `WRONG_STAGE`,
+`WRONG_CAR`, `EVENT_CLOSED`. Only the WRC/AC-Rally backend implements these; the reference
+`dev-server.py` does not.
+
 ## Relevant agent configuration
 
 | Config key       | Default        | Effect on the contract                          |

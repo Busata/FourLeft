@@ -31,10 +31,17 @@ use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem, PredefinedMenuItem};
 use tray_icon::{Icon, MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 
 use crate::config::Config;
+use crate::model::fmt_ms;
 use crate::pairing::{self, Phase};
+use crate::races::{self, ArmState, RaceEvent, RaceStage, RacesHandle, RacesState};
 use crate::runner::Runner;
 use crate::selfupdate::{self, UpdateState};
 use crate::status::{AgentStatus, DriveState, StatusHandle};
+
+/// Accent colours reused across the Races tab.
+const GREEN: egui::Color32 = egui::Color32::from_rgb(0x4c, 0xc2, 0x6a);
+const AMBER: egui::Color32 = egui::Color32::from_rgb(0xd0, 0x9b, 0x4b);
+const RED: egui::Color32 = egui::Color32::from_rgb(0xd0, 0x6b, 0x5b);
 
 /// Display name shown in the window title bar and tray tooltip.
 const APP_NAME: &str = "Fourleft.IO - AC Rally Companion";
@@ -103,6 +110,9 @@ pub fn run(cfg: Config) -> Result<()> {
         linked,
         pipeline: None,
         update,
+        races: Arc::new(Mutex::new(RacesState::default())),
+        races_poller: None,
+        pending_arm: None,
     };
 
     let stop_handlers = stop.clone();
@@ -264,6 +274,30 @@ enum ConnectAction {
     Skip,
 }
 
+/// A stage the user tapped Start on, awaiting confirmation in the modal.
+struct PendingArm {
+    event_id: String,
+    variant_id: String,
+    stage_label: String,
+    event_label: String,
+    car_label: String,
+}
+
+/// What the Races tab / confirm modal asked us to do (applied outside the render closure).
+enum RaceAction {
+    None,
+    RequestArm {
+        event_id: String,
+        variant_id: String,
+        stage_label: String,
+        event_label: String,
+        car_label: String,
+    },
+    ConfirmArm,
+    CancelArm,
+    Disarm,
+}
+
 struct App {
     cfg: Config,
     status: StatusHandle,
@@ -277,6 +311,11 @@ struct App {
     pipeline: Option<JoinHandle<()>>,
     /// Self-update state, driven by background threads (see `selfupdate`).
     update: Arc<Mutex<UpdateState>>,
+    /// Live races state (events + arm), kept fresh by a background poller.
+    races: RacesHandle,
+    races_poller: Option<JoinHandle<()>>,
+    /// The stage awaiting Start confirmation, if the modal is open.
+    pending_arm: Option<PendingArm>,
 }
 
 impl App {
@@ -294,6 +333,16 @@ impl App {
         let status = self.status.clone();
         let stop = self.stop.clone();
         self.pipeline = Some(std::thread::spawn(move || pipeline_loop(cfg, status, stop)));
+    }
+
+    fn spawn_races_poller(&mut self) {
+        if self.races_poller.is_some() {
+            return;
+        }
+        let cfg = self.cfg.clone();
+        let handle = self.races.clone();
+        let stop = self.stop.clone();
+        self.races_poller = Some(std::thread::spawn(move || races::poller(cfg, handle, stop)));
     }
 
     fn start_pairing(&self) {
@@ -393,16 +442,52 @@ impl App {
             ui.add_space(3.0);
         });
 
+        let mut race_action = RaceAction::None;
+        let races = self.races.lock().map(|s| s.clone()).unwrap_or_default();
         egui::CentralPanel::default().show(ctx, |ui| match self.tab {
             Tab::Status => status_tab(ui, &snap),
-            Tab::Races => races_tab(ui, &self.cfg),
+            Tab::Races => races_tab(ui, &races, &snap, &mut race_action),
         });
+
+        // Confirm modal for arming a stage sits on top of the central panel.
+        if let Some(pending) = &self.pending_arm {
+            confirm_modal(ctx, pending, &mut race_action);
+        }
+        self.apply_race_action(race_action);
 
         if do_check {
             self.start_update_check();
         }
         if do_apply {
             self.start_update_apply();
+        }
+    }
+
+    fn apply_race_action(&mut self, action: RaceAction) {
+        match action {
+            RaceAction::None => {}
+            RaceAction::RequestArm {
+                event_id,
+                variant_id,
+                stage_label,
+                event_label,
+                car_label,
+            } => {
+                self.pending_arm = Some(PendingArm {
+                    event_id,
+                    variant_id,
+                    stage_label,
+                    event_label,
+                    car_label,
+                });
+            }
+            RaceAction::CancelArm => self.pending_arm = None,
+            RaceAction::ConfirmArm => {
+                if let Some(p) = self.pending_arm.take() {
+                    races::arm(self.cfg.clone(), self.races.clone(), p.event_id, p.variant_id);
+                }
+            }
+            RaceAction::Disarm => races::disarm(self.cfg.clone(), self.races.clone()),
         }
     }
 
@@ -458,6 +543,9 @@ impl eframe::App for App {
 
         if self.linked && self.pipeline.is_none() {
             self.spawn_pipeline();
+        }
+        if self.linked {
+            self.spawn_races_poller();
         }
 
         if self.linked {
@@ -595,23 +683,235 @@ fn status_tab(ui: &mut egui::Ui, s: &AgentStatus) {
     };
 }
 
-fn races_tab(ui: &mut egui::Ui, cfg: &Config) {
+/// The Races tab: the open events of the driver's clubs, each stage with a Start button, plus the
+/// live arm banner (with best-effort wrong-stage/car warnings) and the previous run's outcome.
+fn races_tab(ui: &mut egui::Ui, state: &RacesState, snap: &AgentStatus, action: &mut RaceAction) {
     ui.add_space(6.0);
-    ui.heading("Races");
+    ui.horizontal(|ui| {
+        ui.heading("Races");
+        if state.loading && !state.loaded_once {
+            ui.spinner();
+        }
+    });
+    ui.add_space(4.0);
+
+    let arm = &state.view.arm;
+    if arm.active {
+        arm_banner(ui, arm, snap, state.busy, action);
+        ui.add_space(6.0);
+        ui.separator();
+    } else if arm.last_outcome.is_some() {
+        outcome_banner(ui, arm);
+        ui.add_space(6.0);
+        ui.separator();
+    }
+
+    if let Some(err) = &state.error {
+        ui.add_space(4.0);
+        ui.colored_label(RED, err);
+    }
+
     ui.add_space(6.0);
-    ui.label("Per-club events you can enter will appear here.");
-    ui.add_space(8.0);
-    ui.label(
-        egui::RichText::new("Not wired up yet — this needs a backend endpoint the agent can query.")
-            .weak(),
-    );
-    ui.add_space(10.0);
-    egui::Grid::new("club")
-        .num_columns(2)
-        .spacing([18.0, 6.0])
-        .show(ui, |ui| {
-            row(ui, "Backend", cfg.api_base.clone());
+    if state.view.events.is_empty() {
+        if state.loaded_once {
+            ui.label(
+                egui::RichText::new(
+                    "No open events right now. Join a club and check back when a championship is running.",
+                )
+                .weak(),
+            );
+        }
+        return;
+    }
+
+    egui::ScrollArea::vertical().show(ui, |ui| {
+        for event in &state.view.events {
+            event_card(ui, event, arm, state.busy, action);
+            ui.add_space(10.0);
+        }
+    });
+}
+
+/// The banner shown while a stage is armed: what you're waiting on, live warnings, and Disarm.
+fn arm_banner(ui: &mut egui::Ui, arm: &ArmState, snap: &AgentStatus, busy: bool, action: &mut RaceAction) {
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new("● Armed").color(GREEN).strong());
+        if let Some(stage) = &arm.stage_label {
+            ui.label(egui::RichText::new(stage).strong());
+        }
+    });
+    let hint = match arm.status.as_deref() {
+        Some("BOUND") => "Run in progress — drive to the finish to record it.",
+        _ => "Go drive this stage now — your next run will be recorded.",
+    };
+    ui.label(egui::RichText::new(hint).weak());
+
+    for warning in arm_warnings(arm, snap) {
+        ui.colored_label(AMBER, format!("⚠ {warning}"));
+    }
+
+    if arm.cars.is_empty() {
+        ui.label(egui::RichText::new("Any car allowed.").weak());
+    } else {
+        ui.label(egui::RichText::new(format!("Cars: {}", arm.cars.join(", "))).weak());
+    }
+
+    ui.add_space(4.0);
+    if ui.add_enabled(!busy, egui::Button::new("Disarm")).clicked() {
+        *action = RaceAction::Disarm;
+    }
+}
+
+/// The banner shown after a run finishes, reflecting the server's authoritative outcome.
+fn outcome_banner(ui: &mut egui::Ui, arm: &ArmState) {
+    let stage = arm.last_stage_label.clone().unwrap_or_else(|| "the stage".to_string());
+    let (color, text) = match arm.last_outcome.as_deref() {
+        Some("RECORDED") => {
+            let time = arm.last_total_ms.map(|ms| fmt_ms(ms as i32)).unwrap_or_default();
+            (GREEN, format!("✓ Recorded {time} on {stage}"))
+        }
+        Some("SLOWER") => (
+            AMBER,
+            format!("Kept your existing time on {stage} — that run was slower."),
+        ),
+        Some("WRONG_STAGE") => (AMBER, format!("⚠ That wasn't {stage} — nothing recorded.")),
+        Some("WRONG_CAR") => (AMBER, "⚠ Wrong car for that stage — nothing recorded.".to_string()),
+        Some("EVENT_CLOSED") => (
+            AMBER,
+            "The event closed before your run finished — nothing recorded.".to_string(),
+        ),
+        other => (
+            egui::Color32::GRAY,
+            format!("Last run: {}", other.unwrap_or("—")),
+        ),
+    };
+    ui.colored_label(color, text);
+}
+
+/// One event, with its stages listed and a Start button per stage.
+fn event_card(ui: &mut egui::Ui, event: &RaceEvent, arm: &ArmState, busy: bool, action: &mut RaceAction) {
+    egui::Frame::group(ui.style()).show(ui, |ui| {
+        ui.label(egui::RichText::new(&event.label).heading());
+        ui.label(egui::RichText::new(format!("{} · {}", event.championship_name, event.club_name)).weak());
+        ui.label(egui::RichText::new(format!("closes {}", human_datetime(&event.closes_at))).weak());
+        ui.add_space(6.0);
+        for stage in &event.stages {
+            stage_row(ui, event, stage, arm, busy, action);
+        }
+    });
+}
+
+/// A single stage row: label, the driver's best, and Start (or an "armed" marker).
+fn stage_row(ui: &mut egui::Ui, event: &RaceEvent, stage: &RaceStage, arm: &ArmState, busy: bool, action: &mut RaceAction) {
+    ui.horizontal(|ui| {
+        ui.label(&stage.label);
+        if let Some(ms) = stage.my_best_ms {
+            ui.label(egui::RichText::new(format!("best {}", fmt_ms(ms as i32))).weak());
+        }
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            let armed_here = arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
+            if armed_here {
+                ui.label(egui::RichText::new("armed").color(GREEN).strong());
+            } else {
+                // One live arm at a time: Start is disabled while any stage is armed or a call is in flight.
+                let enabled = !busy && !arm.active;
+                if ui.add_enabled(enabled, egui::Button::new("Start")).clicked() {
+                    *action = RaceAction::RequestArm {
+                        event_id: event.event_id.clone(),
+                        variant_id: stage.variant_id.clone(),
+                        stage_label: stage.label.clone(),
+                        event_label: event.label.clone(),
+                        car_label: car_summary(stage),
+                    };
+                }
+            }
         });
+    });
+}
+
+/// The Start confirmation modal. Emits Confirm/Cancel actions.
+fn confirm_modal(ctx: &egui::Context, pending: &PendingArm, action: &mut RaceAction) {
+    egui::Window::new("Start this stage?")
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+        .show(ctx, |ui| {
+            ui.label(egui::RichText::new(&pending.event_label).weak());
+            ui.label(egui::RichText::new(&pending.stage_label).heading());
+            ui.label(egui::RichText::new(format!("Car: {}", pending.car_label)).weak());
+            ui.add_space(8.0);
+            ui.label("Your next in-game run on this stage will be recorded. Start it before you begin driving.");
+            ui.add_space(12.0);
+            ui.horizontal(|ui| {
+                if ui.button("Start").clicked() {
+                    *action = RaceAction::ConfirmArm;
+                }
+                if ui.button("Cancel").clicked() {
+                    *action = RaceAction::CancelArm;
+                }
+            });
+        });
+}
+
+/// A short permitted-car summary for the confirm modal.
+fn car_summary(stage: &RaceStage) -> String {
+    if stage.cars.is_empty() {
+        "any car".to_string()
+    } else if stage.cars.len() <= 2 {
+        stage.cars.join(", ")
+    } else {
+        format!("{}, +{} more", stage.cars[..2].join(", "), stage.cars.len() - 2)
+    }
+}
+
+/// Best-effort live warnings while driving an armed stage. Car mismatch is reliable; the stage check
+/// is a fuzzy hint (the live telemetry track string differs from the authoritative save-file key),
+/// so the server's post-run outcome remains the source of truth.
+fn arm_warnings(arm: &ArmState, snap: &AgentStatus) -> Vec<String> {
+    let mut warnings = Vec::new();
+    if snap.state != DriveState::Driving {
+        return warnings;
+    }
+    if !arm.cars.is_empty() && !snap.car.is_empty() {
+        let current = normalize(&snap.car);
+        let allowed = arm.cars.iter().any(|c| {
+            let n = normalize(c);
+            !n.is_empty() && (n == current || n.contains(&current) || current.contains(&n))
+        });
+        if !allowed {
+            warnings.push(format!("This car ({}) isn't allowed for this stage.", snap.car));
+        }
+    }
+    if !stage_matches(&snap.track, arm) {
+        warnings.push("This may not be the stage you armed.".to_string());
+    }
+    warnings
+}
+
+/// True if the live track name plausibly matches the armed stage (normalized substring either way,
+/// against the raw key and the readable label). Unknown/empty tracks never warn.
+fn stage_matches(track: &str, arm: &ArmState) -> bool {
+    let t = normalize(track);
+    if t.is_empty() {
+        return true;
+    }
+    [arm.raw_name.as_deref(), arm.stage_label.as_deref()]
+        .into_iter()
+        .flatten()
+        .map(normalize)
+        .filter(|c| !c.is_empty())
+        .any(|c| c.contains(&t) || t.contains(&c))
+}
+
+/// Lowercase, alphanumeric-only — for tolerant name comparison across differing formats.
+fn normalize(s: &str) -> String {
+    s.chars().filter(|c| c.is_alphanumeric()).flat_map(char::to_lowercase).collect()
+}
+
+/// Trim an ISO date-time ("2026-07-14T18:00:00") to a readable "2026-07-14 18:00".
+fn human_datetime(iso: &str) -> String {
+    let trimmed: String = iso.chars().take(16).collect();
+    trimmed.replacen('T', " ", 1)
 }
 
 fn row(ui: &mut egui::Ui, k: &str, v: String) {

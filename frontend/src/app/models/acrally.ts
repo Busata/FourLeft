@@ -267,3 +267,40 @@ export interface SetEventCarsRequestTo {
 export interface ReorderEventsRequestTo {
   eventIds: string[];
 }
+
+// An event's full leaderboard, from GET /acrally-api/events/{eventId}/leaderboard.
+export interface EventLeaderboardTo {
+  eventId: string;
+  label: string;
+  totalStages: number;
+  stages: StageBoardTo[];
+  overall: EventStandingTo[];
+}
+
+export interface StageBoardTo {
+  variantId: string;
+  label: string;
+  stageName: string | null;
+  locationName: string | null;
+  entries: LeaderboardEntryTo[];
+}
+
+export interface LeaderboardEntryTo {
+  rank: number;
+  userId: string;
+  driver: string;
+  carName: string | null;
+  rawMs: number;
+  penaltyMs: number;
+  totalMs: number;
+  recordedAt: string;
+}
+
+// A driver's overall standing: summed best across completed stages.
+export interface EventStandingTo {
+  rank: number;
+  userId: string;
+  driver: string;
+  totalMs: number;
+  stagesCompleted: number;
+}

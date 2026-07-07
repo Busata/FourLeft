@@ -2,6 +2,7 @@ package io.busata.fourleft.backendacrally.application.ingest;
 
 import io.busata.fourleft.backendacrally.domain.models.session.AgentSession;
 import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
+import io.busata.fourleft.backendacrally.domain.services.championship.EventRecordingService;
 import io.busata.fourleft.backendacrally.domain.services.session.AgentSessionRepository;
 import io.busata.fourleft.backendacrally.domain.services.session.StageResultRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,17 @@ public class SessionIngestService {
 
     private final AgentSessionRepository sessions;
     private final StageResultRepository results;
+    private final EventRecordingService recordingService;
 
     @Transactional
     public UUID open(UUID userId, UUID apiKeyId, IngestPayloads.SessionStart p) {
         AgentSession session = new AgentSession(
                 userId, apiKeyId, p.driver(), p.car(), p.stage(), p.track(), p.startedAtMs(), p.agentVersion());
-        return sessions.save(session).getId();
+        UUID sessionId = sessions.save(session).getId();
+        // Bind a waiting arm to this fresh run: a session that opened before the arm existed can't
+        // bind here, so pressing Start mid-run never captures the run in progress.
+        recordingService.bindToSession(userId, sessionId);
+        return sessionId;
     }
 
     @Transactional
@@ -39,11 +45,15 @@ public class SessionIngestService {
         // De-dupe by the save-file tick: retries re-deliver the same result (contract §Delivery).
         if (results.findByUserIdAndTimestampTicks(userId, p.timestampTicks()).isEmpty()) {
             try {
-                results.save(new StageResult(
+                StageResult saved = results.save(new StageResult(
                         session.getId(), userId, p.stage(), p.car(), p.driver(),
                         p.rawMs(), p.penaltyMs(), p.totalMs(), p.timestampTicks(), p.agentVersion()));
+                // Flush so the row exists before an event_entry references it (FK ordering).
+                results.flush();
+                // First delivery only: score it against any arm bound to this session.
+                recordingService.recordIfArmed(session.getId(), saved);
             } catch (DataIntegrityViolationException concurrentDuplicate) {
-                // Lost a race with a concurrent delivery of the same tick — already stored.
+                // Lost a race with a concurrent delivery of the same tick — already stored and scored.
             }
         }
         session.complete();
@@ -53,6 +63,8 @@ public class SessionIngestService {
     public void abort(UUID userId, String rawSessionId, String reason) {
         AgentSession session = ownedSession(userId, rawSessionId);
         session.abort(reason);
+        // A restart/quit shouldn't burn the arm — release it so the driver's next run re-binds.
+        recordingService.unbindSession(session.getId());
     }
 
     /**
