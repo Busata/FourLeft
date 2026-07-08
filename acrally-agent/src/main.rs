@@ -23,7 +23,6 @@ mod status;
 mod submit;
 mod telemetry;
 
-#[cfg(feature = "ui")]
 mod races;
 
 #[cfg(feature = "ui")]
@@ -64,6 +63,22 @@ fn main() -> Result<()> {
         std::env::args().nth(1).as_deref() == Some("pair") || std::env::var("ACRALLY_PAIR").is_ok();
     if pair_requested {
         return pairing::run(&cfg);
+    }
+
+    // Console race controls — the headless counterpart of the UI's races tab.
+    // Like pair/update these run and exit, and are fine alongside a running
+    // agent: the arm lives on the server, so the agent picks it up on the next
+    // run without any signal.
+    match std::env::args().nth(1).as_deref() {
+        Some("arm-list") | Some("races") => return races::run_list(&cfg),
+        Some("arm") => {
+            let selector = std::env::args().nth(2).ok_or_else(|| {
+                anyhow::anyhow!("usage: acrally-agent arm <number>  (see `acrally-agent arm-list`)")
+            })?;
+            return races::run_arm(&cfg, &selector);
+        }
+        Some("disarm") => return races::run_disarm(&cfg),
+        _ => {}
     }
 
     // Best-effort update nudge on the distributed (Windows) build. Non-blocking;

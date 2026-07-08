@@ -183,7 +183,9 @@ fn verify_with_key(public_key_b64: &str, data: &[u8], sig_text: &str) -> Result<
 pub fn spawn_background_check() {
     std::thread::spawn(|| {
         if let Ok(Some(avail)) = check() {
-            eprintln!(
+            // Also into the log file: a detached headless agent (launch-script /
+            // Wine setups) has no visible stderr, and the log is what users check.
+            crate::logfile::agent_log!(
                 "note: acrally-agent {} is available (you have {}). \
                  Run `acrally-agent update` to upgrade.",
                 avail.version,

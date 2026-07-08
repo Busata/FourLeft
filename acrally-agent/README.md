@@ -86,6 +86,21 @@ The config file lives at `%LOCALAPPDATA%\acrally\config.toml` (on non-Windows,
 `~/.config/acrally/config.toml`), overridable with `ACRALLY_CONFIG`. Pairing
 creates it; nothing in it needs hand-editing for normal use.
 
+## Arming a race from the console
+
+The UI's Races tab has a console twin, for headless setups (e.g. running under
+Wine/Proton with no display). The arm lives on the server, so these can run from
+a second terminal while the agent is up — it needs no signal:
+
+```powershell
+acrally-agent arm-list        # open events + stages, numbered ("races" also works)
+acrally-agent arm 2           # arm stage [2] from that list (variant id also accepted)
+acrally-agent disarm          # release the arm (refused mid-run, like the UI)
+```
+
+`arm-list` also shows the current arm and the previous run's outcome
+(recorded / slower / wrong stage / …), mirroring the UI banners.
+
 ## Install & self-update
 
 Distributed as a single Windows `.exe` that self-updates from a signed manifest
@@ -141,8 +156,8 @@ pipeline on a background thread and shows the live state (driving / idle, car,
 speed, backend connection, last posted result). On first run without a key it
 shows the **Connect** (pairing) screen described above. Closing the window quits
 the agent. The window icon is the fourleft logo (`assets/logo.png`, embedded as
-raw RGBA — see `assets/generate_icon.py`). A **Races** tab is stubbed for the
-planned per-club event browser.
+raw RGBA — see `assets/generate_icon.py`). A **Races** tab lists the open club
+events and arms a stage (console twin: `arm-list` / `arm` / `disarm`).
 
 ```powershell
 cargo run --features ui             # windowed app, mock source
