@@ -85,6 +85,8 @@ fn read_fstring(b: &[u8], o: usize) -> Option<(String, usize)> {
 /// A content string with its position and whether it's a stage header.
 struct Content {
     off: usize,
+    /// Offset just past the string (incl. its NUL), for anchor-adjacency checks.
+    end: usize,
     val: String,
     is_stage: bool,
 }
@@ -113,6 +115,7 @@ fn collect_content(b: &[u8]) -> Vec<Content> {
             let is_stage = i + 1 < items.len() && items[i + 1].0 - items[i].1 < 30;
             Content {
                 off: items[i].0,
+                end: items[i].1,
                 val: items[i].2.clone(),
                 is_stage,
             }
@@ -140,7 +143,26 @@ pub fn parse_records(bytes: &[u8]) -> Vec<StageRecord> {
             o += 1;
             continue;
         }
-        let penalty = read_f32(bytes, o - 12).unwrap_or(0.0).max(0.0);
+        // The penalty must also be a plausible seconds value. The save's car-usage
+        // section stores `[car name][i64 local-time timestamp]` pairs whose string
+        // bytes can decode to an in-range "raw" — but never to a sane penalty
+        // (observed 2026-07-08: raw 8.0, penalty ~7e28, and a timestamp that
+        // outranked every real record because it advances with each save write).
+        let penalty = match read_f32(bytes, o - 12) {
+            Some(p) if p.is_finite() && (-1.0..3600.0).contains(&p) => p.max(0.0),
+            _ => {
+                o += 1;
+                continue;
+            }
+        };
+        // A real anchor sits ~64+ bytes into a record's numeric block; an i64
+        // whose time floats would overlap the preceding string is one of those
+        // car-usage timestamps, not a record.
+        let prev_end = content.iter().filter(|c| c.end <= o).last().map_or(0, |c| c.end);
+        if o - prev_end < 32 {
+            o += 1;
+            continue;
+        }
 
         // Stage = the last stage header before this record; car = the last
         // non-header string before the numeric block (records repeat the car).
@@ -229,6 +251,30 @@ mod tests {
         assert!(totals.contains(&443_653), "7:23.653 total present");
         assert!(totals.contains(&343_722), "5:43.722 total present");
         assert!(totals.contains(&290_937), "4:50.937 total present");
+    }
+
+    // 2026-07-08 save, captured live: alongside 10 real records it has a
+    // car-usage entry — `[AlfaRomeoGTA1300][i64 local-time timestamp]` — whose
+    // string bytes decoded to an in-range raw (8.0s) with a ~7e28 "penalty".
+    // Its timestamp advanced on every save write and outranked every real
+    // record, so the agent kept confirming a garbage result and real runs were
+    // never posted.
+    const SAVE_CAR_USAGE: &[u8] =
+        include_bytes!("../tests/fixtures/PlayerDataSaveSlot-carusage.sav");
+
+    #[test]
+    fn ignores_car_usage_timestamps() {
+        let recs = parse_records(SAVE_CAR_USAGE);
+        assert_eq!(recs.len(), 10, "exactly the real records, no garbage anchor");
+        for r in &recs {
+            assert!(r.penalty_ms < 3_600_000, "sane penalty: {:?}", r);
+            assert!((5_000..3_600_000).contains(&r.raw_ms), "sane raw: {:?}", r);
+        }
+        let newest = newest_record(SAVE_CAR_USAGE).expect("should find records");
+        assert_eq!(newest.timestamp_ticks, 639_191_101_215_490_000);
+        assert_eq!(newest.stage, "AlsaceS2MunsterShort2Reverse");
+        assert_eq!(newest.car, "AlfaRomeoGTA1300");
+        assert_eq!(newest.total_ms, 206_954);
     }
 
     #[test]

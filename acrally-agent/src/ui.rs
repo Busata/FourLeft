@@ -46,7 +46,7 @@ pub fn run(cfg: Config) -> Result<()> {
             .with_title(APP_NAME)
             .with_inner_size([440.0, 560.0])
             .with_min_inner_size([360.0, 420.0])
-            .with_icon(Arc::new(car_icon_data(64))),
+            .with_icon(Arc::new(logo_icon_data())),
         ..Default::default()
     };
 
@@ -867,64 +867,12 @@ fn state_style(state: DriveState) -> (egui::Color32, &'static str) {
     (c, state.label())
 }
 
-/// Window icon: a small side-profile car rendered to RGBA (see also assets/car.svg).
-fn car_icon_data(n: u32) -> egui::IconData {
+/// Window icon: the fourleft logo tile, pre-rendered to 64×64 raw RGBA by
+/// `assets/generate_icon.py` (which also produces the .ico that build.rs embeds).
+fn logo_icon_data() -> egui::IconData {
     egui::IconData {
-        rgba: car_pixels(n),
-        width: n,
-        height: n,
+        rgba: include_bytes!("../assets/icon-64.rgba").to_vec(),
+        width: 64,
+        height: 64,
     }
-}
-
-/// Draw a side-profile car into an `n`×`n` RGBA buffer. Coordinates are authored on
-/// a 64-grid and scaled, so the same shape works at any icon size. Mirrors assets/car.svg.
-fn car_pixels(n: u32) -> Vec<u8> {
-    const GRID: f32 = 64.0;
-    let green = [0x4c, 0xc2, 0x6a, 0xff];
-    let glass = [0xdf, 0xf3, 0xe6, 0xff];
-    let tyre = [0x22, 0x26, 0x2b, 0xff];
-    let hub = [0xb6, 0xbf, 0xcb, 0xff];
-    let clear = [0, 0, 0, 0];
-
-    let wheels = [(19.0_f32, 47.0_f32), (45.0_f32, 47.0_f32)];
-
-    let in_body = |x: f32, y: f32| -> bool {
-        // Lower body.
-        let lower = (7.0..=57.0).contains(&x) && (34.0..=47.0).contains(&y);
-        // Cabin: trapezoid, narrower at the top.
-        let inset = (34.0 - y) * 0.45;
-        let cabin = (20.0..=34.0).contains(&y) && x >= 22.0 + inset && x <= 43.0 - inset;
-        lower || cabin
-    };
-    let in_glass = |x: f32, y: f32| -> bool {
-        let inset = (32.0 - y) * 0.45;
-        (23.0..=32.0).contains(&y) && x >= 25.0 + inset && x <= 40.0 - inset
-    };
-
-    let mut rgba = Vec::with_capacity((n * n * 4) as usize);
-    for py in 0..n {
-        for px in 0..n {
-            let x = (px as f32 + 0.5) * GRID / n as f32;
-            let y = (py as f32 + 0.5) * GRID / n as f32;
-
-            let mut color = clear;
-            if in_body(x, y) {
-                color = green;
-            }
-            if in_glass(x, y) {
-                color = glass;
-            }
-            for (cx, cy) in wheels {
-                let d = ((x - cx).powi(2) + (y - cy).powi(2)).sqrt();
-                if d <= 8.5 {
-                    color = tyre;
-                }
-                if d <= 3.0 {
-                    color = hub;
-                }
-            }
-            rgba.extend_from_slice(&color);
-        }
-    }
-    rgba
 }

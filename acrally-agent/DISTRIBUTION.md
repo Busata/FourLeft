@@ -123,11 +123,11 @@ against a local/staging file.
 
 ## Exe icon & metadata
 
-`build.rs` embeds `assets/car.ico` and version/product metadata into the exe on
-Windows targets (via `winresource`), so it shows the car icon and a real
+`build.rs` embeds `assets/logo.ico` and version/product metadata into the exe on
+Windows targets (via `winresource`), so it shows the fourleft logo and a real
 publisher/description in Explorer and the download dialog. The version fields come
-from `Cargo.toml` automatically. Regenerate the icon with
-`python3 assets/generate_icon.py` if the car art changes.
+from `Cargo.toml` automatically. Regenerate the icon artifacts with
+`python3 assets/generate_icon.py` if the logo art changes.
 
 ## Not yet done (later phases)
 

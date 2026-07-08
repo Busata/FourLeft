@@ -9,10 +9,10 @@ fn main() {
         return;
     }
 
-    println!("cargo:rerun-if-changed=assets/car.ico");
+    println!("cargo:rerun-if-changed=assets/logo.ico");
 
     let mut res = winresource::WindowsResource::new();
-    res.set_icon("assets/car.ico");
+    res.set_icon("assets/logo.ico");
     // FileVersion/ProductVersion are auto-filled from CARGO_PKG_VERSION.
     res.set("ProductName", "Fourleft.IO - AC Rally Companion");
     res.set("FileDescription", "AC Rally club companion agent");

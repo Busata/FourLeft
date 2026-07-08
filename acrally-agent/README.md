@@ -140,9 +140,9 @@ A status window is available behind the `ui` feature. It runs the telemetry
 pipeline on a background thread and shows the live state (driving / idle, car,
 speed, backend connection, last posted result). On first run without a key it
 shows the **Connect** (pairing) screen described above. Closing the window quits
-the agent. The window icon is a small car (`assets/car.svg`, mirrored as an RGBA
-buffer in `src/ui.rs`). A **Races** tab is stubbed for the planned per-club event
-browser.
+the agent. The window icon is the fourleft logo (`assets/logo.png`, embedded as
+raw RGBA — see `assets/generate_icon.py`). A **Races** tab is stubbed for the
+planned per-club event browser.
 
 ```powershell
 cargo run --features ui             # windowed app, mock source
