@@ -116,10 +116,21 @@ fn main() -> Result<()> {
     run_headless(cfg)
 }
 
+/// The claimed single-instance mutex handle, kept so a self-update can hand the
+/// slot to its relaunched replacement (see [`release_single_instance`]).
+#[cfg(windows)]
+static INSTANCE_MUTEX: std::sync::atomic::AtomicPtr<core::ffi::c_void> =
+    std::sync::atomic::AtomicPtr::new(std::ptr::null_mut());
+
 /// Claim this user's single-instance slot. Uses a named mutex, which Windows
 /// frees automatically when the process dies (a lock file could go stale after a
-/// crash); the handle is deliberately never closed so the claim lives exactly as
-/// long as the process. `Local\` scopes it to the current desktop session.
+/// crash); the handle is deliberately kept open so the claim lives as long as
+/// the process. `Local\` scopes it to the current desktop session.
+///
+/// A self-update relaunch (`ACRALLY_RELAUNCH=1`) races the exiting parent, whose
+/// mutex only vanishes once it has fully torn down — so that path retries for a
+/// few seconds instead of bouncing off the dying process.
+///
 /// Returns `false` when another instance already holds the slot; fails open if
 /// the mutex can't be created at all — better two agents than none.
 #[cfg(windows)]
@@ -132,16 +143,31 @@ fn single_instance() -> bool {
             name: *const u16,
         ) -> *mut core::ffi::c_void;
         fn GetLastError() -> u32;
+        fn CloseHandle(handle: *mut core::ffi::c_void) -> i32;
     }
     let name: Vec<u16> = "Local\\acrally-agent-single-instance\0"
         .encode_utf16()
         .collect();
-    unsafe {
-        let handle = CreateMutexW(core::ptr::null_mut(), 0, name.as_ptr());
-        if handle.is_null() {
-            return true;
+    let deadline = std::env::var_os("ACRALLY_RELAUNCH")
+        .map(|_| Instant::now() + Duration::from_secs(10));
+    loop {
+        unsafe {
+            let handle = CreateMutexW(core::ptr::null_mut(), 0, name.as_ptr());
+            if handle.is_null() {
+                return true;
+            }
+            if GetLastError() != ERROR_ALREADY_EXISTS {
+                INSTANCE_MUTEX.store(handle, std::sync::atomic::Ordering::Release);
+                return true;
+            }
+            // This handle keeps the existing mutex object alive — close it before
+            // waiting, or the name would never free even after its owner exits.
+            CloseHandle(handle);
         }
-        GetLastError() != ERROR_ALREADY_EXISTS
+        match deadline {
+            Some(d) if Instant::now() < d => std::thread::sleep(Duration::from_millis(250)),
+            _ => return false,
+        }
     }
 }
 
@@ -150,6 +176,25 @@ fn single_instance() -> bool {
 fn single_instance() -> bool {
     true
 }
+
+/// Release the single-instance slot. Called by the self-updater just before it
+/// spawns the replaced exe: the replacement claims the slot while this process
+/// finishes exiting, instead of racing a mutex that only frees on full teardown.
+#[cfg(windows)]
+pub fn release_single_instance() {
+    extern "system" {
+        fn CloseHandle(handle: *mut core::ffi::c_void) -> i32;
+    }
+    let handle = INSTANCE_MUTEX.swap(core::ptr::null_mut(), std::sync::atomic::Ordering::AcqRel);
+    if !handle.is_null() {
+        unsafe {
+            CloseHandle(handle);
+        }
+    }
+}
+
+#[cfg(not(windows))]
+pub fn release_single_instance() {}
 
 /// Tell the user why this launch did nothing. The GUI build has no console, so a
 /// double-click on an already-running agent would otherwise be indistinguishable

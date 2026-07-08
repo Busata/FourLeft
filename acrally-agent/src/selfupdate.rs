@@ -147,9 +147,13 @@ fn apply(m: &Manifest) -> Result<()> {
     self_replace::self_replace(&tmp).context("could not replace the running executable")?;
     let _ = std::fs::remove_file(&tmp);
 
-    // Relaunch the now-replaced executable and exit this (old) process.
+    // Relaunch the now-replaced executable and exit this (old) process. Hand the
+    // single-instance slot over first, and mark the child as a relaunch so it
+    // waits out this process's teardown instead of exiting "already running".
     let exe = std::env::current_exe().context("could not find our own path to relaunch")?;
+    crate::release_single_instance();
     std::process::Command::new(exe)
+        .env("ACRALLY_RELAUNCH", "1")
         .spawn()
         .context("updated, but could not relaunch — start acrally-agent again")?;
     println!("Updated to {}. Restarting…", m.version);
