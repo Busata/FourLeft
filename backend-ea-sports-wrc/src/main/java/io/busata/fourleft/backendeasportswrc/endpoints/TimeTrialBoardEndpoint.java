@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -149,6 +150,8 @@ public class TimeTrialBoardEndpoint {
     }
 
     /** Reverse lookup: every board a player (by display name) has a stored time on, with its context. */
+    // Public read-only data, deliberately open to third-party sites. Never combine with allowCredentials.
+    @CrossOrigin
     @GetMapping("/api_v2/time-trials/player")
     public PlayerProfileView player(@RequestParam String name) {
         List<TimeTrialLeaderboardEntry> entries = entryRepository.findLatestByDisplayName(name);
