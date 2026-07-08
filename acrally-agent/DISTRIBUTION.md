@@ -17,11 +17,11 @@ steps get tedious.
 
 ## What makes the exe self-contained
 
-- `--features ui,shm` is the real user build (tray UI + Windows shared-memory reader).
+- `--features ui,shm` is the real user build (window UI + Windows shared-memory reader).
 - `.cargo/config.toml` statically links the MSVC CRT, so there's no VC++
   redistributable dependency.
-- `tray-icon` uses native Win32 and `shm` maps the segments directly, so there's
-  no other runtime dependency. The result is one file: `acrally-agent.exe`.
+- `shm` maps the segments directly, so there's no other runtime dependency. The
+  result is one file: `acrally-agent.exe`.
 
 ## Where it installs (and why it can self-update without admin)
 

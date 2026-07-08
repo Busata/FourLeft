@@ -1,20 +1,10 @@
-//! Tray + window UI (built only with the `ui` feature).
+//! Window UI (built only with the `ui` feature).
 //!
 //! Layout of responsibility:
 //!   - a background thread runs the telemetry pipeline and publishes a live
 //!     [`AgentStatus`] snapshot;
 //!   - the main thread owns the event loop: an `eframe` window that renders that
-//!     snapshot, plus a `tray-icon` entry so the app lives in the system tray.
-//!     Closing the window hides it to the tray rather than quitting.
-//!
-//! Tray events (menu clicks + a left-click on the icon) are handled in the global
-//! tray handlers, NOT routed through `App::update`. That's deliberate: a hidden
-//! eframe window on Windows never receives `RedrawRequested`, so `update` stops
-//! running entirely while closed-to-tray. If we queued actions for `update` to
-//! apply, both "Open" and "Quit" would be dead until the window came back — which
-//! it never could. So "Quit" exits the process directly, and "Open" pokes the OS
-//! (`ShowWindow`) to un-hide the window, which restarts painting and revives the
-//! event loop; a queued `Open` then lets `update` re-sync eframe's own state.
+//!     snapshot. Closing the window quits the agent.
 //!
 //! First run without an `api_key` shows an in-window **Connect** screen that drives
 //! the device-pairing flow (no CLI): it shows a code + link, opens the browser, and
@@ -27,8 +17,6 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use eframe::egui;
-use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem, PredefinedMenuItem};
-use tray_icon::{Icon, MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 
 use crate::config::Config;
 use crate::model::fmt_ms;
@@ -43,41 +31,15 @@ const GREEN: egui::Color32 = egui::Color32::from_rgb(0x4c, 0xc2, 0x6a);
 const AMBER: egui::Color32 = egui::Color32::from_rgb(0xd0, 0x9b, 0x4b);
 const RED: egui::Color32 = egui::Color32::from_rgb(0xd0, 0x6b, 0x5b);
 
-/// Display name shown in the window title bar and tray tooltip.
+/// Display name shown in the window title bar.
 const APP_NAME: &str = "Fourleft.IO - AC Rally Companion";
 
-/// A tray action applied on the UI thread once it's ticking again. Only "Open"
-/// flows through here (to re-sync eframe's visibility state); "Quit" exits the
-/// process straight from the tray handler, since a hidden window's `update` is
-/// parked and can't process a queue.
-enum TrayAction {
-    Open,
-}
-
-/// Launch the tray app: build the tray, then run the UI event loop. The telemetry
-/// pipeline starts once we have a key (immediately if configured, else after pairing).
+/// Launch the app window and run the UI event loop. The telemetry pipeline starts
+/// once we have a key (immediately if configured, else after pairing).
 pub fn run(cfg: Config) -> Result<()> {
     let status: StatusHandle = Arc::new(Mutex::new(AgentStatus::default()));
     let stop = Arc::new(AtomicBool::new(false));
     let pairing = Arc::new(Mutex::new(Phase::Idle));
-    let actions: Arc<Mutex<Vec<TrayAction>>> = Arc::new(Mutex::new(Vec::new()));
-
-    // Build the tray icon + menu on the main thread.
-    let open_item = MenuItem::new("Open", true, None);
-    let quit_item = MenuItem::new("Quit", true, None);
-    let open_id = open_item.id().clone();
-    let quit_id = quit_item.id().clone();
-    let menu = Menu::new();
-    menu.append(&open_item)
-        .and_then(|_| menu.append(&PredefinedMenuItem::separator()))
-        .and_then(|_| menu.append(&quit_item))
-        .map_err(|e| anyhow!("tray menu: {e}"))?;
-    let tray = TrayIconBuilder::new()
-        .with_menu(Box::new(menu))
-        .with_tooltip(APP_NAME)
-        .with_icon(car_icon()?)
-        .build()
-        .map_err(|e| anyhow!("tray icon: {e}"))?;
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -103,10 +65,8 @@ pub fn run(cfg: Config) -> Result<()> {
         cfg,
         status,
         stop: stop.clone(),
-        _tray: tray,
         tab: Tab::Status,
         pairing: pairing.clone(),
-        actions: actions.clone(),
         linked,
         pipeline: None,
         update,
@@ -115,119 +75,15 @@ pub fn run(cfg: Config) -> Result<()> {
         pending_arm: None,
     };
 
-    let stop_handlers = stop.clone();
     let result = eframe::run_native(
         "acrally-agent",
         native_options,
-        Box::new(move |cc| {
-            // Capture the native window handle now (while the window exists) so a
-            // tray click can un-hide it even after eframe has parked the loop.
-            let hwnd: isize = {
-                #[cfg(windows)]
-                {
-                    hwnd_of(cc)
-                }
-                #[cfg(not(windows))]
-                {
-                    0
-                }
-            };
-            install_event_forwarders(&cc.egui_ctx, actions, open_id, quit_id, stop_handlers, hwnd);
-            Ok(Box::new(app))
-        }),
+        Box::new(move |_cc| Ok(Box::new(app))),
     )
     .map_err(|e| anyhow!("eframe failed: {e}"));
 
     stop.store(true, Ordering::Relaxed);
     result
-}
-
-/// Handle tray-icon + menu events. These fire inside the OS message pump on the
-/// UI thread, so they must NOT depend on `App::update` running — it's parked while
-/// the window is hidden. "Quit" exits here; "Open" un-hides the window (which
-/// revives the loop) and queues an `Open` for `update` to re-sync eframe's state.
-fn install_event_forwarders(
-    ctx: &egui::Context,
-    actions: Arc<Mutex<Vec<TrayAction>>>,
-    open_id: MenuId,
-    quit_id: MenuId,
-    stop: Arc<AtomicBool>,
-    hwnd: isize,
-) {
-    {
-        let ctx = ctx.clone();
-        let actions = actions.clone();
-        MenuEvent::set_event_handler(Some(move |event: MenuEvent| {
-            if event.id == quit_id {
-                // Can't route through `update` (a hidden window's loop is parked),
-                // so tear down here. `stop` lets the pipeline thread wind down.
-                stop.store(true, Ordering::Relaxed);
-                std::process::exit(0);
-            } else if event.id == open_id {
-                wake_open(&ctx, &actions, hwnd);
-            }
-        }));
-    }
-    {
-        let ctx = ctx.clone();
-        TrayIconEvent::set_event_handler(Some(move |event: TrayIconEvent| {
-            // A left-click (button released) on the icon opens the window.
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                wake_open(&ctx, &actions, hwnd);
-            }
-        }));
-    }
-}
-
-/// Un-hide the window and queue an `Open`. On Windows the `ShowWindow` poke is what
-/// actually revives the parked event loop (a hidden window never repaints, so
-/// `request_repaint` alone can't wake it); the queued `Open` then re-syncs eframe's
-/// own visibility once `update` starts running again.
-fn wake_open(ctx: &egui::Context, actions: &Arc<Mutex<Vec<TrayAction>>>, hwnd: isize) {
-    #[cfg(windows)]
-    win_show(hwnd);
-    #[cfg(not(windows))]
-    let _ = hwnd;
-    if let Ok(mut queue) = actions.lock() {
-        queue.push(TrayAction::Open);
-    }
-    ctx.request_repaint();
-}
-
-/// Read the main window's HWND from eframe's creation context (0 if unavailable).
-#[cfg(windows)]
-fn hwnd_of(cc: &eframe::CreationContext<'_>) -> isize {
-    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
-    match cc.window_handle().map(|h| h.as_raw()) {
-        Ok(RawWindowHandle::Win32(h)) => h.hwnd.get(),
-        _ => 0,
-    }
-}
-
-/// Force a hidden/minimised window visible and foreground it. Called from the tray
-/// handler because eframe can't show a window it has already parked.
-#[cfg(windows)]
-fn win_show(hwnd: isize) {
-    if hwnd == 0 {
-        return;
-    }
-    const SW_SHOW: i32 = 5;
-    const SW_RESTORE: i32 = 9;
-    extern "system" {
-        fn ShowWindow(hwnd: isize, n_cmd_show: i32) -> i32;
-        fn SetForegroundWindow(hwnd: isize) -> i32;
-    }
-    unsafe {
-        // SW_SHOW un-hides; SW_RESTORE also un-minimises if it was minimised.
-        ShowWindow(hwnd, SW_SHOW);
-        ShowWindow(hwnd, SW_RESTORE);
-        SetForegroundWindow(hwnd);
-    }
 }
 
 /// Telemetry pipeline: poll the source, drive the runner, publish live status.
@@ -306,10 +162,8 @@ struct App {
     cfg: Config,
     status: StatusHandle,
     stop: Arc<AtomicBool>,
-    _tray: TrayIcon,
     tab: Tab,
     pairing: Arc<Mutex<Phase>>,
-    actions: Arc<Mutex<Vec<TrayAction>>>,
     /// True once we have a key (or the user chose to run without one): show the app.
     linked: bool,
     pipeline: Option<JoinHandle<()>>,
@@ -323,12 +177,6 @@ struct App {
 }
 
 impl App {
-    fn show_window(ctx: &egui::Context) {
-        ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
-        ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
-        ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
-    }
-
     fn spawn_pipeline(&mut self) {
         if self.pipeline.is_some() {
             return;
@@ -516,27 +364,8 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Keep ticking (~4 Hz) while visible so telemetry stays fresh. When hidden,
-        // tray events wake us via request_repaint (see install_event_forwarders).
+        // Keep ticking (~4 Hz) so telemetry stays fresh.
         ctx.request_repaint_after(Duration::from_millis(250));
-
-        // Apply any queued tray actions.
-        let queued: Vec<TrayAction> = self
-            .actions
-            .lock()
-            .map(|mut q| q.drain(..).collect())
-            .unwrap_or_default();
-        for action in queued {
-            match action {
-                TrayAction::Open => Self::show_window(ctx),
-            }
-        }
-
-        // Closing the window hides it to the tray instead of exiting.
-        if ctx.input(|i| i.viewport().close_requested()) {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-        }
 
         // Pairing just completed -> adopt the key and start reporting.
         if !self.linked {
@@ -1038,13 +867,7 @@ fn state_style(state: DriveState) -> (egui::Color32, &'static str) {
     (c, state.label())
 }
 
-/// Tray icon: a small side-profile car rendered to RGBA (see also assets/car.svg).
-fn car_icon() -> Result<Icon> {
-    let n = 32;
-    Icon::from_rgba(car_pixels(n), n, n).map_err(|e| anyhow!("icon: {e}"))
-}
-
-/// Window icon data (same car).
+/// Window icon: a small side-profile car rendered to RGBA (see also assets/car.svg).
 fn car_icon_data(n: u32) -> egui::IconData {
     egui::IconData {
         rgba: car_pixels(n),

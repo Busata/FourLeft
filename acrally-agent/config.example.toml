@@ -20,7 +20,7 @@
 # pipeline without the game running. Env: ACRALLY_MOCK.
 # mock = false
 
-# Run on the console instead of the tray/window UI (only relevant to a `ui` build;
+# Run on the console instead of the window UI (only relevant to a `ui` build;
 # a non-`ui` build is always headless). Env: ACRALLY_HEADLESS.
 # headless = false
 

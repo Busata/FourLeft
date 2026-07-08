@@ -189,9 +189,9 @@ pub fn spawn_background_check() {
     });
 }
 
-// ---- UI-driven update (tray app) ----
+// ---- UI-driven update (GUI app) ----
 
-/// Live update state published to the tray UI, mirroring pairing's `Phase`.
+/// Live update state published to the window UI, mirroring pairing's `Phase`.
 #[cfg(feature = "ui")]
 #[derive(Clone, Default)]
 pub enum UpdateState {

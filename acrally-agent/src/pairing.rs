@@ -13,7 +13,7 @@
 //!         status: pending | approved | denied | expired | consumed
 //!
 //! Two front-ends use the same primitives (`start` + `poll_once`): the `pair` CLI
-//! subcommand (`run`) and the tray UI's Connect screen (`drive`).
+//! subcommand (`run`) and the window UI's Connect screen (`drive`).
 
 use std::time::{Duration, Instant};
 
@@ -116,7 +116,7 @@ pub fn poll_once(agent: &ureq::Agent, api_base: &str, device_code: &str) -> Resu
 }
 
 /// The interactive CLI flow (`acrally-agent pair`): prints the code/link, polls,
-/// and writes the key to the config file. The tray UI is the preferred path; this
+/// and writes the key to the config file. The window UI is the preferred path; this
 /// stays as a headless fallback.
 pub fn run(cfg: &Config) -> Result<()> {
     let agent = http();
@@ -257,7 +257,7 @@ pub fn persist_api_key(path: &str, key: &str) -> Result<()> {
     Ok(())
 }
 
-// ---- UI-driven pairing (tray app Connect screen) ----
+// ---- UI-driven pairing (GUI Connect screen) ----
 
 /// Live phase of an in-progress pairing, published to the UI thread.
 #[cfg(feature = "ui")]

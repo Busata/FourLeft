@@ -1,6 +1,6 @@
 [package]
 name = "acrally-agent"
-version = "0.2.7"
+version = "0.2.8"
 edition = "2021"
 description = "Local companion agent: reads Assetto Corsa Rally shared-memory telemetry and submits completed stage times to the club backend."
 
@@ -18,11 +18,6 @@ minisign-verify = "0.2"
 # default-features off to drop `accesskit` (screen-reader integration); we keep
 # the glow renderer, bundled fonts, and the Linux x11/wayland backends.
 eframe = { version = "0.32", default-features = false, features = ["glow", "default_fonts", "x11", "wayland"], optional = true }
-tray-icon = { version = "0.24.1", optional = true }
-# Lets the tray handler grab the native window handle (HWND) so it can un-hide a
-# window eframe has parked — a hidden eframe window never repaints on Windows, so
-# App::update can't show itself. Only pulled in by the GUI build.
-raw-window-handle = { version = "0.6", optional = true }
 
 [build-dependencies]
 # Embeds the exe icon + version/product metadata on Windows targets (build.rs).
@@ -39,6 +34,6 @@ win-shared-memory = { version = "0.1", optional = true }
 [features]
 # Enable the real Windows shared-memory telemetry source.
 shm = ["dep:win-shared-memory"]
-# Enable the tray + window GUI (eframe/egui + tray-icon). Off by default so the
-# core pipeline builds and tests run without a display or GUI system libraries.
-ui = ["dep:eframe", "dep:tray-icon", "dep:raw-window-handle"]
+# Enable the window GUI (eframe/egui). Off by default so the core pipeline
+# builds and tests run without a display or GUI system libraries.
+ui = ["dep:eframe"]

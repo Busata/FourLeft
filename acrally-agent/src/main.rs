@@ -5,7 +5,7 @@
 //! The telemetry source is the only platform-specific piece — on Windows it reads
 //! shared memory, elsewhere (or with `mock = true`) it replays a scripted session.
 
-// The distributed build is a GUI app (tray + window), so mark it as a Windows
+// The distributed build is a GUI app (single window), so mark it as a Windows
 // GUI-subsystem binary: launching it must NOT pop a console window. Gated to the
 // `ui` feature so the headless/diagnostic build keeps its console. On non-Windows
 // targets the attribute is inert.
@@ -43,7 +43,7 @@ use telemetry::{MockSource, TelemetrySource};
 
 fn main() -> Result<()> {
     // With `windows_subsystem = "windows"` the GUI build has no console, so a
-    // double-click shows only the tray UI. But the same exe still has console
+    // double-click shows only the app window. But the same exe still has console
     // paths — `pair`, `update`, `ACRALLY_CHECKSAVE`/`SCAN`/`DUMP`, `headless` — so
     // if it was launched from an existing terminal, reattach to that terminal's
     // console. It's a no-op when there's no parent console (the double-click case),
@@ -103,7 +103,7 @@ fn main() -> Result<()> {
         logfile::path().display(),
     );
 
-    // Normal running goes to the tray UI. Console diagnostics (scan/dump) and an
+    // Normal running goes to the window UI. Console diagnostics (scan/dump) and an
     // explicit `headless` setting keep the original console loop.
     #[cfg(feature = "ui")]
     {
@@ -153,7 +153,7 @@ fn single_instance() -> bool {
 
 /// Tell the user why this launch did nothing. The GUI build has no console, so a
 /// double-click on an already-running agent would otherwise be indistinguishable
-/// from a broken exe — pop a message box pointing at the tray instead.
+/// from a broken exe — pop a message box pointing at the existing window instead.
 #[cfg(all(windows, feature = "ui"))]
 fn already_running_notice() {
     const MB_ICONINFORMATION: u32 = 0x40;
@@ -171,7 +171,7 @@ fn already_running_notice() {
             .chain(std::iter::once(0))
             .collect::<Vec<u16>>()
     };
-    let text = wide("acrally-agent is already running — look for its icon in the system tray.");
+    let text = wide("acrally-agent is already running — look for its window in the taskbar.");
     let caption = wide("acrally-agent");
     unsafe {
         MessageBoxW(

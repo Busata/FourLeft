@@ -60,7 +60,7 @@ Backends that authenticate members (like fourleft.io) need a personal API key.
 Rather than copy-pasting one, the agent uses a device-authorization flow — the
 same "enter this code / click this link" pattern as logging a TV into an account.
 
-**In the app (what users do):** launch the tray app; on first run, with no key, it
+**In the app (what users do):** launch the app; on first run, with no key, it
 shows a **Connect** screen. Click *Connect* → it opens your browser to the approval
 page and shows a short code. Approve it while signed in (a linked Steam account is
 required) and the agent saves the key to `config.toml` and starts reporting — no
@@ -107,7 +107,7 @@ Build/sign/release steps are in [`DISTRIBUTION.md`](DISTRIBUTION.md).
 | `selfupdate.rs` | Poll the signed release manifest; verify + swap + relaunch |
 | `runner.rs` | Orchestrates shared memory + save file into the flow above |
 | `status.rs` | Live status snapshot shared with the UI |
-| `ui.rs` | Tray + window GUI (behind the `ui` feature) |
+| `ui.rs` | Window GUI (behind the `ui` feature) |
 | `config.rs`, `main.rs`, `model.rs` | Config, wiring, shared types |
 
 ## Run it
@@ -134,34 +134,29 @@ GUI build has no console, so when a run doesn't show up on the leaderboard this
 file is the place to see what the agent actually observed. It's rotated to
 `agent.log.old` at startup once it passes ~1 MB.
 
-## Tray UI
+## Window UI
 
-A system-tray app with a status window is available behind the `ui` feature. It
-runs the telemetry pipeline on a background thread and shows the live state
-(driving / idle, car, speed, backend connection, last posted result). On first run
-without a key it shows the **Connect** (pairing) screen described above.
-
-Closing the window hides it to the tray. **Left-click the tray icon** — or the tray
-menu's **Open acrally** — to bring the window back (tray events wake the hidden
-window via a repaint, so this works even while it's tucked away); **Quit** exits.
-The tray/window icon is a small car (`assets/car.svg`, mirrored as an RGBA buffer in
-`src/ui.rs`). A **Races** tab is stubbed for the planned per-club event browser.
+A status window is available behind the `ui` feature. It runs the telemetry
+pipeline on a background thread and shows the live state (driving / idle, car,
+speed, backend connection, last posted result). On first run without a key it
+shows the **Connect** (pairing) screen described above. Closing the window quits
+the agent. The window icon is a small car (`assets/car.svg`, mirrored as an RGBA
+buffer in `src/ui.rs`). A **Races** tab is stubbed for the planned per-club event
+browser.
 
 ```powershell
-cargo run --features ui             # tray app, mock source
-cargo run --features ui,shm         # tray app + real shared memory (Windows)
+cargo run --features ui             # windowed app, mock source
+cargo run --features ui,shm         # windowed app + real shared memory (Windows)
 ```
 
 The UI is **off by default** so the core pipeline builds and tests run without a
-display or GUI system libraries. When built with `ui`, the tray app is the default
+display or GUI system libraries. When built with `ui`, the window is the default
 way to run; the console loop still runs for the `scan`/`dump`/`checksave`
 diagnostics, or set `headless = true` (or `ACRALLY_HEADLESS=1`).
 
-- **Windows** (the target): no extra system packages — `tray-icon` uses native
-  Win32 APIs.
-- **Linux/WSL** (dev only): the tray backend links GTK + libxdo, so building the
-  `ui` feature needs `libgtk-3-dev libxdo-dev libayatana-appindicator3-dev` (and a
-  display to actually show the window).
+- **Windows** (the target): no extra system packages.
+- **Linux/WSL** (dev only): building the `ui` feature needs a display to actually
+  show the window.
 
 ## Testing locally
 

@@ -50,7 +50,7 @@ pub struct Config {
     #[serde(default)]
     pub mock: bool,
 
-    /// Run without the tray/window UI, logging to the console instead. Only
+    /// Run without the window UI, logging to the console instead. Only
     /// relevant to a build with the `ui` feature; a non-`ui` build is always
     /// headless. Also forced by the `ACRALLY_HEADLESS` env var.
     #[serde(default)]
