@@ -1,0 +1,320 @@
+// Compact championship viewer. One card per event; a phase-tinted left edge, stage tabs that
+// double as the itinerary, a single board at a time, and a one-line car list. Mobile-first:
+// the car column appears at 720px.
+
+.ev-none {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+// ---- Event card ---------------------------------------------------------------------------------
+.ev {
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  margin-bottom: 10px;
+  overflow: hidden;
+
+  // The left edge carries the phase at a glance.
+  &--open {
+    border-left-color: var(--ok);
+  }
+
+  &--upcoming {
+    border-left-color: var(--accent);
+  }
+
+  &--closed {
+    border-left-color: var(--border-strong);
+  }
+}
+
+// The whole header row toggles the card (a reset button).
+.ev__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover .ev__name {
+    color: var(--accent);
+  }
+}
+
+.ev__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ev__headline {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ev__name {
+  font-weight: 700;
+  font-size: 15px;
+  transition: color 0.12s;
+}
+
+.ev__meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ev__rel {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.ev__chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.15s;
+
+  &--collapsed {
+    transform: rotate(-90deg); // points right when collapsed, down when open
+  }
+}
+
+.ev__body {
+  padding: 0 14px 14px;
+}
+
+.ev-empty {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+// ---- Stage tabs (itinerary + board switcher) ------------------------------------------------------
+.ev__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ev-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  &:hover {
+    border-color: #9aa4b5;
+  }
+
+  &--on {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-deep);
+    font-weight: 600;
+
+    .ev-tab__ss {
+      color: var(--accent);
+    }
+  }
+}
+
+// The "SS1" ordinal inside a stage tab.
+.ev-tab__ss {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+
+// ---- Board ----------------------------------------------------------------------------------------
+.ev__board {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  overflow-x: auto; // a stage board can outgrow a narrow screen.
+}
+
+.ev__caption {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ev__caption-note {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.ev-board {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.ev-board__pos {
+  width: 2.8em;
+}
+
+.ev-board__driver {
+  font-weight: 600;
+}
+
+// Numeric columns: left-aligned under their headers, tabular figures so digits line up.
+.ev-board__num {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// Penalty baked into the total, called out inline next to the time.
+.ev-board__pen {
+  margin-left: 4px;
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+// Gap to the leader — secondary to the absolute time.
+.ev-board__diff {
+  color: var(--muted);
+}
+
+.ev-board__faint {
+  color: var(--faint);
+}
+
+// Wide-only column (car): hidden on narrow screens, shown from 720px.
+.ev-board__wide {
+  display: none;
+}
+
+// Rank badges; the top three get podium tints.
+.pod {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+
+  &--gold {
+    background: #fbf1cf;
+    border-color: #e8c766;
+    color: #8a6d1a;
+  }
+
+  &--silver {
+    background: #eef0f3;
+    border-color: #c3c9d2;
+    color: #5c636e;
+  }
+
+  &--bronze {
+    background: #f6e6d6;
+    border-color: #d8a877;
+    color: #8a5a2b;
+  }
+}
+
+// ---- Cars line ------------------------------------------------------------------------------------
+.ev__cars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ev__cars-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-right: 2px;
+}
+
+.ev__cars-any {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.car-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ev__cars-more {
+  border: none;
+  background: none;
+  padding: 3px 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 720px) {
+  .ev-board__wide {
+    display: table-cell;
+  }
+}

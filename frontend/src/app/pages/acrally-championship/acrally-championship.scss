@@ -165,90 +165,6 @@
   font-size: 13px;
 }
 
-// ---- Leaderboard ----
-// The open board sits in its own inset so the results read as a distinct module rather than
-// spilling out of the car chips above it.
-.board-wrap {
-  margin-top: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-alt);
-  overflow-x: auto; // the stage board's extra columns can outgrow a narrow screen.
-}
-
-.board__caption {
-  margin: 12px 0 4px;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text);
-
-  // The board's first caption shouldn't add space on top of the inset's own padding.
-  &:first-child {
-    margin-top: 0;
-  }
-}
-
-.board {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-
-  th {
-    text-align: left;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--faint);
-    padding: 4px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  td {
-    padding: 5px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-}
-
-.board__pos {
-  width: 2.5em;
-  color: var(--muted);
-}
-
-// Numeric columns: left-aligned so the values sit under their (left-aligned) headers, with
-// tabular figures so the digits line up row to row.
-.board__num {
-  text-align: left;
-  font-variant-numeric: tabular-nums;
-}
-
-// The penalty column — the "+Xs" is called out in red; a zero penalty shows a muted dash.
-.board__penalty {
-  color: var(--danger);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-// Gap to the stage leader — secondary to the absolute time, so it reads muted.
-.board__diff {
-  color: var(--muted);
-}
-
-// Placeholder dash for an empty numeric cell (no penalty / the leader's diff).
-.board__muted {
-  color: var(--faint);
-}
-
-// Wide-only columns (car, stages-completed): hidden on narrow screens, shown from 720px.
-.board__wide {
-  display: none;
-}
-
 // ---- Forms ----
 .form-row {
   display: flex;
@@ -504,9 +420,5 @@
       flex: 1;
       margin-bottom: 0;
     }
-  }
-
-  .board__wide {
-    display: table-cell;
   }
 }

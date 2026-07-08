@@ -1,5 +1,5 @@
-// Club detail: a clear three-level hierarchy — club title, a subordinate "Championships" eyebrow,
-// then each championship as its own clickable card so the individual entries stand out.
+// Club detail: club title, a subordinate "Championships" eyebrow, then each championship as an
+// expandable block that unfolds the compact championship view (events + boards) in place.
 
 .club-title {
   font-size: 22px;
@@ -37,44 +37,87 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-// Each championship is a card, and the whole card is the click target.
-.champ-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
+// Each championship is a block whose header row expands it in place.
+.champ-block {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  text-decoration: none;
-  color: inherit;
   transition: border-color 0.12s, box-shadow 0.12s;
 
   &:hover {
-    border-color: var(--accent);
-    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+    border-color: var(--border-strong);
   }
 
-  &:hover .champ-card__name {
+  &--open {
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+  }
+}
+
+.champ-block__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+// The headline area is the expand/collapse toggle (a reset button).
+.champ-block__toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover .champ-block__name {
     color: var(--accent);
   }
 }
 
-.champ-card__body {
+.champ-block__headline {
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.champ-card__name {
+.champ-block__name {
   font-size: 16px;
   font-weight: 700;
   color: var(--ink);
   transition: color 0.12s;
+}
+
+.champ-block__chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.15s;
+
+  &--collapsed {
+    transform: rotate(-90deg); // points right when collapsed, down when open
+  }
+}
+
+.champ-block__manage {
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+// The unfolded championship view; a hairline separates it from the block header.
+.champ-block__body {
+  padding: 12px;
+  border-top: 1px solid var(--border);
 }

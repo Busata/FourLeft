@@ -8,10 +8,10 @@ import type {
   CarTo,
   ChampionshipDetailTo,
   ChampionshipEventTo,
-  EventLeaderboardTo,
   EventVariantTo,
   VariantTo,
 } from '../../models/acrally';
+import { AcrallyChampionshipView } from '../../shared/acrally-championship-view/acrally-championship-view';
 
 interface VariantGroup {
   location: string;
@@ -24,13 +24,14 @@ interface CarGroup {
 }
 
 /**
- * Championship editor / viewer. Owners build the schedule here — events (with derived open/close
- * dates), the ordered variants each event runs, and the cars each event permits. Non-owners get a
- * read-only view. Every mutation returns the fresh detail aggregate, which we rebind wholesale.
+ * Championship editor. Owners of a draft build the schedule here — events (with derived open/close
+ * dates), the ordered variants each event runs, and the cars each event permits. Once published
+ * (or for non-owners) the page swaps to the shared compact championship view; the club page embeds
+ * the same view inline. Every mutation returns the fresh detail aggregate, rebound wholesale.
  */
 @Component({
   selector: 'app-acrally-championship',
-  imports: [DatePipe, FormsModule, NgTemplateOutlet, RouterLink],
+  imports: [DatePipe, FormsModule, NgTemplateOutlet, RouterLink, AcrallyChampionshipView],
   templateUrl: './acrally-championship.html',
   styleUrl: './acrally-championship.scss',
 })
@@ -112,13 +113,8 @@ export class AcrallyChampionship implements OnInit {
   readonly editingCarsEventId = signal<string | null>(null);
   readonly editCarIds = signal<Set<string>>(new Set());
 
-  // --- Event collapse: open events expand by default, the rest collapse to a summary line ---
+  // --- Event collapse (editor only): all events expand by default while building ---
   readonly expandedEvents = signal<Set<string>>(new Set());
-
-  // --- Leaderboards (lazy-loaded + collapsible per event) ---
-  readonly leaderboards = signal<Map<string, EventLeaderboardTo>>(new Map());
-  readonly openBoards = signal<Set<string>>(new Set());
-  readonly loadingBoards = signal<Set<string>>(new Set());
 
   ngOnInit(): void {
     this.clubId.set(this.route.snapshot.paramMap.get('clubId') ?? '');
@@ -151,6 +147,15 @@ export class AcrallyChampionship implements OnInit {
   }
 
   private apply(detail: ChampionshipDetailTo): void {
+    // A freshly added event should be open for its stage/car setup.
+    const known = new Set((this.detail()?.events ?? []).map((e) => e.id));
+    const expanded = new Set(this.expandedEvents());
+    for (const event of detail.events) {
+      if (!known.has(event.id)) {
+        expanded.add(event.id);
+      }
+    }
+    this.expandedEvents.set(expanded);
     this.detail.set(detail);
     this.error.set('');
     this.editingMeta.set(false);
@@ -178,21 +183,11 @@ export class AcrallyChampionship implements OnInit {
     return [v.locationName, v.stageName, v.label].filter((p) => !!p && p.trim()).join(' - ');
   }
 
-  // --- Event collapse ---
-  /**
-   * Expand the events that are currently open (and, while editing a draft, all of them so the owner
-   * can build it); collapse the rest to their summary line. Each expanded event's leaderboard opens
-   * with it.
-   */
+  // --- Event collapse (editor only; the read-only view manages its own) ---
+  /** Start with every event expanded so the owner can build the draft without extra clicks. */
   private initEventState(detail: ChampionshipDetailTo): void {
-    const expanded = new Set<string>();
-    for (const event of detail.events) {
-      if (this.eventPhase(event) === 'open' || this.canEdit()) {
-        expanded.add(event.id);
-        this.openBoard(event.id);
-      }
-    }
-    this.expandedEvents.set(expanded);
+    if (!this.canEdit()) return;
+    this.expandedEvents.set(new Set(detail.events.map((event) => event.id)));
   }
 
   isEventExpanded(eventId: string): boolean {
@@ -201,12 +196,7 @@ export class AcrallyChampionship implements OnInit {
 
   toggleEvent(eventId: string): void {
     const open = new Set(this.expandedEvents());
-    if (open.has(eventId)) {
-      open.delete(eventId);
-    } else {
-      open.add(eventId);
-      this.openBoard(eventId); // reveal its board straight away, matching the default-open behaviour
-    }
+    open.has(eventId) ? open.delete(eventId) : open.add(eventId);
     this.expandedEvents.set(open);
   }
 
@@ -238,92 +228,6 @@ export class AcrallyChampionship implements OnInit {
       ? 'any car'
       : `${event.cars.length} ${event.cars.length === 1 ? 'car' : 'cars'}`;
     return `${stages} · ${cars}`;
-  }
-
-  // --- Leaderboards ---
-  isBoardOpen(eventId: string): boolean {
-    return this.openBoards().has(eventId);
-  }
-
-  isBoardLoading(eventId: string): boolean {
-    return this.loadingBoards().has(eventId);
-  }
-
-  board(eventId: string): EventLeaderboardTo | undefined {
-    return this.leaderboards().get(eventId);
-  }
-
-  /** Open one event's leaderboard, fetching it the first time. */
-  private openBoard(eventId: string): void {
-    if (!this.openBoards().has(eventId)) {
-      this.openBoards.set(new Set(this.openBoards()).add(eventId));
-    }
-    if (!this.leaderboards().has(eventId)) {
-      this.loadLeaderboard(eventId);
-    }
-  }
-
-  /** Toggle an event's leaderboard, fetching it the first time it's opened. */
-  toggleLeaderboard(eventId: string): void {
-    const open = new Set(this.openBoards());
-    if (open.has(eventId)) {
-      open.delete(eventId);
-      this.openBoards.set(open);
-      return;
-    }
-    open.add(eventId);
-    this.openBoards.set(open);
-    if (!this.leaderboards().has(eventId)) {
-      this.loadLeaderboard(eventId);
-    }
-  }
-
-  private loadLeaderboard(eventId: string): void {
-    const loading = new Set(this.loadingBoards());
-    loading.add(eventId);
-    this.loadingBoards.set(loading);
-    this.http.get<EventLeaderboardTo>(`/acrally-api/events/${eventId}/leaderboard`).subscribe({
-      next: (board) => {
-        this.leaderboards.set(new Map(this.leaderboards()).set(eventId, board));
-        this.clearLoading(eventId);
-      },
-      error: () => this.clearLoading(eventId),
-    });
-  }
-
-  private clearLoading(eventId: string): void {
-    const loading = new Set(this.loadingBoards());
-    loading.delete(eventId);
-    this.loadingBoards.set(loading);
-  }
-
-  /** ms → m:ss.mmm (penalised totals), matching the personal-stats formatting. */
-  formatTime(ms: number): string {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const millis = ms % 1000;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`;
-  }
-
-  /** Penalty seconds baked into a total, e.g. "+2.0s". Only shown when there is a penalty. */
-  formatPenalty(ms: number): string {
-    return `+${(ms / 1000).toFixed(1)}s`;
-  }
-
-  /** Gap behind the stage leader, e.g. "+1.234" or "+1:02.345". Empty for the leader / no gap. */
-  formatDiff(gapMs: number): string {
-    if (gapMs <= 0) {
-      return '';
-    }
-    const totalSeconds = Math.floor(gapMs / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const millis = gapMs % 1000;
-    const body = minutes > 0
-      ? `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`
-      : `${seconds}.${millis.toString().padStart(3, '0')}`;
-    return `+${body}`;
   }
 
   // --- Championship meta ---

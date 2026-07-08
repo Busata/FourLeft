@@ -51,21 +51,46 @@
     } @else {
       <ul class="champ-list">
         @for (c of championships(); track c.id) {
-          <li>
-            <a class="champ-card" [routerLink]="['championships', c.id]">
-              <span class="champ-card__body">
-                <span class="champ-card__name">{{ c.name }}</span>
-                <span class="key-sub">
-                  Starts {{ c.startsAt | date: 'MMM d, y · HH:mm' }} ·
-                  {{ c.eventCount }} {{ c.eventCount === 1 ? 'event' : 'events' }}
+          <li class="champ-block" [class.champ-block--open]="isChampExpanded(c.id)">
+            <div class="champ-block__head">
+              <button
+                class="champ-block__toggle"
+                type="button"
+                (click)="toggleChampionship(c.id)"
+                [attr.aria-expanded]="isChampExpanded(c.id)">
+                <span class="champ-block__headline">
+                  <span class="champ-block__name">{{ c.name }}</span>
+                  <span class="key-sub">
+                    Starts {{ c.startsAt | date: 'MMM d, y · HH:mm' }} ·
+                    {{ c.eventCount }} {{ c.eventCount === 1 ? 'event' : 'events' }}
+                  </span>
                 </span>
-              </span>
-              @if (c.status !== 'PUBLISHED') {
-                <span class="status-pill status-pill--draft">Draft</span>
-              } @else {
-                <span class="status-pill status-pill--live">Published</span>
+                @if (c.status !== 'PUBLISHED') {
+                  <span class="status-pill status-pill--draft">Draft</span>
+                }
+                <span
+                  class="champ-block__chevron"
+                  [class.champ-block__chevron--collapsed]="!isChampExpanded(c.id)"
+                  aria-hidden="true">▾</span>
+              </button>
+              @if (c.owner) {
+                <a class="g-button g-button-secondary champ-block__manage" [routerLink]="['championships', c.id]">
+                  Manage
+                </a>
               }
-            </a>
+            </div>
+
+            @if (isChampExpanded(c.id)) {
+              <div class="champ-block__body">
+                @if (detailFor(c.id); as detail) {
+                  <app-acrally-championship-view [detail]="detail" />
+                } @else if (isDetailLoading(c.id)) {
+                  <p class="auth-sub" style="margin: 0">Loading…</p>
+                } @else {
+                  <p class="auth-sub" style="margin: 0">Couldn’t load this championship.</p>
+                }
+              </div>
+            }
           </li>
         }
       </ul>

@@ -1,0 +1,166 @@
+@if (detail().events.length === 0) {
+  <p class="ev-none">No events have been scheduled yet.</p>
+}
+
+@for (event of detail().events; track event.id; let i = $index) {
+  <div class="ev ev--{{ phase(event) }}">
+    <button
+      class="ev__head"
+      type="button"
+      (click)="toggle(event.id)"
+      [attr.aria-expanded]="isExpanded(event.id)">
+      <span class="ev__num">{{ i + 1 }}</span>
+      <span class="ev__headline">
+        <span class="ev__name">{{ event.label }}</span>
+        <span class="ev__meta">
+          {{ event.opensAt | date: 'MMM d, HH:mm' }} → {{ event.closesAt | date: 'MMM d, HH:mm' }}
+          @if (relPhrase(event)) {
+            <span class="ev__rel">· {{ relPhrase(event) }}</span>
+          }
+          @if (!isExpanded(event.id)) {
+            · {{ summary(event) }}
+          }
+        </span>
+      </span>
+      <span class="status-pill {{ phaseClass(event) }}">{{ phaseLabel(event) }}</span>
+      <span class="ev__chevron" [class.ev__chevron--collapsed]="!isExpanded(event.id)" aria-hidden="true">▾</span>
+    </button>
+
+    @if (isExpanded(event.id)) {
+      <div class="ev__body">
+        @if (event.variants.length === 0) {
+          <p class="ev-empty">No stages have been added to this event yet.</p>
+        } @else {
+          <!-- The tabs are the itinerary: one chip per stage, plus Overall on multi-stage events. -->
+          <div class="ev__tabs" role="tablist">
+            @if (event.variants.length > 1) {
+              <button
+                class="ev-tab"
+                role="tab"
+                type="button"
+                [class.ev-tab--on]="tab(event) === 'overall'"
+                [attr.aria-selected]="tab(event) === 'overall'"
+                (click)="setTab(event.id, 'overall')">
+                Overall
+              </button>
+            }
+            @for (v of event.variants; track v.variantId; let si = $index) {
+              <button
+                class="ev-tab"
+                role="tab"
+                type="button"
+                [class.ev-tab--on]="tab(event) === v.variantId"
+                [attr.aria-selected]="tab(event) === v.variantId"
+                (click)="setTab(event.id, v.variantId)">
+                <span class="ev-tab__ss">SS{{ si + 1 }}</span>{{ v.stageName || v.label }}
+              </button>
+            }
+          </div>
+
+          <div class="ev__board">
+            @if (isBoardLoading(event.id)) {
+              <p class="ev-empty">Loading times…</p>
+            } @else if (board(event.id); as b) {
+              @if (tab(event) === 'overall') {
+                <p class="ev__caption">
+                  Overall standings <span class="ev__caption-note">— best per stage, summed</span>
+                </p>
+                @if (b.overall.length === 0) {
+                  <p class="ev-empty">No times yet — be the first to set one.</p>
+                } @else {
+                  <table class="ev-board">
+                    <thead>
+                      <tr>
+                        <th class="ev-board__pos">#</th>
+                        <th>Driver</th>
+                        <th class="ev-board__num">Total</th>
+                        <th class="ev-board__num">Stages</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (s of b.overall; track s.userId) {
+                        <tr>
+                          <td class="ev-board__pos"><span class="pod {{ podClass(s.rank) }}">{{ s.rank }}</span></td>
+                          <td class="ev-board__driver">{{ s.driver }}</td>
+                          <td class="ev-board__num">{{ formatTime(s.totalMs) }}</td>
+                          <td class="ev-board__num ev-board__faint">{{ s.stagesCompleted }}/{{ b.totalStages }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+              } @else {
+                @if (selectedVariant(event); as sv) {
+                  <p class="ev__caption">{{ stageFullLabel(sv) }}</p>
+                }
+                @if (selectedBoard(event); as sb) {
+                  @if (sb.entries.length === 0) {
+                    <p class="ev-empty">No times yet — be the first to set one.</p>
+                  } @else {
+                    <table class="ev-board">
+                      <thead>
+                        <tr>
+                          <th class="ev-board__pos">#</th>
+                          <th>Driver</th>
+                          <th class="ev-board__wide">Car</th>
+                          <th class="ev-board__num">Time</th>
+                          <th class="ev-board__num">Gap</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (e of sb.entries; track e.userId; let ei = $index) {
+                          <tr>
+                            <td class="ev-board__pos"><span class="pod {{ podClass(e.rank) }}">{{ e.rank }}</span></td>
+                            <td class="ev-board__driver">{{ e.driver }}</td>
+                            <td class="ev-board__wide ev-board__faint">{{ e.carName || '—' }}</td>
+                            <td class="ev-board__num">
+                              {{ formatTime(e.totalMs) }}
+                              @if (e.penaltyMs > 0) {
+                                <span class="ev-board__pen">{{ formatPenalty(e.penaltyMs) }}</span>
+                              }
+                            </td>
+                            <td class="ev-board__num ev-board__diff">
+                              @if (ei === 0) {
+                                <span class="ev-board__faint">—</span>
+                              } @else {
+                                {{ formatDiff(e.totalMs - sb.entries[0].totalMs) }}
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                } @else {
+                  <p class="ev-empty">No times yet — be the first to set one.</p>
+                }
+              }
+            } @else {
+              <p class="ev-empty">Couldn’t load the leaderboard.</p>
+            }
+          </div>
+        }
+
+        <div class="ev__cars">
+          <span class="ev__cars-label">Cars</span>
+          @if (event.cars.length === 0) {
+            <span class="ev__cars-any">open — any car allowed</span>
+          } @else {
+            @for (c of visibleCars(event); track c.id) {
+              <span class="car-chip">{{ c.name }}</span>
+            }
+            @if (overflowCount(event) > 0) {
+              <button class="ev__cars-more" type="button" (click)="toggleCars(event.id)">
+                +{{ overflowCount(event) }} more
+              </button>
+            } @else if (carsExpanded(event)) {
+              <button class="ev__cars-more" type="button" (click)="toggleCars(event.id)">
+                show fewer
+              </button>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

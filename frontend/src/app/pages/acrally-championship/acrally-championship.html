@@ -63,7 +63,12 @@
       </div>
     }
 
-    <!-- Events -->
+    <!-- Events: draft owners build here; everyone else gets the compact read-only view. -->
+    @if (!canEdit()) {
+      <section class="account-section" style="border-top: none; padding-top: 0">
+        <app-acrally-championship-view [detail]="d" />
+      </section>
+    } @else {
     <section class="account-section" style="border-top: none; padding-top: 0">
       <div class="section-head">
         <h2 class="account-section__title" style="margin: 0">Events</h2>
@@ -190,90 +195,6 @@
             }
           </div>
 
-          <!-- Leaderboard -->
-          <div class="event-section">
-            <div class="event-section__head">
-              <span class="event-section__title">Leaderboard</span>
-              <button class="g-button g-button-secondary mini" type="button" (click)="toggleLeaderboard(event.id)">
-                {{ isBoardOpen(event.id) ? 'Hide' : 'Show' }}
-              </button>
-            </div>
-            @if (isBoardOpen(event.id)) {
-              <div class="board-wrap">
-              @if (isBoardLoading(event.id)) {
-                <p class="event-empty">Loading…</p>
-              } @else if (board(event.id); as b) {
-                @if (b.overall.length === 0) {
-                  <p class="event-empty">No times yet — be the first to set one.</p>
-                } @else {
-                  @if (b.totalStages > 1) {
-                    <p class="board__caption">Overall standings</p>
-                    <table class="board">
-                      <thead>
-                        <tr><th class="board__pos">#</th><th>Driver</th><th class="board__num">Total</th><th class="board__wide board__num">Stages</th></tr>
-                      </thead>
-                      <tbody>
-                        @for (s of b.overall; track s.userId) {
-                          <tr>
-                            <td class="board__pos">{{ s.rank }}</td>
-                            <td>{{ s.driver }}</td>
-                            <td class="board__num">{{ formatTime(s.totalMs) }}</td>
-                            <td class="board__wide board__num">{{ s.stagesCompleted }} / {{ b.totalStages }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  }
-                  @for (stage of b.stages; track stage.variantId) {
-                    <p class="board__caption">{{ stage.label }}</p>
-                    @if (stage.entries.length === 0) {
-                      <p class="event-empty">No times yet.</p>
-                    } @else {
-                      <table class="board">
-                        <thead>
-                          <tr>
-                            <th class="board__pos">#</th>
-                            <th>Driver</th>
-                            <th class="board__wide">Car</th>
-                            <th class="board__num">Time</th>
-                            <th class="board__num">Penalty</th>
-                            <th class="board__num">Diff</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (e of stage.entries; track e.userId; let i = $index) {
-                            <tr>
-                              <td class="board__pos">{{ e.rank }}</td>
-                              <td>{{ e.driver }}</td>
-                              <td class="board__wide">{{ e.carName || '—' }}</td>
-                              <td class="board__num">{{ formatTime(e.totalMs) }}</td>
-                              <td class="board__num">
-                                @if (e.penaltyMs > 0) {
-                                  <span class="board__penalty">{{ formatPenalty(e.penaltyMs) }}</span>
-                                } @else {
-                                  <span class="board__muted">—</span>
-                                }
-                              </td>
-                              <td class="board__num board__diff">
-                                @if (i === 0) {
-                                  <span class="board__muted">—</span>
-                                } @else {
-                                  {{ formatDiff(e.totalMs - stage.entries[0].totalMs) }}
-                                }
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    }
-                  }
-                }
-              } @else {
-                <p class="event-empty">Couldn’t load the leaderboard.</p>
-              }
-              </div>
-            }
-          </div>
           }
         </div>
       }
@@ -321,6 +242,7 @@
         </div>
       }
     </section>
+    }
   }
 </div>
 
