@@ -16,6 +16,10 @@ import java.util.UUID;
  */
 public class AppUserDetails implements UserDetails {
 
+    // Sessions are JDK-serialized into Postgres (spring-session-jdbc); a pinned UID keeps
+    // stored sessions deserializable across compatible changes to this class.
+    private static final long serialVersionUID = 1L;
+
     private final UUID id;
     private final String displayName;
     private final String status;

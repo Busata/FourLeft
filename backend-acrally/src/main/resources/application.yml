@@ -10,9 +10,22 @@ spring:
       ddl-auto: validate
   datasource:
     driver-class-name: org.postgresql.Driver
+  session:
+    # Sessions are stored in Postgres (spring-session-jdbc) so they survive deploys and
+    # stay instantly revocable server-side. Flyway owns the tables (V020).
+    jdbc:
+      initialize-schema: never
+    # Idle expiry, refreshed on every authenticated request.
+    timeout: 30d
 
 server:
   port: 8085
+  servlet:
+    session:
+      cookie:
+        # Persistent cookie so closing the browser doesn't log people out. Fixed at login
+        # (not sliding), so the hard ceiling on a session is 30 days regardless of activity.
+        max-age: 30d
   # Behind the TLS-terminating reverse proxy in prod: honour X-Forwarded-* so the app
   # knows requests are https (correct scheme + Secure session/CSRF cookies). No-op locally.
   forward-headers-strategy: framework
