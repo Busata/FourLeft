@@ -432,8 +432,9 @@ export class ChannelConfig implements OnInit {
   // Mirrors the backend's ScoringService.racenetDefaultPoints: racenet's default participation-scaled
   // system, where position r of a P-entrant field scores max(0, floor(P*(3r+1)/(4r)) - (r-1)) — the
   // winner gets exactly P and roughly the bottom quarter scores 0. Collapse that zero tail into one row.
+  // Field sizes beyond PREVIEW_CAP exist (a 1297-entrant daily has been seen) but aren't worth rendering.
   private updateRacenetPreview(): void {
-    const fieldSize = Math.min(Math.max(Math.floor(this.form.controls.racenetFieldSize.value ?? 0), 0), 500);
+    const fieldSize = Math.min(Math.max(Math.floor(this.form.controls.racenetFieldSize.value ?? 0), 0), PREVIEW_CAP);
     if (fieldSize < 1) {
       this.racenetPreview.set([]);
       return;
