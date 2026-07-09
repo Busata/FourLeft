@@ -157,8 +157,11 @@ export class ChannelConfig implements OnInit {
   }
 
   addRestriction(rule: EventRestriction | null = null): void {
+    // Only open championships are offered, so there's usually exactly one — preselect it.
+    const targets = this.restrictionTargets();
+    const defaultChampionshipId = targets.length === 1 ? targets[0].id : '';
     const row: RestrictionRow = new FormGroup({
-      championshipId: new FormControl<string>(rule?.championshipId ?? '', { nonNullable: true }),
+      championshipId: new FormControl<string>(rule?.championshipId ?? defaultChampionshipId, { nonNullable: true }),
       eventId: new FormControl<string>(rule?.eventId ?? '', { nonNullable: true }),
       displayMode: new FormControl<RestrictionDisplayMode>(rule?.displayMode ?? 'WARN', { nonNullable: true }),
       scoringMode: new FormControl<RestrictionScoringMode>(rule?.scoringMode ?? 'EXCLUDE', { nonNullable: true }),

@@ -7,6 +7,7 @@ import io.busata.fourleft.api.easportswrc.models.EventRestrictionTo;
 import io.busata.fourleft.api.easportswrc.models.RestrictionTargetsTo;
 import io.busata.fourleft.api.easportswrc.models.ScoringAnchorEntryTo;
 import io.busata.fourleft.api.easportswrc.models.ScoringAnchorsTo;
+import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.configuration.ChannelConfigurationRequest;
@@ -163,12 +164,15 @@ public class ChannelConfigurationRequestService {
     }
 
     /**
-     * The championships/events of the channel's club that a restriction rule can target.
+     * The championships/events of the channel's club that a restriction rule can target. Only open
+     * championships qualify — there's no point restricting a finished one — so this usually offers
+     * one championship, or none.
      */
     @Transactional(readOnly = true)
     public Optional<RestrictionTargetsTo> getRestrictionTargets(UUID requestId) {
         return findClub(requestId).map(club -> new RestrictionTargetsTo(
                 club.getChampionships().stream()
+                        .filter(Championship::isActiveSnapshot)
                         .map(championship -> new RestrictionTargetsTo.RestrictionTargetChampionshipTo(
                                 championship.getId(),
                                 championship.getSettings().getName(),
