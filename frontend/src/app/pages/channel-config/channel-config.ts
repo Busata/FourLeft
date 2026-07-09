@@ -21,6 +21,16 @@ type AnchorRow = FormGroup<{
 
 const DEFAULT_FLOOR = 1;
 
+// How far the preview expands positions before giving up on reaching the floor (e.g. decrease of 0).
+// Club 146's real definition only floors at position 1001, so this needs headroom beyond that.
+const PREVIEW_CAP = 2000;
+
+// One rendered run of the preview: consecutive positions that all score the same points.
+interface PreviewRow {
+  label: string;
+  points: number;
+}
+
 @Component({
   selector: 'app-channel-config',
   imports: [ReactiveFormsModule, SlideToggle],
@@ -41,6 +51,9 @@ export class ChannelConfig implements OnInit {
   readonly customScoringOn = signal(false);
   // Mirrors the scoringStrategy control so the template can switch between the two editors reactively.
   readonly scoringStrategySig = signal<ScoringStrategy>('LOOKUP_TABLE');
+  // Live expansion of the anchor definition to points per position, recomputed on every form change.
+  readonly anchorPreview = signal<PreviewRow[]>([]);
+  readonly anchorPreviewTruncated = signal(false);
 
   readonly form = new FormGroup({
     clubId: new FormControl<string>('', { nonNullable: true }),
@@ -64,6 +77,7 @@ export class ChannelConfig implements OnInit {
   ngOnInit(): void {
     this.form.controls.customScoringEnabled.valueChanges.subscribe((on) => this.customScoringOn.set(on));
     this.form.controls.scoringStrategy.valueChanges.subscribe((s) => this.scoringStrategySig.set(s));
+    this.form.valueChanges.subscribe(() => this.updateAnchorPreview());
 
     this.http.get<ChannelConfiguration>(this.base).subscribe({
       next: (config) => this.apply(config),
@@ -190,6 +204,77 @@ export class ChannelConfig implements OnInit {
     }
     entries.sort((a, b) => a.position - b.position);
     return { floor: this.form.controls.scoringFloor.value, entries };
+  }
+
+  // Mirrors the backend's ScoringService.anchorPoints: walk positions in hundredths of a point
+  // (integer math), where an anchor sets the running value and stops any active decrease, a decrease
+  // keeps subtracting until overridden, and anything else scores the floor (which also clamps).
+  private updateAnchorPreview(): void {
+    const { floor, entries } = this.rowsToAnchors();
+    if (entries.length === 0) {
+      this.anchorPreview.set([]);
+      this.anchorPreviewTruncated.set(false);
+      return;
+    }
+
+    const roundHundredths = (h: number) => (h >= 0 ? Math.floor((h + 50) / 100) : -Math.floor((-h + 50) / 100));
+
+    const expanded: number[] = [];
+    let runningHundredths: number | null = null;
+    let stepHundredths = 0;
+    let decreaseActive = false;
+    let entryIndex = 0;
+
+    for (let p = 1; p <= PREVIEW_CAP; p++) {
+      let handled = false;
+
+      while (entryIndex < entries.length && entries[entryIndex].position === p) {
+        const entry = entries[entryIndex++];
+        if (entry.points != null) {
+          runningHundredths = entry.points * 100;
+          decreaseActive = false;
+        } else {
+          stepHundredths = Math.round((entry.decrease ?? 0) * 100);
+          decreaseActive = true;
+          if (runningHundredths != null) {
+            runningHundredths -= stepHundredths;
+          }
+        }
+        handled = true;
+      }
+
+      if (!handled && decreaseActive && runningHundredths != null) {
+        runningHundredths -= stepHundredths;
+        handled = true;
+      }
+
+      expanded.push(handled && runningHundredths != null ? Math.max(roundHundredths(runningHundredths), floor) : floor);
+    }
+
+    // Everything past the last position that beats the floor scores the floor forever; collapse it into one row.
+    let lastAboveFloor = -1;
+    for (let i = 0; i < expanded.length; i++) {
+      if (expanded[i] !== floor) {
+        lastAboveFloor = i;
+      }
+    }
+
+    const rows: PreviewRow[] = [];
+    let runStart = 1;
+    for (let i = 1; i <= lastAboveFloor + 1; i++) {
+      const endOfRun = i === lastAboveFloor + 1 || expanded[i] !== expanded[i - 1];
+      if (endOfRun) {
+        rows.push({ label: runStart === i ? `${i}` : `${runStart}–${i}`, points: expanded[i - 1] });
+        runStart = i + 1;
+      }
+    }
+
+    const truncated = lastAboveFloor === PREVIEW_CAP - 1;
+    if (!truncated) {
+      rows.push({ label: `${lastAboveFloor + 2}+`, points: floor });
+    }
+    this.anchorPreview.set(rows);
+    this.anchorPreviewTruncated.set(truncated);
   }
 
   private apply(config: ChannelConfiguration | null): void {

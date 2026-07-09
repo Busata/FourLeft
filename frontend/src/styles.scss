@@ -220,6 +220,36 @@ select {
   color: var(--faint);
 }
 
+/* Live scoring preview (channel config): one chip per run of positions scoring the same points. */
+.scoring-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  /* Real definitions can expand to 1000+ positions; keep the panel bounded and scrollable. */
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 2px;
+
+  .scoring-preview-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    font-size: 13px;
+
+    .pos {
+      color: var(--muted);
+    }
+    .pts {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
 /* Loose action buttons at the end of a form. */
 form .g-button + .g-button {
   margin-left: 8px;

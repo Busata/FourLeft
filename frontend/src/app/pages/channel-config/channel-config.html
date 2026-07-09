@@ -102,6 +102,25 @@
               <label>Floor (points for positions not covered by an anchor or decrease)</label>
               <input type="number" formControlName="scoringFloor" min="0" />
             </div>
+
+            <div class="form-group">
+              <label>Preview (points per finishing position)</label>
+              @if (anchorPreview().length > 0) {
+                <div class="scoring-preview">
+                  @for (row of anchorPreview(); track row.label) {
+                    <span class="scoring-preview-chip">
+                      <span class="pos">{{ row.label }}</span>
+                      <span class="pts">{{ row.points }}</span>
+                    </span>
+                  }
+                </div>
+                @if (anchorPreviewTruncated()) {
+                  <p>Points haven't reached the floor by position 2000 &mdash; check the decrease values.</p>
+                }
+              } @else {
+                <p>Add an anchor to see the points each position would score.</p>
+              }
+            </div>
           }
         }
 
