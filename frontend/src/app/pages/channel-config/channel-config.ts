@@ -3,7 +3,18 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { ChannelConfiguration, ScoringAnchors, ScoringAnchorEntry, ScoringStrategy } from '../../models/channel-configuration';
+import {
+  ChannelConfiguration,
+  EventRestriction,
+  RestrictionDisplayMode,
+  RestrictionScoringMode,
+  RestrictionTargetChampionship,
+  RestrictionTargetEvent,
+  RestrictionTargets,
+  ScoringAnchors,
+  ScoringAnchorEntry,
+  ScoringStrategy,
+} from '../../models/channel-configuration';
 import { SlideToggle } from '../../shared/slide-toggle/slide-toggle';
 
 type ScoringRow = FormGroup<{
@@ -17,6 +28,17 @@ type AnchorRow = FormGroup<{
   position: FormControl<number | null>;
   points: FormControl<number | null>;
   decrease: FormControl<number | null>;
+}>;
+
+// One restriction rule: a target (championship, or one of its events), the two violation modes and
+// the allowed-vehicle set. An empty eventId means the whole championship.
+type RestrictionRow = FormGroup<{
+  championshipId: FormControl<string>;
+  eventId: FormControl<string>;
+  displayMode: FormControl<RestrictionDisplayMode>;
+  scoringMode: FormControl<RestrictionScoringMode>;
+  penaltyPoints: FormControl<number | null>;
+  allowedVehicles: FormControl<string[]>;
 }>;
 
 const DEFAULT_FLOOR = 1;
@@ -54,6 +76,11 @@ export class ChannelConfig implements OnInit {
   // Live expansion of the anchor definition to points per position, recomputed on every form change.
   readonly anchorPreview = signal<PreviewRow[]>([]);
   readonly anchorPreviewTruncated = signal(false);
+  // The club's championships/events a restriction can target, and the vehicles seen on its boards.
+  readonly restrictionTargets = signal<RestrictionTargetChampionship[]>([]);
+  readonly vehicles = signal<string[]>([]);
+  // The pickers are static per club; fetch them once, not on every save round-trip.
+  private pickersLoaded = false;
 
   readonly form = new FormGroup({
     clubId: new FormControl<string>('', { nonNullable: true }),
@@ -64,6 +91,7 @@ export class ChannelConfig implements OnInit {
     scoringTable: new FormArray<ScoringRow>([]),
     scoringFloor: new FormControl<number>(DEFAULT_FLOOR, { nonNullable: true }),
     scoringAnchors: new FormArray<AnchorRow>([]),
+    eventRestrictions: new FormArray<RestrictionRow>([]),
   });
 
   get scoringTable(): FormArray<ScoringRow> {
@@ -72,6 +100,10 @@ export class ChannelConfig implements OnInit {
 
   get scoringAnchors(): FormArray<AnchorRow> {
     return this.form.controls.scoringAnchors;
+  }
+
+  get eventRestrictions(): FormArray<RestrictionRow> {
+    return this.form.controls.eventRestrictions;
   }
 
   ngOnInit(): void {
@@ -124,6 +156,35 @@ export class ChannelConfig implements OnInit {
     this.scoringAnchors.removeAt(index);
   }
 
+  addRestriction(rule: EventRestriction | null = null): void {
+    const row: RestrictionRow = new FormGroup({
+      championshipId: new FormControl<string>(rule?.championshipId ?? '', { nonNullable: true }),
+      eventId: new FormControl<string>(rule?.eventId ?? '', { nonNullable: true }),
+      displayMode: new FormControl<RestrictionDisplayMode>(rule?.displayMode ?? 'WARN', { nonNullable: true }),
+      scoringMode: new FormControl<RestrictionScoringMode>(rule?.scoringMode ?? 'EXCLUDE', { nonNullable: true }),
+      penaltyPoints: new FormControl<number | null>(rule?.penaltyPoints ?? null),
+      allowedVehicles: new FormControl<string[]>(rule?.allowedVehicles ?? [], { nonNullable: true }),
+    });
+    // A rule targets one championship's scope; picking another one invalidates the event choice.
+    row.controls.championshipId.valueChanges.subscribe(() => row.controls.eventId.setValue(''));
+    this.eventRestrictions.push(row);
+  }
+
+  removeRestriction(index: number): void {
+    this.eventRestrictions.removeAt(index);
+  }
+
+  toggleVehicle(row: RestrictionRow, vehicle: string): void {
+    const current = row.controls.allowedVehicles.value;
+    row.controls.allowedVehicles.setValue(
+      current.includes(vehicle) ? current.filter((v) => v !== vehicle) : [...current, vehicle],
+    );
+  }
+
+  eventsFor(row: RestrictionRow): RestrictionTargetEvent[] {
+    return this.restrictionTargets().find((ch) => ch.id === row.controls.championshipId.value)?.events ?? [];
+  }
+
   create(): void {
     this.http
       .post<ChannelConfiguration>(this.base, {
@@ -149,6 +210,7 @@ export class ChannelConfig implements OnInit {
         scoringStrategy: this.form.controls.scoringStrategy.value,
         scoringTable: this.rowsToTable(),
         scoringAnchors: this.rowsToAnchors(),
+        eventRestrictions: this.rowsToRestrictions(),
       })
       .subscribe({
         next: (config) => {
@@ -180,6 +242,30 @@ export class ChannelConfig implements OnInit {
       }
     }
     return table;
+  }
+
+  // Build the restriction rules the backend expects, dropping rows without a target or vehicles.
+  private rowsToRestrictions(): EventRestriction[] {
+    const rules: EventRestriction[] = [];
+    for (const row of this.eventRestrictions.controls) {
+      const championshipId = row.controls.championshipId.value;
+      const eventId = row.controls.eventId.value;
+      const allowedVehicles = row.controls.allowedVehicles.value;
+      if (!championshipId || allowedVehicles.length === 0) {
+        continue;
+      }
+      const scoringMode = row.controls.scoringMode.value;
+      rules.push({
+        type: 'VEHICLE_ALLOWLIST',
+        championshipId,
+        eventId: eventId || null,
+        displayMode: row.controls.displayMode.value,
+        scoringMode,
+        penaltyPoints: scoringMode === 'PENALTY' ? (row.controls.penaltyPoints.value ?? 0) : null,
+        allowedVehicles,
+      });
+    }
+    return rules;
   }
 
   // Build the anchor definition the backend expects, dropping incomplete rows and sorting by position.
@@ -294,6 +380,22 @@ export class ChannelConfig implements OnInit {
       } else {
         this.addDecrease(entry.position, entry.decrease ?? null);
       }
+    }
+
+    this.eventRestrictions.clear();
+    for (const rule of config.eventRestrictions ?? []) {
+      this.addRestriction(rule);
+    }
+    if (config.configured && !this.pickersLoaded) {
+      this.pickersLoaded = true;
+      this.http.get<RestrictionTargets>(`${this.base}/restriction-targets`).subscribe({
+        next: (targets) => this.restrictionTargets.set(targets?.championships ?? []),
+        error: () => this.restrictionTargets.set([]),
+      });
+      this.http.get<string[]>(`${this.base}/vehicles`).subscribe({
+        next: (vehicles) => this.vehicles.set(vehicles ?? []),
+        error: () => this.vehicles.set([]),
+      });
     }
 
     this.form.controls.clubId.setValue(config.clubId ?? '');

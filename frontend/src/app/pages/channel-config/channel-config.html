@@ -134,6 +134,91 @@
           }
         }
 
+        <div class="form-group">
+          <label>Event restrictions</label>
+          <p>
+            Restrict an event (or a whole championship) to specific cars &mdash; e.g. a quattro-only event.
+            Violators can be flagged or hidden on results, and penalised or excluded in custom scoring.
+            Scoring effects require custom scoring to be enabled &mdash; racenet's own standings can't be changed.
+          </p>
+          <div formArrayName="eventRestrictions">
+            @for (row of eventRestrictions.controls; track $index) {
+              <div class="restriction-row" [formGroupName]="$index">
+                <div class="form-group">
+                  <label>Championship</label>
+                  <select formControlName="championshipId">
+                    <option value="">Pick a championship&hellip;</option>
+                    @for (championship of restrictionTargets(); track championship.id) {
+                      <option [value]="championship.id">{{ championship.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Event (leave empty for the whole championship)</label>
+                  <select formControlName="eventId">
+                    <option value="">Whole championship</option>
+                    @for (event of eventsFor(row); track event.id) {
+                      <option [value]="event.id">{{ event.location }} ({{ event.vehicleClass }})</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>On results</label>
+                  <select formControlName="displayMode">
+                    <option value="WARN">Show a warning on violators</option>
+                    <option value="EXCLUDE">Hide violators from results</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>In custom scoring</label>
+                  <select formControlName="scoringMode">
+                    <option value="EXCLUDE">Score 0, promote others</option>
+                    <option value="PENALTY">Flat point penalty</option>
+                  </select>
+                </div>
+
+                @if (row.controls.scoringMode.value === 'PENALTY') {
+                  <div class="form-group">
+                    <label>Penalty points (deducted, never below 0)</label>
+                    <input type="number" formControlName="penaltyPoints" min="0" placeholder="Points" />
+                  </div>
+                }
+
+                <div class="form-group">
+                  <label>Allowed vehicles</label>
+                  @if (vehicles().length > 0) {
+                    <div class="vehicle-list">
+                      @for (vehicle of vehicles(); track vehicle) {
+                        <label class="vehicle-option">
+                          <input
+                            type="checkbox"
+                            [checked]="row.controls.allowedVehicles.value.includes(vehicle)"
+                            (change)="toggleVehicle(row, vehicle)"
+                          />
+                          {{ vehicle }}
+                        </label>
+                      }
+                    </div>
+                  } @else {
+                    <p>No vehicles seen on this club's leaderboards yet.</p>
+                  }
+                </div>
+
+                <button class="g-button g-button-tertiary" type="button" (click)="removeRestriction($index)">
+                  Remove restriction
+                </button>
+              </div>
+            }
+            @if (eventRestrictions.controls.length === 0) {
+              <p>No restrictions defined.</p>
+            }
+          </div>
+          <button class="g-button g-button-secondary" type="button" (click)="addRestriction()">Add restriction</button>
+        </div>
+
         <button class="g-button g-button-primary" type="button" (click)="save()">Save</button>
         <button class="g-button g-button-tertiary" type="button" (click)="remove()">Remove</button>
       } @else {

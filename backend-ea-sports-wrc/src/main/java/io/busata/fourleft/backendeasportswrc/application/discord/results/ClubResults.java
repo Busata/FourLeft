@@ -8,6 +8,8 @@ import java.util.List;
 
 public record ClubResults(
         String clubId,
+        String championshipId,
+        String eventId,
         String championshipName,
         String location,
         Long locationID,

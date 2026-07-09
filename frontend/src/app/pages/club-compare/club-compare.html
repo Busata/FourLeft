@@ -100,6 +100,9 @@
                       @if (event.meta) {
                         <span class="cmp-meta">{{ event.meta }}</span>
                       }
+                      @if (event.restrictionNote) {
+                        <span class="cmp-restriction" [title]="event.restrictionNote">{{ event.restrictionNote }}</span>
+                      }
                     </div>
                     <table class="iq-table cmp-table">
                       <thead>
@@ -107,6 +110,9 @@
                           <th class="cmp-label"></th>
                           <th class="num">
                             {{ aName() }}
+                            @if (event.aViolated) {
+                              <span class="cmp-violation" title="Drove a vehicle outside this event's restriction">⚠️</span>
+                            }
                             @if (podium(event.aRank); as tier) {
                               <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ event.aRank }}</span>
                             } @else {
@@ -115,6 +121,9 @@
                           </th>
                           <th class="num">
                             {{ bName() }}
+                            @if (event.bViolated) {
+                              <span class="cmp-violation" title="Drove a vehicle outside this event's restriction">⚠️</span>
+                            }
                             @if (podium(event.bRank); as tier) {
                               <span class="ttp-podium" [class]="'ttp-podium--' + tier">{{ event.bRank }}</span>
                             } @else {

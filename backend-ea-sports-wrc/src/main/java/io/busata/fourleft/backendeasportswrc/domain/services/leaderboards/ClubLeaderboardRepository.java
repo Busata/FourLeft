@@ -15,4 +15,8 @@ interface ClubLeaderboardRepository extends JpaRepository<ClubLeaderboard, Strin
 
     @Query("select cl from ClubLeaderboard cl left join fetch cl.entries where cl.id in :ids")
     List<ClubLeaderboard> findAllWithEntriesByIds(@Param("ids") List<String> leaderboardIds);
+
+    @Query("select distinct entry.vehicle from ClubLeaderboard cl join cl.entries entry " +
+            "where cl.id in :ids and entry.vehicle is not null order by entry.vehicle")
+    List<String> findDistinctVehicles(@Param("ids") List<String> leaderboardIds);
 }

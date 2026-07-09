@@ -106,4 +106,13 @@ public class ClubLeaderboardService {
                         ClubLeaderboard::getEntries
                 ));
     }
+
+    @Transactional(readOnly = true)
+    public List<String> findDistinctVehicles(List<String> leaderboardIds) {
+        if (leaderboardIds.isEmpty()) {
+            return List.of();
+        }
+
+        return this.clubLeaderboardRepository.findDistinctVehicles(leaderboardIds);
+    }
 }

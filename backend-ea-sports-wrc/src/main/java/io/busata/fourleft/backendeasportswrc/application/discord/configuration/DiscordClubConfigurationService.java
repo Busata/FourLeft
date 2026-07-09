@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.common.ScoringStrategy;
@@ -58,7 +59,8 @@ public class DiscordClubConfigurationService {
     @Transactional
     public Optional<DiscordClubConfiguration> updateConfiguration(Long channelId, boolean autopostingEnabled, boolean requiresTracking,
                                                                   boolean customScoringEnabled, ScoringStrategy scoringStrategy,
-                                                                  Map<String, Integer> scoringTable, ScoringAnchors scoringAnchors) {
+                                                                  Map<String, Integer> scoringTable, ScoringAnchors scoringAnchors,
+                                                                  List<EventRestriction> eventRestrictions) {
         return this.repository.findByChannelId(channelId).map(configuration -> {
             configuration.setAutopostingEnabled(autopostingEnabled);
             configuration.setRequiresTracking(requiresTracking);
@@ -66,6 +68,7 @@ public class DiscordClubConfigurationService {
             configuration.setScoringStrategy(scoringStrategy);
             configuration.setScoringTable(scoringTable);
             configuration.setScoringAnchors(scoringAnchors);
+            configuration.setEventRestrictions(eventRestrictions);
             return this.repository.save(configuration);
         });
     }

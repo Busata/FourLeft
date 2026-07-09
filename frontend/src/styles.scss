@@ -242,6 +242,39 @@ select {
   }
 }
 
+/* Restriction editor (channel config): one bordered block per rule. */
+.restriction-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* Allowed-vehicle picker: bounded, scrollable checkbox list. */
+.vehicle-list {
+  max-height: 220px;
+  overflow-y: auto;
+  max-width: 420px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+
+  .vehicle-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-weight: 400;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      flex: 0 0 auto;
+      width: auto;
+      margin: 0;
+    }
+  }
+}
+
 /* Loose action buttons at the end of a form. */
 form .g-button + .g-button {
   margin-left: 8px;

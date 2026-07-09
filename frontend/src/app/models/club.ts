@@ -21,6 +21,18 @@ export interface ClubResultEntry {
   timePenalty: WireDuration | null;
   differenceToFirst: WireDuration | null;
   differenceAccumulated: WireDuration | null;
+  /** True when the entry's vehicle violates the event's restriction (WARN mode only —
+   *  EXCLUDE-mode violators are filtered out server-side and never appear). */
+  restrictionViolated?: boolean | null;
+}
+
+/** The restriction rule active on an event, e.g. a vehicle allowlist ("quattro only"). */
+export interface EventRestriction {
+  type: 'VEHICLE_ALLOWLIST';
+  displayMode: 'WARN' | 'EXCLUDE';
+  scoringMode: 'EXCLUDE' | 'PENALTY';
+  penaltyPoints?: number | null;
+  allowedVehicles: string[];
 }
 
 export interface EventSettings {
@@ -45,6 +57,7 @@ export interface ClubEventResult {
   absoluteOpenDate: string;
   absoluteCloseDate: string;
   leaderboardEntries: ClubResultEntry[];
+  restriction?: EventRestriction | null;
 }
 
 export interface ChampionshipSettings {

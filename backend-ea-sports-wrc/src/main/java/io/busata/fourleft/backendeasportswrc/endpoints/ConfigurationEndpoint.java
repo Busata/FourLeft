@@ -9,6 +9,7 @@ import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationUpdateTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubCreateConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.DiscordClubRemoveConfigurationTo;
+import io.busata.fourleft.api.easportswrc.models.RestrictionTargetsTo;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.ChannelConfigurationRequestService;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
@@ -61,6 +62,18 @@ public class ConfigurationEndpoint {
     @GetMapping("/api_v2/configuration/channel/{requestId}")
     public Optional<ChannelConfigurationTo> getChannelConfiguration(@PathVariable UUID requestId) {
         return this.channelConfigurationRequestService.getConfiguration(requestId);
+    }
+
+    @GetMapping("/api_v2/configuration/channel/{requestId}/restriction-targets")
+    public Optional<RestrictionTargetsTo> getRestrictionTargets(@PathVariable UUID requestId) {
+        return this.channelConfigurationRequestService.getRestrictionTargets(requestId);
+    }
+
+    @GetMapping("/api_v2/configuration/channel/{requestId}/vehicles")
+    public Optional<List<String>> getVehicles(@PathVariable UUID requestId,
+                                              @RequestParam(required = false) String championshipId,
+                                              @RequestParam(required = false) String eventId) {
+        return this.channelConfigurationRequestService.getVehicles(requestId, championshipId, eventId);
     }
 
     @PostMapping("/api_v2/configuration/channel/{requestId}")

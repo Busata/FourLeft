@@ -24,8 +24,12 @@ interface CompareEvent {
   eventId: string;
   location: string;
   meta: string;
+  /** The event's active vehicle restriction, e.g. "Restricted: Audi Sport quattro S1 E2" — '' if none. */
+  restrictionNote: string;
   aRank: number | null;
   bRank: number | null;
+  aViolated: boolean;
+  bViolated: boolean;
   rows: CompareRow[];
 }
 
@@ -219,12 +223,16 @@ export class ClubCompare implements OnInit {
   private buildEvent(event: ClubEventResult, a: ClubResultEntry, b: ClubResultEntry): CompareEvent {
     const settings = event.eventSettings;
     const meta = [settings?.weatherSeason, settings?.vehicleClass].filter(Boolean).join(' · ');
+    const restriction = event.restriction;
     return {
       eventId: event.id,
       location: settings?.location ?? 'Event',
       meta,
+      restrictionNote: restriction ? `Restricted: ${restriction.allowedVehicles.join(', ')}` : '',
       aRank: a.rank,
       bRank: b.rank,
+      aViolated: a.restrictionViolated === true,
+      bViolated: b.restrictionViolated === true,
       rows: [
         compareDurationRow('Last stage', parseDuration(a.time), parseDuration(b.time)),
         compareDurationRow('Total', parseDuration(a.timeAccumulated), parseDuration(b.timeAccumulated)),

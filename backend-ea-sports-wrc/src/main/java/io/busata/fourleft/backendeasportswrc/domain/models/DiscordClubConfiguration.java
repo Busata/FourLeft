@@ -2,6 +2,7 @@ package io.busata.fourleft.backendeasportswrc.domain.models;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.AutoPostMessageService;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
+import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.common.ScoringStrategy;
 import jakarta.persistence.Column;
@@ -16,6 +17,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,6 +54,10 @@ public class DiscordClubConfiguration {
     @Column(columnDefinition = "jsonb")
     ScoringAnchors scoringAnchors;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    List<EventRestriction> eventRestrictions;
+
 
     String resultsEntryTemplate;
     String autoPostTemplate;
@@ -83,6 +89,14 @@ public class DiscordClubConfiguration {
 
     public void setScoringAnchors(ScoringAnchors scoringAnchors) {
         this.scoringAnchors = scoringAnchors;
+    }
+
+    public void setEventRestrictions(List<EventRestriction> eventRestrictions) {
+        this.eventRestrictions = eventRestrictions;
+    }
+
+    public List<EventRestriction> getEventRestrictionsOrEmpty() {
+        return eventRestrictions == null ? List.of() : eventRestrictions;
     }
 
 

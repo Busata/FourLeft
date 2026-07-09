@@ -1,9 +1,12 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.results;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.*;
+import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import io.busata.fourleft.backendeasportswrc.domain.services.profile.ProfileService;
+import io.busata.fourleft.backendeasportswrc.domain.services.restrictions.RestrictionService;
+import io.busata.fourleft.common.RestrictionScoringMode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +32,7 @@ public class ClubResultsService {
     private final ClubLeaderboardService clubLeaderboardService;
     private final ProfileService profileService;
     private final ScoringService scoringService;
+    private final RestrictionService restrictionService;
 
 
 
@@ -102,6 +106,8 @@ public class ClubResultsService {
 
         return new ClubResults(
                 club.getId(),
+                championship.getId(),
+                event.getId(),
                 club.getClubName(),
                 eventSettings.getLocation(),
                 eventSettings.getLocationID(),
@@ -207,6 +213,13 @@ public class ClubResultsService {
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
 
+            Optional<EventRestriction> restriction = restrictionService.resolveRestriction(configuration, event.getChampionshipID(), event.getId());
+
+            Map<ClubLeaderboardEntry, Long> excludedScoringPositions = restriction
+                    .filter(rule -> rule.scoringMode() == RestrictionScoringMode.EXCLUDE)
+                    .map(rule -> restrictionService.scoringPositions(rule, board.getEntries()))
+                    .orElse(null);
+
             board.getEntries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
 
                 playerData.computeIfAbsent(entry.getSsid(), (ssid) -> {
@@ -220,7 +233,23 @@ public class ClubResultsService {
                         return oldPoints;
                     }
 
-                    return oldPoints + scoringService.getPoints(configuration, entry.getRankAccumulated().intValue());
+                    boolean violates = restriction.map(rule -> restrictionService.violates(rule, entry)).orElse(false);
+
+                    if (violates && excludedScoringPositions != null) {
+                        return oldPoints;
+                    }
+
+                    long position = excludedScoringPositions != null
+                            ? excludedScoringPositions.get(entry)
+                            : entry.getRankAccumulated();
+
+                    int entryPoints = scoringService.getPoints(configuration, (int) position);
+
+                    if (violates) {
+                        entryPoints = Math.max(0, entryPoints - Optional.ofNullable(restriction.get().penaltyPoints()).orElse(0));
+                    }
+
+                    return oldPoints + entryPoints;
                 });
 
             });

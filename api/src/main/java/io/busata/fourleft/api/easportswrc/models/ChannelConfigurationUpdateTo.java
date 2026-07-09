@@ -2,6 +2,7 @@ package io.busata.fourleft.api.easportswrc.models;
 
 import io.busata.fourleft.common.ScoringStrategy;
 
+import java.util.List;
 import java.util.Map;
 
 public record ChannelConfigurationUpdateTo(
@@ -10,6 +11,7 @@ public record ChannelConfigurationUpdateTo(
         boolean customScoringEnabled,
         ScoringStrategy scoringStrategy,
         Map<String, Integer> scoringTable,
-        ScoringAnchorsTo scoringAnchors)
+        ScoringAnchorsTo scoringAnchors,
+        List<EventRestrictionTo> eventRestrictions)
 {
 }

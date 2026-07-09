@@ -359,6 +359,17 @@
     color: #8a91a0;
     font-size: 12px;
   }
+  .cmp-restriction {
+    color: #b45309;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+/* Warning marker on a driver who violated the event's vehicle restriction (WARN mode). */
+.cmp-violation {
+  font-size: 12px;
+  cursor: help;
 }
 
 .cmp-table {

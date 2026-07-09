@@ -1,7 +1,11 @@
 package io.busata.fourleft.backendeasportswrc.domain.models;
 
+import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchorEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
+import io.busata.fourleft.common.RestrictionDisplayMode;
+import io.busata.fourleft.common.RestrictionScoringMode;
+import io.busata.fourleft.common.RestrictionType;
 import io.busata.fourleft.common.ScoringStrategy;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -103,6 +107,38 @@ class CustomScoringPersistenceTest {
     }
 
     @Test
+    void eventRestrictionsRoundTripThroughJsonb() {
+        // Also proves V029's event_restrictions column is valid: Flyway must apply it before this
+        // context starts, so a green run means the migration parsed and executed against real Postgres.
+        DiscordClubConfiguration config = new DiscordClubConfiguration(1L, 45L, "666", true);
+        config.setEventRestrictions(List.of(
+                new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, "champ-1", null,
+                        RestrictionDisplayMode.WARN, RestrictionScoringMode.PENALTY, 25,
+                        List.of("Audi Sport quattro S1 E2")),
+                new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-9",
+                        RestrictionDisplayMode.EXCLUDE, RestrictionScoringMode.EXCLUDE, null,
+                        List.of("Lancia Delta S4", "MG Metro 6R4"))));
+
+        UUID id = (UUID) em.persistAndGetId(config);
+        em.flush();
+        em.clear();
+
+        DiscordClubConfiguration reloaded = em.find(DiscordClubConfiguration.class, id);
+
+        List<EventRestriction> restrictions = reloaded.getEventRestrictionsOrEmpty();
+        assertThat(restrictions).hasSize(2);
+        assertThat(restrictions.get(0).championshipId()).isEqualTo("champ-1");
+        assertThat(restrictions.get(0).isEventSpecific()).isFalse();
+        assertThat(restrictions.get(0).scoringMode()).isEqualTo(RestrictionScoringMode.PENALTY);
+        assertThat(restrictions.get(0).penaltyPoints()).isEqualTo(25);
+        assertThat(restrictions.get(0).allowedVehicles()).containsExactly("Audi Sport quattro S1 E2");
+        assertThat(restrictions.get(1).eventId()).isEqualTo("event-9");
+        assertThat(restrictions.get(1).isEventSpecific()).isTrue();
+        assertThat(restrictions.get(1).displayMode()).isEqualTo(RestrictionDisplayMode.EXCLUDE);
+        assertThat(restrictions.get(1).allowedVehicles()).containsExactly("Lancia Delta S4", "MG Metro 6R4");
+    }
+
+    @Test
     void defaultsAreSaneForANewConfig() {
         DiscordClubConfiguration config = new DiscordClubConfiguration(1L, 43L, "888", true);
 
@@ -115,5 +151,6 @@ class CustomScoringPersistenceTest {
         assertThat(reloaded.isCustomScoringEnabled()).isFalse();
         assertThat(reloaded.getScoringStrategy()).isEqualTo(ScoringStrategy.LOOKUP_TABLE);
         assertThat(reloaded.getScoringTable()).isEmpty();
+        assertThat(reloaded.getEventRestrictionsOrEmpty()).isEmpty();
     }
 }

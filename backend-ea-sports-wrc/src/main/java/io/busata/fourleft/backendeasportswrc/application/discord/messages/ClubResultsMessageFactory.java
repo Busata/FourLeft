@@ -6,8 +6,11 @@ import io.busata.fourleft.backendeasportswrc.application.fieldmapping.WeatherMap
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
+import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
+import io.busata.fourleft.backendeasportswrc.domain.services.restrictions.RestrictionService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import io.busata.fourleft.common.BadgeType;
+import io.busata.fourleft.common.RestrictionDisplayMode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,25 +23,29 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ClubResultsMessageFactory {
     private final EAWRCFieldMapper fieldMapper;
+    private final RestrictionService restrictionService;
 
     public static String defaultTemplate = "**${rank}** • ${flag} • **${displayName}** • ${time} *(${deltaTime}*)";
 
     public MessageEmbed createResultPost(ClubResults results, DiscordClubConfiguration configuration) {
+        Optional<EventRestriction> restriction = restrictionService.resolveRestriction(configuration, results.championshipId(), results.eventId());
+
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        buildHeader(embedBuilder, results);
-        buildEntries(embedBuilder, results, configuration.getResultsEntryTemplate(), configuration.isRequiresTracking());
+        buildHeader(embedBuilder, results, restriction);
+        buildEntries(embedBuilder, results, configuration.getResultsEntryTemplate(), configuration.isRequiresTracking(), restriction);
         buildFooter(embedBuilder, results);
         return embedBuilder.build();
     }
 
 
-    private void buildHeader(EmbedBuilder embedBuilder, ClubResults results) {
+    private void buildHeader(EmbedBuilder embedBuilder, ClubResults results, Optional<EventRestriction> restriction) {
         embedBuilder.setTitle("**Results**")
                 .addField(new MessageEmbed.Field(
                         "**Country**",
@@ -55,6 +62,15 @@ public class ClubResultsMessageFactory {
                         String.join(", ", results.stages()),
                         true
                 ));
+
+        restriction.ifPresent(rule -> {
+            String suffix = rule.displayMode() == RestrictionDisplayMode.EXCLUDE ? " *(violators hidden)*" : "";
+            embedBuilder.addField(new MessageEmbed.Field(
+                    "**Restriction**",
+                    String.join(", ", rule.allowedVehicles()) + suffix,
+                    false
+            ));
+        });
 
         boolean singleStageEvent = results.stages().size() == 1;
 
@@ -105,14 +121,35 @@ public class ClubResultsMessageFactory {
     private static final int MAX_FIELD_VALUE_LENGTH = MessageEmbed.VALUE_MAX_LENGTH;
     private static final int DESIRED_GROUP_SIZE = 10;
 
-    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking) {
+    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking, Optional<EventRestriction> restriction) {
+        // Footer/badge totals stay at the racenet board size, also under display-EXCLUDE.
         int totalEntries = results.entries().size();
 
-        List<String> renderedEntries = results.entries().stream()
-                .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
+        boolean excludeViolators = restriction.map(rule -> rule.displayMode() == RestrictionDisplayMode.EXCLUDE).orElse(false);
+        boolean warnViolators = restriction.map(rule -> rule.displayMode() == RestrictionDisplayMode.WARN).orElse(false);
+
+        List<ClubLeaderboardEntry> boardEntries = results.entries().stream()
+                .filter(entry -> !excludeViolators || !restrictionService.violates(restriction.get(), entry))
                 .sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated))
+                .toList();
+
+        // Under display-EXCLUDE the remaining entries are re-ranked 1..n; otherwise the racenet rank stands.
+        Map<ClubLeaderboardEntry, Long> displayRanks = new HashMap<>();
+        for (int i = 0; i < boardEntries.size(); i++) {
+            displayRanks.put(boardEntries.get(i), excludeViolators ? i + 1 : boardEntries.get(i).getRankAccumulated());
+        }
+
+        List<String> renderedEntries = boardEntries.stream()
+                .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 10)
                 .limit(50)
-                .map(entry -> StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, totalEntries)))
+                .map(entry -> {
+                    String rendered = StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry, displayRanks.get(entry), totalEntries));
+                    // Appended after template substitution so custom entry templates keep working.
+                    if (warnViolators && restrictionService.violates(restriction.get(), entry)) {
+                        rendered += " ⚠️";
+                    }
+                    return rendered;
+                })
                 .toList();
 
         StringBuilder currentField = new StringBuilder();
@@ -142,11 +179,11 @@ public class ClubResultsMessageFactory {
         }
     }
 
-    private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, int totalEntries) {
+    private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, Long displayRank, int totalEntries) {
         Map<String, String> values = new HashMap<>();
 
-        values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), totalEntries, entry.isDnf()));
-        values.put("rank", String.valueOf(entry.getRankAccumulated()));
+        values.put("badgeRank", BadgeMapper.createBadge(displayRank, totalEntries, entry.isDnf()));
+        values.put("rank", String.valueOf(displayRank));
         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
         values.put("displayName", entry.getAlias());
         values.put("time", DurationHelper.formatTime(entry.getTimeAccumulated()));

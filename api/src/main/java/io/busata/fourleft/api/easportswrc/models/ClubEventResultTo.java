@@ -10,5 +10,6 @@ public record ClubEventResultTo(
         String status,
         ZonedDateTime absoluteOpenDate,
         ZonedDateTime absoluteCloseDate,
-        List<ClubResultEntryTo> leaderboardEntries) {
+        List<ClubResultEntryTo> leaderboardEntries,
+        EventRestrictionTo restriction) {
 }

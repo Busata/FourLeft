@@ -39,7 +39,7 @@ class ClubResultSerializationTest {
                     "wrc-1", "Driver One", 1L, 0L, 1L, "Rally1",
                     lastStage,
                     Duration.ofMinutes(5).plusSeconds(7).plusMillis(890),
-                    Duration.ZERO, Duration.ZERO, Duration.ZERO);
+                    Duration.ZERO, Duration.ZERO, Duration.ZERO, null);
 
             String json = mapper.writeValueAsString(entry);
             log.info("ClubResultEntryTo serialized as: {}", json);
