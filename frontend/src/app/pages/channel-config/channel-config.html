@@ -107,12 +107,22 @@
               <label>Preview (points per finishing position)</label>
               @if (anchorPreview().length > 0) {
                 <div class="scoring-preview">
-                  @for (row of anchorPreview(); track row.label) {
-                    <span class="scoring-preview-chip">
-                      <span class="pos">{{ row.label }}</span>
-                      <span class="pts">{{ row.points }}</span>
-                    </span>
-                  }
+                  <table class="dash-table">
+                    <thead>
+                      <tr>
+                        <th>Position</th>
+                        <th>Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of anchorPreview(); track row.label) {
+                        <tr>
+                          <td>{{ row.label }}</td>
+                          <td>{{ row.points }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
                 </div>
                 @if (anchorPreviewTruncated()) {
                   <p>Points haven't reached the floor by position 2000 &mdash; check the decrease values.</p>

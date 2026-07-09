@@ -25,7 +25,7 @@ const DEFAULT_FLOOR = 1;
 // Club 146's real definition only floors at position 1001, so this needs headroom beyond that.
 const PREVIEW_CAP = 2000;
 
-// One rendered run of the preview: consecutive positions that all score the same points.
+// One row of the preview leaderboard: a finishing position (or the "N+" floor tail) and its points.
 interface PreviewRow {
   label: string;
   points: number;
@@ -260,13 +260,8 @@ export class ChannelConfig implements OnInit {
     }
 
     const rows: PreviewRow[] = [];
-    let runStart = 1;
-    for (let i = 1; i <= lastAboveFloor + 1; i++) {
-      const endOfRun = i === lastAboveFloor + 1 || expanded[i] !== expanded[i - 1];
-      if (endOfRun) {
-        rows.push({ label: runStart === i ? `${i}` : `${runStart}–${i}`, points: expanded[i - 1] });
-        runStart = i + 1;
-      }
+    for (let i = 0; i <= lastAboveFloor; i++) {
+      rows.push({ label: `${i + 1}`, points: expanded[i] });
     }
 
     const truncated = lastAboveFloor === PREVIEW_CAP - 1;
