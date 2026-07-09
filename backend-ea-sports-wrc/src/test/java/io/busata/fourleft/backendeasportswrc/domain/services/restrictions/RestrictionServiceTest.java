@@ -73,6 +73,15 @@ class RestrictionServiceTest {
     }
 
     @Test
+    void firstRuleWinsAmongDuplicateTargets() {
+        // Save-side dedupe should prevent this, but resolution stays deterministic regardless.
+        EventRestriction first = championshipRule("champ-1", List.of("Audi"));
+        EventRestriction second = championshipRule("champ-1", List.of("Lancia"));
+
+        assertThat(service.resolveRestriction(List.of(first, second), "champ-1", "event-1")).contains(first);
+    }
+
+    @Test
     void noRulesResolvesToEmpty() {
         assertThat(service.resolveRestriction(List.of(), "champ-1", "event-1")).isEmpty();
         assertThat(service.resolveRestriction((List<EventRestriction>) null, "champ-1", "event-1")).isEmpty();

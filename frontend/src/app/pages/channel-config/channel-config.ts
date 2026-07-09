@@ -76,10 +76,12 @@ export class ChannelConfig implements OnInit {
   // Live expansion of the anchor definition to points per position, recomputed on every form change.
   readonly anchorPreview = signal<PreviewRow[]>([]);
   readonly anchorPreviewTruncated = signal(false);
-  // The club's championships/events a restriction can target, and the vehicles seen on its boards.
+  // The club's open championships/events a restriction can target.
   readonly restrictionTargets = signal<RestrictionTargetChampionship[]>([]);
-  readonly vehicles = signal<string[]>([]);
-  // The pickers are static per club; fetch them once, not on every save round-trip.
+  // Vehicle options per restriction target ("championshipId|eventId"), scoped by the backend to the
+  // target's car class. Cached so retargeting between rows doesn't refetch.
+  readonly vehiclesByTarget = signal<Record<string, string[]>>({});
+  // The targets are static per club; fetch them once, not on every save round-trip.
   private pickersLoaded = false;
 
   readonly form = new FormGroup({
@@ -169,12 +171,64 @@ export class ChannelConfig implements OnInit {
       allowedVehicles: new FormControl<string[]>(rule?.allowedVehicles ?? [], { nonNullable: true }),
     });
     // A rule targets one championship's scope; picking another one invalidates the event choice.
-    row.controls.championshipId.valueChanges.subscribe(() => row.controls.eventId.setValue(''));
+    // Retargeting also clears the vehicle picks — they were scoped to the previous target's car class.
+    row.controls.championshipId.valueChanges.subscribe(() => {
+      row.controls.eventId.setValue('');
+      row.controls.allowedVehicles.setValue([]);
+      this.loadVehicles(row);
+    });
+    row.controls.eventId.valueChanges.subscribe(() => {
+      row.controls.allowedVehicles.setValue([]);
+      this.loadVehicles(row);
+    });
     this.eventRestrictions.push(row);
+    this.loadVehicles(row);
   }
 
   removeRestriction(index: number): void {
     this.eventRestrictions.removeAt(index);
+  }
+
+  /**
+   * True when an earlier row already targets the same thing (same event, or same whole championship) —
+   * that row wins and this one is dropped on save. A championship-wide rule plus an event-specific one
+   * is not a conflict: the event-specific rule overrides for that event.
+   */
+  isDuplicateTarget(index: number): boolean {
+    const rows = this.eventRestrictions.controls;
+    if (!rows[index].controls.championshipId.value) {
+      return false;
+    }
+    const key = this.targetKey(rows[index]);
+    return rows.slice(0, index).some((row) => this.targetKey(row) === key);
+  }
+
+  vehiclesFor(row: RestrictionRow): string[] {
+    return this.vehiclesByTarget()[this.targetKey(row)] ?? [];
+  }
+
+  private targetKey(row: RestrictionRow): string {
+    return `${row.controls.championshipId.value}|${row.controls.eventId.value}`;
+  }
+
+  private loadVehicles(row: RestrictionRow): void {
+    const key = this.targetKey(row);
+    if (key in this.vehiclesByTarget()) {
+      return;
+    }
+    this.vehiclesByTarget.update((cache) => ({ ...cache, [key]: [] }));
+
+    const params: Record<string, string> = {};
+    if (row.controls.championshipId.value) {
+      params['championshipId'] = row.controls.championshipId.value;
+    }
+    if (row.controls.eventId.value) {
+      params['eventId'] = row.controls.eventId.value;
+    }
+    this.http.get<string[]>(`${this.base}/vehicles`, { params }).subscribe({
+      next: (vehicles) => this.vehiclesByTarget.update((cache) => ({ ...cache, [key]: vehicles ?? [] })),
+      error: () => {},
+    });
   }
 
   toggleVehicle(row: RestrictionRow, vehicle: string): void {
@@ -247,9 +301,11 @@ export class ChannelConfig implements OnInit {
     return table;
   }
 
-  // Build the restriction rules the backend expects, dropping rows without a target or vehicles.
+  // Build the restriction rules the backend expects, dropping rows without a target or vehicles and
+  // conflicting duplicates for the same target (first row wins — mirrored by isDuplicateTarget()).
   private rowsToRestrictions(): EventRestriction[] {
     const rules: EventRestriction[] = [];
+    const seenTargets = new Set<string>();
     for (const row of this.eventRestrictions.controls) {
       const championshipId = row.controls.championshipId.value;
       const eventId = row.controls.eventId.value;
@@ -257,6 +313,11 @@ export class ChannelConfig implements OnInit {
       if (!championshipId || allowedVehicles.length === 0) {
         continue;
       }
+      const target = eventId ? `event:${eventId}` : `championship:${championshipId}`;
+      if (seenTargets.has(target)) {
+        continue;
+      }
+      seenTargets.add(target);
       const scoringMode = row.controls.scoringMode.value;
       rules.push({
         type: 'VEHICLE_ALLOWLIST',
@@ -394,10 +455,6 @@ export class ChannelConfig implements OnInit {
       this.http.get<RestrictionTargets>(`${this.base}/restriction-targets`).subscribe({
         next: (targets) => this.restrictionTargets.set(targets?.championships ?? []),
         error: () => this.restrictionTargets.set([]),
-      });
-      this.http.get<string[]>(`${this.base}/vehicles`).subscribe({
-        next: (vehicles) => this.vehicles.set(vehicles ?? []),
-        error: () => this.vehicles.set([]),
       });
     }
 

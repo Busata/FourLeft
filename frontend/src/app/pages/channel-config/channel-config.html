@@ -164,6 +164,13 @@
                   </select>
                 </div>
 
+                @if (isDuplicateTarget($index)) {
+                  <p class="restriction-conflict">
+                    Another restriction above already targets this &mdash; that one wins and this row is
+                    ignored when saving. Pick a different event, or edit the other rule instead.
+                  </p>
+                }
+
                 <div class="form-group">
                   <label>On results</label>
                   <select formControlName="displayMode">
@@ -188,10 +195,10 @@
                 }
 
                 <div class="form-group">
-                  <label>Allowed vehicles</label>
-                  @if (vehicles().length > 0) {
+                  <label>Allowed vehicles (matching the target's car class)</label>
+                  @if (vehiclesFor(row).length > 0) {
                     <div class="vehicle-list">
-                      @for (vehicle of vehicles(); track vehicle) {
+                      @for (vehicle of vehiclesFor(row); track vehicle) {
                         <label class="vehicle-option">
                           <input
                             type="checkbox"
@@ -203,7 +210,7 @@
                       }
                     </div>
                   } @else {
-                    <p>No vehicles seen on this club's leaderboards yet.</p>
+                    <p>No vehicles known for this car class yet.</p>
                   }
                 </div>
 

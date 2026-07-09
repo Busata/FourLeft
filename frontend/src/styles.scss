@@ -250,6 +250,13 @@ select {
   margin-bottom: 12px;
 }
 
+/* Warning shown on a restriction row whose target is already covered by an earlier rule. */
+.restriction-conflict {
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* Allowed-vehicle picker: bounded, scrollable checkbox list. */
 .vehicle-list {
   max-height: 220px;

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeTrialLeaderboardEntry, UUID> {
@@ -121,4 +122,17 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     @Modifying
     @Query("delete from TimeTrialLeaderboardEntry e where e.combinationId = :combinationId")
     void deleteByCombinationId(@Param("combinationId") String combinationId);
+
+    /**
+     * Distinct car names driven in the given vehicle classes across ALL stored time-trial boards —
+     * the closest thing to a per-class car catalog. TT boards are global Racenet data (every player,
+     * every car), so any remotely popular class covers its full car list, unlike a single club's
+     * own event history.
+     */
+    @Query("""
+            select distinct e.vehicle from TimeTrialLeaderboardEntry e, TimeTrialCombination c
+            where e.combinationId = c.id and c.vehicleClassId in :classIds and e.vehicle is not null
+            order by e.vehicle
+            """)
+    List<String> findDistinctVehiclesByClassIds(@Param("classIds") Set<Long> classIds);
 }

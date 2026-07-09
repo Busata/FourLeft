@@ -10,20 +10,26 @@ import io.busata.fourleft.api.easportswrc.models.ScoringAnchorsTo;
 import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.models.Event;
 import io.busata.fourleft.backendeasportswrc.domain.models.configuration.ChannelConfigurationRequest;
 import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchorEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
+import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class ChannelConfigurationRequestService {
     private final DiscordClubConfigurationService clubConfigurationService;
     private final ClubService clubService;
     private final ClubLeaderboardService clubLeaderboardService;
+    private final TimeTrialLeaderboardEntryRepository timeTrialLeaderboardEntryRepository;
 
     @Transactional
     public UUID requestConfiguration(Long guildId, Long channelId, String discordId) {
@@ -147,7 +154,12 @@ public class ChannelConfigurationRequestService {
         if (restrictions == null) {
             return null;
         }
+        // Reject conflicting duplicates for the same target (same event, or same whole championship):
+        // first one wins. A championship-wide rule plus an event-specific one is NOT a conflict — the
+        // event-specific rule intentionally overrides for that event (see RestrictionService).
+        Set<String> seenTargets = new HashSet<>();
         return restrictions.stream()
+                .filter(r -> seenTargets.add(r.eventId() != null ? "event:" + r.eventId() : "championship:" + r.championshipId()))
                 .map(r -> new EventRestriction(r.type(), r.championshipId(), r.eventId(), r.displayMode(),
                         r.scoringMode(), r.penaltyPoints(), r.allowedVehicles()))
                 .toList();
@@ -165,8 +177,8 @@ public class ChannelConfigurationRequestService {
 
     /**
      * The championships/events of the channel's club that a restriction rule can target. Only open
-     * championships qualify — there's no point restricting a finished one — so this usually offers
-     * one championship, or none.
+     * championships and their open/upcoming events qualify — there's no point restricting something
+     * that has already finished — so this usually offers one championship, or none.
      */
     @Transactional(readOnly = true)
     public Optional<RestrictionTargetsTo> getRestrictionTargets(UUID requestId) {
@@ -179,6 +191,7 @@ public class ChannelConfigurationRequestService {
                                 championship.getAbsoluteOpenDate(),
                                 championship.getAbsoluteCloseDate(),
                                 championship.getEvents().stream()
+                                        .filter(event -> !event.isFinished())
                                         .map(event -> new RestrictionTargetsTo.RestrictionTargetEventTo(
                                                 event.getId(),
                                                 event.getEventSettings().getLocation(),
@@ -189,21 +202,45 @@ public class ChannelConfigurationRequestService {
     }
 
     /**
-     * Distinct vehicles seen on the club's leaderboards, for the allowlist picker — optionally scoped
-     * to one championship or one event.
+     * Distinct vehicles for the allowlist picker, scoped to the target's vehicle class(es) when known.
+     * The per-class car list comes from the global time-trial boards (the closest thing to a catalog —
+     * every player, every car), supplemented by the club's own boards of the same class in case a car
+     * shows up there that the TT snapshots miss. Without class info it falls back to everything ever
+     * seen on the club's boards.
      */
     @Transactional(readOnly = true)
     public Optional<List<String>> getVehicles(UUID requestId, String championshipId, String eventId) {
         return findClub(requestId).map(club -> {
-            List<String> leaderboardIds = club.getChampionships().stream()
-                    .filter(championship -> championshipId == null || Objects.equals(championship.getId(), championshipId))
+            List<Event> allEvents = club.getChampionships().stream()
                     .flatMap(championship -> championship.getEvents().stream())
-                    .filter(event -> eventId == null || Objects.equals(event.getId(), eventId))
+                    .toList();
+
+            Set<Long> targetClassIds = allEvents.stream()
+                    .filter(event -> eventId != null
+                            ? Objects.equals(event.getId(), eventId)
+                            : championshipId != null && Objects.equals(event.getChampionshipID(), championshipId))
+                    .map(event -> event.getEventSettings().getVehicleClassID())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            List<String> leaderboardIds = allEvents.stream()
+                    .filter(event -> targetClassIds.isEmpty()
+                            || targetClassIds.contains(event.getEventSettings().getVehicleClassID()))
                     .filter(event -> !event.getStages().isEmpty())
                     .map(event -> event.getLastStage().getLeaderboardId())
                     .toList();
 
-            return clubLeaderboardService.findDistinctVehicles(leaderboardIds);
+            List<String> clubVehicles = clubLeaderboardService.findDistinctVehicles(leaderboardIds);
+
+            if (targetClassIds.isEmpty()) {
+                return clubVehicles;
+            }
+
+            List<String> catalogVehicles = timeTrialLeaderboardEntryRepository.findDistinctVehiclesByClassIds(targetClassIds);
+            return Stream.concat(catalogVehicles.stream(), clubVehicles.stream())
+                    .distinct()
+                    .sorted()
+                    .toList();
         });
     }
 
