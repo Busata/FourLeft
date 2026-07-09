@@ -45,6 +45,7 @@
             <select formControlName="scoringStrategy">
               <option value="LOOKUP_TABLE">Position lookup table</option>
               <option value="POINT_ANCHOR">Point anchors</option>
+              <option value="RACENET_DEFAULT">Racenet default (participation scaled)</option>
             </select>
           </div>
 
@@ -129,6 +130,49 @@
                 }
               } @else {
                 <p>Add an anchor to see the points each position would score.</p>
+              }
+            </div>
+          }
+
+          @if (scoringStrategySig() === 'RACENET_DEFAULT') {
+            <div class="form-group">
+              <label>Racenet default scoring</label>
+              <p>
+                The same points racenet awards when a club uses its default scoring: the winner scores as many
+                points as there are entrants (mid-event dropouts included), points fall off to a
+                &hellip;3, 2, 1 tail and roughly the bottom quarter of the field scores 0. Nothing to
+                configure &mdash; the points scale with each event's field size.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label>Preview field size (number of entrants)</label>
+              <input type="number" formControlName="racenetFieldSize" min="1" max="500" />
+            </div>
+
+            <div class="form-group">
+              <label>Preview (points per finishing position)</label>
+              @if (racenetPreview().length > 0) {
+                <div class="scoring-preview">
+                  <table class="dash-table">
+                    <thead>
+                      <tr>
+                        <th>Position</th>
+                        <th>Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of racenetPreview(); track row.label) {
+                        <tr>
+                          <td>{{ row.label }}</td>
+                          <td>{{ row.points }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p>Enter a field size to see the points each position would score.</p>
               }
             </div>
           }

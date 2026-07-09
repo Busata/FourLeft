@@ -76,6 +76,8 @@ export class ChannelConfig implements OnInit {
   // Live expansion of the anchor definition to points per position, recomputed on every form change.
   readonly anchorPreview = signal<PreviewRow[]>([]);
   readonly anchorPreviewTruncated = signal(false);
+  // RACENET_DEFAULT expanded for the chosen field size, recomputed on every form change.
+  readonly racenetPreview = signal<PreviewRow[]>([]);
   // The club's open championships/events a restriction can target.
   readonly restrictionTargets = signal<RestrictionTargetChampionship[]>([]);
   // Vehicle options per restriction target ("championshipId|eventId"), scoped by the backend to the
@@ -93,6 +95,8 @@ export class ChannelConfig implements OnInit {
     scoringTable: new FormArray<ScoringRow>([]),
     scoringFloor: new FormControl<number>(DEFAULT_FLOOR, { nonNullable: true }),
     scoringAnchors: new FormArray<AnchorRow>([]),
+    // Preview-only: RACENET_DEFAULT scoring depends on the event's field size, not on configuration.
+    racenetFieldSize: new FormControl<number>(20, { nonNullable: true }),
     eventRestrictions: new FormArray<RestrictionRow>([]),
   });
 
@@ -111,7 +115,10 @@ export class ChannelConfig implements OnInit {
   ngOnInit(): void {
     this.form.controls.customScoringEnabled.valueChanges.subscribe((on) => this.customScoringOn.set(on));
     this.form.controls.scoringStrategy.valueChanges.subscribe((s) => this.scoringStrategySig.set(s));
-    this.form.valueChanges.subscribe(() => this.updateAnchorPreview());
+    this.form.valueChanges.subscribe(() => {
+      this.updateAnchorPreview();
+      this.updateRacenetPreview();
+    });
 
     this.http.get<ChannelConfiguration>(this.base).subscribe({
       next: (config) => this.apply(config),
@@ -420,6 +427,28 @@ export class ChannelConfig implements OnInit {
     }
     this.anchorPreview.set(rows);
     this.anchorPreviewTruncated.set(truncated);
+  }
+
+  // Mirrors the backend's ScoringService.racenetDefaultPoints: racenet's default participation-scaled
+  // system, where position r of a P-entrant field scores max(0, floor(P*(3r+1)/(4r)) - (r-1)) — the
+  // winner gets exactly P and roughly the bottom quarter scores 0. Collapse that zero tail into one row.
+  private updateRacenetPreview(): void {
+    const fieldSize = Math.min(Math.max(Math.floor(this.form.controls.racenetFieldSize.value ?? 0), 0), 500);
+    if (fieldSize < 1) {
+      this.racenetPreview.set([]);
+      return;
+    }
+
+    const rows: PreviewRow[] = [];
+    for (let position = 1; position <= fieldSize; position++) {
+      const points = Math.max(0, Math.floor((fieldSize * (3 * position + 1)) / (4 * position)) - (position - 1));
+      if (points === 0) {
+        rows.push({ label: `${position}+`, points: 0 });
+        break;
+      }
+      rows.push({ label: `${position}`, points });
+    }
+    this.racenetPreview.set(rows);
   }
 
   private apply(config: ChannelConfiguration | null): void {

@@ -1,4 +1,4 @@
-export type ScoringStrategy = 'LOOKUP_TABLE' | 'POINT_ANCHOR';
+export type ScoringStrategy = 'LOOKUP_TABLE' | 'POINT_ANCHOR' | 'RACENET_DEFAULT';
 
 // One entry of a POINT_ANCHOR definition: either an anchor (points set) or a decrease (decrease set).
 export interface ScoringAnchorEntry {

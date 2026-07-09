@@ -21,7 +21,12 @@ public class ScoringService {
     /** Points for a position not covered by the strategy (matches the old table's getOrDefault). */
     private static final int DEFAULT_POINTS = 1;
 
+    /** For strategies that don't depend on the field size. RACENET_DEFAULT scores 0 through here. */
     public int getPoints(DiscordClubConfiguration configuration, int position) {
+        return getPoints(configuration, position, 0);
+    }
+
+    public int getPoints(DiscordClubConfiguration configuration, int position, int fieldSize) {
         ScoringStrategy strategy = configuration.getScoringStrategy() != null
                 ? configuration.getScoringStrategy()
                 : ScoringStrategy.LOOKUP_TABLE;
@@ -29,7 +34,23 @@ public class ScoringService {
         return switch (strategy) {
             case LOOKUP_TABLE -> lookup(configuration.getScoringTable(), position);
             case POINT_ANCHOR -> anchorPoints(configuration.getScoringAnchors(), position);
+            case RACENET_DEFAULT -> racenetDefaultPoints(position, fieldSize);
         };
+    }
+
+    /**
+     * Racenet's default participation-scaled system: with a field of {@code fieldSize} entrants,
+     * position {@code rank} scores {@code max(0, floor(P * (3r + 1) / (4r)) - (r - 1))}. The winner
+     * gets exactly P, points fall to a linear ...3, 2, 1 tail and roughly the bottom quarter of the
+     * field scores 0. Reverse-engineered from racenet standings; exact on every observed field size
+     * (P = 4 to 1297). Racenet counts everyone who started the event in P, DNFs included.
+     */
+    public static int racenetDefaultPoints(int rank, int fieldSize) {
+        if (rank < 1 || fieldSize < 1) {
+            return 0;
+        }
+        long points = (long) fieldSize * (3L * rank + 1) / (4L * rank) - (rank - 1);
+        return (int) Math.max(0, points);
     }
 
     private int lookup(Map<String, Integer> table, int position) {

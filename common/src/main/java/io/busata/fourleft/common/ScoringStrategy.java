@@ -13,5 +13,13 @@ public enum ScoringStrategy {
      * the next entry; positions covered by neither score the configured floor (default 1). Reproduces a
      * full lookup table in a handful of hand-editable entries.
      */
-    POINT_ANCHOR
+    POINT_ANCHOR,
+    /**
+     * Racenet's own default (participation-scaled) system, reverse-engineered from club standings:
+     * with P entrants, position r scores {@code max(0, floor(P * (3r + 1) / (4r)) - (r - 1))} — the
+     * winner gets exactly P points, points fall to a linear ...3, 2, 1 tail and roughly the bottom
+     * quarter of the field scores 0. Depends on the event's field size, so there is no configuration
+     * payload to edit.
+     */
+    RACENET_DEFAULT
 }

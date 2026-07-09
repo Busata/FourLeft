@@ -7,6 +7,7 @@ import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLe
 import io.busata.fourleft.backendeasportswrc.domain.services.profile.ProfileService;
 import io.busata.fourleft.backendeasportswrc.domain.services.restrictions.RestrictionService;
 import io.busata.fourleft.common.RestrictionScoringMode;
+import io.busata.fourleft.common.ScoringStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -213,6 +216,15 @@ public class ClubResultsService {
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
 
+            boolean racenetDefault = configuration.getScoringStrategy() == ScoringStrategy.RACENET_DEFAULT;
+
+            // Racenet's default formula scales with everyone who STARTED the event, and still awards
+            // mid-event dropouts the tail of the curve — both live only on the earlier stage boards,
+            // so those are only pulled in for that strategy. DNFs on the final board are ranked and
+            // scored by racenet too (the curve bottoms out at 0 anyway), so they aren't skipped there.
+            List<ClubLeaderboardEntry> dropouts = racenetDefault ? findDropouts(event, board.getEntries()) : List.of();
+            int fieldSize = board.getEntries().size() + dropouts.size();
+
             Optional<EventRestriction> restriction = restrictionService.resolveRestriction(configuration, event.getChampionshipID(), event.getId());
 
             Map<ClubLeaderboardEntry, Long> excludedScoringPositions = restriction
@@ -229,7 +241,7 @@ public class ClubResultsService {
                 points.putIfAbsent(entry.getSsid(), 0);
 
                 points.computeIfPresent(entry.getSsid(), (ssid, oldPoints) -> {
-                    if(entry.isDnf()) {
+                    if(entry.isDnf() && !racenetDefault) {
                         return oldPoints;
                     }
 
@@ -243,7 +255,7 @@ public class ClubResultsService {
                             ? excludedScoringPositions.get(entry)
                             : entry.getRankAccumulated();
 
-                    int entryPoints = scoringService.getPoints(configuration, (int) position);
+                    int entryPoints = scoringService.getPoints(configuration, (int) position, fieldSize);
 
                     if (violates) {
                         entryPoints = Math.max(0, entryPoints - Optional.ofNullable(restriction.get().penaltyPoints()).orElse(0));
@@ -254,7 +266,67 @@ public class ClubResultsService {
 
             });
 
+            long dropoutPosition = board.getEntries().size();
+            for (ClubLeaderboardEntry entry : dropouts) {
+                dropoutPosition++;
+
+                playerData.computeIfAbsent(entry.getSsid(), (ssid) -> {
+                    return new PlayerEntryData(entry.getSsid(), entry.getDisplayName(), entry.getNationalityID().intValue());
+                });
+
+                points.putIfAbsent(entry.getSsid(), 0);
+
+                boolean violates = restriction.map(rule -> restrictionService.violates(rule, entry)).orElse(false);
+                if (violates && excludedScoringPositions != null) {
+                    continue;
+                }
+
+                int entryPoints = scoringService.getPoints(configuration, (int) dropoutPosition, fieldSize);
+                if (violates) {
+                    entryPoints = Math.max(0, entryPoints - Optional.ofNullable(restriction.get().penaltyPoints()).orElse(0));
+                }
+
+                points.merge(entry.getSsid(), entryPoints, Integer::sum);
+            }
+
             return points;
+    }
+
+    /**
+     * Players who started the event but never reached the final board (quit mid-event). Racenet ranks
+     * them below every finisher — furthest stage reached first, then accumulated time — which is the
+     * order its default scoring hands out the remaining tail points in.
+     */
+    private List<ClubLeaderboardEntry> findDropouts(Event event, List<ClubLeaderboardEntry> finishers) {
+        List<Stage> stages = event.getStages();
+        if (stages.size() <= 1) {
+            return List.of();
+        }
+
+        Set<String> finisherIds = finishers.stream().map(ClubLeaderboardEntry::getSsid).collect(Collectors.toSet());
+
+        List<String> earlierBoardIds = stages.subList(0, stages.size() - 1).stream()
+                .map(Stage::getLeaderboardId)
+                .toList();
+        Map<String, List<ClubLeaderboardEntry>> stageBoards = clubLeaderboardService.findEntriesByLeaderboardIds(earlierBoardIds);
+
+        // Walking the stages in running order leaves each dropout's furthest-stage entry behind.
+        Map<String, ClubLeaderboardEntry> lastEntry = new HashMap<>();
+        Map<String, Integer> lastStageIndex = new HashMap<>();
+        for (int stageIndex = 0; stageIndex < earlierBoardIds.size(); stageIndex++) {
+            for (ClubLeaderboardEntry entry : stageBoards.getOrDefault(earlierBoardIds.get(stageIndex), List.of())) {
+                if (finisherIds.contains(entry.getSsid())) {
+                    continue;
+                }
+                lastEntry.put(entry.getSsid(), entry);
+                lastStageIndex.put(entry.getSsid(), stageIndex);
+            }
+        }
+
+        return lastEntry.values().stream()
+                .sorted(Comparator.<ClubLeaderboardEntry>comparingInt(entry -> -lastStageIndex.get(entry.getSsid()))
+                        .thenComparing(ClubLeaderboardEntry::getTimeAccumulated))
+                .toList();
     }
 
 }
