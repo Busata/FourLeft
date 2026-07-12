@@ -86,7 +86,8 @@ public class EventRecordingService {
             return;
         }
 
-        // 4. Record — keep the better time if the driver already has one on this stage.
+        // 4. Record. One shot per stage means an existing entry should have blocked arming
+        //    (EventArmService#arm), so the keep-the-better-time branch is a safety net only.
         UUID carId = matchedCar.map(Car::getId).orElse(null);
         EventEntry existing = entryRepository
                 .findByEventIdAndVariantIdAndUserId(arm.getEventId(), variant.getId(), result.getUserId())

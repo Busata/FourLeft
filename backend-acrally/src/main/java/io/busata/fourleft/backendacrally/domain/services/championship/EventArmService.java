@@ -28,6 +28,7 @@ public class EventArmService {
     private static final List<EventArmStatus> LIVE = List.of(EventArmStatus.ARMED, EventArmStatus.BOUND);
 
     private final EventArmRepository armRepository;
+    private final EventEntryRepository entryRepository;
     private final ChampionshipEventRepository eventRepository;
     private final EventVariantRepository eventVariantRepository;
     private final ChampionshipRepository championshipRepository;
@@ -38,7 +39,9 @@ public class EventArmService {
      * Arm a stage: replace any existing ARMED arm and start waiting for the driver's next run. The
      * event must be open (published + within its window) and the variant must be one it runs, and the
      * driver must belong to the club. Rejected (409) while a BOUND run is in progress — switching
-     * stages mid-run would be a disarm by another name. Returns the fresh {@code ARMED} arm.
+     * stages mid-run would be a disarm by another name — and once the driver's one shot at the stage
+     * is spent: a recorded time or a DNF expiry locks the stage (wrong-stage/wrong-car mishaps don't).
+     * Returns the fresh {@code ARMED} arm.
      */
     @Transactional
     public EventArm arm(UUID userId, UUID eventId, UUID variantId) {
@@ -57,6 +60,15 @@ public class EventArmService {
                 .anyMatch(variantId::equals);
         if (!variantInEvent) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "That stage isn't part of this event.");
+        }
+        if (entryRepository.findByEventIdAndVariantIdAndUserId(eventId, variantId, userId).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "You've already run this stage — one shot per stage, and your time is in.");
+        }
+        if (armRepository.existsByUserIdAndEventIdAndVariantIdAndStatus(
+                userId, eventId, variantId, EventArmStatus.EXPIRED)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Your entry on this stage expired as a DNF — one shot per stage.");
         }
 
         cancelLive(userId);

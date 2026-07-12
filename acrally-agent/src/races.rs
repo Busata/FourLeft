@@ -75,6 +75,10 @@ pub struct RaceStage {
     pub car_keys: Vec<String>,
     #[serde(default)]
     pub my_best_ms: Option<i64>,
+    /// One shot per stage: set when the driver's attempt is spent (a recorded time, or a DNF
+    /// expiry when `my_best_ms` is absent). The backend refuses to re-arm a completed stage.
+    #[serde(default)]
+    pub completed: bool,
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -334,6 +338,10 @@ pub fn run_list(cfg: &Config) -> Result<()> {
                 && view.arm.variant_id.as_deref() == Some(stage.variant_id.as_str())
             {
                 "  [ARMED]"
+            } else if stage.completed && stage.my_best_ms.is_none() {
+                "  [DNF]"
+            } else if stage.completed {
+                "  [DONE]"
             } else {
                 ""
             };
@@ -367,6 +375,9 @@ pub fn run_arm(cfg: &Config, selector: &str) -> Result<()> {
     let Some((event, stage)) = picked else {
         bail!("no stage '{selector}' — run `acrally-agent arm-list` to see the numbers.");
     };
+    if stage.completed {
+        bail!("that stage is already done — one shot per stage.");
+    }
     println!(
         "arming {} ({} · {})...",
         stage.label, event.label, event.club_name

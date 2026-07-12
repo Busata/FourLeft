@@ -5,6 +5,7 @@ import io.busata.fourleft.backendacrally.domain.models.championship.Championship
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArm;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArmOutcome;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus;
+import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventVariant;
 import io.busata.fourleft.backendacrally.domain.services.club.ClubMembershipRepository;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 class EventArmServiceTest {
 
     @Mock EventArmRepository armRepository;
+    @Mock EventEntryRepository entryRepository;
     @Mock ChampionshipEventRepository eventRepository;
     @Mock EventVariantRepository eventVariantRepository;
     @Mock ChampionshipRepository championshipRepository;
@@ -108,12 +111,7 @@ class EventArmServiceTest {
         ChampionshipEvent event = new ChampionshipEvent(championship.getId(), 0, 0, 7);
         UUID variantId = UUID.randomUUID();
 
-        when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
-        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
-        when(membershipRepository.existsByClubIdAndUserId(championship.getClubId(), userId)).thenReturn(true);
-        when(championshipService.isOpenNow(event.getId())).thenReturn(true);
-        when(eventVariantRepository.findAllByEventIdOrderByPositionAsc(event.getId()))
-                .thenReturn(List.of(new EventVariant(event.getId(), variantId, 0)));
+        stubOpenEvent(championship, event, variantId);
         when(armRepository.findFirstByUserIdAndStatusIn(eq(userId), any(List.class)))
                 .thenReturn(Optional.of(arm));
 
@@ -122,5 +120,55 @@ class EventArmServiceTest {
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.CONFLICT);
         verify(armRepository, never()).save(any(EventArm.class));
+    }
+
+    @Test
+    void armingIsRejectedOnceAStageHasARecordedTime() {
+        // One shot per stage: a submitted run spends it, so re-arming for another go is refused.
+        Championship championship =
+                new Championship(UUID.randomUUID(), "Champ", java.time.LocalDateTime.now(), userId);
+        ChampionshipEvent event = new ChampionshipEvent(championship.getId(), 0, 0, 7);
+        UUID variantId = UUID.randomUUID();
+
+        stubOpenEvent(championship, event, variantId);
+        when(entryRepository.findByEventIdAndVariantIdAndUserId(event.getId(), variantId, userId))
+                .thenReturn(Optional.of(mock(EventEntry.class)));
+
+        assertThatThrownBy(() -> service.arm(userId, event.getId(), variantId))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(e -> ((ResponseStatusException) e).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+        verify(armRepository, never()).save(any(EventArm.class));
+    }
+
+    @Test
+    void armingIsRejectedAfterADnfExpiryOnTheStage() {
+        // The DNF expiry also spends the shot — otherwise timing out an arm would be a free retry.
+        Championship championship =
+                new Championship(UUID.randomUUID(), "Champ", java.time.LocalDateTime.now(), userId);
+        ChampionshipEvent event = new ChampionshipEvent(championship.getId(), 0, 0, 7);
+        UUID variantId = UUID.randomUUID();
+
+        stubOpenEvent(championship, event, variantId);
+        when(entryRepository.findByEventIdAndVariantIdAndUserId(event.getId(), variantId, userId))
+                .thenReturn(Optional.empty());
+        when(armRepository.existsByUserIdAndEventIdAndVariantIdAndStatus(
+                userId, event.getId(), variantId, EventArmStatus.EXPIRED)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.arm(userId, event.getId(), variantId))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(e -> ((ResponseStatusException) e).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+        verify(armRepository, never()).save(any(EventArm.class));
+    }
+
+    /** The shared arm() preamble: event exists, driver is a member, window open, variant belongs. */
+    private void stubOpenEvent(Championship championship, ChampionshipEvent event, UUID variantId) {
+        when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+        when(membershipRepository.existsByClubIdAndUserId(championship.getClubId(), userId)).thenReturn(true);
+        when(championshipService.isOpenNow(event.getId())).thenReturn(true);
+        when(eventVariantRepository.findAllByEventIdOrderByPositionAsc(event.getId()))
+                .thenReturn(List.of(new EventVariant(event.getId(), variantId, 0)));
     }
 }

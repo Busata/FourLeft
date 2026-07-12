@@ -191,14 +191,20 @@ when Start is pressed can never be captured (this is what makes "only the next r
 un-forgeable). When that run's `POST /sessions/{id}/result` arrives, the backend records the time to
 the event's stage leaderboard if it matches the armed stage in a permitted car while the event is open.
 
+**One shot per stage:** a recorded time or a DNF expiry spends the driver's attempt — re-arming that
+stage is refused with a 409. Wrong-stage/wrong-car runs don't spend it, and restarting/quitting a run
+in progress releases the arm without spending it. The races list marks spent stages with
+`"completed": true` per stage (a DNF when `my_best_ms` is absent) so UIs don't offer Start.
+
 ```
 GET  {api_base}/agent/races          -> { events:[…], arm:{…} }   open events for the driver's clubs + arm state
 POST {api_base}/agent/races/arm      { event_id, variant_id }     -> arm state
 POST {api_base}/agent/races/disarm                                -> arm state
 ```
 
-`arm` outcomes reported back (on the next poll after a run): `RECORDED`, `SLOWER`, `WRONG_STAGE`,
-`WRONG_CAR`, `EVENT_CLOSED`. Only the WRC/AC-Rally backend implements these; the reference
+`arm` outcomes reported back (on the next poll after a run): `RECORDED`, `WRONG_STAGE`, `WRONG_CAR`,
+`EVENT_CLOSED`, `DNF` (armed but expired without a run). `SLOWER` is legacy from the pre-one-shot
+best-of era and no longer occurs. Only the WRC/AC-Rally backend implements these; the reference
 `dev-server.py` does not.
 
 ## Relevant agent configuration

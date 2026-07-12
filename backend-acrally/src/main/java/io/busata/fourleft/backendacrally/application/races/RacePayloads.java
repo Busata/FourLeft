@@ -35,7 +35,9 @@ public final class RacePayloads {
     /**
      * A stage a driver can arm. {@code cars} are the readable catalogue names to display; {@code carKeys}
      * are the raw strings the game may report for those cars (catalogue names + assigned aliases), which
-     * the agent matches live telemetry against.
+     * the agent matches live telemetry against. {@code completed} means the driver's one shot at this
+     * stage is spent (a recorded time, or a DNF expiry when {@code myBestMs} is null) — arming it again
+     * would be refused, so the agent shouldn't offer Start.
      */
     public record RaceStage(
             @JsonProperty("variant_id") UUID variantId,
@@ -45,7 +47,8 @@ public final class RacePayloads {
             @JsonProperty("location_name") String locationName,
             @JsonProperty("cars") List<String> cars,
             @JsonProperty("car_keys") List<String> carKeys,
-            @JsonProperty("my_best_ms") Integer myBestMs) {
+            @JsonProperty("my_best_ms") Integer myBestMs,
+            @JsonProperty("completed") boolean completed) {
     }
 
     /** POST body to arm a stage. */

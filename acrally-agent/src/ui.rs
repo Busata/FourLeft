@@ -715,6 +715,13 @@ fn stage_row(
                 arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
             if armed_here {
                 ui.label(egui::RichText::new("armed").color(GREEN).strong());
+            } else if stage.completed {
+                // One shot per stage: the attempt is spent (time recorded, or DNF if no best).
+                if stage.my_best_ms.is_some() {
+                    ui.label(egui::RichText::new("✓ done").color(GREEN));
+                } else {
+                    ui.label(egui::RichText::new("DNF").color(AMBER));
+                }
             } else {
                 // One live arm at a time: Start is disabled while any stage is armed or a call is in flight.
                 let enabled = !busy && !arm.active;
@@ -747,6 +754,12 @@ fn confirm_modal(ctx: &egui::Context, pending: &PendingArm, action: &mut RaceAct
             ui.label(egui::RichText::new(format!("Car: {}", pending.car_label)).weak());
             ui.add_space(8.0);
             ui.label("Your next in-game run on this stage will be recorded. Start it before you begin driving.");
+            ui.label(
+                egui::RichText::new(
+                    "One shot: once a run is recorded (or your entry expires), this stage is locked.",
+                )
+                .weak(),
+            );
             ui.add_space(12.0);
             ui.horizontal(|ui| {
                 if ui.button("Start").clicked() {

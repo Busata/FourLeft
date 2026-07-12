@@ -22,6 +22,7 @@ import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.ChampionshipEventRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.ChampionshipRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.ChampionshipService;
+import io.busata.fourleft.backendacrally.domain.services.championship.EventArmRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.EventArmService;
 import io.busata.fourleft.backendacrally.domain.services.championship.EventCarRepository;
 import io.busata.fourleft.backendacrally.domain.services.championship.EventEntryRepository;
@@ -71,6 +72,7 @@ public class AgentRacesEndpoint {
     private final VariantService variantService;
     private final ChampionshipService championshipService;
     private final EventArmService armService;
+    private final EventArmRepository armRepository;
 
     @GetMapping
     public RacesView list(@AuthenticationPrincipal AgentPrincipal agent) {
@@ -137,10 +139,17 @@ public class AgentRacesEndpoint {
         List<String> carKeys = carKeysFor(permittedCarIds, carNames, aliasesByCar);
         Map<UUID, Integer> myBest = entryRepository.findByEventIdAndUserId(event.getId(), userId).stream()
                 .collect(Collectors.toMap(EventEntry::getVariantId, EventEntry::getTotalMs, Math::min));
+        // One shot per stage: a recorded time or a DNF expiry spends it (see EventArmService#arm).
+        Set<UUID> dnfVariantIds = armRepository
+                .findAllByUserIdAndEventIdAndStatus(userId, event.getId(), EventArmStatus.EXPIRED).stream()
+                .map(EventArm::getVariantId)
+                .collect(Collectors.toSet());
 
         List<RaceStage> stages = eventVariantRepository.findAllByEventIdOrderByPositionAsc(event.getId()).stream()
                 .map(EventVariant::getVariantId)
-                .map(variantId -> toRaceStage(variantId, variants, labels, permittedCars, carKeys, myBest.get(variantId)))
+                .map(variantId -> toRaceStage(variantId, variants, labels, permittedCars, carKeys,
+                        myBest.get(variantId),
+                        myBest.containsKey(variantId) || dnfVariantIds.contains(variantId)))
                 .toList();
 
         return new RaceEvent(event.getId(), champ.getId(), champ.getName(), clubName,
@@ -149,7 +158,8 @@ public class AgentRacesEndpoint {
 
     private RaceStage toRaceStage(UUID variantId, Map<UUID, Variant> variants,
                                   Map<UUID, VariantService.VariantLabel> labels,
-                                  List<String> permittedCars, List<String> carKeys, Integer myBestMs) {
+                                  List<String> permittedCars, List<String> carKeys, Integer myBestMs,
+                                  boolean completed) {
         Variant variant = variants.get(variantId);
         VariantService.VariantLabel label = labels.get(variantId);
         String rawName = variant == null ? null : variant.getRawName();
@@ -157,7 +167,7 @@ public class AgentRacesEndpoint {
         return new RaceStage(variantId, rawName, display,
                 label == null ? null : label.stageName(),
                 label == null ? null : label.locationName(),
-                permittedCars, carKeys, myBestMs);
+                permittedCars, carKeys, myBestMs, completed);
     }
 
     private ArmState currentArmState(UUID userId) {
