@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +24,12 @@ public class SessionIngestService {
     private final AgentSessionRepository sessions;
     private final StageResultRepository results;
     private final EventRecordingService recordingService;
+
+    /** Seconds between 0001-01-01 (the .NET-ticks epoch) and 1970-01-01. */
+    private static final long UNIX_EPOCH_TICKS_SECONDS = 62_135_596_800L;
+
+    /** Clock-skew allowance on the future bound: two days, in ticks. */
+    private static final long FUTURE_MARGIN_TICKS = 2L * 24 * 3600 * 10_000_000;
 
     @Transactional
     public UUID open(UUID userId, UUID apiKeyId, IngestPayloads.SessionStart p) {
@@ -44,6 +51,17 @@ public class SessionIngestService {
     @Transactional
     public void recordResult(UUID userId, String rawSessionId, IngestPayloads.Result p) {
         AgentSession session = ownedSession(userId, rawSessionId);
+        // A record's tick is stamped at event entry from the player's (UTC) clock, so a tick
+        // meaningfully in the future is a false save anchor, not a run (2026-07-09: a
+        // ServiceParkDefault block decoding to year 2057 was submitted with a stage name in the
+        // car field and poisoned that agent's result floor). Reject it so garbage can't enter
+        // the results or the car-alias catalogue; fixed agents never send one.
+        long maxPlausibleTicks =
+                (Instant.now().getEpochSecond() + UNIX_EPOCH_TICKS_SECONDS) * 10_000_000L + FUTURE_MARGIN_TICKS;
+        if (p.timestampTicks() > maxPlausibleTicks) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Result timestamp is in the future — rejected as a false save anchor.");
+        }
         // De-dupe by save-file tick + total: retries re-deliver the same result (contract
         // §Delivery), but the tick alone is shared by every run of one event entry — a second
         // run of the same event arrives with the same tick and different times, and is NOT a dupe.

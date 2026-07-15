@@ -130,7 +130,7 @@ class ClubResultsMessageFactoryRestrictionTest {
                 entry("second", 2, "Audi Sport quattro S1 E2")), configuration);
 
         MessageEmbed.Field restrictionField = embed.getFields().stream()
-                .filter(field -> Objects.equals(field.getName(), "**Restriction**"))
+                .filter(field -> Objects.equals(field.getName(), "**Permitted cars**"))
                 .findFirst()
                 .orElseThrow();
         assertThat(restrictionField.getValue()).contains("Audi Sport quattro S1 E2", "violators hidden");
@@ -143,7 +143,7 @@ class ClubResultsMessageFactoryRestrictionTest {
                 entry("second", 2, "Audi Sport quattro S1 E2")), configuration);
 
         assertThat(embed.getFields().stream().map(MessageEmbed.Field::getName))
-                .doesNotContain("**Restriction**");
+                .doesNotContain("**Permitted cars**");
         String entries = renderedEntries(embed);
         assertThat(entries).contains("**1** • ", "**2** • ").doesNotContain("⚠️");
     }

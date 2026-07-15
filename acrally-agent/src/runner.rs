@@ -181,7 +181,22 @@ impl Runner {
         // floor (last successful post) and that newest record — are recovered
         // explicitly below. Without a persisted floor (first run) history is left
         // alone: there is no way to tell a missed run from an ancient one.
-        let persisted = load_floor();
+        // A floor stamped in the future is poison, not a bookmark: it came from a
+        // false anchor (see savegame::max_plausible_ticks) and would make every
+        // genuine record look old, silently dropping all future runs. Reset it to
+        // "post everything still in the save" — the backend de-dupes on
+        // (user, ticks, total), so re-delivery is harmless and recovers any runs
+        // the poisoned floor swallowed.
+        let persisted = match load_floor() {
+            Some((ticks, _, _)) if ticks > savegame::max_plausible_ticks() => {
+                agent_log!(
+                    "persisted result floor is stamped in the future (ticks {ticks}) — a false \
+                     save anchor poisoned it; discarding and re-delivering the save's records"
+                );
+                Some((0, 0, 0))
+            }
+            other => other,
+        };
         let newest = newest_key(save_path.as_deref());
         let mut runner = Runner {
             cfg,

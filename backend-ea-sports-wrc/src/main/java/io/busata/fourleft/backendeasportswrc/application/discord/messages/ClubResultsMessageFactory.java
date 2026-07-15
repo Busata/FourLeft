@@ -66,7 +66,7 @@ public class ClubResultsMessageFactory {
         restriction.ifPresent(rule -> {
             String suffix = rule.displayMode() == RestrictionDisplayMode.EXCLUDE ? " *(violators hidden)*" : "";
             embedBuilder.addField(new MessageEmbed.Field(
-                    "**Restriction**",
+                    "**Permitted cars**",
                     String.join(", ", rule.allowedVehicles()) + suffix,
                     false
             ));

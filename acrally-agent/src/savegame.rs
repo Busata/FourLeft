@@ -21,6 +21,7 @@
 //! moving; see [`StageRecord::content_key`].
 
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// One completed stage record from the save file.
 #[derive(Debug, Clone, PartialEq)]
@@ -50,6 +51,27 @@ impl StageRecord {
 /// .NET ticks range for plausible recent save dates (~2000..2200).
 const TICKS_MIN: i64 = 600_000_000_000_000_000;
 const TICKS_MAX: i64 = 700_000_000_000_000_000;
+
+/// Seconds between 0001-01-01 (the .NET-ticks epoch) and 1970-01-01.
+const UNIX_EPOCH_TICKS_SECS: i64 = 62_135_596_800;
+
+/// Clock-skew allowance on the future bound: two days, in ticks.
+const FUTURE_MARGIN_TICKS: i64 = 2 * 24 * 3600 * 10_000_000;
+
+/// The largest timestamp a genuine record can carry: records are stamped at
+/// event entry from the (UTC) system clock, so anything meaningfully in the
+/// future is a false anchor — save sections other than the record history can
+/// contain an i64 that lands in the static plausibility window with sane-looking
+/// floats around it (observed 2026-07-09: a `ServiceParkDefault` block whose
+/// "timestamp" decoded to 2057, outranking every real record and poisoning the
+/// persisted floor).
+pub fn max_plausible_ticks() -> i64 {
+    let unix_secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0);
+    ((unix_secs + UNIX_EPOCH_TICKS_SECS) * 10_000_000).saturating_add(FUTURE_MARGIN_TICKS)
+}
 
 fn read_f32(b: &[u8], o: usize) -> Option<f32> {
     b.get(o..o + 4)
@@ -126,6 +148,7 @@ fn collect_content(b: &[u8]) -> Vec<Content> {
 /// Parse all stage records from raw save bytes.
 pub fn parse_records(bytes: &[u8]) -> Vec<StageRecord> {
     let content = collect_content(bytes);
+    let ticks_max = TICKS_MAX.min(max_plausible_ticks());
     let mut records = Vec::new();
     let mut o = 0usize;
     while o + 8 <= bytes.len() {
@@ -133,7 +156,7 @@ pub fn parse_records(bytes: &[u8]) -> Vec<StageRecord> {
             Some(v) => v,
             None => break,
         };
-        if !(TICKS_MIN..TICKS_MAX).contains(&ticks) {
+        if !(TICKS_MIN..ticks_max).contains(&ticks) {
             o += 1;
             continue;
         }
@@ -275,6 +298,38 @@ mod tests {
         assert_eq!(newest.stage, "AlsaceS2MunsterShort2Reverse");
         assert_eq!(newest.car, "AlfaRomeoGTA1300");
         assert_eq!(newest.total_ms, 206_954);
+    }
+
+    /// Minimal synthetic record block: two adjacent strings (stage + car), a
+    /// ≥32-byte gap, then [raw f32][pad][penalty f32][pad][ticks i64].
+    fn synthetic_record(ticks: i64) -> Vec<u8> {
+        fn fstring(s: &str) -> Vec<u8> {
+            let mut b = ((s.len() + 1) as i32).to_le_bytes().to_vec();
+            b.extend_from_slice(s.as_bytes());
+            b.push(0);
+            b
+        }
+        let mut bytes = fstring("ServiceParkDefault");
+        bytes.extend(fstring("WelesS4HafrenSouthFullForward"));
+        let anchor = bytes.len() + 40;
+        bytes.resize(anchor + 8, 0);
+        bytes[anchor - 20..anchor - 16].copy_from_slice(&1754.229f32.to_le_bytes());
+        bytes[anchor - 12..anchor - 8].copy_from_slice(&0.0f32.to_le_bytes());
+        bytes[anchor..anchor + 8].copy_from_slice(&ticks.to_le_bytes());
+        bytes
+    }
+
+    // 2026-07-09 in prod: a ServiceParkDefault save block carried an i64 that
+    // decoded to year-2057 ticks with sane-looking floats around it. It was
+    // submitted as a result (stage name in the car field) and, worse, poisoned
+    // the persisted floor so every real run after it was silently dropped.
+    #[test]
+    fn rejects_future_timestamps() {
+        let past = synthetic_record(639_191_101_215_490_000); // 2026-07-08
+        assert_eq!(parse_records(&past).len(), 1, "control: block is otherwise valid");
+
+        let future = synthetic_record(649_081_296_294_772_799); // ~2057, the prod value
+        assert!(parse_records(&future).is_empty(), "future-stamped anchor must be rejected");
     }
 
     #[test]

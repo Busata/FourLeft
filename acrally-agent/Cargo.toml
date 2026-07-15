@@ -1,6 +1,6 @@
 [package]
 name = "acrally-agent"
-version = "0.3.4"
+version = "0.3.6"
 edition = "2021"
 description = "Local companion agent: reads Assetto Corsa Rally shared-memory telemetry and submits completed stage times to the club backend."
 
