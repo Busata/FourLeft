@@ -825,19 +825,60 @@ fn arm_warnings(arm: &ArmState, snap: &AgentStatus) -> Vec<String> {
     warnings
 }
 
-/// True if the live track name plausibly matches the armed stage (normalized substring either way,
-/// against the raw key and the readable label). Unknown/empty tracks never warn.
+/// True if the live track name plausibly matches the armed stage. Whole-string containment first
+/// (normalized, either way, against the raw key and the readable label), then shared word tokens:
+/// the live telemetry name and the catalogue names often overlap only in the local stage words —
+/// "Wales Afon Bidno" vs raw `WelesS4HafrenSouthFullForward` ("Weles"!) + label
+/// "Afon Bidno - Severn (Variant 1)" share just "afon"/"bidno". Unknown/empty tracks never warn.
 fn stage_matches(track: &str, arm: &ArmState) -> bool {
     let t = normalize(track);
     if t.is_empty() {
         return true;
     }
-    [arm.raw_name.as_deref(), arm.stage_label.as_deref()]
-        .into_iter()
+    let candidates = [arm.raw_name.as_deref(), arm.stage_label.as_deref()];
+    if candidates
+        .iter()
         .flatten()
-        .map(normalize)
+        .map(|c| normalize(c))
         .filter(|c| !c.is_empty())
         .any(|c| c.contains(&t) || t.contains(&c))
+    {
+        return true;
+    }
+    let track_tokens = stage_tokens(track);
+    candidates
+        .iter()
+        .flatten()
+        .any(|c| stage_tokens(c).iter().any(|tok| track_tokens.contains(tok)))
+}
+
+/// Lowercased word tokens of a stage name, split on non-alphanumerics and camelCase boundaries.
+/// Direction/length words (and anything shorter than 3 chars, like "S4") are dropped — they recur
+/// across unrelated stages and would silence the warning on a genuine mismatch.
+fn stage_tokens(s: &str) -> Vec<String> {
+    const STOP: &[&str] = &["full", "forward", "reverse", "short", "long", "cut", "variant", "stage"];
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut prev_lower = false;
+    for c in s.chars() {
+        if c.is_alphanumeric() {
+            if c.is_uppercase() && prev_lower && !current.is_empty() {
+                tokens.push(std::mem::take(&mut current));
+            }
+            current.extend(c.to_lowercase());
+            prev_lower = c.is_lowercase() || c.is_numeric();
+        } else {
+            if !current.is_empty() {
+                tokens.push(std::mem::take(&mut current));
+            }
+            prev_lower = false;
+        }
+    }
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+    tokens.retain(|t| t.len() >= 3 && !STOP.contains(&t.as_str()));
+    tokens
 }
 
 /// Lowercase, alphanumeric-only — for tolerant name comparison across differing formats.
@@ -887,5 +928,49 @@ fn logo_icon_data() -> egui::IconData {
         rgba: include_bytes!("../assets/icon-64.rgba").to_vec(),
         width: 64,
         height: 64,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{stage_matches, stage_tokens};
+    use crate::races::ArmState;
+
+    fn arm(raw: &str, label: &str) -> ArmState {
+        ArmState {
+            raw_name: Some(raw.to_string()),
+            stage_label: Some(label.to_string()),
+            ..ArmState::default()
+        }
+    }
+
+    // 2026-07-15: driving exactly the armed stage still warned "may not be the stage
+    // you armed" — telemetry says "Wales Afon Bidno", the catalogue "Weles…"/"Afon
+    // Bidno - Severn (Variant 1)"; no whole-string containment, only shared words.
+    #[test]
+    fn live_name_matches_by_shared_stage_words() {
+        let a = arm("WelesS4HafrenSouthFullForward", "Afon Bidno - Severn (Variant 1)");
+        assert!(stage_matches("Wales Afon Bidno", &a));
+    }
+
+    #[test]
+    fn unrelated_stage_still_warns() {
+        let a = arm("WelesS4HafrenSouthFullForward", "Afon Bidno - Severn (Variant 1)");
+        assert!(!stage_matches("Greece Zeli Reverse", &a));
+        // Shared direction word alone must not count as a match.
+        let rev = arm("AlsaceS2MunsterShort2Reverse", "Munster (Variant 2)");
+        assert!(!stage_matches("Greece Zeli Reverse", &rev));
+    }
+
+    #[test]
+    fn tokens_split_camel_case_and_drop_noise() {
+        assert_eq!(
+            stage_tokens("WelesS4HafrenSouthFullForward"),
+            vec!["weles", "hafren", "south"]
+        );
+        assert_eq!(
+            stage_tokens("Afon Bidno - Severn (Variant 1)"),
+            vec!["afon", "bidno", "severn"]
+        );
     }
 }

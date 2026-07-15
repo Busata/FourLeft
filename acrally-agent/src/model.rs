@@ -114,6 +114,10 @@ pub struct SessionStart {
     pub track: String,
     pub started_at_ms: u128,
     pub agent_version: String,
+    /// True when this session replays a record from the save file (startup
+    /// recovery) rather than tracking a live run. The backend must not bind a
+    /// waiting event arm to it — recovered runs never score an armed stage.
+    pub recovery: bool,
 }
 
 /// Body of `POST /sessions/{id}/heartbeat` — live telemetry while driving.

@@ -19,7 +19,9 @@ public final class IngestPayloads {
             @JsonProperty("driver_id") String driverId,
             @JsonProperty("club_id") String clubId,
             @JsonProperty("started_at_ms") Long startedAtMs,
-            @JsonProperty("agent_version") String agentVersion) {
+            @JsonProperty("agent_version") String agentVersion,
+            /** True when the session replays a save record (startup recovery) rather than a live run. */
+            Boolean recovery) {
     }
 
     public record Heartbeat(

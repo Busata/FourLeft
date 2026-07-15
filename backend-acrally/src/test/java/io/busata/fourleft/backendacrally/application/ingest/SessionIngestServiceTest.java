@@ -18,6 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,11 +42,18 @@ class SessionIngestServiceTest {
                 240_282, 0, 240_282, ticks, null, null, "0.3.6");
     }
 
-    private void ownedSession() {
+    private IngestPayloads.SessionStart sessionStart(Boolean recovery) {
+        return new IngestPayloads.SessionStart(
+                "Busata", "MiniCooperS1275", "WelesS4HafrenSouthFullForward",
+                "WelesS4HafrenSouthFullForward", null, null, 0L, "0.3.8", recovery);
+    }
+
+    private AgentSession ownedSession() {
         AgentSession session = new AgentSession(
                 userId, UUID.randomUUID(), "Busata", "CitroenXsaraWRC",
                 "GreeceS3ElatiaCut1Reverse", "GreeceS3ElatiaCut1Reverse", 0L, "0.3.6");
         when(sessions.findById(sessionId)).thenReturn(Optional.of(session));
+        return session;
     }
 
     // 2026-07-09 in prod: a false save anchor decoding to year-2057 ticks was submitted
@@ -60,6 +68,40 @@ class SessionIngestServiceTest {
                 .hasMessageContaining("future");
 
         verify(results, never()).save(any());
+    }
+
+    // 2026-07-15 in prod: the first startup-recovery session bound the user's armed arm,
+    // its replayed (duplicate) result skipped recordIfArmed, and the arm stayed BOUND to a
+    // dead session forever — the real armed run then passed by unscored.
+    @Test
+    void recoverySessionsNeverBindAnArm() {
+        when(sessions.save(any())).thenAnswer(inv -> inv.getArgument(0, AgentSession.class));
+
+        service.open(userId, UUID.randomUUID(), sessionStart(true));
+
+        verify(recordingService, never()).bindToSession(any(), any());
+    }
+
+    @Test
+    void liveSessionsStillBindAnArm() {
+        when(sessions.save(any())).thenAnswer(inv -> inv.getArgument(0, AgentSession.class));
+
+        service.open(userId, UUID.randomUUID(), sessionStart(null));
+
+        verify(recordingService).bindToSession(eq(userId), any());
+    }
+
+    @Test
+    void duplicateResultReleasesABoundArm() {
+        AgentSession session = ownedSession();
+        long ticks = 639_191_141_860_160_000L;
+        when(results.findByUserIdAndTimestampTicksAndTotalMs(userId, ticks, 240_282))
+                .thenReturn(Optional.of(org.mockito.Mockito.mock(StageResult.class)));
+
+        service.recordResult(userId, sessionId.toString(), resultWithTicks(ticks));
+
+        verify(results, never()).save(any());
+        verify(recordingService).unbindSession(session.getId());
     }
 
     @Test

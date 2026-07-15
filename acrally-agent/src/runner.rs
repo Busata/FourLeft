@@ -289,6 +289,7 @@ impl Runner {
             track: f.track.clone(),
             started_at_ms: now_ms(),
             agent_version: env!("CARGO_PKG_VERSION").to_string(),
+            recovery: false,
         };
         let id = self.client.start_session(&body);
         let connected = !id.starts_with("local-");
@@ -415,6 +416,7 @@ impl Runner {
                 track: rec.stage.clone(),
                 started_at_ms: now_ms(),
                 agent_version: env!("CARGO_PKG_VERSION").to_string(),
+                recovery: true,
             };
             let id = self.client.start_session(&body);
             agent_log!(

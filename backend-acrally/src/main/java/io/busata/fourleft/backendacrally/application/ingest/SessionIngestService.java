@@ -37,8 +37,12 @@ public class SessionIngestService {
                 userId, apiKeyId, p.driver(), p.car(), p.stage(), p.track(), p.startedAtMs(), p.agentVersion());
         UUID sessionId = sessions.save(session).getId();
         // Bind a waiting arm to this fresh run: a session that opened before the arm existed can't
-        // bind here, so pressing Start mid-run never captures the run in progress.
-        recordingService.bindToSession(userId, sessionId);
+        // bind here, so pressing Start mid-run never captures the run in progress. Recovery sessions
+        // (startup replay of the save file) never bind — a recovered run must not score an armed
+        // stage, and 2026-07-15 showed a replayed record stealing the arm and stranding it BOUND.
+        if (!Boolean.TRUE.equals(p.recovery())) {
+            recordingService.bindToSession(userId, sessionId);
+        }
         return sessionId;
     }
 
@@ -77,6 +81,11 @@ public class SessionIngestService {
             } catch (DataIntegrityViolationException concurrentDuplicate) {
                 // Lost a race with a concurrent delivery of the same tick — already stored and scored.
             }
+        } else {
+            // Already delivered (agent retry, or an old agent's recovery replay). A replayed result
+            // can never consume the arm, so release any arm bound to this session rather than
+            // stranding it BOUND to a session that will never produce a first delivery.
+            recordingService.unbindSession(session.getId());
         }
         session.complete();
     }

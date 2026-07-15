@@ -76,6 +76,7 @@ Request body (`SessionStart`):
 | `track`         | string        | yes      | Track name                                       |
 | `started_at_ms` | integer (u128)| yes      | Unix epoch milliseconds at session start         |
 | `agent_version` | string        | yes      | Agent's Cargo package version, e.g. `"0.1.0"`    |
+| `recovery`      | boolean       | no       | `true` when this session replays a save record (startup recovery) instead of tracking a live run. The server must not bind a waiting event arm to a recovery session — recovered runs never score an armed stage. Absent/`false` for live sessions. |
 
 Response — JSON object containing the session id. The agent accepts either key:
 
