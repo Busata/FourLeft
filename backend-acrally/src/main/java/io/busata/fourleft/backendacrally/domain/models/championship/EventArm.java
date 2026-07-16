@@ -70,7 +70,10 @@ public class EventArm {
         this.createdAt = now;
     }
 
-    /** Attach this arm to a freshly opened session (ARMED → BOUND). */
+    /**
+     * Attach this arm to a freshly opened session (ARMED → BOUND). Re-binding while BOUND is the
+     * driver's newest run superseding an abandoned one whose abort hasn't arrived yet.
+     */
     public void bind(UUID sessionId) {
         this.sessionId = sessionId;
         this.status = EventArmStatus.BOUND;

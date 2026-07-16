@@ -37,9 +37,16 @@ public class EventRecordingService {
     private final CarAliasRepository carAliasRepository;
     private final ChampionshipService championshipService;
 
-    /** A freshly opened session binds the driver's waiting arm — that run is the one that counts. */
+    /**
+     * A freshly opened session binds the driver's waiting arm — that run is the one that counts.
+     * An arm still BOUND to an earlier session re-binds to the new one: a driver runs one stage at
+     * a time, so a fresh session proves the bound run was restarted/quit. Its abort only arrives
+     * once the agent's save-record wait window lapses — minutes after the next run already started
+     * — and an arm left on the dead session would miss the run that actually finishes.
+     */
     public void bindToSession(UUID userId, UUID sessionId) {
-        armRepository.findFirstByUserIdAndStatusIn(userId, java.util.List.of(EventArmStatus.ARMED))
+        armRepository.findFirstByUserIdAndStatusIn(userId,
+                        java.util.List.of(EventArmStatus.ARMED, EventArmStatus.BOUND))
                 .ifPresent(arm -> arm.bind(sessionId));
     }
 

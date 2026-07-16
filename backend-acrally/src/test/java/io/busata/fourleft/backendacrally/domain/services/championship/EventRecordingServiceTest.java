@@ -66,13 +66,30 @@ class EventRecordingServiceTest {
     @Test
     void bindsWaitingArmToNewSession() {
         EventArm armed = new EventArm(userId, eventId, UUID.randomUUID());
-        when(armRepository.findFirstByUserIdAndStatusIn(userId, List.of(EventArmStatus.ARMED)))
+        when(armRepository.findFirstByUserIdAndStatusIn(
+                userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
                 .thenReturn(Optional.of(armed));
 
         service.bindToSession(userId, sessionId);
 
         assertThat(armed.getStatus()).isEqualTo(EventArmStatus.BOUND);
         assertThat(armed.getSessionId()).isEqualTo(sessionId);
+    }
+
+    @Test
+    void rebindsArmStuckOnAbandonedSessionToNewerSession() {
+        // Restart-at-results-screen: the old session's abort lags behind the next session's open,
+        // so the arm is still BOUND to the abandoned run when the run that counts starts.
+        EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
+        arm.bind(UUID.randomUUID()); // the abandoned session
+        when(armRepository.findFirstByUserIdAndStatusIn(
+                userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
+                .thenReturn(Optional.of(arm));
+
+        service.bindToSession(userId, sessionId);
+
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(arm.getSessionId()).isEqualTo(sessionId);
     }
 
     @Test
