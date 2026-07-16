@@ -113,6 +113,14 @@ against a local/staging file.
 
 ## How the client update works (`src/selfupdate.rs`)
 
+Updates are **mandatory, not opt-in**: the Windows build checks at startup and
+applies any newer signed release straight away (the UI shows the Downloading
+state, then the app relaunches). As a backstop, the backend rejects agents older
+than `acrally.agent.min-version` with `426 Upgrade Required`, which also
+triggers an immediate self-update — so a long-running old agent converges too.
+When bumping the backend's minimum, publish the release **first**, then deploy
+the backend with the raised minimum.
+
 1. GET `latest.json`, semver-compare `version` against the compiled version.
 2. If newer: download the exe into memory, download `<url>.minisig`.
 3. **Verify** the minisign signature over the exact bytes against the compiled-in

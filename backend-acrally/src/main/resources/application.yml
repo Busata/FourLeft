@@ -42,6 +42,12 @@ acrally:
   # Origin the browser + Steam use to reach this service. Prod goes through the reverse
   # proxy on the public host; local dev talks to the backend port directly (override).
   public-base-url: https://fourleft.io
+  agent:
+    # Oldest acrally-agent the ingestion endpoints accept. Older agents get 426 Upgrade
+    # Required, which makes them self-update and relaunch. Bump whenever the agent wire
+    # contract changes (keep it <= the version published in the release channel); blank
+    # disables the gate.
+    min-version: "0.3.8"
   steam:
     # Where the browser lands after the Steam sign-in round-trip.
     success-path: /acrally/dashboard

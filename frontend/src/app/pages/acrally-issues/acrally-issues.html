@@ -1,0 +1,53 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">Issue reports submitted from the companion agent.</p>
+    @if (loaded() && !error()) {
+      <span class="key-sub">{{ issues().length }} open</span>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (issues().length === 0 && !error()) {
+    <p class="auth-sub">No issue reports. Quiet day.</p>
+  } @else {
+    <ul class="key-list">
+      @for (issue of issues(); track issue.id) {
+        <li class="key-item">
+          <div class="key-meta">
+            <span class="key-label">
+              {{ issue.userDisplayName }}
+              @if (issue.agentVersion) {
+                <span class="key-sub">· agent v{{ issue.agentVersion }}</span>
+              }
+              <span class="key-sub">· {{ issue.createdAt | date: 'medium' }}</span>
+            </span>
+            <span style="white-space: pre-wrap">{{ issue.description }}</span>
+            <div class="club-actions" style="margin-top: 6px">
+              @if (issue.saveGameSize > 0) {
+                <a class="g-button g-button-tertiary" [href]="'/acrally-api/admin/issues/' + issue.id + '/savegame'">
+                  Save game ({{ size(issue.saveGameSize) }})
+                </a>
+              } @else {
+                <span class="key-sub">no save game</span>
+              }
+              @if (issue.agentLogSize > 0) {
+                <a class="g-button g-button-tertiary" [href]="'/acrally-api/admin/issues/' + issue.id + '/log'">
+                  Agent log ({{ size(issue.agentLogSize) }})
+                </a>
+              } @else {
+                <span class="key-sub">no log</span>
+              }
+              <button class="g-button g-button-danger" type="button" (click)="remove(issue)" [disabled]="busy()">
+                Delete
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/acrally-api/agent/pair/start",
                                 "/acrally-api/agent/pair/token",
                                 "/acrally-api/sessions/**",
-                                "/acrally-api/agent/races/**"))
+                                "/acrally-api/agent/races/**",
+                                "/acrally-api/agent/issues"))
                 // Force the CSRF token to materialize so the cookie is written on every
                 // response (incl. the initial GET the SPA makes before any mutation).
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)

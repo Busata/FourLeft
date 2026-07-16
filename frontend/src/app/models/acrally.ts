@@ -26,6 +26,21 @@ export interface AdminUserTo {
   createdAt: string;
 }
 
+// A user-submitted issue report (description + save game + agent log captured by the companion),
+// from GET /acrally-api/admin/issues. Attachment bytes come from /{id}/savegame and /{id}/log.
+export interface AdminIssueReportTo {
+  id: string;
+  userId: string;
+  userDisplayName: string;
+  description: string;
+  agentVersion: string | null;
+  saveGameName: string | null;
+  saveGameSize: number;
+  agentLogName: string | null;
+  agentLogSize: number;
+  createdAt: string;
+}
+
 // A rally location, from GET /acrally-api/admin/locations. stageCount > 0 blocks deletion.
 export interface LocationTo {
   id: string;

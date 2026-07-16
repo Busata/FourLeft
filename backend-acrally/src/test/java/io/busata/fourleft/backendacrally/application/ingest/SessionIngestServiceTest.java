@@ -30,6 +30,7 @@ class SessionIngestServiceTest {
     @Mock AgentSessionRepository sessions;
     @Mock StageResultRepository results;
     @Mock EventRecordingService recordingService;
+    @Mock AgentVersionPolicy versionPolicy;
 
     @InjectMocks SessionIngestService service;
 
@@ -89,6 +90,21 @@ class SessionIngestServiceTest {
         service.open(userId, UUID.randomUUID(), sessionStart(null));
 
         verify(recordingService).bindToSession(eq(userId), any());
+    }
+
+    @Test
+    void outdatedAgentIsRejectedBeforeAnythingIsStored() {
+        org.mockito.Mockito.doThrow(new ResponseStatusException(
+                        org.springframework.http.HttpStatus.UPGRADE_REQUIRED, "too old"))
+                .when(versionPolicy).requireSupported("0.3.6");
+
+        assertThatThrownBy(() -> service.recordResult(
+                userId, sessionId.toString(), resultWithTicks(639_191_141_860_160_000L)))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("too old");
+
+        verify(results, never()).save(any());
+        verify(sessions, never()).findById(any());
     }
 
     @Test

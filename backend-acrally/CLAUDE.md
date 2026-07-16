@@ -45,7 +45,8 @@ with the WRC backend. Full design rationale lives in `docs/acrally-module-plan.m
    covered by single-use `ACR_STEAM_NONCE`/`ACR_STEAM_REDIRECT` cookies. Instantly revocable
    server-side — critical for banning abusers.
 2. **Agent = personal API key** — opaque `acr_`-prefixed bearer token, stored **SHA-256 hashed**,
-   shown once. Sent as `Authorization: Bearer <key>` on `/sessions/**`. Handled by
+   shown once. Sent as `Authorization: Bearer <key>` on `/sessions/**`, `/agent/races/**` and
+   `/agent/issues`. Handled by
    `ApiKeyAuthFilter` → `AgentPrincipal` (rejects revoked key / banned user). CSRF-exempt.
    Agents obtain keys via **device pairing** (RFC 8628 device-authorization grant), not copy-paste.
 3. **Admin** — a session with `ROLE_ADMIN`. Guards everything under `/acrally-api/admin/**`.
@@ -75,7 +76,10 @@ submitting results. `linked_identity` has unique `(provider, provider_user_id)` 
 - championships — `clubs/{clubId}/championships`, `championships/{id}` (+ `events`, `events/order`),
   `events/{eventId}` (+ `variants`, `cars`).
 - `cars`, `variants` — read-only catalogue (`CatalogueEndpoint`).
-- `admin/` — `users`, `cars`, `locations`, `stages`, `variants` (CRUD; ROLE_ADMIN).
+- `agent/issues` — POST (API-key authed): "Report issue" from the companion; description + base64
+  save game + agent log in the JSON body (`IssuePayloads`, size/rate limits in `IssueReportService`).
+- `admin/` — `users`, `cars`, `locations`, `stages`, `variants` (CRUD; ROLE_ADMIN); `issues`
+  (list reports blob-free, download `/{id}/savegame` + `/{id}/log`, delete).
 
 Agent wire DTOs (`IngestPayloads`) map snake_case with `@JsonProperty`; browser DTOs stay camelCase.
 

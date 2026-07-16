@@ -62,6 +62,9 @@ impl Client {
                 })
                 .unwrap_or_else(local_session_id),
             Err(e) => {
+                if let ureq::Error::Status(426, _) = e {
+                    crate::selfupdate::on_upgrade_required();
+                }
                 agent_log!("start_session failed ({e}); using local session id");
                 local_session_id()
             }
@@ -96,6 +99,13 @@ impl Client {
                 }
                 Err(e) => {
                     agent_log!("result POST failed (attempt {attempt}/{RESULT_RETRIES}): {e}");
+                    if let ureq::Error::Status(426, _) = e {
+                        // The backend refuses this agent version — retrying is pointless.
+                        // Self-update instead; the record stays in the save and the
+                        // relaunched agent recovers it.
+                        crate::selfupdate::on_upgrade_required();
+                        break;
+                    }
                     if attempt < RESULT_RETRIES {
                         std::thread::sleep(RESULT_RETRY_PAUSE);
                     }

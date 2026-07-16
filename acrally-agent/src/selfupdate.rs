@@ -176,22 +176,46 @@ fn verify_with_key(public_key_b64: &str, data: &[u8], sig_text: &str) -> Result<
     Ok(())
 }
 
-/// Best-effort, non-blocking startup check: prints a one-line nudge if a newer
-/// build exists. Never blocks the pipeline; stays silent on any error.
-/// Only wired up on Windows (the distributed target).
+/// Mandatory-update policy: check and, when a newer signed build exists, apply it
+/// immediately — the process re-execs into the new binary. Called at startup on
+/// the distributed build and when the backend answers 426 Upgrade Required.
+/// Failures are logged and the agent keeps running: an unreachable update host
+/// must not brick reporting outright (the backend still rejects a too-old agent,
+/// so nothing wrong gets recorded meanwhile).
 #[cfg_attr(not(windows), allow(dead_code))]
-pub fn spawn_background_check() {
-    std::thread::spawn(|| {
-        if let Ok(Some(avail)) = check() {
-            // Also into the log file: a detached headless agent (launch-script /
-            // Wine setups) has no visible stderr, and the log is what users check.
+pub fn auto_update(reason: &str) {
+    match check() {
+        Ok(Some(avail)) => {
             crate::logfile::agent_log!(
-                "note: acrally-agent {} is available (you have {}). \
-                 Run `acrally-agent update` to upgrade.",
-                avail.version,
+                "updating acrally-agent {} -> {} ({reason})…",
                 env!("CARGO_PKG_VERSION"),
+                avail.version,
             );
+            if let Err(e) = apply(&avail.manifest) {
+                crate::logfile::agent_log!("self-update failed: {e:#}");
+            }
         }
+        Ok(None) => {}
+        Err(e) => crate::logfile::agent_log!("update check failed: {e:#}"),
+    }
+}
+
+/// The backend answered 426 Upgrade Required: it no longer accepts this agent
+/// version. Kick off one background self-update no matter how many calls race.
+/// A mid-run re-exec is safe — the finished run's record stays in the save and
+/// the relaunched (updated) agent posts it.
+pub fn on_upgrade_required() {
+    use std::sync::Once;
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        crate::logfile::agent_log!(
+            "backend requires a newer agent than {} — self-updating",
+            env!("CARGO_PKG_VERSION"),
+        );
+        #[cfg(windows)]
+        std::thread::spawn(|| auto_update("required by the backend"));
+        #[cfg(not(windows))]
+        crate::logfile::agent_log!("(non-Windows build: update manually and restart)");
     });
 }
 

@@ -19,6 +19,7 @@ use anyhow::{anyhow, Result};
 use eframe::egui;
 
 use crate::config::Config;
+use crate::issue::{self, SendState};
 use crate::model::fmt_ms;
 use crate::pairing::{self, Phase};
 use crate::races::{self, ArmState, RaceEvent, RaceStage, RacesHandle, RacesState};
@@ -50,14 +51,16 @@ pub fn run(cfg: Config) -> Result<()> {
         ..Default::default()
     };
 
-    // Check for a newer signed build in the background so the window can offer an
-    // in-app "Update & restart". Only on Windows (the distributed target); the
+    // Updates are mandatory: at startup, check for a newer signed build and apply
+    // it straight away (the window shows the Downloading state, then the app
+    // relaunches updated). Old agents drift out of contract with the backend,
+    // which rejects them with 426. Only on Windows (the distributed target); the
     // manual "Check for updates" button works everywhere for dev testing.
     let update = Arc::new(Mutex::new(UpdateState::default()));
     #[cfg(windows)]
     {
         let u = update.clone();
-        std::thread::spawn(move || selfupdate::drive_check(u));
+        std::thread::spawn(move || selfupdate::drive_apply(u));
     }
 
     let linked = cfg.api_key.is_some();
@@ -73,6 +76,8 @@ pub fn run(cfg: Config) -> Result<()> {
         races: Arc::new(Mutex::new(RacesState::default())),
         races_poller: None,
         pending_arm: None,
+        issue_draft: None,
+        issue_send: Arc::new(Mutex::new(SendState::Idle)),
     };
 
     let result = eframe::run_native(
@@ -143,6 +148,13 @@ struct PendingArm {
     car_label: String,
 }
 
+/// What the Report-issue modal asked us to do (applied outside the render closure).
+enum IssueAction {
+    None,
+    Send,
+    Close,
+}
+
 /// What the Races tab / confirm modal asked us to do (applied outside the render closure).
 enum RaceAction {
     None,
@@ -174,6 +186,10 @@ struct App {
     races_poller: Option<JoinHandle<()>>,
     /// The stage awaiting Start confirmation, if the modal is open.
     pending_arm: Option<PendingArm>,
+    /// The Report-issue draft text, `Some` while the modal is open.
+    issue_draft: Option<String>,
+    /// Report-issue send state, driven by a background thread (see `issue::send`).
+    issue_send: issue::SendHandle,
 }
 
 impl App {
@@ -275,7 +291,8 @@ impl App {
             ui.add_space(2.0);
         });
 
-        // Bottom bar: manual update check + status.
+        // Bottom bar: manual update check + status, and the Report-issue entry point.
+        let mut do_report = false;
         egui::TopBottomPanel::bottom("update-bar").show(ctx, |ui| {
             ui.add_space(3.0);
             ui.horizontal(|ui| {
@@ -290,6 +307,11 @@ impl App {
                         ui.label(egui::RichText::new("up to date").weak());
                     }
                 }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button("Report issue").clicked() {
+                        do_report = true;
+                    }
+                });
             });
             ui.add_space(3.0);
         });
@@ -307,11 +329,35 @@ impl App {
         }
         self.apply_race_action(race_action);
 
+        // Report-issue modal, likewise on top of the central panel.
+        let mut issue_action = IssueAction::None;
+        if let Some(draft) = self.issue_draft.as_mut() {
+            let send = self.issue_send.lock().map(|s| s.clone()).unwrap_or_default();
+            issue_action = issue_modal(ctx, draft, &send);
+        }
+        match issue_action {
+            IssueAction::None => {}
+            IssueAction::Send => {
+                if let Some(draft) = &self.issue_draft {
+                    issue::send(self.cfg.clone(), self.issue_send.clone(), draft.clone());
+                }
+            }
+            IssueAction::Close => {
+                self.issue_draft = None;
+                if let Ok(mut s) = self.issue_send.lock() {
+                    *s = SendState::Idle;
+                }
+            }
+        }
+
         if do_check {
             self.start_update_check();
         }
         if do_apply {
             self.start_update_apply();
+        }
+        if do_report && self.issue_draft.is_none() {
+            self.issue_draft = Some(String::new());
         }
     }
 
@@ -770,6 +816,66 @@ fn confirm_modal(ctx: &egui::Context, pending: &PendingArm, action: &mut RaceAct
                 }
             });
         });
+}
+
+/// The Report-issue modal: a description box plus the explicit notice that the save
+/// game and agent log are uploaded with it. Emits Send/Close actions.
+fn issue_modal(ctx: &egui::Context, draft: &mut String, send: &SendState) -> IssueAction {
+    let mut action = IssueAction::None;
+    egui::Window::new("Report an issue")
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+        .show(ctx, |ui| {
+            if let SendState::Sent(attachments) = send {
+                ui.label(egui::RichText::new("✓ Report sent — thanks!").color(GREEN));
+                ui.label(egui::RichText::new(format!("Attached: {attachments}.")).weak());
+                ui.add_space(8.0);
+                if ui.button("Close").clicked() {
+                    action = IssueAction::Close;
+                }
+                return;
+            }
+
+            ui.label("What went wrong?");
+            ui.add(
+                egui::TextEdit::multiline(draft)
+                    .desired_rows(5)
+                    .desired_width(360.0)
+                    .hint_text("What were you doing, and what did you expect to happen?"),
+            );
+            ui.add_space(6.0);
+            ui.label(
+                egui::RichText::new(
+                    "Sending this report also uploads your game save and the agent log, \
+                     so the problem can be debugged from the real data.",
+                )
+                .weak(),
+            );
+            if let SendState::Failed(msg) = send {
+                ui.add_space(4.0);
+                ui.colored_label(RED, format!("Could not send the report: {msg}"));
+            }
+            ui.add_space(8.0);
+            ui.horizontal(|ui| {
+                if matches!(send, SendState::Sending) {
+                    ui.spinner();
+                    ui.label("Sending…");
+                    return;
+                }
+                let can_send = !draft.trim().is_empty();
+                if ui
+                    .add_enabled(can_send, egui::Button::new("Send report"))
+                    .clicked()
+                {
+                    action = IssueAction::Send;
+                }
+                if ui.button("Cancel").clicked() {
+                    action = IssueAction::Close;
+                }
+            });
+        });
+    action
 }
 
 /// The event's permitted cars (the same list on every stage; empty = any car).

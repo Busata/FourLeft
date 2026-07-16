@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Authenticates the agent's ingestion + races calls by {@code Authorization: Bearer <api_key>}. Acts
- * on {@code /acrally-api/sessions/**} (ingestion) and {@code /acrally-api/agent/races/**} (the Races
- * tab); a valid, non-revoked key belonging to an active user sets an {@link AgentPrincipal}. Anything
+ * Authenticates the agent's ingestion + races + issue calls by {@code Authorization: Bearer <api_key>}.
+ * Acts on {@code /acrally-api/sessions/**} (ingestion), {@code /acrally-api/agent/races/**} (the Races
+ * tab) and {@code /acrally-api/agent/issues} (problem reports); a valid, non-revoked key belonging to
+ * an active user sets an {@link AgentPrincipal}. Anything
  * else is left unauthenticated so the authorization layer 401s. Note: {@code /agent/pair/**} is NOT
  * covered here — pairing is browser (session) driven, so the prefix is the narrower {@code races}.
  */
@@ -31,7 +32,7 @@ import java.util.Optional;
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
     private static final List<String> PATH_PREFIXES =
-            List.of("/acrally-api/sessions", "/acrally-api/agent/races");
+            List.of("/acrally-api/sessions", "/acrally-api/agent/races", "/acrally-api/agent/issues");
     private static final String BEARER = "Bearer ";
 
     private final ApiKeyService apiKeyService;

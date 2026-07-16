@@ -12,6 +12,7 @@
 #![cfg_attr(feature = "ui", windows_subsystem = "windows")]
 
 mod config;
+mod issue;
 mod logfile;
 mod model;
 mod pairing;
@@ -78,13 +79,25 @@ fn main() -> Result<()> {
             return races::run_arm(&cfg, &selector);
         }
         Some("disarm") => return races::run_disarm(&cfg),
+        // Report a problem to the club: description + save game + agent log. The
+        // console counterpart of the UI's Report issue button.
+        Some("report-issue") => {
+            let description = std::env::args().skip(2).collect::<Vec<_>>().join(" ");
+            if description.trim().is_empty() {
+                anyhow::bail!("usage: acrally-agent report-issue <what went wrong>");
+            }
+            return issue::run_report(&cfg, &description);
+        }
         _ => {}
     }
 
-    // Best-effort update nudge on the distributed (Windows) build. Non-blocking;
-    // silent unless a newer release is published.
-    #[cfg(windows)]
-    selfupdate::spawn_background_check();
+    // Mandatory update on the distributed (Windows) console/headless build: when a
+    // newer signed release exists, apply it before anything else runs (the process
+    // re-execs). Old agents drift out of contract with the backend, which rejects
+    // them with 426 — updating up front keeps the two matching. The UI build runs
+    // the same policy from its own startup path (with a visible progress state).
+    #[cfg(all(windows, not(feature = "ui")))]
+    selfupdate::auto_update("startup");
 
     // Gentle nudge when unauthenticated against a backend that expects a key.
     if cfg.api_key.is_none() {

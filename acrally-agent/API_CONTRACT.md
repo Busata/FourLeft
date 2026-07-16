@@ -185,6 +185,13 @@ above). Response: any 2xx.
 5. **No GET endpoints are part of the contract.** The dev server's `GET /`
    (HTML leaderboard) and `GET /state` (JSON dump of sessions + results) are
    dev-only conveniences, not something the agent uses.
+6. **Updates are mandatory: a server may answer `426 Upgrade Required`** on
+   `POST /sessions` and `POST /sessions/{id}/result` when the payload's
+   `agent_version` is older than its configured minimum (backend property
+   `acrally.agent.min-version`). The agent treats a 426 as "self-update now":
+   it stops retrying, downloads + verifies the latest signed build, re-execs,
+   and recovers the undelivered result from the save on relaunch. Servers
+   should keep the minimum ≤ the version published in the release channel.
 
 ## Example exchange
 

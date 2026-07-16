@@ -24,6 +24,7 @@ public class SessionIngestService {
     private final AgentSessionRepository sessions;
     private final StageResultRepository results;
     private final EventRecordingService recordingService;
+    private final AgentVersionPolicy versionPolicy;
 
     /** Seconds between 0001-01-01 (the .NET-ticks epoch) and 1970-01-01. */
     private static final long UNIX_EPOCH_TICKS_SECONDS = 62_135_596_800L;
@@ -33,6 +34,7 @@ public class SessionIngestService {
 
     @Transactional
     public UUID open(UUID userId, UUID apiKeyId, IngestPayloads.SessionStart p) {
+        versionPolicy.requireSupported(p.agentVersion());
         AgentSession session = new AgentSession(
                 userId, apiKeyId, p.driver(), p.car(), p.stage(), p.track(), p.startedAtMs(), p.agentVersion());
         UUID sessionId = sessions.save(session).getId();
@@ -54,6 +56,7 @@ public class SessionIngestService {
 
     @Transactional
     public void recordResult(UUID userId, String rawSessionId, IngestPayloads.Result p) {
+        versionPolicy.requireSupported(p.agentVersion());
         AgentSession session = ownedSession(userId, rawSessionId);
         // A record's tick is stamped at event entry from the player's (UTC) clock, so a tick
         // meaningfully in the future is a false save anchor, not a run (2026-07-09: a
