@@ -108,7 +108,9 @@ class SessionIngestServiceTest {
     }
 
     @Test
-    void duplicateResultReleasesABoundArm() {
+    void duplicateResultResolvesABoundArmAsDnf() {
+        // A replayed result can never score, and releasing the arm instead would let a crafted
+        // duplicate post act as a retry button — the bound run resolves as DNF.
         AgentSession session = ownedSession();
         long ticks = 639_191_141_860_160_000L;
         when(results.findByUserIdAndTimestampTicksAndTotalMs(userId, ticks, 240_282))
@@ -117,7 +119,7 @@ class SessionIngestServiceTest {
         service.recordResult(userId, sessionId.toString(), resultWithTicks(ticks));
 
         verify(results, never()).save(any());
-        verify(recordingService).unbindSession(session.getId());
+        verify(recordingService).dnfSession(session.getId());
     }
 
     @Test

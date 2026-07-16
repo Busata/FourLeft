@@ -142,8 +142,9 @@ class EventArmServiceTest {
     }
 
     @Test
-    void armingIsRejectedAfterADnfExpiryOnTheStage() {
-        // The DNF expiry also spends the shot — otherwise timing out an arm would be a free retry.
+    void armingIsRejectedAfterADnfOnTheStage() {
+        // Any DNF spends the shot — an idle expiry or an abandoned bound run (restart/quit/crash).
+        // Otherwise timing out or restarting away an arm would be a free retry.
         Championship championship =
                 new Championship(UUID.randomUUID(), "Champ", java.time.LocalDateTime.now(), userId);
         ChampionshipEvent event = new ChampionshipEvent(championship.getId(), 0, 0, 7);
@@ -152,8 +153,8 @@ class EventArmServiceTest {
         stubOpenEvent(championship, event, variantId);
         when(entryRepository.findByEventIdAndVariantIdAndUserId(event.getId(), variantId, userId))
                 .thenReturn(Optional.empty());
-        when(armRepository.existsByUserIdAndEventIdAndVariantIdAndStatus(
-                userId, event.getId(), variantId, EventArmStatus.EXPIRED)).thenReturn(true);
+        when(armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcome(
+                userId, event.getId(), variantId, EventArmOutcome.DNF)).thenReturn(true);
 
         assertThatThrownBy(() -> service.arm(userId, event.getId(), variantId))
                 .isInstanceOf(ResponseStatusException.class)

@@ -6,10 +6,13 @@ import io.busata.fourleft.backendacrally.domain.models.championship.EventArmOutc
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventCar;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
+import io.busata.fourleft.backendacrally.domain.models.session.AgentSession;
 import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
+import io.busata.fourleft.backendacrally.domain.models.stage.TrackAlias;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
 import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
+import io.busata.fourleft.backendacrally.domain.services.stage.TrackAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +44,7 @@ class EventRecordingServiceTest {
     @Mock EventEntryRepository entryRepository;
     @Mock EventCarRepository eventCarRepository;
     @Mock VariantRepository variantRepository;
+    @Mock TrackAliasRepository trackAliasRepository;
     @Mock CarRepository carRepository;
     @Mock CarAliasRepository carAliasRepository;
     @Mock ChampionshipService championshipService;
@@ -63,46 +67,123 @@ class EventRecordingServiceTest {
         return new StageResult(sessionId, userId, stage, car, "Drv", totalMs, 0, totalMs, 42L, "0.1");
     }
 
-    @Test
-    void bindsWaitingArmToNewSession() {
-        EventArm armed = new EventArm(userId, eventId, UUID.randomUUID());
+    private AgentSession sessionOn(String track, String car) {
+        return new AgentSession(userId, UUID.randomUUID(), "Drv", car, track, track, 0L, "0.4.0");
+    }
+
+    private EventArm waitingArm(UUID variantId) {
+        EventArm armed = new EventArm(userId, eventId, variantId);
         when(armRepository.findFirstByUserIdAndStatusIn(
                 userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
                 .thenReturn(Optional.of(armed));
-
-        service.bindToSession(userId, sessionId);
-
-        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.BOUND);
-        assertThat(armed.getSessionId()).isEqualTo(sessionId);
+        return armed;
     }
 
     @Test
-    void rebindsArmStuckOnAbandonedSessionToNewerSession() {
-        // Restart-at-results-screen: the old session's abort lags behind the next session's open,
-        // so the arm is still BOUND to the abandoned run when the run that counts starts.
+    void bindsWaitingArmWhenTrackIsUnknown() {
+        // An unlearned telemetry name errs toward binding — a gap must never allow a free retry.
+        EventArm armed = waitingArm(UUID.randomUUID());
+        when(trackAliasRepository.findByRawName("Fresh DLC Stage")).thenReturn(Optional.empty());
+        when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of()); // any car
+        AgentSession session = sessionOn("Fresh DLC Stage", "Lancia");
+
+        service.bindToSession(userId, session);
+
+        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(armed.getSessionId()).isEqualTo(session.getId());
+    }
+
+    @Test
+    void bindsWaitingArmWhenTrackAliasMatchesArmedVariant() {
+        UUID variantId = UUID.randomUUID();
+        EventArm armed = waitingArm(variantId);
+        TrackAlias alias = new TrackAlias("Wales Afon Bidno");
+        alias.assign(variantId);
+        when(trackAliasRepository.findByRawName("Wales Afon Bidno")).thenReturn(Optional.of(alias));
+        when(eventCarRepository.findAllByEventId(eventId)).thenReturn(List.of());
+        AgentSession session = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+
+        service.bindToSession(userId, session);
+
+        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(armed.getSessionId()).isEqualTo(session.getId());
+    }
+
+    @Test
+    void freeRoamOnAnotherStageLeavesArmWaiting() {
+        EventArm armed = waitingArm(UUID.randomUUID());
+        TrackAlias alias = new TrackAlias("Alsace Sommet");
+        alias.assign(UUID.randomUUID()); // provably a different variant than the armed one
+        when(trackAliasRepository.findByRawName("Alsace Sommet")).thenReturn(Optional.of(alias));
+
+        service.bindToSession(userId, sessionOn("Alsace Sommet", "Lancia"));
+
+        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.ARMED);
+        assertThat(armed.getSessionId()).isNull();
+    }
+
+    @Test
+    void practiceInAnUnpermittedCarLeavesArmWaiting() {
+        Car permitted = new Car("Mini Cooper S", 1965, "2", "B");
+        Car other = new Car("Lancia Delta", 1992, "A", "A8");
+        EventArm armed = waitingArm(UUID.randomUUID());
+        when(trackAliasRepository.findByRawName("Wales Afon Bidno")).thenReturn(Optional.empty());
+        when(eventCarRepository.findAllByEventId(eventId))
+                .thenReturn(List.of(new EventCar(eventId, permitted.getId())));
+        when(carRepository.findFirstByNameIgnoreCase("Lancia Delta")).thenReturn(Optional.of(other));
+
+        service.bindToSession(userId, sessionOn("Wales Afon Bidno", "Lancia Delta"));
+
+        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.ARMED);
+        assertThat(armed.getSessionId()).isNull();
+    }
+
+    @Test
+    void bindsWhenCarIsUnknownOnACarRestrictedEvent() {
+        // An unresolvable car string errs toward binding, like an unlearned track name.
+        EventArm armed = waitingArm(UUID.randomUUID());
+        when(trackAliasRepository.findByRawName("Wales Afon Bidno")).thenReturn(Optional.empty());
+        when(eventCarRepository.findAllByEventId(eventId))
+                .thenReturn(List.of(new EventCar(eventId, UUID.randomUUID())));
+        when(carRepository.findFirstByNameIgnoreCase("Mystery_Car")).thenReturn(Optional.empty());
+        AgentSession session = sessionOn("Wales Afon Bidno", "Mystery_Car");
+
+        service.bindToSession(userId, session);
+
+        assertThat(armed.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(armed.getSessionId()).isEqualTo(session.getId());
+    }
+
+    @Test
+    void abandonedBoundRunResolvesAsDnfWhenTheNextSessionOpens() {
+        // Restart-at-results-screen: the old session's abort lags behind the next session's open.
+        // A new run while one is bound proves the bound run was abandoned — the shot is spent.
         EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
-        arm.bind(UUID.randomUUID()); // the abandoned session
+        UUID abandonedSessionId = UUID.randomUUID();
+        arm.bind(abandonedSessionId);
         when(armRepository.findFirstByUserIdAndStatusIn(
                 userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
                 .thenReturn(Optional.of(arm));
 
-        service.bindToSession(userId, sessionId);
+        service.bindToSession(userId, sessionOn("Wales Afon Bidno", "Mini Cooper S 1275"));
 
-        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.BOUND);
-        assertThat(arm.getSessionId()).isEqualTo(sessionId);
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.CONSUMED);
+        assertThat(arm.getOutcome()).isEqualTo(EventArmOutcome.DNF);
+        assertThat(arm.getSessionId()).isEqualTo(abandonedSessionId); // the new run never binds
     }
 
     @Test
-    void unbindReleasesBoundArm() {
+    void dnfSessionConsumesBoundArm() {
         EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
         arm.bind(sessionId);
         when(armRepository.findFirstBySessionIdAndStatus(sessionId, EventArmStatus.BOUND))
                 .thenReturn(Optional.of(arm));
 
-        service.unbindSession(sessionId);
+        service.dnfSession(sessionId);
 
-        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.ARMED);
-        assertThat(arm.getSessionId()).isNull();
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.CONSUMED);
+        assertThat(arm.getOutcome()).isEqualTo(EventArmOutcome.DNF);
+        assertThat(arm.getResultId()).isNull();
     }
 
     @Test

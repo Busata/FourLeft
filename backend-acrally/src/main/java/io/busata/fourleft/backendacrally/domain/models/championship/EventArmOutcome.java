@@ -12,6 +12,9 @@ public enum EventArmOutcome {
     WRONG_CAR,
     /** The event's window had closed by the time the result arrived. */
     EVENT_CLOSED,
-    /** No run ever completed — the arm sat idle until it expired (did not finish). */
+    /**
+     * Did not finish: the bound run was abandoned (restart, quit, crash, or no save record ever
+     * arrived), or the arm sat idle until it expired. Spends the driver's one shot at the stage.
+     */
     DNF
 }

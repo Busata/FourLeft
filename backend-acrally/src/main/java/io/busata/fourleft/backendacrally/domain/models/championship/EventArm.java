@@ -15,8 +15,9 @@ import java.util.UUID;
 /**
  * A driver's "I'm about to drive this stage" record — the server side of the agent's Start button.
  * It binds to the next {@link io.busata.fourleft.backendacrally.domain.models.session.AgentSession}
- * the driver opens, so a run that started before the arm existed can never be captured. See
- * {@link EventArmStatus} for the lifecycle.
+ * the driver opens that can be the armed stage (a run started before the arm existed can never be
+ * captured), and that run is final: it resolves as a recorded result or a DNF — no restarts, no
+ * quits. See {@link EventArmStatus} for the lifecycle.
  */
 @Entity
 @Table(name = "event_arm")
@@ -70,24 +71,17 @@ public class EventArm {
         this.createdAt = now;
     }
 
-    /**
-     * Attach this arm to a freshly opened session (ARMED → BOUND). Re-binding while BOUND is the
-     * driver's newest run superseding an abandoned one whose abort hasn't arrived yet.
-     */
+    /** Attach this arm to a freshly opened session (ARMED → BOUND). A bound run is final. */
     public void bind(UUID sessionId) {
         this.sessionId = sessionId;
         this.status = EventArmStatus.BOUND;
         this.updatedAt = LocalDateTime.now();
     }
 
-    /** The bound run was abandoned (abort/restart) — release so the next run can re-bind. */
-    public void unbind() {
-        this.sessionId = null;
-        this.status = EventArmStatus.ARMED;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    /** The bound run finished — record how it scored. */
+    /**
+     * The bound run resolved — how it scored, or {@link EventArmOutcome#DNF} (with no
+     * {@code resultId}) when it was abandoned before producing a save record.
+     */
     public void consume(EventArmOutcome outcome, UUID resultId) {
         this.status = EventArmStatus.CONSUMED;
         this.outcome = outcome;

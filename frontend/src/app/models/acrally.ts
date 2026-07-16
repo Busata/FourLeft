@@ -137,6 +137,30 @@ export interface CarAliasCollectResultTo {
   aliases: CarAliasTo[];
 }
 
+// A telemetry track string collected from sessions, mapped to a variant (null until assigned).
+export interface TrackAliasTo {
+  id: string;
+  rawName: string;
+  variantId: string | null;
+  variantLabel: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface UpdateTrackAliasRequestTo {
+  variantId: string | null;
+}
+
+export interface CreateTrackAliasRequestTo {
+  rawName: string;
+  variantId: string | null;
+}
+
+export interface TrackAliasCollectResultTo {
+  added: number;
+  aliases: TrackAliasTo[];
+}
+
 export interface LinkedIdentityTo {
   provider: string;
   providerUserId: string;

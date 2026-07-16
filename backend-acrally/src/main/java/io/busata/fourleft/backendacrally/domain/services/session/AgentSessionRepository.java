@@ -20,4 +20,8 @@ public interface AgentSessionRepository extends JpaRepository<AgentSession, UUID
               and coalesce(s.lastHeartbeatAt, s.createdAt) < :cutoff
             """)
     List<AgentSession> findOpenAndSilentSince(@Param("cutoff") LocalDateTime cutoff);
+
+    /** Every distinct, non-blank telemetry track string seen across all sessions (for track aliases). */
+    @Query("SELECT DISTINCT s.track FROM AgentSession s WHERE s.track IS NOT NULL AND s.track <> ''")
+    List<String> findDistinctTrackNames();
 }

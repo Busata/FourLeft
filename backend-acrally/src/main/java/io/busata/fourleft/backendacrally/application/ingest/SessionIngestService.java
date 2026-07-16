@@ -35,17 +35,19 @@ public class SessionIngestService {
     @Transactional
     public UUID open(UUID userId, UUID apiKeyId, IngestPayloads.SessionStart p) {
         versionPolicy.requireSupported(p.agentVersion());
-        AgentSession session = new AgentSession(
-                userId, apiKeyId, p.driver(), p.car(), p.stage(), p.track(), p.startedAtMs(), p.agentVersion());
-        UUID sessionId = sessions.save(session).getId();
-        // Bind a waiting arm to this fresh run: a session that opened before the arm existed can't
-        // bind here, so pressing Start mid-run never captures the run in progress. Recovery sessions
-        // (startup replay of the save file) never bind — a recovered run must not score an armed
-        // stage, and 2026-07-15 showed a replayed record stealing the arm and stranding it BOUND.
+        AgentSession session = sessions.save(new AgentSession(
+                userId, apiKeyId, p.driver(), p.car(), p.stage(), p.track(), p.startedAtMs(), p.agentVersion()));
+        // Bind a waiting arm to this fresh run when it can be the armed stage (alias-matched on the
+        // telemetry track/car) — a bound run is final, and a still-BOUND arm resolves as DNF here
+        // (its run was abandoned; see EventRecordingService#bindToSession). A session that opened
+        // before the arm existed can't bind, so pressing Start mid-run never captures the run in
+        // progress. Recovery sessions (startup replay of the save file) never bind — a recovered
+        // run must not score an armed stage, and 2026-07-15 showed a replayed record stealing the
+        // arm and stranding it BOUND.
         if (!Boolean.TRUE.equals(p.recovery())) {
-            recordingService.bindToSession(userId, sessionId);
+            recordingService.bindToSession(userId, session);
         }
-        return sessionId;
+        return session.getId();
     }
 
     @Transactional
@@ -86,9 +88,10 @@ public class SessionIngestService {
             }
         } else {
             // Already delivered (agent retry, or an old agent's recovery replay). A replayed result
-            // can never consume the arm, so release any arm bound to this session rather than
-            // stranding it BOUND to a session that will never produce a first delivery.
-            recordingService.unbindSession(session.getId());
+            // can never consume the arm; a session that "completes" without a first delivery spends
+            // the shot as a DNF rather than stranding the arm BOUND — releasing it instead would let
+            // a crafted duplicate post free the arm for a retry.
+            recordingService.dnfSession(session.getId());
         }
         session.complete();
     }
@@ -97,22 +100,26 @@ public class SessionIngestService {
     public void abort(UUID userId, String rawSessionId, String reason) {
         AgentSession session = ownedSession(userId, rawSessionId);
         session.abort(reason);
-        // A restart/quit shouldn't burn the arm — release it so the driver's next run re-binds.
-        recordingService.unbindSession(session.getId());
+        // A restarted/quit run spends the arm as a DNF — an armed run is final. Anything else makes
+        // "restart at the results screen" a free retry: a discarded run never writes a save record,
+        // so its time can never be judged.
+        recordingService.dnfSession(session.getId());
     }
 
     /**
      * Janitor half of the contract: heartbeats/aborts are at-most-once, so a session with no
      * result and no abort must be timed out rather than waited on forever. Marks long-silent
-     * OPEN sessions STALE and releases any arm still bound to them, so a driver whose agent
-     * died mid-run gets their arm back. Returns how many were swept (for the schedule's log).
+     * OPEN sessions STALE and resolves any arm still bound to them as a DNF — a crash mid-run
+     * spends the shot like a restart does (rally rules; killing the agent must not be a retry
+     * button). Genuine technical failures are an admin pardon, not an automatic release.
+     * Returns how many were swept (for the schedule's log).
      */
     @Transactional
     public int sweepStaleSessions(LocalDateTime cutoff) {
         List<AgentSession> silent = sessions.findOpenAndSilentSince(cutoff);
         for (AgentSession session : silent) {
             session.markStale();
-            recordingService.unbindSession(session.getId());
+            recordingService.dnfSession(session.getId());
         }
         return silent.size();
     }

@@ -139,9 +139,10 @@ public class AgentRacesEndpoint {
         List<String> carKeys = carKeysFor(permittedCarIds, carNames, aliasesByCar);
         Map<UUID, Integer> myBest = entryRepository.findByEventIdAndUserId(event.getId(), userId).stream()
                 .collect(Collectors.toMap(EventEntry::getVariantId, EventEntry::getTotalMs, Math::min));
-        // One shot per stage: a recorded time or a DNF expiry spends it (see EventArmService#arm).
+        // One shot per stage: a recorded time or a DNF spends it (see EventArmService#arm) —
+        // whether the arm expired idle or its bound run was abandoned (restart/quit/crash).
         Set<UUID> dnfVariantIds = armRepository
-                .findAllByUserIdAndEventIdAndStatus(userId, event.getId(), EventArmStatus.EXPIRED).stream()
+                .findAllByUserIdAndEventIdAndOutcome(userId, event.getId(), EventArmOutcome.DNF).stream()
                 .map(EventArm::getVariantId)
                 .collect(Collectors.toSet());
 

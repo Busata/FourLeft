@@ -6,10 +6,13 @@ import io.busata.fourleft.backendacrally.domain.models.championship.EventArmOutc
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventCar;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
+import io.busata.fourleft.backendacrally.domain.models.session.AgentSession;
 import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
+import io.busata.fourleft.backendacrally.domain.models.stage.TrackAlias;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
 import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
+import io.busata.fourleft.backendacrally.domain.services.stage.TrackAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,27 +36,77 @@ public class EventRecordingService {
     private final EventEntryRepository entryRepository;
     private final EventCarRepository eventCarRepository;
     private final VariantRepository variantRepository;
+    private final TrackAliasRepository trackAliasRepository;
     private final CarRepository carRepository;
     private final CarAliasRepository carAliasRepository;
     private final ChampionshipService championshipService;
 
     /**
-     * A freshly opened session binds the driver's waiting arm — that run is the one that counts.
-     * An arm still BOUND to an earlier session re-binds to the new one: a driver runs one stage at
-     * a time, so a fresh session proves the bound run was restarted/quit. Its abort only arrives
-     * once the agent's save-record wait window lapses — minutes after the next run already started
-     * — and an arm left on the dead session would miss the run that actually finishes.
+     * A freshly opened session binds the driver's waiting arm when the run can be the armed stage —
+     * and a bound run is final: it resolves as a recorded result or a DNF, never a retry. Telemetry
+     * only carries display names, so the session's track/car resolve through the alias tables: a
+     * name that provably points elsewhere (another variant, or a car the event doesn't permit)
+     * leaves the arm waiting — free roam and practice cars stay possible while armed — while a
+     * match or an unknown/unassigned name binds. Erring toward binding on alias gaps is deliberate:
+     * if unlearned names skipped binding, a run on new content could be discarded at the results
+     * screen for a free retry.
+     *
+     * <p>A session opening while the arm is still BOUND to an earlier session means that run was
+     * abandoned (a driver runs one stage at a time; the old session's abort only arrives once the
+     * agent's save-record wait window lapses) — the shot is spent, so the arm resolves as DNF.
      */
-    public void bindToSession(UUID userId, UUID sessionId) {
-        armRepository.findFirstByUserIdAndStatusIn(userId,
+    public void bindToSession(UUID userId, AgentSession session) {
+        EventArm arm = armRepository.findFirstByUserIdAndStatusIn(userId,
                         java.util.List.of(EventArmStatus.ARMED, EventArmStatus.BOUND))
-                .ifPresent(arm -> arm.bind(sessionId));
+                .orElse(null);
+        if (arm == null) {
+            return;
+        }
+        if (arm.getStatus() == EventArmStatus.BOUND) {
+            if (!session.getId().equals(arm.getSessionId())) {
+                arm.consume(EventArmOutcome.DNF, null);
+            }
+            return;
+        }
+        if (couldBeArmedStage(arm, session.getTrack()) && couldBePermittedCar(arm.getEventId(), session.getCar())) {
+            arm.bind(session.getId());
+        }
     }
 
-    /** An aborted/restarted run releases its arm so the next fresh run can re-bind. */
-    public void unbindSession(UUID sessionId) {
+    /**
+     * The bound run ended without a scoreable result (restart, quit, agent death, or a replayed
+     * record) — the shot is spent, resolved as DNF. Releasing the arm here instead would make
+     * "restart at the results screen" a free retry, because a discarded run never writes a save
+     * record for the server to judge.
+     */
+    public void dnfSession(UUID sessionId) {
         armRepository.findFirstBySessionIdAndStatus(sessionId, EventArmStatus.BOUND)
-                .ifPresent(EventArm::unbind);
+                .ifPresent(arm -> arm.consume(EventArmOutcome.DNF, null));
+    }
+
+    /** Whether the telemetry track could be the armed variant: yes, unless an assigned alias points elsewhere. */
+    private boolean couldBeArmedStage(EventArm arm, String track) {
+        if (track == null || track.isBlank()) {
+            return true;
+        }
+        return trackAliasRepository.findByRawName(track)
+                .map(TrackAlias::getVariantId)
+                .filter(java.util.Objects::nonNull)
+                .map(variantId -> variantId.equals(arm.getVariantId()))
+                .orElse(true);
+    }
+
+    /** Whether the telemetry car could be permitted: yes, unless it resolves to a car the event excludes. */
+    private boolean couldBePermittedCar(UUID eventId, String car) {
+        Set<UUID> permitted = eventCarRepository.findAllByEventId(eventId).stream()
+                .map(EventCar::getCarId)
+                .collect(Collectors.toSet());
+        if (permitted.isEmpty()) {
+            return true;
+        }
+        return resolveCar(car)
+                .map(matched -> permitted.contains(matched.getId()))
+                .orElse(true);
     }
 
     /**

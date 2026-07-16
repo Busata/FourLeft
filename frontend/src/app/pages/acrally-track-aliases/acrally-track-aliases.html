@@ -1,0 +1,104 @@
+<div class="g-card">
+  <div class="dash-head">
+    <p class="auth-sub" style="margin: 0">
+      Track aliases are the track names live telemetry reports when a run starts (per variant and
+      localized). Assign each to a stage so the server knows right away whether a run is the armed
+      stage — an unassigned name is treated as “could be the armed stage”, so assign these promptly.
+    </p>
+    <div class="club-actions">
+      <button class="g-button g-button-secondary" type="button" (click)="toggleCreate()">
+        {{ creating() ? 'Cancel' : '+ Add manually' }}
+      </button>
+      <button class="g-button g-button-primary" type="button" (click)="collect()" [disabled]="collecting()">
+        {{ collecting() ? 'Collecting…' : 'Collect from sessions' }}
+      </button>
+    </div>
+  </div>
+
+  @if (creating()) {
+    <section class="account-section" style="border-top: none; padding-top: 0">
+      <div class="form-group">
+        <label>Name telemetry reports</label>
+        <input
+          type="text"
+          maxlength="190"
+          placeholder="e.g. Wales Afon Bidno"
+          [ngModel]="newRawName()"
+          (ngModelChange)="newRawName.set($event)"
+        />
+      </div>
+      <div class="form-group">
+        <label>Stage (variant)</label>
+        <select [ngModel]="newVariantId()" (ngModelChange)="newVariantId.set($event)">
+          <option value="">Unassigned</option>
+          @for (variant of variantOptions(); track variant.id) {
+            <option [value]="variant.id">{{ variant.label }}</option>
+          }
+        </select>
+      </div>
+      <button class="g-button g-button-primary" type="button" (click)="create()" [disabled]="busy() || !newRawName().trim()">Add</button>
+    </section>
+  }
+
+  @if (collectMessage()) {
+    <p class="auth-sub">{{ collectMessage() }}</p>
+  }
+  @if (error()) {
+    <p class="auth-error">{{ error() }}</p>
+  }
+
+  @if (!loaded()) {
+    <p class="auth-sub">Loading…</p>
+  } @else if (aliases().length === 0) {
+    <p class="auth-sub">No track names collected yet. Drive a run, then hit “Collect from sessions”.</p>
+  } @else {
+    <div class="g-tablewrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Telemetry reports</th>
+            <th>Stage (variant)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (alias of aliases(); track alias.id) {
+            <tr>
+              <td>{{ alias.rawName }}</td>
+              @if (editingId() === alias.id) {
+                <td>
+                  <select [ngModel]="editVariantId()" (ngModelChange)="editVariantId.set($event)">
+                    <option value="">Unassigned</option>
+                    @for (variant of variantOptions(); track variant.id) {
+                      <option [value]="variant.id">{{ variant.label }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-primary" type="button" (click)="save(alias)" [disabled]="busy()">Save</button>
+                    <button class="g-button g-button-tertiary" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </td>
+              } @else {
+                <td>
+                  @if (alias.variantLabel) {
+                    {{ alias.variantLabel }}
+                  } @else {
+                    <span class="dash-sub">Unassigned</span>
+                  }
+                </td>
+                <td>
+                  <div class="club-actions">
+                    <button class="g-button g-button-tertiary" type="button" (click)="startEdit(alias)">Edit</button>
+                    <button class="g-button g-button-danger" type="button" (click)="remove(alias)" [disabled]="busy()">Delete</button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -3,6 +3,7 @@ package io.busata.fourleft.backendacrally.domain.services.championship;
 import io.busata.fourleft.backendacrally.domain.models.championship.Championship;
 import io.busata.fourleft.backendacrally.domain.models.championship.ChampionshipEvent;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArm;
+import io.busata.fourleft.backendacrally.domain.models.championship.EventArmOutcome;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventVariant;
 import io.busata.fourleft.backendacrally.domain.services.club.ClubMembershipRepository;
@@ -40,7 +41,9 @@ public class EventArmService {
      * event must be open (published + within its window) and the variant must be one it runs, and the
      * driver must belong to the club. Rejected (409) while a BOUND run is in progress — switching
      * stages mid-run would be a disarm by another name — and once the driver's one shot at the stage
-     * is spent: a recorded time or a DNF expiry locks the stage (wrong-stage/wrong-car mishaps don't).
+     * is spent: a recorded time or a DNF locks the stage (wrong-stage/wrong-car mishaps don't). A DNF
+     * is any bound run that never produced a save record — restarted, quit, crashed, or an arm that
+     * expired idle — because a discarded run leaves no time for the server to judge.
      * Returns the fresh {@code ARMED} arm.
      */
     @Transactional
@@ -65,10 +68,10 @@ public class EventArmService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "You've already run this stage — one shot per stage, and your time is in.");
         }
-        if (armRepository.existsByUserIdAndEventIdAndVariantIdAndStatus(
-                userId, eventId, variantId, EventArmStatus.EXPIRED)) {
+        if (armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcome(
+                userId, eventId, variantId, EventArmOutcome.DNF)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Your entry on this stage expired as a DNF — one shot per stage.");
+                    "Your entry on this stage ended as a DNF — one shot per stage.");
         }
 
         cancelLive(userId);
@@ -77,9 +80,8 @@ public class EventArmService {
 
     /**
      * Cancel the driver's live arm, if any. Idempotent while ARMED; rejected while BOUND — once a
-     * run is in progress its outcome must be recorded, or disarming becomes a cherry-picking tool
-     * (bail out of a bad run before the finish and keep the old time). The run itself is the escape
-     * hatch: restarting or quitting the stage aborts the session, which releases the arm.
+     * run is in progress its outcome is final: a recorded result, or a DNF if it's restarted, quit,
+     * or crashed. There is no escape hatch; that's what makes the one shot a shot.
      */
     @Transactional
     public void disarm(UUID userId) {
@@ -100,8 +102,8 @@ public class EventArmService {
      * Janitor: expire ARMED arms with no activity since the cutoff, resolving them as DNF. An arm
      * binds to the driver's NEXT session, so one left waiting would otherwise capture whatever run
      * they happen to start days later. Only ARMED arms qualify: a BOUND arm belongs to a run in
-     * progress, and the stale-session sweep unbinds it (back to ARMED, refreshing its activity)
-     * if that run dies. Returns how many were expired (for the schedule's log).
+     * progress, and if that run dies silently the stale-session sweep resolves it as a DNF.
+     * Returns how many were expired (for the schedule's log).
      */
     @Transactional
     public int expireIdleArms(java.time.LocalDateTime cutoff) {
@@ -113,13 +115,14 @@ public class EventArmService {
     /**
      * Cancel the live arm and flush, so a subsequent insert doesn't collide on the live-arm index.
      * A BOUND arm is never cancelled — not by disarm, not by arming another stage — so a run in
-     * progress cannot be un-entered; it resolves via its session (result, abort, or the stale sweep).
+     * progress cannot be un-entered; it resolves via its session (a result, or a DNF on
+     * abort/crash/abandonment).
      */
     private void cancelLive(UUID userId) {
         armRepository.findFirstByUserIdAndStatusIn(userId, LIVE).ifPresent(arm -> {
             if (arm.getStatus() == EventArmStatus.BOUND) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "A run is in progress on your armed stage — it has to finish (or be restarted/quit) first.");
+                        "A run is in progress on your armed stage — it counts once it resolves (restarting or quitting is a DNF).");
             }
             arm.cancel();
             armRepository.saveAndFlush(arm);

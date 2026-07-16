@@ -20,6 +20,7 @@ export class AcrallyAdmin {
     { path: 'variants', label: 'Variants' },
     { path: 'cars', label: 'Cars' },
     { path: 'car-aliases', label: 'Car aliases' },
+    { path: 'track-aliases', label: 'Track aliases' },
     { path: 'issues', label: 'Issues' },
   ];
 }
