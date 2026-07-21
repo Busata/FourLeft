@@ -11,6 +11,7 @@
 // targets the attribute is inert.
 #![cfg_attr(feature = "ui", windows_subsystem = "windows")]
 
+mod auth;
 mod config;
 mod issue;
 mod logfile;
@@ -52,6 +53,9 @@ fn main() -> Result<()> {
     attach_parent_console();
 
     let cfg = Config::load()?;
+    // Seed the process-wide credential store (see `auth`): clients read the key
+    // from there per request, so a re-pair can take effect without a restart.
+    auth::init(cfg.api_key.clone());
 
     // `acrally-agent update`: check for a newer signed build, apply it, and relaunch.
     if std::env::args().nth(1).as_deref() == Some("update") {

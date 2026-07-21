@@ -40,7 +40,7 @@ pub fn submit(cfg: &Config, description: &str) -> Result<Receipt> {
     if description.trim().is_empty() {
         bail!("please describe the issue first.");
     }
-    if cfg.api_key.is_none() {
+    if crate::auth::key().is_none() {
         bail!("not paired — connect the agent to your account first.");
     }
 
@@ -67,7 +67,7 @@ pub fn submit(cfg: &Config, description: &str) -> Result<Receipt> {
         cfg.api_base.trim_end_matches('/')
     );
     let mut req = agent.post(&url);
-    if let Some(key) = &cfg.api_key {
+    if let Some(key) = crate::auth::key() {
         req = req.set("Authorization", &format!("Bearer {key}"));
     }
     let response = req.send_json(&body).map_err(submit_error)?;
@@ -88,6 +88,10 @@ pub fn submit(cfg: &Config, description: &str) -> Result<Receipt> {
 /// (empty description, rate limit, attachment too large).
 fn submit_error(e: ureq::Error) -> anyhow::Error {
     match e {
+        ureq::Error::Status(401, _) => {
+            crate::auth::on_unauthorized("issue report");
+            anyhow!(crate::auth::REVOKED_MSG)
+        }
         ureq::Error::Status(status, resp) => {
             let body = resp.into_string().unwrap_or_default();
             let reason = extract_reason(&body);

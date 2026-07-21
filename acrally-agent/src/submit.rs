@@ -13,6 +13,7 @@
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use crate::auth;
 use crate::config::Config;
 use crate::logfile::agent_log;
 use crate::model::{Heartbeat, ResultPayload, SessionStart};
@@ -23,7 +24,6 @@ const RESULT_RETRY_PAUSE: Duration = Duration::from_secs(2);
 
 pub struct Client {
     api_base: String,
-    api_key: Option<String>,
     agent: ureq::Agent,
 }
 
@@ -31,7 +31,6 @@ impl Client {
     pub fn new(cfg: &Config) -> Self {
         Client {
             api_base: cfg.api_base.trim_end_matches('/').to_string(),
-            api_key: cfg.api_key.clone(),
             agent: ureq::AgentBuilder::new()
                 .timeout(std::time::Duration::from_secs(10))
                 .build(),
@@ -40,7 +39,7 @@ impl Client {
 
     fn req(&self, url: &str) -> ureq::Request {
         let mut r = self.agent.post(url);
-        if let Some(key) = &self.api_key {
+        if let Some(key) = auth::key() {
             r = r.set("Authorization", &format!("Bearer {key}"));
         }
         r
@@ -49,6 +48,11 @@ impl Client {
     /// Open a session. Returns a session id — from the server if it responds,
     /// otherwise a locally-generated id so heartbeats/results can still be keyed.
     pub fn start_session(&self, body: &SessionStart) -> String {
+        if auth::revoked() {
+            // The POST could only 401 — keep the session local until a re-pair.
+            agent_log!("start_session skipped (agent key rejected); using local session id");
+            return local_session_id();
+        }
         let url = format!("{}/sessions", self.api_base);
         match self.req(&url).send_json(body) {
             Ok(resp) => resp
@@ -65,6 +69,9 @@ impl Client {
                 if let ureq::Error::Status(426, _) = e {
                     crate::selfupdate::on_upgrade_required();
                 }
+                if let ureq::Error::Status(401, _) = e {
+                    auth::on_unauthorized("start_session");
+                }
                 agent_log!("start_session failed ({e}); using local session id");
                 local_session_id()
             }
@@ -74,14 +81,34 @@ impl Client {
     /// Best-effort live heartbeat (dropped on failure). Returns whether the POST
     /// was accepted, so callers can surface backend connectivity.
     pub fn heartbeat(&self, session_id: &str, body: &Heartbeat) -> bool {
+        if auth::revoked() {
+            return false;
+        }
         let url = format!("{}/sessions/{}/heartbeat", self.api_base, session_id);
-        self.req(&url).send_json(body).is_ok()
+        match self.req(&url).send_json(body) {
+            Ok(_) => true,
+            Err(e) => {
+                if let ureq::Error::Status(401, _) = e {
+                    auth::on_unauthorized("heartbeat");
+                }
+                false
+            }
+        }
     }
 
     /// Post the authoritative result, retrying a few times in-process. Returns
     /// `true` if delivered; on total failure the result is dropped (never
     /// persisted for later replay) and `false` is returned.
     pub fn post_result(&self, session_id: &str, result: &ResultPayload) -> bool {
+        if auth::revoked() {
+            // The record stays in the save (the floor only advances on delivery),
+            // so recovery re-delivers it on the next launch after a re-pair.
+            agent_log!(
+                "result for session {session_id} held — agent key rejected; \
+                 re-pair, then it is re-delivered on the next launch"
+            );
+            return false;
+        }
         let url = format!("{}/sessions/{}/result", self.api_base, session_id);
         for attempt in 1..=RESULT_RETRIES {
             match self.req(&url).send_json(result) {
@@ -106,6 +133,12 @@ impl Client {
                         crate::selfupdate::on_upgrade_required();
                         break;
                     }
+                    if let ureq::Error::Status(401, _) = e {
+                        // Bad key — more attempts can't succeed. The record stays in
+                        // the save; recovery re-delivers it once re-paired.
+                        auth::on_unauthorized("result POST");
+                        break;
+                    }
                     if attempt < RESULT_RETRIES {
                         std::thread::sleep(RESULT_RETRY_PAUSE);
                     }
@@ -123,6 +156,9 @@ impl Client {
 
     /// Best-effort session abort (e.g. on restart / quit).
     pub fn abort_session(&self, session_id: &str, reason: &str) {
+        if auth::revoked() {
+            return;
+        }
         let url = format!("{}/sessions/{}/abort", self.api_base, session_id);
         let _ = self
             .req(&url)

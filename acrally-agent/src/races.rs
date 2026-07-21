@@ -22,12 +22,18 @@ use std::time::Duration;
 use anyhow::{anyhow, bail, Context, Result};
 use serde::Deserialize;
 
+use crate::auth;
 use crate::config::Config;
 use crate::model::fmt_ms;
 
 /// How often the background poller refreshes the events + arm state while the app is open.
 #[cfg(feature = "ui")]
 const POLL_INTERVAL: Duration = Duration::from_secs(4);
+
+/// Throttled cadence while the backend rejects our key — polling faster would
+/// only repeat the 401. A re-pair clears the throttle (see [`poll_interval`]).
+#[cfg(feature = "ui")]
+const REVOKED_POLL_INTERVAL: Duration = Duration::from_secs(60);
 
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct RacesView {
@@ -136,7 +142,6 @@ fn http() -> ureq::Agent {
 
 struct Client {
     api_base: String,
-    api_key: Option<String>,
     agent: ureq::Agent,
 }
 
@@ -144,13 +149,12 @@ impl Client {
     fn new(cfg: &Config) -> Self {
         Client {
             api_base: cfg.api_base.trim_end_matches('/').to_string(),
-            api_key: cfg.api_key.clone(),
             agent: http(),
         }
     }
 
     fn req(&self, req: ureq::Request) -> ureq::Request {
-        match &self.api_key {
+        match auth::key() {
             Some(key) => req.set("Authorization", &format!("Bearer {key}")),
             None => req,
         }
@@ -159,7 +163,16 @@ impl Client {
     fn fetch(&self) -> Result<RacesView> {
         self.req(self.agent.get(&format!("{}/agent/races", self.api_base)))
             .call()
-            .context("could not reach the club backend")?
+            .map_err(|e| match e {
+                // A revoked key would otherwise surface as "could not reach the
+                // club backend" — a misdiagnosis that sends users chasing their
+                // network instead of re-pairing.
+                ureq::Error::Status(401, _) => {
+                    auth::on_unauthorized("races fetch");
+                    anyhow!(auth::REVOKED_MSG)
+                }
+                other => anyhow!(other).context("could not reach the club backend"),
+            })?
             .into_json()
             .context("unexpected response from the races endpoint")
     }
@@ -192,6 +205,10 @@ impl Client {
 /// Turn a ureq error into a friendly message, surfacing the backend's reason on a 4xx.
 fn arm_error(e: ureq::Error) -> anyhow::Error {
     match e {
+        ureq::Error::Status(401, _) => {
+            auth::on_unauthorized("arm/disarm");
+            anyhow!(auth::REVOKED_MSG)
+        }
         ureq::Error::Status(_, resp) => {
             let body = resp.into_string().unwrap_or_default();
             let reason = body.trim();
@@ -231,12 +248,24 @@ pub fn poller(cfg: Config, handle: RacesHandle, stop: Arc<AtomicBool>) {
     }
     while !stop.load(Ordering::Relaxed) {
         refresh_into(&client, &handle);
-        // Sleep in small slices so quitting is responsive.
+        // Sleep in small slices so quitting is responsive; the target is
+        // re-read each slice so a re-pair (clearing the revoked throttle)
+        // resumes the normal cadence promptly.
         let mut slept = Duration::ZERO;
-        while slept < POLL_INTERVAL && !stop.load(Ordering::Relaxed) {
+        while slept < poll_interval() && !stop.load(Ordering::Relaxed) {
             std::thread::sleep(Duration::from_millis(200));
             slept += Duration::from_millis(200);
         }
+    }
+}
+
+/// The poller cadence: normal, or throttled while the backend rejects our key.
+#[cfg(feature = "ui")]
+fn poll_interval() -> Duration {
+    if auth::revoked() {
+        REVOKED_POLL_INTERVAL
+    } else {
+        POLL_INTERVAL
     }
 }
 
@@ -303,8 +332,8 @@ fn set_busy(handle: &RacesHandle, busy: bool) {
 
 /// A paired key is required before the backend will answer any races call —
 /// fail fast with the fix instead of surfacing a bare 401.
-fn require_key(cfg: &Config) -> Result<()> {
-    if cfg.api_key.is_none() {
+fn require_key() -> Result<()> {
+    if auth::key().is_none() {
         bail!("not paired — run `acrally-agent pair` first, then try again.");
     }
     Ok(())
@@ -313,7 +342,7 @@ fn require_key(cfg: &Config) -> Result<()> {
 /// `acrally-agent arm-list`: current arm state, then every open stage with a
 /// pick number for `arm <n>`.
 pub fn run_list(cfg: &Config) -> Result<()> {
-    require_key(cfg)?;
+    require_key()?;
     let client = Client::new(cfg);
     let view = client.fetch()?;
     print_arm(&view.arm);
@@ -359,7 +388,7 @@ pub fn run_list(cfg: &Config) -> Result<()> {
 /// `acrally-agent arm <selector>`: arm a stage by its `arm-list` number, or by
 /// variant id for scripting.
 pub fn run_arm(cfg: &Config, selector: &str) -> Result<()> {
-    require_key(cfg)?;
+    require_key()?;
     let client = Client::new(cfg);
     let view = client.fetch()?;
     // Flattened in the same order `run_list` numbers them.
@@ -390,7 +419,7 @@ pub fn run_arm(cfg: &Config, selector: &str) -> Result<()> {
 /// `acrally-agent disarm`: release the current arm (refused by the backend
 /// while a bound run is in progress).
 pub fn run_disarm(cfg: &Config) -> Result<()> {
-    require_key(cfg)?;
+    require_key()?;
     let client = Client::new(cfg);
     let arm = client.disarm()?;
     print_arm(&arm);

@@ -239,6 +239,27 @@ impl App {
         let update = self.update.lock().map(|s| s.clone()).unwrap_or_default();
         let mut do_check = false;
         let mut do_apply = false;
+        let mut do_repair = false;
+
+        // Auth banner: the backend rejected our key (revoked/replaced). Every
+        // call will 401 until the agent is re-paired, so put the fix one click
+        // away instead of letting it read as a connectivity problem.
+        if crate::auth::revoked() {
+            egui::TopBottomPanel::top("auth-banner").show(ctx, |ui| {
+                ui.add_space(5.0);
+                ui.horizontal_wrapped(|ui| {
+                    ui.colored_label(
+                        RED,
+                        egui::RichText::new("This agent's key was revoked — runs are not being reported.")
+                            .strong(),
+                    );
+                    if ui.button("Re-pair").clicked() {
+                        do_repair = true;
+                    }
+                });
+                ui.add_space(5.0);
+            });
+        }
 
         // Update banner: only shown when there's something to act on or report.
         match &update {
@@ -359,6 +380,14 @@ impl App {
         if do_report && self.issue_draft.is_none() {
             self.issue_draft = Some(String::new());
         }
+        if do_repair {
+            // Back to the Connect screen; approval flows through the same
+            // adoption path as first-run pairing (which clears the revoked flag).
+            if let Ok(mut p) = self.pairing.lock() {
+                *p = Phase::Idle;
+            }
+            self.linked = false;
+        }
     }
 
     fn apply_race_action(&mut self, action: RaceAction) {
@@ -420,6 +449,9 @@ impl eframe::App for App {
                 _ => None,
             };
             if let Some(api_key) = key {
+                // Adopt into the shared store too: the already-running pipeline
+                // and races poller pick the new key up on their next request.
+                crate::auth::set_key(api_key.clone());
                 self.cfg.api_key = Some(api_key);
                 self.linked = true;
             }
@@ -533,10 +565,13 @@ fn status_tab(ui: &mut egui::Ui, s: &AgentStatus) {
     ui.add_space(8.0);
 
     ui.horizontal(|ui| {
-        let (color, text) = if s.backend_connected {
-            (egui::Color32::from_rgb(0x4c, 0xc2, 0x6a), "connected")
+        // A rejected key is not a connectivity problem — name the real issue.
+        let (color, text) = if crate::auth::revoked() {
+            (RED, "key revoked — re-pair needed")
+        } else if s.backend_connected {
+            (GREEN, "connected")
         } else {
-            (egui::Color32::from_rgb(0xd0, 0x6b, 0x5b), "not connected")
+            (RED, "not connected")
         };
         ui.label("Backend:");
         ui.colored_label(color, text);
