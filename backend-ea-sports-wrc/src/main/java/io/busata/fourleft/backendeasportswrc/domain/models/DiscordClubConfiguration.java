@@ -43,6 +43,9 @@ public class DiscordClubConfiguration {
 
     boolean customScoringEnabled;
 
+    // When true, a new-event post is followed by the time-trial top 10 (target times) for the event's board.
+    boolean timeTrialTopEnabled;
+
     @Enumerated(EnumType.STRING)
     ScoringStrategy scoringStrategy;
 
@@ -79,6 +82,10 @@ public class DiscordClubConfiguration {
         this.customScoringEnabled = customScoringEnabled;
     }
 
+    public void setTimeTrialTopEnabled(boolean timeTrialTopEnabled) {
+        this.timeTrialTopEnabled = timeTrialTopEnabled;
+    }
+
     public void setScoringStrategy(ScoringStrategy scoringStrategy) {
         this.scoringStrategy = scoringStrategy;
     }
@@ -108,6 +115,7 @@ public class DiscordClubConfiguration {
         this.autopostingEnabled = autopostingEnabled;
         this.requiresTracking = false;
         this.customScoringEnabled = false;
+        this.timeTrialTopEnabled = false;
         this.scoringStrategy = ScoringStrategy.LOOKUP_TABLE;
         this.scoringTable = new HashMap<>();
         this.autoPostTemplate = AutoPostMessageService.defaultTemplate;

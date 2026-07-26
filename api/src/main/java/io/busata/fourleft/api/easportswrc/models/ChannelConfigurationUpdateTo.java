@@ -9,6 +9,7 @@ public record ChannelConfigurationUpdateTo(
         boolean autopostingEnabled,
         boolean requiresTracking,
         boolean customScoringEnabled,
+        boolean timeTrialTopEnabled,
         ScoringStrategy scoringStrategy,
         Map<String, Integer> scoringTable,
         ScoringAnchorsTo scoringAnchors,

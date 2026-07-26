@@ -31,6 +31,7 @@ public class ChampionshipStartedMessageService {
     private final ChampionshipService championshipService;
 
     private final ClubResultsMessageFactory clubResultsMessageFactory;
+    private final TimeTrialTopMessageFactory timeTrialTopMessageFactory;
 
     @EventListener
     public void handleClubEvent(ClubChampionshipStarted championshipStarted) {
@@ -45,6 +46,11 @@ public class ChampionshipStartedMessageService {
             clubResultsService.getCurrentResults(championshipStarted.clubId()).ifPresent(results -> {
                 MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
+
+                // Show the time-trial top 10 so members know the target times to beat, when enabled.
+                if (configuration.isTimeTrialTopEnabled()) {
+                    timeTrialTopMessageFactory.createTopPost(results).ifPresent(embeds::add);
+                }
             });
 
             embeds.forEach(embed -> {

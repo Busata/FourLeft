@@ -58,13 +58,15 @@ public class DiscordClubConfigurationService {
 
     @Transactional
     public Optional<DiscordClubConfiguration> updateConfiguration(Long channelId, boolean autopostingEnabled, boolean requiresTracking,
-                                                                  boolean customScoringEnabled, ScoringStrategy scoringStrategy,
+                                                                  boolean customScoringEnabled, boolean timeTrialTopEnabled,
+                                                                  ScoringStrategy scoringStrategy,
                                                                   Map<String, Integer> scoringTable, ScoringAnchors scoringAnchors,
                                                                   List<EventRestriction> eventRestrictions) {
         return this.repository.findByChannelId(channelId).map(configuration -> {
             configuration.setAutopostingEnabled(autopostingEnabled);
             configuration.setRequiresTracking(requiresTracking);
             configuration.setCustomScoringEnabled(customScoringEnabled);
+            configuration.setTimeTrialTopEnabled(timeTrialTopEnabled);
             configuration.setScoringStrategy(scoringStrategy);
             configuration.setScoringTable(scoringTable);
             configuration.setScoringAnchors(scoringAnchors);
