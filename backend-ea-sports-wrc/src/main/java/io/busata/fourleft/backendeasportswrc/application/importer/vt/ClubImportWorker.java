@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 
 /**
@@ -115,14 +116,23 @@ public class ClubImportWorker {
      * Refresh details (fatal on failure), then push the open leaderboards and the active championship's
      * standings, then announce the ended event. A failed board/standings fetch is logged and skipped
      * inside the apply helpers.
+     *
+     * <p>When the ended event was its championship's last (a daily club rolling over), the refresh
+     * leaves no active championship to pull standings or open boards from. Announcing is deferred:
+     * the freshly-finished championship makes {@code requiresHistoryUpdate} true, so the queue
+     * immediately re-runs the club through {@link #updateHistory}, which pushes the final boards and
+     * standings and publishes {@link ClubEventEnded}.
      */
     private ClubImportReport eventEnded(String clubId) {
         fetchAndUpdateDetails(clubId);
 
-        AppliedBoards boards = applyLeaderboards(clubId, clubService.getOpenLeaderboards(clubId));
+        Optional<String> activeChampionshipId = clubService.getActiveChampionshipId(clubId);
+        if (activeChampionshipId.isEmpty()) {
+            return ClubImportReport.of(JobOutcome.DETAILS_REFRESHED, true);
+        }
 
-        String activeChampionshipId = clubService.getActiveChampionshipId(clubId).orElseThrow();
-        int standings = applyStandings(clubId, List.of(activeChampionshipId));
+        AppliedBoards boards = applyLeaderboards(clubId, clubService.getOpenLeaderboards(clubId));
+        int standings = applyStandings(clubId, List.of(activeChampionshipId.get()));
 
         eventPublisher.publishEvent(new ClubEventEnded(clubId));
         return new ClubImportReport(JobOutcome.EVENT_ENDED, true,

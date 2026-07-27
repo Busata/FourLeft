@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ChampionshipTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.clubDetails.ClubDetailsTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.leaderboard.ClubLeaderboardResultTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.racenet.models.standings.ClubStandingsResultTo;
@@ -47,9 +48,18 @@ public class RacenetApiWireMocks {
     }
 
     @SneakyThrows
+    public void createChampionshipMocks(WireMockServer racenetApi, ChampionshipTo championship) {
+            racenetApi.stubFor(get(urlPathMatching("/api/wrc2023clubs/championships/%s".formatted(championship.id())))
+                    .willReturn(aResponse()
+                            .withHeader("Content-Type","application/json")
+                            .withBody(this.mapper.writeValueAsString(championship))
+                    ));
+    }
+
+    @SneakyThrows
     public void createLeaderboards(WireMockServer racenetApi, String clubId, String leaderboardId, ClubLeaderboardResultTo leaderboardResult) {
             racenetApi.stubFor(get(urlPathMatching("/api/wrc2023clubs/%s/leaderboard/%s".formatted(clubId, leaderboardId)))
-                    .withQueryParam("MaxResultCount", equalTo("10"))
+                    .withQueryParam("MaxResultCount", equalTo("20"))
                     .withQueryParam("Platform", equalTo("0"))
                     .willReturn(aResponse()
                             .withHeader("Content-Type","application/json")
@@ -69,7 +79,7 @@ public class RacenetApiWireMocks {
     @SneakyThrows
     public void createLeaderboardsPage(WireMockServer racenetApi, String clubId, String leaderboardId, String cursor, ClubLeaderboardResultTo leaderboardResult) {
             racenetApi.stubFor(get(urlPathMatching("/api/wrc2023clubs/%s/leaderboard/%s".formatted(clubId, leaderboardId)))
-                            .withQueryParam("MaxResultCount", equalTo("10"))
+                            .withQueryParam("MaxResultCount", equalTo("20"))
                             .withQueryParam("Platform", equalTo("0"))
                             .withQueryParam("Cursor", equalTo(cursor))
 
@@ -82,7 +92,7 @@ public class RacenetApiWireMocks {
     @SneakyThrows
     public void createLeaderboardsPageFailure(WireMockServer racenetApi, String clubId, String leaderboardId, String cursor) {
             racenetApi.stubFor(get(urlPathMatching("/api/wrc2023clubs/%s/leaderboard/%s".formatted(clubId, leaderboardId)))
-                            .withQueryParam("MaxResultCount", equalTo("10"))
+                            .withQueryParam("MaxResultCount", equalTo("20"))
                             .withQueryParam("Platform", equalTo("0"))
                             .withQueryParam("Cursor", equalTo(cursor))
 

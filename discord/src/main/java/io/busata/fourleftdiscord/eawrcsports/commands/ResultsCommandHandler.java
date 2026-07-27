@@ -36,6 +36,7 @@ public class ResultsCommandHandler extends ListenerAdapter {
             case "current" -> MessageCacheType.RESULTS_CURRENT;
             case "previous" -> MessageCacheType.RESULTS_PREVIOUS;
             case "standings" -> MessageCacheType.RESULTS_STANDINGS;
+            case "timetrial" -> MessageCacheType.TIME_TRIAL_TOP;
             case null, default -> null;
         };
 

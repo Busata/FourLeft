@@ -4,6 +4,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.configuration.D
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubResultsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStandingsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStatsMessageFactory;
+import io.busata.fourleft.backendeasportswrc.application.discord.messages.TimeTrialTopMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
@@ -41,6 +42,7 @@ public class ResultsEndpoint {
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory standingsMessageFactory;
     private final ClubStatsMessageFactory clubStatsMessageFactory;
+    private final TimeTrialTopMessageFactory timeTrialTopMessageFactory;
 
 
     @GetMapping("/api_v2/results/{channelId}/current")
@@ -51,6 +53,20 @@ public class ResultsEndpoint {
                 .orElse("");
     }
 
+
+    /**
+     * Time-trial top 10 (target times) for the channel's current event. Served regardless of the
+     * auto-post toggle — the slash command is on demand — but honors the tracked-only setting.
+     */
+    @GetMapping("/api_v2/results/{channelId}/timetrial")
+    String getTimeTrialTop(@PathVariable Long channelId) {
+        DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
+        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId())
+                .flatMap(results -> timeTrialTopMessageFactory.createTopPost(results, discordClubConfiguration.isTimeTrialTopTrackedOnly()))
+                .map(MessageEmbed::toData)
+                .map(DataObject::toString)
+                .orElse("");
+    }
 
     @GetMapping(value="/api_v2/results/club/{clubId}/{championshipId}", produces = "text/csv")
     ResponseEntity<String> getClubResults(@PathVariable String clubId, @PathVariable String championshipId) {

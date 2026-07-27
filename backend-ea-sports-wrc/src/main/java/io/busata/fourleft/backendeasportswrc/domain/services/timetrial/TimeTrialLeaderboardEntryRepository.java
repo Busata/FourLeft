@@ -81,6 +81,25 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
     Page<TimeTrialLeaderboardEntry> findLatestPage(@Param("combinationId") String combinationId, Pageable pageable);
 
     /**
+     * Same as {@link #findLatestPage}, restricted to discord-tracked players: rows whose ssid matches a
+     * {@link io.busata.fourleft.backendeasportswrc.domain.models.profile.Profile} with tracking enabled.
+     * Rows keep their board-wide rank/delta, so the page shows tracked drivers against the global board.
+     */
+    @Query(value = """
+            select e from TimeTrialLeaderboardEntry e
+            where e.combinationId = :combinationId
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = :combinationId)
+              and exists (select 1 from Profile p where p.id = e.ssid and p.trackDiscord = true)
+            """,
+            countQuery = """
+            select count(e) from TimeTrialLeaderboardEntry e
+            where e.combinationId = :combinationId
+              and e.fetchedAt = (select max(e2.fetchedAt) from TimeTrialLeaderboardEntry e2 where e2.combinationId = :combinationId)
+              and exists (select 1 from Profile p where p.id = e.ssid and p.trackDiscord = true)
+            """)
+    Page<TimeTrialLeaderboardEntry> findLatestTrackedPage(@Param("combinationId") String combinationId, Pageable pageable);
+
+    /**
      * Every row of a board's current snapshot, ranked ascending — the CSV export writes the whole
      * board in one pass. Same latest-generation filter as {@link #findLatestPage}, without paging.
      */

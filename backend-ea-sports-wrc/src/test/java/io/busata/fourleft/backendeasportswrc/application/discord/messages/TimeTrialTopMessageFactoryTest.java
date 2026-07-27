@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -87,7 +89,7 @@ class TimeTrialTopMessageFactoryTest {
         // The dry WRC board for Fridão (location 6, route 101, surface 0, class 19).
         when(entryRepository.findLatestPage(eq("6-101-0-19"), any(Pageable.class))).thenReturn(page);
 
-        MessageEmbed embed = factory.createTopPost(results(List.of("Fridão"))).orElseThrow();
+        MessageEmbed embed = factory.createTopPost(results(List.of("Fridão")), false).orElseThrow();
 
         String entries = renderedEntries(embed);
         assertThat(entries)
@@ -100,13 +102,33 @@ class TimeTrialTopMessageFactoryTest {
 
     @Test
     void multiStageEventProducesNoPost() {
-        assertThat(factory.createTopPost(results(List.of("Stage 1", "Stage 2")))).isEmpty();
+        assertThat(factory.createTopPost(results(List.of("Stage 1", "Stage 2")), false)).isEmpty();
     }
 
     @Test
     void emptyBoardProducesNoPost() {
         when(entryRepository.findLatestPage(any(), any(Pageable.class))).thenReturn(Page.empty());
 
-        assertThat(factory.createTopPost(results(List.of("Fridão")))).isEmpty();
+        assertThat(factory.createTopPost(results(List.of("Fridão")), false)).isEmpty();
+    }
+
+    @Test
+    void trackedOnlyUsesTheTrackedQueryAndKeepsBoardWideRanks() {
+        Page<TimeTrialLeaderboardEntry> page = new PageImpl<>(List.of(
+                entry(4, "trackedPlayer", "03:15.000", "00:02.900")));
+        when(entryRepository.findLatestTrackedPage(eq("6-101-0-19"), any(Pageable.class))).thenReturn(page);
+
+        MessageEmbed embed = factory.createTopPost(results(List.of("Fridão")), true).orElseThrow();
+
+        // The tracked filter happens in the query; the rendered row keeps its global rank and delta.
+        assertThat(renderedEntries(embed)).contains("**4** • ", "trackedPlayer", "03:15.000", "+00:02.900");
+        verify(entryRepository, never()).findLatestPage(any(), any(Pageable.class));
+    }
+
+    @Test
+    void trackedOnlyWithNoTrackedEntriesProducesNoPost() {
+        when(entryRepository.findLatestTrackedPage(any(), any(Pageable.class))).thenReturn(Page.empty());
+
+        assertThat(factory.createTopPost(results(List.of("Fridão")), true)).isEmpty();
     }
 }

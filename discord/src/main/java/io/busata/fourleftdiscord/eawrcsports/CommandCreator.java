@@ -26,7 +26,8 @@ public class CommandCreator {
                                 .addSubcommands(
                                         new SubcommandData("current", "Current results"),
                                         new SubcommandData("previous", "Previous results"),
-                                        new SubcommandData("standings", "Standings")
+                                        new SubcommandData("standings", "Standings"),
+                                        new SubcommandData("timetrial", "Time trial top 10 (target times) for the current event")
                                 ),
                         new SubcommandGroupData("events", "Event related commands")
                                 .addSubcommands(

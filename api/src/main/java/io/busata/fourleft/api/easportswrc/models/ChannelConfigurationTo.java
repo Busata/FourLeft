@@ -15,6 +15,7 @@ public record ChannelConfigurationTo(
         Boolean enabled,
         Boolean customScoringEnabled,
         Boolean timeTrialTopEnabled,
+        Boolean timeTrialTopTrackedOnly,
         ScoringStrategy scoringStrategy,
         Map<String, Integer> scoringTable,
         ScoringAnchorsTo scoringAnchors,

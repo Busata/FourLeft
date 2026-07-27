@@ -56,6 +56,7 @@ export interface ChannelConfiguration {
   enabled: boolean | null;
   customScoringEnabled: boolean | null;
   timeTrialTopEnabled: boolean | null;
+  timeTrialTopTrackedOnly: boolean | null;
   scoringStrategy: ScoringStrategy | null;
   scoringTable: Record<string, number> | null;
   scoringAnchors: ScoringAnchors | null;

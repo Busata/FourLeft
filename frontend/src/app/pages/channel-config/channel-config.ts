@@ -92,6 +92,7 @@ export class ChannelConfig implements OnInit {
     requiresTracking: new FormControl<boolean>(false, { nonNullable: true }),
     customScoringEnabled: new FormControl<boolean>(false, { nonNullable: true }),
     timeTrialTopEnabled: new FormControl<boolean>(false, { nonNullable: true }),
+    timeTrialTopTrackedOnly: new FormControl<boolean>(false, { nonNullable: true }),
     scoringStrategy: new FormControl<ScoringStrategy>('LOOKUP_TABLE', { nonNullable: true }),
     scoringTable: new FormArray<ScoringRow>([]),
     scoringFloor: new FormControl<number>(DEFAULT_FLOOR, { nonNullable: true }),
@@ -273,6 +274,7 @@ export class ChannelConfig implements OnInit {
         requiresTracking: this.form.controls.requiresTracking.value,
         customScoringEnabled: this.form.controls.customScoringEnabled.value,
         timeTrialTopEnabled: this.form.controls.timeTrialTopEnabled.value,
+        timeTrialTopTrackedOnly: this.form.controls.timeTrialTopTrackedOnly.value,
         scoringStrategy: this.form.controls.scoringStrategy.value,
         scoringTable: this.rowsToTable(),
         scoringAnchors: this.rowsToAnchors(),
@@ -495,6 +497,7 @@ export class ChannelConfig implements OnInit {
     this.form.controls.requiresTracking.setValue(config.requiresTracking ?? false);
     this.form.controls.customScoringEnabled.setValue(config.customScoringEnabled ?? false);
     this.form.controls.timeTrialTopEnabled.setValue(config.timeTrialTopEnabled ?? false);
+    this.form.controls.timeTrialTopTrackedOnly.setValue(config.timeTrialTopTrackedOnly ?? false);
     this.form.controls.scoringStrategy.setValue(config.scoringStrategy ?? 'LOOKUP_TABLE');
     this.customScoringOn.set(config.customScoringEnabled ?? false);
     this.scoringStrategySig.set(config.scoringStrategy ?? 'LOOKUP_TABLE');

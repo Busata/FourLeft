@@ -29,6 +29,9 @@ import java.util.stream.Collectors;
  * <p>Only single-stage events map cleanly to one TT board (mirroring the "TT board" link in
  * {@link ClubResultsMessageFactory}); multi-stage events and boards with no stored rows yield
  * {@link Optional#empty()} so nothing is posted.
+ *
+ * <p>With {@code trackedOnly}, only discord-tracked players are listed — they keep their board-wide
+ * rank and delta to the global leader, since the point is target times against the full board.
  */
 @Service
 @RequiredArgsConstructor
@@ -41,7 +44,7 @@ public class TimeTrialTopMessageFactory {
     private static final int TOP_N = 10;
     private static final String entryTemplate = "**${rank}** • ${flag} • **${displayName}** • ${time}${delta}";
 
-    public Optional<MessageEmbed> createTopPost(ClubResults results) {
+    public Optional<MessageEmbed> createTopPost(ClubResults results, boolean trackedOnly) {
         // A TT board is per-stage; only a single-stage event maps to exactly one board.
         if (results.stages().size() != 1) {
             return Optional.empty();
@@ -49,8 +52,10 @@ public class TimeTrialTopMessageFactory {
 
         String combinationId = buildCombinationId(results);
 
-        List<TimeTrialLeaderboardEntry> top = entryRepository
-                .findLatestPage(combinationId, PageRequest.of(0, TOP_N, Sort.by(Sort.Direction.ASC, "rank")))
+        PageRequest topPage = PageRequest.of(0, TOP_N, Sort.by(Sort.Direction.ASC, "rank"));
+        List<TimeTrialLeaderboardEntry> top = (trackedOnly
+                ? entryRepository.findLatestTrackedPage(combinationId, topPage)
+                : entryRepository.findLatestPage(combinationId, topPage))
                 .getContent();
 
         if (top.isEmpty()) {

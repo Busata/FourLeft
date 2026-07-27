@@ -20,6 +20,9 @@ public interface EAWRCBackendApi {
     @GetMapping("/api_v2/results/{channelId}/standings")
     Optional<String> getStandings(@PathVariable Long channelId);
 
+    @GetMapping("/api_v2/results/{channelId}/timetrial")
+    Optional<String> getTimeTrialTop(@PathVariable Long channelId);
+
     @GetMapping("/api_v2/configuration/channels")
     List<DiscordClubConfigurationTo> getConfigurations();
 

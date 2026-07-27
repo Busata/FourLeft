@@ -49,7 +49,7 @@ public class ChampionshipStartedMessageService {
 
                 // Show the time-trial top 10 so members know the target times to beat, when enabled.
                 if (configuration.isTimeTrialTopEnabled()) {
-                    timeTrialTopMessageFactory.createTopPost(results).ifPresent(embeds::add);
+                    timeTrialTopMessageFactory.createTopPost(results, configuration.isTimeTrialTopTrackedOnly()).ifPresent(embeds::add);
                 }
             });
 

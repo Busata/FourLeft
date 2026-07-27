@@ -49,6 +49,7 @@ public class MessageCache {
         var previousResults = api.getPreviousResults(channelId);
         var standings = api.getStandings(channelId);
         var summary = api.getSummary(channelId);
+        var timeTrialTop = api.getTimeTrialTop(channelId);
 
 
         Map<MessageCacheType, MessageEmbed> messages = this.cachedData.get(channelId);
@@ -64,6 +65,9 @@ public class MessageCache {
         });
         summary.ifPresent(results -> {
             messages.put(MessageCacheType.EVENTS_SUMMARY, embedFactory.create(results));
+        });
+        timeTrialTop.ifPresent(results -> {
+            messages.put(MessageCacheType.TIME_TRIAL_TOP, embedFactory.create(results));
         });
     }
 
