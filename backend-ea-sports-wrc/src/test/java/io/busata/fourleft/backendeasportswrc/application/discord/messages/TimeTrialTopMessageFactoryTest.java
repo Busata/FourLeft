@@ -83,9 +83,10 @@ class TimeTrialTopMessageFactoryTest {
 
     @Test
     void rendersTopEntriesForTheEventsBoard() {
+        // Times arrive in Racenet's raw "00:03:12.1000000" form and must render as "03:12.100".
         Page<TimeTrialLeaderboardEntry> page = new PageImpl<>(List.of(
-                entry(1, "leader", "03:12.100", null),
-                entry(2, "chaser", "03:13.500", "00:01.400")));
+                entry(1, "leader", "00:03:12.1000000", null),
+                entry(2, "chaser", "00:03:13.5000000", "00:00:01.4000000")));
         // The dry WRC board for Fridão (location 6, route 101, surface 0, class 19).
         when(entryRepository.findLatestPage(eq("6-101-0-19"), any(Pageable.class))).thenReturn(page);
 
@@ -94,7 +95,8 @@ class TimeTrialTopMessageFactoryTest {
         String entries = renderedEntries(embed);
         assertThat(entries)
                 .contains("**1** • ", "leader", "03:12.100")
-                .contains("**2** • ", "chaser", "03:13.500", "+00:01.400");
+                .contains("**2** • ", "chaser", "03:13.500", "*(+00:01.400)*");
+        assertThat(entries).doesNotContain("1000000", "4000000");
         // Leader carries no delta.
         assertThat(entries.lines().filter(line -> line.contains("leader")).findFirst().orElseThrow())
                 .doesNotContain("+");
@@ -115,13 +117,13 @@ class TimeTrialTopMessageFactoryTest {
     @Test
     void trackedOnlyUsesTheTrackedQueryAndKeepsBoardWideRanks() {
         Page<TimeTrialLeaderboardEntry> page = new PageImpl<>(List.of(
-                entry(4, "trackedPlayer", "03:15.000", "00:02.900")));
+                entry(4, "trackedPlayer", "00:03:15.0000000", "00:00:02.9000000")));
         when(entryRepository.findLatestTrackedPage(eq("6-101-0-19"), any(Pageable.class))).thenReturn(page);
 
         MessageEmbed embed = factory.createTopPost(results(List.of("Fridão")), true).orElseThrow();
 
         // The tracked filter happens in the query; the rendered row keeps its global rank and delta.
-        assertThat(renderedEntries(embed)).contains("**4** • ", "trackedPlayer", "03:15.000", "+00:02.900");
+        assertThat(renderedEntries(embed)).contains("**4** • ", "trackedPlayer", "03:15.000", "*(+00:02.900)*");
         verify(entryRepository, never()).findLatestPage(any(), any(Pageable.class));
     }
 

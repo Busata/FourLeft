@@ -6,6 +6,7 @@ import io.busata.fourleft.backendeasportswrc.application.fieldmapping.WeatherMap
 import io.busata.fourleft.backendeasportswrc.domain.models.TimeTrialLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
+import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -84,13 +85,34 @@ public class TimeTrialTopMessageFactory {
         values.put("rank", String.valueOf(entry.getRank()));
         values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE));
         values.put("displayName", entry.getDisplayName());
-        values.put("time", Optional.ofNullable(entry.getTime()).orElse("-"));
+        values.put("time", formatTime(entry.getTime()));
 
         String diff = entry.getDifferenceToFirst();
         boolean isLeader = entry.getRank() != null && entry.getRank() == 1L;
-        values.put("delta", (isLeader || diff == null || diff.isBlank()) ? "" : " *(+%s)*".formatted(diff));
+        values.put("delta", (isLeader || diff == null || diff.isBlank()) ? "" : " *(%s)*".formatted(formatDelta(diff)));
 
         return StringSubstitutor.replace(entryTemplate, values);
+    }
+
+    // Racenet stores raw "00:04:37.5470000" strings; render them in the same style as the club
+    // results embeds. An unparseable value falls back to the raw string rather than dropping the row.
+    private String formatTime(String rawTime) {
+        if (rawTime == null || rawTime.isBlank()) {
+            return "-";
+        }
+        try {
+            return DurationHelper.formatTime(DurationHelper.parseDuration(rawTime));
+        } catch (RuntimeException ex) {
+            return rawTime;
+        }
+    }
+
+    private String formatDelta(String rawDiff) {
+        try {
+            return DurationHelper.formatDelta(DurationHelper.parseDuration(rawDiff));
+        } catch (RuntimeException ex) {
+            return "+" + rawDiff;
+        }
     }
 
     private int surfaceCondition(ClubResults results) {
