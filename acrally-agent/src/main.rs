@@ -392,19 +392,28 @@ fn check_save(cfg: &Config) {
                     let recs = savegame::parse_records(&bytes);
                     println!("records found: {}", recs.len());
                     match recs.iter().max_by_key(|r| r.timestamp_ticks) {
-                        Some(r) => println!(
-                            "newest: {} / {}  raw {} + {}s = total {}  (ticks {})",
-                            if r.stage.is_empty() {
-                                "(no stage)"
+                        Some(r) => {
+                            println!(
+                                "newest: {} / {}  raw {} + {}s = total {}  (ticks {})",
+                                if r.stage.is_empty() {
+                                    "(no stage)"
+                                } else {
+                                    &r.stage
+                                },
+                                r.car,
+                                fmt(r.raw_ms),
+                                r.penalty_ms / 1000,
+                                fmt(r.total_ms),
+                                r.timestamp_ticks,
+                            );
+                            if r.checkpoints_ms.is_empty() {
+                                println!("checkpoints: (none parsed)");
                             } else {
-                                &r.stage
-                            },
-                            r.car,
-                            fmt(r.raw_ms),
-                            r.penalty_ms / 1000,
-                            fmt(r.total_ms),
-                            r.timestamp_ticks,
-                        ),
+                                let cps: Vec<String> =
+                                    r.checkpoints_ms.iter().map(|&ms| fmt(ms)).collect();
+                                println!("checkpoints: {}", cps.join(" | "));
+                            }
+                        }
                         None => println!("no records parsed — the save format may have changed"),
                     }
                 }

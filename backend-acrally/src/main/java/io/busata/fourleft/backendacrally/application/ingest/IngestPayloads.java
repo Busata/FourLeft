@@ -40,6 +40,8 @@ public final class IngestPayloads {
             @JsonProperty("penalty_ms") int penaltyMs,
             @JsonProperty("total_ms") int totalMs,
             @JsonProperty("timestamp_ticks") long timestampTicks,
+            /** Cumulative checkpoint times in ms, finish included (last == raw_ms). Optional. */
+            @JsonProperty("checkpoints_ms") java.util.List<Integer> checkpointsMs,
             @JsonProperty("driver_id") String driverId,
             @JsonProperty("club_id") String clubId,
             @JsonProperty("agent_version") String agentVersion) {

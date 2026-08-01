@@ -40,7 +40,7 @@ class SessionIngestServiceTest {
     private IngestPayloads.Result resultWithTicks(long ticks) {
         return new IngestPayloads.Result(
                 "GreeceS3ElatiaCut1Reverse", "CitroenXsaraWRC", "Busata",
-                240_282, 0, 240_282, ticks, null, null, "0.3.6");
+                240_282, 0, 240_282, ticks, null, null, null, "0.3.6");
     }
 
     private IngestPayloads.SessionStart sessionStart(Boolean recovery) {

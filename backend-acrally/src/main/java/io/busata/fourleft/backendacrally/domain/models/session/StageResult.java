@@ -44,11 +44,16 @@ public class StageResult {
     @Column(name = "agent_version")
     private String agentVersion;
 
+    /** Cumulative checkpoint ms as CSV, finish included (last == rawMs); NULL when not provided. */
+    @Column(name = "checkpoints_ms")
+    private String checkpointsMs;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public StageResult(UUID sessionId, UUID userId, String stage, String car, String driver,
-                       int rawMs, int penaltyMs, int totalMs, long timestampTicks, String agentVersion) {
+                       int rawMs, int penaltyMs, int totalMs, long timestampTicks,
+                       String checkpointsMs, String agentVersion) {
         this.id = UUID.randomUUID();
         this.sessionId = sessionId;
         this.userId = userId;
@@ -59,7 +64,16 @@ public class StageResult {
         this.penaltyMs = penaltyMs;
         this.totalMs = totalMs;
         this.timestampTicks = timestampTicks;
+        this.checkpointsMs = checkpointsMs;
         this.agentVersion = agentVersion;
         this.createdAt = LocalDateTime.now();
+    }
+
+    /** The CSV column decoded, or an empty list when absent. */
+    public java.util.List<Integer> checkpointList() {
+        if (checkpointsMs == null || checkpointsMs.isBlank()) {
+            return java.util.List.of();
+        }
+        return java.util.Arrays.stream(checkpointsMs.split(",")).map(Integer::parseInt).toList();
     }
 }

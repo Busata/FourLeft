@@ -75,7 +75,7 @@ public class EventLeaderboardEndpoint {
         for (int i = 0; i < rows.size(); i++) {
             EventLeaderboardService.BoardRow r = rows.get(i);
             entries.add(new LeaderboardEntryTo(i + 1, r.userId(), r.driver(), r.carName(),
-                    r.rawMs(), r.penaltyMs(), r.totalMs(), r.recordedAt()));
+                    r.rawMs(), r.penaltyMs(), r.totalMs(), r.checkpointsMs(), r.recordedAt()));
         }
         return new StageBoardTo(
                 board.variantId(),

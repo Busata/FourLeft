@@ -63,6 +63,7 @@ public class MeEndpoint {
                         result.getRawMs(),
                         result.getPenaltyMs(),
                         result.getTotalMs(),
+                        result.checkpointList(),
                         result.getCreatedAt()))
                 .toList();
     }

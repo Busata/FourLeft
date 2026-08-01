@@ -142,6 +142,10 @@ pub struct ResultPayload {
     pub raw_ms: u32,
     pub penalty_ms: u32,
     pub total_ms: u32,
+    /// Cumulative checkpoint times in ms (finish included, so the last equals
+    /// `raw_ms`); empty when the save's checkpoint table didn't validate.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub checkpoints_ms: Vec<u32>,
     /// Save-file timestamp (.NET ticks) — stable id for de-duping a result.
     pub timestamp_ticks: i64,
     pub agent_version: String,

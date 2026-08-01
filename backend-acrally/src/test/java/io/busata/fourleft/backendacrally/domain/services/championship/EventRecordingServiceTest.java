@@ -64,7 +64,7 @@ class EventRecordingServiceTest {
     }
 
     private StageResult result(String stage, String car, int totalMs) {
-        return new StageResult(sessionId, userId, stage, car, "Drv", totalMs, 0, totalMs, 42L, "0.1");
+        return new StageResult(sessionId, userId, stage, car, "Drv", totalMs, 0, totalMs, 42L, null, "0.1");
     }
 
     private AgentSession sessionOn(String track, String car) {

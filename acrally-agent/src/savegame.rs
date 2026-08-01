@@ -34,6 +34,9 @@ pub struct StageRecord {
     pub raw_ms: u32,
     pub penalty_ms: u32,
     pub total_ms: u32,
+    /// Cumulative checkpoint times in ms, finish included (last == `raw_ms`).
+    /// Empty when the record's checkpoint table didn't validate — never guessed.
+    pub checkpoints_ms: Vec<u32>,
 }
 
 /// A record's identity for novelty detection: (timestamp, raw, penalty).
@@ -81,6 +84,66 @@ fn read_f32(b: &[u8], o: usize) -> Option<f32> {
 fn read_i64(b: &[u8], o: usize) -> Option<i64> {
     b.get(o..o + 8)
         .map(|s| i64::from_le_bytes(s.try_into().unwrap()))
+}
+
+fn read_i32(b: &[u8], o: usize) -> Option<i32> {
+    b.get(o..o + 4)
+        .map(|s| i32::from_le_bytes(s.try_into().unwrap()))
+}
+
+/// Checkpoint tolerance: cumulative diffs must reproduce the stored sector
+/// durations to within this many seconds (f32 rounding headroom).
+const CP_EPSILON: f32 = 0.02;
+
+/// Most checkpoints a real stage plausibly has (longest observed: 5).
+const CP_MAX: usize = 32;
+
+/// Decode the record's checkpoint table, anchored like the times themselves.
+///
+/// The numeric block before a record's tick anchor is a table of
+/// `[i32 index][f32 cumulative][f32 sector]` triplets at a 12-byte stride,
+/// newest-last: triplet K ends at the known raw/last-sector floats
+/// (`o-24..o-12`), triplet k sits 12 bytes earlier per step, and the first
+/// triplet repeats its cumulative as its sector. Every sector must equal the
+/// cumulative difference of its neighbours (verified to the ms on real saves,
+/// 2026-08-01). Any mismatch returns an empty vec — a record without splits is
+/// fine, a record with invented splits is not.
+fn read_checkpoints(b: &[u8], anchor: usize, raw: f32) -> Vec<u32> {
+    let k = match read_i32(b, anchor.wrapping_sub(24)) {
+        Some(v) if (1..=CP_MAX as i32).contains(&v) => v as usize,
+        _ => return Vec::new(),
+    };
+    if anchor < 24 + 12 * (k - 1) + 4 {
+        return Vec::new();
+    }
+    let mut cums = vec![0f32; k];
+    let mut secs = vec![0f32; k];
+    for i in (1..=k).rev() {
+        let base = anchor - 24 - 12 * (k - i);
+        let (Some(idx), Some(cum), Some(sec)) = (
+            read_i32(b, base),
+            read_f32(b, base + 4),
+            read_f32(b, base + 8),
+        ) else {
+            return Vec::new();
+        };
+        if idx != i as i32 || !cum.is_finite() || !sec.is_finite() {
+            return Vec::new();
+        }
+        cums[i - 1] = cum;
+        secs[i - 1] = sec;
+    }
+    if (cums[k - 1] - raw).abs() > CP_EPSILON {
+        return Vec::new();
+    }
+    for i in 0..k {
+        let prev = if i == 0 { 0.0 } else { cums[i - 1] };
+        let cum = cums[i];
+        if cum <= prev || (cum - prev - secs[i]).abs() > CP_EPSILON {
+            return Vec::new();
+        }
+    }
+    cums.iter().map(|c| (c * 1000.0).round() as u32).collect()
 }
 
 /// Read an Unreal FString (i32 length prefix + Latin-1 bytes incl. trailing NUL)
@@ -211,6 +274,7 @@ pub fn parse_records(bytes: &[u8]) -> Vec<StageRecord> {
             raw_ms,
             penalty_ms,
             total_ms: raw_ms + penalty_ms,
+            checkpoints_ms: read_checkpoints(bytes, o, raw),
         });
         o += 8;
     }
@@ -265,6 +329,36 @@ mod tests {
         assert_eq!(r.raw_ms, 238_874);
         assert_eq!(r.penalty_ms, 10_000);
         assert_eq!(r.total_ms, 248_874);
+    }
+
+    #[test]
+    fn newest_record_carries_checkpoints() {
+        let r = newest_record(SAVE).expect("should find records");
+        // The fixture's checkpoint table for that run, verified by hand against
+        // the raw bytes: cumulative 1:12.132 | 2:29.981 | 3:58.874 (= raw).
+        assert_eq!(r.checkpoints_ms, vec![72_132, 149_981, 238_874]);
+    }
+
+    #[test]
+    fn all_fixture_checkpoints_are_consistent() {
+        for r in parse_records(SAVE).iter().chain(parse_records(SAVE_CAR_USAGE).iter()) {
+            let cps = &r.checkpoints_ms;
+            if cps.is_empty() {
+                continue; // a record without a valid table is fine
+            }
+            assert!(cps.windows(2).all(|w| w[0] < w[1]), "monotonic: {:?}", r);
+            let last = *cps.last().unwrap() as i64;
+            assert!((last - r.raw_ms as i64).abs() <= 20, "last cp == raw: {:?}", r);
+        }
+    }
+
+    #[test]
+    fn corrupt_checkpoint_table_yields_empty() {
+        // The synthetic block has zeros where the table would sit — index 0 is
+        // not a valid checkpoint count, so no checkpoints may be invented.
+        let bytes = synthetic_record(639_191_101_215_490_000);
+        let r = newest_record(&bytes).expect("record parses");
+        assert!(r.checkpoints_ms.is_empty());
     }
 
     #[test]

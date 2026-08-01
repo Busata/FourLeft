@@ -116,6 +116,7 @@ Request body (`ResultPayload`):
 | `penalty_ms`      | integer (u32) | yes      | Penalty time, ms                                            |
 | `total_ms`        | integer (u32) | yes      | Penalised total (`raw_ms + penalty_ms`), ms                 |
 | `timestamp_ticks` | integer (i64) | yes      | Save-file timestamp in .NET ticks — **stable de-dupe key**  |
+| `checkpoints_ms`  | integer array | no       | Cumulative checkpoint splits, ms, finish included (last == `raw_ms`); omitted when the save's checkpoint table didn't validate. Agent v0.4.2+ |
 | `driver_id`       | string        | no       | Omitted if unset in config                                  |
 | `club_id`         | string        | no       | Omitted if unset in config                                  |
 | `agent_version`   | string        | yes      | Agent version                                               |

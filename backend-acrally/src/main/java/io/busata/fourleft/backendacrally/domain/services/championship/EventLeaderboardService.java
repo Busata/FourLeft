@@ -3,8 +3,10 @@ package io.busata.fourleft.backendacrally.domain.services.championship;
 import io.busata.fourleft.backendacrally.domain.models.car.Car;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventEntry;
 import io.busata.fourleft.backendacrally.domain.models.championship.EventVariant;
+import io.busata.fourleft.backendacrally.domain.models.session.StageResult;
 import io.busata.fourleft.backendacrally.domain.models.user.AppUser;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
+import io.busata.fourleft.backendacrally.domain.services.session.StageResultRepository;
 import io.busata.fourleft.backendacrally.domain.services.user.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,10 +33,12 @@ public class EventLeaderboardService {
     private final EventVariantRepository eventVariantRepository;
     private final AppUserRepository appUserRepository;
     private final CarRepository carRepository;
+    private final StageResultRepository stageResultRepository;
 
     /** A single driver's time on one stage. */
     public record BoardRow(UUID userId, String driver, String carName,
-                           int rawMs, int penaltyMs, int totalMs, LocalDateTime recordedAt) {
+                           int rawMs, int penaltyMs, int totalMs,
+                           List<Integer> checkpointsMs, LocalDateTime recordedAt) {
     }
 
     /** One stage's board (fastest first). */
@@ -53,6 +57,7 @@ public class EventLeaderboardService {
         List<EventEntry> entries = entryRepository.findByEventId(eventId);
         Map<UUID, String> driverNames = resolveDrivers(entries);
         Map<UUID, String> carNames = resolveCars(entries);
+        Map<UUID, List<Integer>> checkpoints = resolveCheckpoints(entries);
 
         // Stage boards, ordered by the event's running order; each board sorted fastest-first.
         List<UUID> orderedVariantIds = eventVariantRepository.findAllByEventIdOrderByPositionAsc(eventId).stream()
@@ -63,7 +68,7 @@ public class EventLeaderboardService {
         List<StageBoard> stages = orderedVariantIds.stream()
                 .map(variantId -> new StageBoard(variantId, byVariant.getOrDefault(variantId, List.of()).stream()
                         .sorted(Comparator.comparingInt(EventEntry::getTotalMs))
-                        .map(e -> row(e, driverNames, carNames))
+                        .map(e -> row(e, driverNames, carNames, checkpoints))
                         .toList()))
                 .toList();
 
@@ -84,12 +89,21 @@ public class EventLeaderboardService {
         return new EventStandings(stages, overall);
     }
 
-    private BoardRow row(EventEntry e, Map<UUID, String> driverNames, Map<UUID, String> carNames) {
+    private BoardRow row(EventEntry e, Map<UUID, String> driverNames, Map<UUID, String> carNames,
+                         Map<UUID, List<Integer>> checkpoints) {
         // Prefer the resolved catalogue car name; fall back to the raw game string when unmapped.
         String carName = e.getCarId() == null ? e.getCarName()
                 : carNames.getOrDefault(e.getCarId(), e.getCarName());
         return new BoardRow(e.getUserId(), driverNames.getOrDefault(e.getUserId(), "—"),
-                carName, e.getRawMs(), e.getPenaltyMs(), e.getTotalMs(), e.getRecordedAt());
+                carName, e.getRawMs(), e.getPenaltyMs(), e.getTotalMs(),
+                checkpoints.getOrDefault(e.getResultId(), List.of()), e.getRecordedAt());
+    }
+
+    /** Checkpoint splits of the entries' backing results, batch-loaded (empty list when absent). */
+    private Map<UUID, List<Integer>> resolveCheckpoints(List<EventEntry> entries) {
+        List<UUID> resultIds = entries.stream().map(EventEntry::getResultId).distinct().toList();
+        return stageResultRepository.findAllById(resultIds).stream()
+                .collect(Collectors.toMap(StageResult::getId, StageResult::checkpointList));
     }
 
     private Map<UUID, String> resolveDrivers(List<EventEntry> entries) {

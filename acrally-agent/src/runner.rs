@@ -433,6 +433,7 @@ impl Runner {
             raw_ms: rec.raw_ms,
             penalty_ms: rec.penalty_ms,
             total_ms: rec.total_ms,
+            checkpoints_ms: rec.checkpoints_ms,
             timestamp_ticks: rec.timestamp_ticks,
             agent_version: env!("CARGO_PKG_VERSION").to_string(),
         };
@@ -495,6 +496,7 @@ mod tests {
             raw_ms,
             penalty_ms: 0,
             total_ms: raw_ms,
+            checkpoints_ms: Vec::new(),
         }
     }
 

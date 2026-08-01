@@ -78,7 +78,8 @@ public class SessionIngestService {
             try {
                 StageResult saved = results.save(new StageResult(
                         session.getId(), userId, p.stage(), p.car(), p.driver(),
-                        p.rawMs(), p.penaltyMs(), p.totalMs(), p.timestampTicks(), p.agentVersion()));
+                        p.rawMs(), p.penaltyMs(), p.totalMs(), p.timestampTicks(),
+                        sanitizedCheckpoints(p.checkpointsMs(), p.rawMs()), p.agentVersion()));
                 // Flush so the row exists before an event_entry references it (FK ordering).
                 results.flush();
                 // First delivery only: score it against any arm bound to this session.
@@ -122,6 +123,31 @@ public class SessionIngestService {
             recordingService.dnfSession(session.getId());
         }
         return silent.size();
+    }
+
+    /**
+     * Checkpoint splits as a CSV column value, or null when absent or implausible. Cumulative,
+     * finish included: strictly increasing positive values whose last entry equals the raw time
+     * (20 ms rounding headroom). A list that fails any check is dropped whole — a partial or
+     * inconsistent split trace is worse than none.
+     */
+    private String sanitizedCheckpoints(List<Integer> checkpoints, int rawMs) {
+        if (checkpoints == null || checkpoints.isEmpty() || checkpoints.size() > 32) {
+            return null;
+        }
+        int prev = 0;
+        for (Integer cp : checkpoints) {
+            if (cp == null || cp <= prev) {
+                return null;
+            }
+            prev = cp;
+        }
+        if (Math.abs(prev - rawMs) > 20) {
+            return null;
+        }
+        StringBuilder csv = new StringBuilder();
+        checkpoints.forEach(cp -> csv.append(csv.isEmpty() ? "" : ",").append(cp));
+        return csv.toString();
     }
 
     /**
