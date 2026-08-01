@@ -16,7 +16,14 @@ public class MediaArchiveProperties {
     /** Channels whose image attachments get archived to the media gallery. */
     private List<Long> channelIds = new ArrayList<>();
 
+    /** Discord user ids allowed to run the backfill command without being a server admin. */
+    private List<Long> operatorUserIds = new ArrayList<>();
+
     public boolean isArchivedChannel(long channelId) {
         return channelIds.contains(channelId);
+    }
+
+    public boolean isOperator(long userId) {
+        return operatorUserIds.contains(userId);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,6 +29,7 @@ public class MediaArchiveBackfillHandler extends ListenerAdapter {
 
     private final JDA client;
     private final MediaArchiveService mediaArchiveService;
+    private final MediaArchiveProperties properties;
     private final EAWRCBackendApi backendApi;
 
     @PostConstruct
@@ -37,7 +39,7 @@ public class MediaArchiveBackfillHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("fourleft")) {
+        if (!event.getName().equals("wrc")) {
             return;
         }
         if (!"archive".equals(event.getSubcommandGroup()) || !"backfill".equals(event.getSubcommandName())) {
@@ -45,6 +47,10 @@ public class MediaArchiveBackfillHandler extends ListenerAdapter {
         }
         if (!event.isFromGuild()) {
             event.reply("This command only works in a server channel.").setEphemeral(true).queue();
+            return;
+        }
+        if (!isAllowed(event)) {
+            event.reply("You are not allowed to run archive commands.").setEphemeral(true).queue();
             return;
         }
 
@@ -56,6 +62,14 @@ public class MediaArchiveBackfillHandler extends ListenerAdapter {
 
         event.deferReply(true).queue();
         mediaArchiveService.submitBackfill(() -> runBackfill(event.getHook(), channel));
+    }
+
+    /** Server admins always may; other users need their id on the configured operator list. */
+    private boolean isAllowed(SlashCommandInteractionEvent event) {
+        if (properties.isOperator(event.getUser().getIdLong())) {
+            return true;
+        }
+        return event.getMember() != null && event.getMember().hasPermission(Permission.ADMINISTRATOR);
     }
 
     private GuildMessageChannel resolveChannel(SlashCommandInteractionEvent event) {

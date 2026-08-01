@@ -32,6 +32,13 @@ public class CommandCreator {
                         new SubcommandGroupData("events", "Event related commands")
                                 .addSubcommands(
                                         new SubcommandData("summary", "Summary of the events for the active championship")
+                                ),
+                        // Visible to everyone (the admin-gated /fourleft command is hidden from
+                        // non-admins entirely); the handler restricts it to admins + configured operators.
+                        new SubcommandGroupData("archive", "Media archive")
+                                .addSubcommands(
+                                        new SubcommandData("backfill", "Archive this channel's full image history to the media gallery")
+                                                .addOption(OptionType.CHANNEL, "channel", "Channel to backfill (defaults to the current channel)", false)
                                 )
                 )
                 .addSubcommands(
@@ -53,11 +60,6 @@ public class CommandCreator {
                                         new SubcommandData("untrack", "Track a club in this channel")
                                                 .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true),
                                         new SubcommandData("edit", "Generate a private link to view and edit this channel's configuration")
-                                ),
-                        new SubcommandGroupData("archive", "Media archive")
-                                .addSubcommands(
-                                        new SubcommandData("backfill", "Archive this channel's full image history to the media gallery")
-                                                .addOption(OptionType.CHANNEL, "channel", "Channel to backfill (defaults to the current channel)", false)
                                 )
                 );
 
