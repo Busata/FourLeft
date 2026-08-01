@@ -27,7 +27,12 @@
                   <span class="dash-sub">{{ r.car }}</span>
                 </td>
                 <td class="wide-only">{{ r.car }}</td>
-                <td class="dash-time">{{ formatTime(r.totalMs) }}</td>
+                <td class="dash-time">
+                  {{ formatTime(r.totalMs) }}
+                  @if (r.checkpointsMs?.length) {
+                    <span class="dash-sub">{{ formatSplits(r) }}</span>
+                  }
+                </td>
                 <td>{{ formatPenalty(r.penaltyMs) }}</td>
                 <td class="wide-only">{{ r.recordedAt | date: 'short' }}</td>
               </tr>

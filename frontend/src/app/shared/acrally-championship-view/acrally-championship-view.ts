@@ -8,6 +8,7 @@ import type {
   ChampionshipEventTo,
   EventLeaderboardTo,
   EventVariantTo,
+  LeaderboardEntryTo,
   StageBoardTo,
 } from '../../models/acrally';
 
@@ -35,6 +36,9 @@ export class AcrallyChampionshipView {
   private readonly tabs = signal<Map<string, string>>(new Map());
   /** Events whose car list is expanded past the +N overflow. */
   private readonly carsOpen = signal<Set<string>>(new Set());
+
+  /** Board rows whose checkpoint splits are expanded, keyed event:variant:user. */
+  private readonly splitsOpen = signal<Set<string>>(new Set());
 
   /** Car chips shown before collapsing the rest behind "+N more". */
   private readonly carLimit = 6;
@@ -180,6 +184,65 @@ export class AcrallyChampionshipView {
       next.delete(eventId);
       return next;
     });
+  }
+
+  // --- Checkpoint splits (per board row, expandable) ---
+  hasSplits(e: LeaderboardEntryTo): boolean {
+    return (e.checkpointsMs?.length ?? 0) > 0;
+  }
+
+  splitsKey(eventId: string, variantId: string, e: LeaderboardEntryTo): string {
+    return `${eventId}:${variantId}:${e.userId}`;
+  }
+
+  splitsShown(key: string): boolean {
+    return this.splitsOpen().has(key);
+  }
+
+  toggleSplits(key: string): void {
+    this.splitsOpen.update((s) => {
+      const next = new Set(s);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  /**
+   * The row splits are compared against: the best-ranked entry that has the same number of
+   * checkpoints (usually the leader). Undefined for the reference row itself and when nobody
+   * comparable exists — those rows show sector durations instead of deltas.
+   */
+  splitRef(sb: StageBoardTo, e: LeaderboardEntryTo): LeaderboardEntryTo | undefined {
+    const ref = sb.entries.find(
+      (c) => this.hasSplits(c) && c.checkpointsMs.length === e.checkpointsMs.length,
+    );
+    return ref && ref.userId !== e.userId ? ref : undefined;
+  }
+
+  /** Checkpoint label: CP1…CPn-1, "Fin" for the finish line. */
+  cpLabel(e: LeaderboardEntryTo, i: number): string {
+    return i === e.checkpointsMs.length - 1 ? 'Fin' : `CP${i + 1}`;
+  }
+
+  /** Duration of sector i (cumulative difference). */
+  sectorMs(e: LeaderboardEntryTo, i: number): number {
+    return e.checkpointsMs[i] - (i > 0 ? e.checkpointsMs[i - 1] : 0);
+  }
+
+  /** Signed gap to the reference at checkpoint i (negative = ahead). */
+  cpDelta(ref: LeaderboardEntryTo, e: LeaderboardEntryTo, i: number): number {
+    return e.checkpointsMs[i] - ref.checkpointsMs[i];
+  }
+
+  /** "+1.234" / "−0.850" — signed split gap in seconds (splits stay sub-minute readable). */
+  formatSignedGap(ms: number): string {
+    const sign = ms < 0 ? '−' : '+';
+    return `${sign}${(Math.abs(ms) / 1000).toFixed(3)}`;
+  }
+
+  /** A sector's duration, e.g. "57.623" or "1:24.872" (shown when there is nobody to compare to). */
+  formatSector(ms: number): string {
+    return ms >= 60_000 ? this.formatTime(ms) : `${(ms / 1000).toFixed(3)}`;
   }
 
   // --- Cars ---

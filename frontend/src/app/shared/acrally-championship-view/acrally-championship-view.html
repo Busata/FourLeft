@@ -109,9 +109,19 @@
                       </thead>
                       <tbody>
                         @for (e of sb.entries; track e.userId; let ei = $index) {
-                          <tr>
+                          <tr
+                            [class.ev-board__row--splittable]="hasSplits(e)"
+                            (click)="hasSplits(e) && toggleSplits(splitsKey(event.id, sb.variantId, e))">
                             <td class="ev-board__pos"><span class="pod {{ podClass(e.rank) }}">{{ e.rank }}</span></td>
-                            <td class="ev-board__driver">{{ e.driver }}</td>
+                            <td class="ev-board__driver">
+                              {{ e.driver }}
+                              @if (hasSplits(e)) {
+                                <span
+                                  class="ev-board__caret"
+                                  [class.ev-board__caret--open]="splitsShown(splitsKey(event.id, sb.variantId, e))"
+                                  aria-hidden="true">▾</span>
+                              }
+                            </td>
                             <td class="ev-board__wide ev-board__faint">{{ e.carName || '—' }}</td>
                             <td class="ev-board__num">
                               {{ formatTime(e.totalMs) }}
@@ -127,6 +137,33 @@
                               }
                             </td>
                           </tr>
+                          @if (hasSplits(e) && splitsShown(splitsKey(event.id, sb.variantId, e))) {
+                            <tr class="ev-splits">
+                              <td colspan="5">
+                                <div class="ev-splits__strip">
+                                  @for (cp of e.checkpointsMs; track $index; let ci = $index) {
+                                    <span class="ev-splits__cp">
+                                      <span class="ev-splits__label">{{ cpLabel(e, ci) }}</span>
+                                      <span class="ev-splits__time">{{ formatTime(cp) }}</span>
+                                      @if (splitRef(sb, e); as ref) {
+                                        <span
+                                          class="ev-splits__delta"
+                                          [class.ev-splits__delta--ahead]="cpDelta(ref, e, ci) < 0"
+                                          [class.ev-splits__delta--behind]="cpDelta(ref, e, ci) > 0">
+                                          {{ formatSignedGap(cpDelta(ref, e, ci)) }}
+                                        </span>
+                                      } @else {
+                                        <span class="ev-splits__sector">{{ formatSector(sectorMs(e, ci)) }}</span>
+                                      }
+                                    </span>
+                                  }
+                                  @if (splitRef(sb, e)) {
+                                    <span class="ev-splits__note">vs fastest</span>
+                                  }
+                                </div>
+                              </td>
+                            </tr>
+                          }
                         }
                       </tbody>
                     </table>

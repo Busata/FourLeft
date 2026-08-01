@@ -222,6 +222,8 @@ export interface MyResultTo {
   rawMs: number;
   penaltyMs: number;
   totalMs: number;
+  /** Cumulative checkpoint splits in ms, finish included; empty when unavailable (pre-v0.4.2 agents). */
+  checkpointsMs: number[];
   recordedAt: string;
 }
 
@@ -349,6 +351,8 @@ export interface LeaderboardEntryTo {
   rawMs: number;
   penaltyMs: number;
   totalMs: number;
+  /** Cumulative checkpoint splits in ms, finish included; empty when unavailable (pre-v0.4.2 agents). */
+  checkpointsMs: number[];
   recordedAt: string;
 }
 

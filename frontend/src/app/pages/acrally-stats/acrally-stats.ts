@@ -54,6 +54,11 @@ export class AcrallyStats implements OnInit {
     return ms > 0 ? `+${(ms / 1000).toFixed(1)}s` : '—';
   }
 
+  /** Cumulative checkpoint splits under the total, e.g. "1:24.872 · 2:22.495 · 3:51.536". */
+  formatSplits(r: MyResultTo): string {
+    return r.checkpointsMs.map((cp) => this.formatTime(cp)).join(' · ');
+  }
+
   prevSessionsPage(): void {
     if (this.sessionsPage() > 0) {
       this.sessionsPage.update((n) => n - 1);

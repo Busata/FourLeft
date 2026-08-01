@@ -233,6 +233,83 @@
   color: var(--faint);
 }
 
+// ---- Checkpoint splits (expandable per row) -----------------------------------------------------
+.ev-board__row--splittable {
+  cursor: pointer;
+
+  &:hover .ev-board__driver {
+    color: var(--accent);
+  }
+}
+
+.ev-board__caret {
+  margin-left: 4px;
+  color: var(--faint);
+  font-size: 10px;
+  display: inline-block;
+  transform: rotate(-90deg);
+  transition: transform 0.12s ease;
+
+  &--open {
+    transform: none;
+  }
+}
+
+.ev-splits td {
+  padding: 0 8px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ev-splits__strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ev-splits__cp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ev-splits__label {
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ev-splits__time {
+  color: var(--ink);
+}
+
+.ev-splits__sector,
+.ev-splits__delta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ev-splits__delta--ahead {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.ev-splits__delta--behind {
+  color: var(--danger);
+}
+
+.ev-splits__note {
+  color: var(--faint);
+  font-size: 11px;
+}
+
 // Wide-only column (car): hidden on narrow screens, shown from 720px.
 .ev-board__wide {
   display: none;
