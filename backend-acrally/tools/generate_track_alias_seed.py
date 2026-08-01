@@ -12,7 +12,8 @@ and emits an upsert seed that only ever fills unassigned aliases (admin
 assignments are never overwritten).
 
 Strings a community translation mod produces (e.g. Portuguese "Grécia Zeli")
-cannot be derived and still need manual assignment in the admin UI.
+cannot be derived; once observed and identified, add them to MANUAL_ALIASES
+below and regenerate — until then they need assignment in the admin UI.
 
 Usage (after extract_game_locres.py for each locale + extract_track_variants.py):
   ./generate_track_alias_seed.py --variants variant_seed.json --locres-dir . \
@@ -24,6 +25,20 @@ import sys
 from pathlib import Path
 
 LOCALES = ["de", "en", "es", "fr", "it", "zh-Hans"]
+# Hand-curated aliases observed in the wild that cannot be derived from game
+# files — community translation mods replace the locres strings client-side.
+# Only add entries whose target is unambiguous; they are checked against the
+# derived set and the build fails on any conflict.
+MANUAL_ALIASES = {
+    # Portuguese translation mod (observed on prod 2026-08-01); labels mirror
+    # the English short labels 1:1, so the mapping is unambiguous
+    "Grécia Elatia": "GreeceS3ElatiaCut1Forward",
+    "Grécia Zeli": "GreeceS3ElatiaCut2Forward",
+    "Grécia Zeli - Elatia": "GreeceS3ElatiaFullReverse",
+    "Grécia New Loutraki": "GreeceS4LoutrakiCut1Forward",
+    "Grécia Aghii Theodori": "GreeceS4LoutrakiCut2Forward",
+    "Grécia Aghii Theodori (Inverso)": "GreeceS4LoutrakiCut2Reverse",
+}
 TRACK_FIELD_LEN = 32  # UTF-16 code units, [u16; 33] minus the terminator
 # stage prefix (variant raw-key prefix) -> TRACK_LOCATION_* key suffix
 LOCATION_KEY = {
@@ -76,6 +91,17 @@ def main():
               + "; ".join(ambiguous), file=sys.stderr)
     rows = [(a, next(iter(t))) for a, t in composed.items() if len(t) == 1]
     rows += [(v["raw_name"], v["raw_name"]) for v in variants]  # old-agent self-maps
+    known = {v["raw_name"] for v in variants}
+    derived = dict(rows)
+    for alias, raw in MANUAL_ALIASES.items():
+        if raw not in known:
+            raise SystemExit(f"manual alias {alias!r} targets unknown variant {raw!r}")
+        if alias in composed and composed[alias] != {raw}:
+            raise SystemExit(f"manual alias {alias!r} conflicts with derived mapping {composed[alias]}")
+        if derived.get(alias) not in (None, raw):
+            raise SystemExit(f"manual alias {alias!r} conflicts with derived row -> {derived[alias]}")
+        if alias not in derived:
+            rows.append((alias, raw))
     rows.sort()
 
     def q(s):
@@ -88,9 +114,12 @@ def main():
 -- Live telemetry writes "<localized location> <localized variant label>" into a
 -- 32-UTF-16-unit field (hence the truncated entries); labels come from the
 -- TRACK_*_SHORT locres keys with per-key English fallback, so most strings mix
--- languages. Older agents report the raw variant key itself. Community
--- translation mods produce strings not covered here — those stay for admin
--- assignment, as do the {len(ambiguous)} composition(s) dropped as ambiguous.
+-- languages. Older agents report the raw variant key itself. Also includes
+-- {len(MANUAL_ALIASES)} hand-curated entries for observed translation-mod strings; new mod
+-- strings need admin assignment (or add them to MANUAL_ALIASES and
+-- regenerate). {len(ambiguous)} composition(s) the game emits identically for more than
+-- one stage (e.g. "Alsace Forêt") are dropped on purpose and must stay
+-- unassigned — assigning either variant would misbind the other's sessions.
 --
 -- Upsert policy: insert unknown aliases pre-assigned, fill variant_id on
 -- existing unassigned rows, never touch an alias an admin already assigned.

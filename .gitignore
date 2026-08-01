@@ -39,3 +39,4 @@ application-override.yml
 application-override.yaml
 
 fourleft.sql
+__pycache__/

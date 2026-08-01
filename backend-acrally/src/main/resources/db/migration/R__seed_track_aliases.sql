@@ -5,9 +5,12 @@
 -- Live telemetry writes "<localized location> <localized variant label>" into a
 -- 32-UTF-16-unit field (hence the truncated entries); labels come from the
 -- TRACK_*_SHORT locres keys with per-key English fallback, so most strings mix
--- languages. Older agents report the raw variant key itself. Community
--- translation mods produce strings not covered here — those stay for admin
--- assignment, as do the 12 composition(s) dropped as ambiguous.
+-- languages. Older agents report the raw variant key itself. Also includes
+-- 6 hand-curated entries for observed translation-mod strings; new mod
+-- strings need admin assignment (or add them to MANUAL_ALIASES and
+-- regenerate). 12 composition(s) the game emits identically for more than
+-- one stage (e.g. "Alsace Forêt") are dropped on purpose and must stay
+-- unassigned — assigning either variant would misbind the other's sessions.
 --
 -- Upsert policy: insert unknown aliases pre-assigned, fill variant_id on
 -- existing unassigned rows, never touch an alias an admin already assigned.
@@ -173,6 +176,12 @@ FROM (VALUES
     ('Grèce Zeli', 'GreeceS3ElatiaCut2Forward'),
     ('Grèce Zeli - Elatia', 'GreeceS3ElatiaFullReverse'),
     ('Grèce Zeli inversé', 'GreeceS3ElatiaCut2Reverse'),
+    ('Grécia Aghii Theodori', 'GreeceS4LoutrakiCut2Forward'),
+    ('Grécia Aghii Theodori (Inverso)', 'GreeceS4LoutrakiCut2Reverse'),
+    ('Grécia Elatia', 'GreeceS3ElatiaCut1Forward'),
+    ('Grécia New Loutraki', 'GreeceS4LoutrakiCut1Forward'),
+    ('Grécia Zeli', 'GreeceS3ElatiaCut2Forward'),
+    ('Grécia Zeli - Elatia', 'GreeceS3ElatiaFullReverse'),
     ('Livigno Circuit Main Circuit', 'LivignoTestTrack01FullForward'),
     ('Livigno Circuit Main Circuit Rev', 'LivignoTestTrack01FullReverse'),
     ('Livigno Circuit Main Reverse', 'LivignoTestTrack01FullReverse'),
