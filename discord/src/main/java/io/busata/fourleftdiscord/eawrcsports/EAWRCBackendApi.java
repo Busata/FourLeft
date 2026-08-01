@@ -44,4 +44,10 @@ public interface EAWRCBackendApi {
     @PostMapping("/api_v2/configuration/channel/request")
     ChannelConfigurationRequestResultTo requestChannelConfiguration(@RequestBody ChannelConfigurationRequestTo request);
 
+    @PostMapping("/api_v2/media-archive/posts")
+    void ingestMediaArchivePost(@RequestBody CreateMediaArchivePostTo post);
+
+    @GetMapping("/api_v2/media-archive/channels/{channelId}/message-ids")
+    List<Long> getArchivedMediaMessageIds(@PathVariable Long channelId);
+
 }

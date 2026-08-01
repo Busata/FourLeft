@@ -53,6 +53,11 @@ public class CommandCreator {
                                         new SubcommandData("untrack", "Track a club in this channel")
                                                 .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true),
                                         new SubcommandData("edit", "Generate a private link to view and edit this channel's configuration")
+                                ),
+                        new SubcommandGroupData("archive", "Media archive")
+                                .addSubcommands(
+                                        new SubcommandData("backfill", "Archive this channel's full image history to the media gallery")
+                                                .addOption(OptionType.CHANNEL, "channel", "Channel to backfill (defaults to the current channel)", false)
                                 )
                 );
 

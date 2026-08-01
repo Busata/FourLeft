@@ -1,0 +1,50 @@
+<div class="gallery">
+  <h1 class="gallery__title">Community Gallery</h1>
+  <p class="gallery__sub">Screenshots shared by the community on Discord.</p>
+
+  @if (!loaded()) {
+    <p class="gallery__status">Loading…</p>
+  } @else if (posts().length === 0) {
+    <p class="gallery__status">No posts yet.</p>
+  }
+
+  @for (post of posts(); track post.messageId) {
+    <article class="post g-card">
+      <header class="post__header">
+        <div class="post__avatar">
+          <span class="post__avatar-initial">{{ initial(post) }}</span>
+          @if (post.authorAvatarUrl) {
+            <img [src]="post.authorAvatarUrl" alt="" (error)="hideBrokenAvatar($event)" />
+          }
+        </div>
+        <div class="post__meta">
+          <span class="post__author">{{ authorName(post) }}</span>
+          <span class="post__date">{{ post.timestamp | date: 'mediumDate' }}</span>
+        </div>
+      </header>
+
+      <div class="post__images" [class.post__images--multi]="post.images.length > 1">
+        @for (image of post.images; track image.imageStoreUuid; let first = $first) {
+          <a
+            class="post__image-link"
+            [class.post__image-link--lead]="first"
+            [href]="fullUrl(image)"
+            target="_blank"
+            rel="noopener">
+            <img [src]="thumbUrl(image)" [style.aspect-ratio]="aspectRatio(image)" loading="lazy" alt="" />
+          </a>
+        }
+      </div>
+
+      @if (post.caption) {
+        <p class="post__caption">{{ post.caption }}</p>
+      }
+    </article>
+  }
+
+  @if (hasMore()) {
+    <button class="g-button g-button-secondary gallery__more" type="button" (click)="loadMore()" [disabled]="loading()">
+      {{ loading() ? 'Loading…' : 'Load more' }}
+    </button>
+  }
+</div>

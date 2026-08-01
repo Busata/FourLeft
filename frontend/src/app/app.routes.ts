@@ -13,6 +13,7 @@ import { TimeTrialsShell } from './pages/time-trials-shell/time-trials-shell';
 import { TimeTrialsBoards } from './pages/time-trials-boards/time-trials-boards';
 import { TimeTrialsProfile } from './pages/time-trials-profile/time-trials-profile';
 import { ClubCompare } from './pages/club-compare/club-compare';
+import { MediaGallery } from './pages/media-gallery/media-gallery';
 import { AcrallyLogin } from './pages/acrally-login/acrally-login';
 import { AcrallyAccount } from './pages/acrally-account/acrally-account';
 import { AcrallyLink } from './pages/acrally-link/acrally-link';
@@ -62,6 +63,7 @@ export const routes: Routes = [
         ],
       },
       { path: 'easportswrc/club-compare', component: ClubCompare, title: 'Club Compare' },
+      { path: 'easportswrc/gallery', component: MediaGallery, title: 'Community Gallery' },
       { path: 'acrally/login', component: AcrallyLogin, title: 'AC Rally — Sign in' },
       {
         path: 'acrally/dashboard',
