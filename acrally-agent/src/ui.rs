@@ -786,11 +786,11 @@ fn stage_row(
     busy: bool,
     action: &mut RaceAction,
 ) {
+    // Controls are allocated from the right FIRST, and the label truncates into
+    // whatever is left: laid out label-first, a long stage name pushes the Start
+    // button past the window edge — invisible, and indistinguishable from "there
+    // is no start button" (as a bug report memorably proved).
     ui.horizontal(|ui| {
-        ui.label(&stage.label);
-        if let Some(ms) = stage.my_best_ms {
-            ui.label(egui::RichText::new(format!("best {}", fmt_ms(ms as i32))).weak());
-        }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let armed_here =
                 arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
@@ -819,6 +819,12 @@ fn stage_row(
                     };
                 }
             }
+            if let Some(ms) = stage.my_best_ms {
+                ui.label(egui::RichText::new(format!("best {}", fmt_ms(ms as i32))).weak());
+            }
+            ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                ui.add(egui::Label::new(&stage.label).truncate());
+            });
         });
     });
 }
