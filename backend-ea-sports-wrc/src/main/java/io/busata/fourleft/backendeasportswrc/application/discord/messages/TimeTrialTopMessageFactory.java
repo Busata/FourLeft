@@ -48,6 +48,7 @@ public class TimeTrialTopMessageFactory {
     public Optional<MessageEmbed> createTopPost(ClubResults results, boolean trackedOnly) {
         // A TT board is per-stage; only a single-stage event maps to exactly one board.
         if (results.stages().size() != 1) {
+            log.info("TT top post • club {} • skipped, event has {} stages", results.clubId(), results.stages().size());
             return Optional.empty();
         }
 
@@ -61,8 +62,12 @@ public class TimeTrialTopMessageFactory {
 
         if (top.isEmpty()) {
             // Board not synced yet or gone from Racenet — no target times to show.
+            log.info("TT top post • club {} • skipped, board {} has no {}entries", results.clubId(), combinationId,
+                    trackedOnly ? "tracked " : "");
             return Optional.empty();
         }
+
+        log.info("TT top post • club {} • posting top {} of board {}", results.clubId(), top.size(), combinationId);
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("**Time Trial • Target times**");

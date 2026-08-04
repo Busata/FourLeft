@@ -32,6 +32,7 @@ public class ClubEventEndedMessageService {
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory clubStandingsMessageFactory;
     private final ClubStatsMessageFactory clubStatsMessageFactory;
+    private final TimeTrialTopMessageFactory timeTrialTopMessageFactory;
 
     @EventListener
     public void handleClubEvent(ClubEventEnded eventEnded) {
@@ -80,6 +81,11 @@ public class ClubEventEndedMessageService {
             clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
                 MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
+
+                // Show the time-trial top 10 so members know the target times to beat, when enabled.
+                if (configuration.isTimeTrialTopEnabled()) {
+                    timeTrialTopMessageFactory.createTopPost(results, configuration.isTimeTrialTopTrackedOnly()).ifPresent(embeds::add);
+                }
             });
         } catch (Exception ex) {
             log.error("Could not add current results to club event ended post", ex);
