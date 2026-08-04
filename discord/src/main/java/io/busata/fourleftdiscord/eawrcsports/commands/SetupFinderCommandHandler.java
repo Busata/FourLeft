@@ -39,15 +39,14 @@ public class SetupFinderCommandHandler extends ListenerAdapter {
         }
 
         String country = event.getOption("country", OptionMapping::getAsString);
-        String car = event.getOption("car", OptionMapping::getAsString);
 
         event.deferReply(true).queue();
-        findAndReplySetups(event, country, car);
+        findAndReplySetups(event, country);
     }
 
-    private void findAndReplySetups(SlashCommandInteractionEvent event, String country, String car) {
+    private void findAndReplySetups(SlashCommandInteractionEvent event, String country) {
         try {
-            List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase()) && channel.name().toLowerCase().contains(car.toLowerCase())).toList();
+            List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase())).toList();
             if (channels.isEmpty()) {
                 event.getHook().sendMessage("Could not find any setups.").setEphemeral(true).queue();
             } else {

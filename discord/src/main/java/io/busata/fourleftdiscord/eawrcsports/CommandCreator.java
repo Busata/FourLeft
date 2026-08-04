@@ -46,7 +46,6 @@ public class CommandCreator {
                                 .addOption(OptionType.STRING, "racenet", "EA Racenet account name, case sensitive", true),
                         new SubcommandData("setup", "Find the perfect tune in the EA SPORTS WRC setup channel")
                                 .addOption(OptionType.STRING, "country", "Country", true)
-                                .addOption(OptionType.STRING, "car", "Car name", true)
                 );
 
         SlashCommandData configureBotCommand = Commands.slash("fourleft", "Commands related to the fourleft bot")
