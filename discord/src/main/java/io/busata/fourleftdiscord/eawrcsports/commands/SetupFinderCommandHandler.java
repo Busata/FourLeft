@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class SetupFinderCommandHandler extends ListenerAdapter {
+    // Guild hosting the setup forum; must match the guild queried in the backend's QueryEndpoint
+    private static final long SETUP_GUILD_ID = 892050958723469332L;
+
     private final JDA client;
     private final EAWRCBackendApi api;
 
@@ -40,7 +43,7 @@ public class SetupFinderCommandHandler extends ListenerAdapter {
 
         String country = event.getOption("country", OptionMapping::getAsString);
 
-        event.deferReply(true).queue();
+        event.deferReply().queue();
         findAndReplySetups(event, country);
     }
 
@@ -48,12 +51,13 @@ public class SetupFinderCommandHandler extends ListenerAdapter {
         try {
             List<SetupChannelResultTo> channels = api.getChannels().stream().filter(channel -> channel.name().toLowerCase().contains(country.toLowerCase())).toList();
             if (channels.isEmpty()) {
-                event.getHook().sendMessage("Could not find any setups.").setEphemeral(true).queue();
+                event.getHook().sendMessage("Could not find any setups.").queue();
             } else {
                 String channelResult = channels.stream().map(result -> {
-                    return "<#%s>".formatted(result.id());
+                    // Link instead of <#id> mention: archived threads aren't in the client cache and render as #unknown
+                    return "[%s](https://discord.com/channels/%d/%d)".formatted(result.name(), SETUP_GUILD_ID, result.id());
                 }).collect(Collectors.joining("\n"));
-                event.getHook().sendMessage("Found the following setups:\n%s".formatted(channelResult)).setEphemeral(true).queue();
+                event.getHook().sendMessage("Found the following setups:\n%s".formatted(channelResult)).queue();
             }
         } catch (Exception ex) {
             event.getHook().sendMessage("Something went wrong! Please poke @busata").queue();
