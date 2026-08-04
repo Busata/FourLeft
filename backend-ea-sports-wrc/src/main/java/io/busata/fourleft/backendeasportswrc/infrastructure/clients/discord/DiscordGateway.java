@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord;
 
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordActiveThreadsTo;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordArchivedThreadsTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordMessageTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -29,6 +30,11 @@ public interface DiscordGateway {
 
     @GetMapping("/guilds/{guildId}/threads/active")
     DiscordActiveThreadsTo getThreads(@PathVariable Long guildId);
+
+    @GetMapping("/channels/{channelId}/threads/archived/public")
+    DiscordArchivedThreadsTo getPublicArchivedThreads(@PathVariable Long channelId,
+                                                      @RequestParam(value = "before", required = false) String before,
+                                                      @RequestParam("limit") Long limit);
 
     default Optional<DiscordMessageTo> getLastChannelMessage(Long channelId) {
 
