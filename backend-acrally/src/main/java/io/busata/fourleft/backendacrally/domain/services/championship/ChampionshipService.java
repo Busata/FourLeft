@@ -286,7 +286,8 @@ public class ChampionshipService {
         return championship;
     }
 
-    private ChampionshipEvent requireOwnedEvent(UUID eventId, UUID userId) {
+    /** The event, or 404/403 — the guard every owner-only action on an event goes through. */
+    public ChampionshipEvent requireOwnedEvent(UUID eventId, UUID userId) {
         ChampionshipEvent event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such event."));
         requireOwnedChampionship(event.getChampionshipId(), userId);

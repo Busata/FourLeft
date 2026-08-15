@@ -159,3 +159,29 @@ Changes vs. the "Key decisions" above:
   migration `V018`. Cookie-session model unchanged (still instantly revocable).
 - `SteamLinkService`/link flow deleted — the identity row is created at sign-in.
 - Account recovery is now "recover your Steam account"; admin role stays a manual DB flag.
+
+---
+
+## Addendum (2026-08-15) — Owner-reverted DNFs
+
+The one-shot rule is deliberately unforgiving: a bound run that never produces a save record is a
+DNF (restart, quit, crash, or an arm that expired idle) and it spends the driver's only shot at that
+stage. The server cannot tell a bail-out from a crashed game, a killed agent, or a Start pressed by
+mistake — so the club owner arbitrates.
+
+- `event_arm` gains `reverted_at` / `reverted_by` (migration `V024`). The row keeps
+  `outcome = DNF`: reverting is not a rewrite of what happened, it's a decision that it shouldn't
+  count. Deleting the row would lose the audit trail of who granted the retry.
+- Every one-shot check now reads the standing DNFs only —
+  `existsByUserIdAndEventIdAndVariantIdAndOutcomeAndRevertedAtIsNull` (arming) and
+  `findAllByUserIdAndEventIdAndOutcomeAndRevertedAtIsNull` (the agent's races list, which marks
+  used-up stages). A reverted DNF simply stops counting, so the stage opens back up.
+- `EventDnfService` is the owner-scoped counterpart to the driver-scoped `EventArmService`:
+  `GET /events/{eventId}/dnfs` + `POST /events/{eventId}/dnfs/{armId}/revert`, both gated by
+  `ChampionshipService#requireOwnedEvent` (now public for exactly this). Revert is idempotent and
+  refuses anything that isn't a DNF, or an arm from another event.
+- Frontend: the championship view's event card gets a "DNFs" tab, rendered only when
+  `detail().owner` — driver, stage, cause ("quit / restart / crash" vs "armed, never ran"), when,
+  and a Revert button. Reverted rows stay listed, dimmed, marked with who reverted them and whether
+  the driver has since set a time. The panel warns when the event has already closed: reverting
+  clears the DNF, but nobody can re-run a stage outside the event window.

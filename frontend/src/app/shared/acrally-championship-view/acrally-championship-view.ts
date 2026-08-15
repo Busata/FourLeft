@@ -6,6 +6,7 @@ import type {
   CarTo,
   ChampionshipDetailTo,
   ChampionshipEventTo,
+  EventDnfTo,
   EventLeaderboardTo,
   EventVariantTo,
   LeaderboardEntryTo,
@@ -40,6 +41,13 @@ export class AcrallyChampionshipView {
   /** Board rows whose checkpoint splits are expanded, keyed event:variant:user. */
   private readonly splitsOpen = signal<Set<string>>(new Set());
 
+  /** Owner-only DNF panel: eventId → its DNFs, fetched when the tab is first opened. */
+  private readonly dnfs = signal<Map<string, EventDnfTo[]>>(new Map());
+  private readonly loadingDnfs = signal<Set<string>>(new Set());
+  /** Arms with a revert in flight, so the button can't be double-fired. */
+  private readonly reverting = signal<Set<string>>(new Set());
+  readonly dnfError = signal('');
+
   /** Car chips shown before collapsing the rest behind "+N more". */
   private readonly carLimit = 6;
 
@@ -66,6 +74,7 @@ export class AcrallyChampionshipView {
     this.expanded.set(new Set(ids));
     for (const id of ids) {
       this.fetchBoard(id);
+      this.fetchDnfs(id);
     }
   }
 
@@ -81,6 +90,7 @@ export class AcrallyChampionshipView {
     } else {
       open.add(eventId);
       this.fetchBoard(eventId);
+      this.fetchDnfs(eventId);
     }
     this.expanded.set(open);
   }
@@ -182,6 +192,81 @@ export class AcrallyChampionshipView {
     this.loadingBoards.update((s) => {
       const next = new Set(s);
       next.delete(eventId);
+      return next;
+    });
+  }
+
+  // --- DNFs (owner only) ---
+  /**
+   * A DNF spends a driver's one shot at a stage, and the server can't tell a bail-out from a
+   * crashed game or a dead agent. The owner sees them all here and can hand a shot back.
+   */
+  dnfList(eventId: string): EventDnfTo[] {
+    return this.dnfs().get(eventId) ?? [];
+  }
+
+  /** DNFs still standing — what the tab badge counts, so a handled event stops nagging. */
+  openDnfCount(eventId: string): number {
+    return this.dnfList(eventId).filter((d) => !d.revertedAt).length;
+  }
+
+  isDnfLoading(eventId: string): boolean {
+    return this.loadingDnfs().has(eventId);
+  }
+
+  isReverting(armId: string): boolean {
+    return this.reverting().has(armId);
+  }
+
+  /** "quit / restart / crash" vs "armed, never ran" — the two ways a shot is lost. */
+  causeLabel(dnf: EventDnfTo): string {
+    return dnf.cause === 'EXPIRED' ? 'armed, never ran' : 'quit / restart / crash';
+  }
+
+  revert(eventId: string, dnf: EventDnfTo): void {
+    if (this.isReverting(dnf.armId)) return;
+    this.dnfError.set('');
+    this.reverting.update((s) => new Set(s).add(dnf.armId));
+    this.http
+      .post<EventDnfTo[]>(`/acrally-api/events/${eventId}/dnfs/${dnf.armId}/revert`, {})
+      .subscribe({
+        next: (list) => {
+          this.dnfs.update((m) => new Map(m).set(eventId, list));
+          this.clearReverting(dnf.armId);
+        },
+        error: () => {
+          this.dnfError.set(`Could not revert ${dnf.driver}'s DNF.`);
+          this.clearReverting(dnf.armId);
+        },
+      });
+  }
+
+  /** Owner-only fetch; the endpoint 403s for everyone else, so don't even ask. */
+  private fetchDnfs(eventId: string): void {
+    if (!this.detail().owner) return;
+    if (this.dnfs().has(eventId) || this.loadingDnfs().has(eventId)) return;
+    this.loadingDnfs.update((s) => new Set(s).add(eventId));
+    this.http.get<EventDnfTo[]>(`/acrally-api/events/${eventId}/dnfs`).subscribe({
+      next: (list) => {
+        this.dnfs.update((m) => new Map(m).set(eventId, list));
+        this.clearDnfLoading(eventId);
+      },
+      error: () => this.clearDnfLoading(eventId),
+    });
+  }
+
+  private clearDnfLoading(eventId: string): void {
+    this.loadingDnfs.update((s) => {
+      const next = new Set(s);
+      next.delete(eventId);
+      return next;
+    });
+  }
+
+  private clearReverting(armId: string): void {
+    this.reverting.update((s) => {
+      const next = new Set(s);
+      next.delete(armId);
       return next;
     });
   }

@@ -23,13 +23,20 @@ public interface EventArmRepository extends JpaRepository<EventArm, UUID> {
     /** The user's most recent arm regardless of status — for showing the last outcome. */
     Optional<EventArm> findFirstByUserIdOrderByCreatedAtDesc(UUID userId);
 
-    /** Whether the user has an arm with the given outcome for a stage — the one-shot DNF check
-     *  (covers both an idle-EXPIRED arm and a CONSUMED one whose bound run was abandoned). */
-    boolean existsByUserIdAndEventIdAndVariantIdAndOutcome(
+    /** Whether the user has a standing (non-reverted) arm with the given outcome for a stage — the
+     *  one-shot DNF check (covers both an idle-EXPIRED arm and a CONSUMED one whose bound run was
+     *  abandoned). A DNF a club owner reverted no longer spends the shot. */
+    boolean existsByUserIdAndEventIdAndVariantIdAndOutcomeAndRevertedAtIsNull(
             UUID userId, UUID eventId, UUID variantId, EventArmOutcome outcome);
 
-    /** The user's arms with a given outcome for an event — marks used-up stages in the races list. */
-    List<EventArm> findAllByUserIdAndEventIdAndOutcome(UUID userId, UUID eventId, EventArmOutcome outcome);
+    /** The user's standing arms with a given outcome for an event — marks used-up stages in the
+     *  races list; reverted DNFs are excluded so the stage opens back up in the agent. */
+    List<EventArm> findAllByUserIdAndEventIdAndOutcomeAndRevertedAtIsNull(
+            UUID userId, UUID eventId, EventArmOutcome outcome);
+
+    /** Every arm with a given outcome across an event, freshest first — the owner's DNF panel.
+     *  Reverted arms are included; the panel shows them as already handled. */
+    List<EventArm> findAllByEventIdAndOutcomeOrderByUpdatedAtDesc(UUID eventId, EventArmOutcome outcome);
 
     /** ARMED arms with no activity (bind/unbind or the arming itself) since the cutoff. */
     @Query("""

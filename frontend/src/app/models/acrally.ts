@@ -364,3 +364,21 @@ export interface EventStandingTo {
   totalMs: number;
   stagesCompleted: number;
 }
+
+// One DNF on an event, from GET /acrally-api/events/{eventId}/dnfs (club owner only). A DNF spends
+// the driver's one shot at that stage; POST .../dnfs/{armId}/revert hands it back.
+export interface EventDnfTo {
+  armId: string;
+  userId: string;
+  driver: string;
+  variantId: string;
+  stageLabel: string;
+  /** ABANDONED (run restarted/quit/crashed) or EXPIRED (armed, never ran). */
+  cause: 'ABANDONED' | 'EXPIRED';
+  occurredAt: string;
+  /** Set once an owner handed the shot back; null while the DNF still stands. */
+  revertedAt: string | null;
+  revertedBy: string | null;
+  /** The driver has since set a time on that stage — a granted retry that was used. */
+  hasTimeSince: boolean;
+}

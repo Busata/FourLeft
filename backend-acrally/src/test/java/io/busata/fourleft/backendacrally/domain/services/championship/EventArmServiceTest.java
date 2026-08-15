@@ -153,7 +153,7 @@ class EventArmServiceTest {
         stubOpenEvent(championship, event, variantId);
         when(entryRepository.findByEventIdAndVariantIdAndUserId(event.getId(), variantId, userId))
                 .thenReturn(Optional.empty());
-        when(armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcome(
+        when(armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcomeAndRevertedAtIsNull(
                 userId, event.getId(), variantId, EventArmOutcome.DNF)).thenReturn(true);
 
         assertThatThrownBy(() -> service.arm(userId, event.getId(), variantId))

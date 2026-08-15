@@ -43,7 +43,8 @@ public class EventArmService {
      * stages mid-run would be a disarm by another name — and once the driver's one shot at the stage
      * is spent: a recorded time or a DNF locks the stage (wrong-stage/wrong-car mishaps don't). A DNF
      * is any bound run that never produced a save record — restarted, quit, crashed, or an arm that
-     * expired idle — because a discarded run leaves no time for the server to judge.
+     * expired idle — because a discarded run leaves no time for the server to judge. A DNF the club
+     * owner reverted ({@link EventDnfService}) no longer locks it.
      * Returns the fresh {@code ARMED} arm.
      */
     @Transactional
@@ -68,7 +69,7 @@ public class EventArmService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "You've already run this stage — one shot per stage, and your time is in.");
         }
-        if (armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcome(
+        if (armRepository.existsByUserIdAndEventIdAndVariantIdAndOutcomeAndRevertedAtIsNull(
                 userId, eventId, variantId, EventArmOutcome.DNF)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Your entry on this stage ended as a DNF — one shot per stage.");

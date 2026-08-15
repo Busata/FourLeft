@@ -153,6 +153,75 @@
   color: var(--faint);
 }
 
+// The owner-only DNF tab, with a count badge while any DNF still stands.
+.ev-tab--dnf {
+  margin-left: auto; // pushed to the far end — it's a moderation tool, not part of the itinerary.
+}
+
+.ev-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+// ---- DNF panel (owner) ----------------------------------------------------------------------------
+.ev-dnf__note,
+.ev-dnf__error {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.ev-dnf__note {
+  color: var(--muted);
+}
+
+.ev-dnf__error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+// A handled DNF stays listed as the audit trail, just visibly settled.
+.ev-dnf__row--done {
+  opacity: 0.62;
+}
+
+.ev-dnf__done {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+.ev-dnf__revert {
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent-deep);
+  }
+
+  &:disabled {
+    color: var(--faint);
+    cursor: default;
+  }
+}
+
 // ---- Board ----------------------------------------------------------------------------------------
 .ev__board {
   margin-top: 10px;

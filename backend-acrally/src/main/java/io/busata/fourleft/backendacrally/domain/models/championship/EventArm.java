@@ -54,6 +54,12 @@ public class EventArm {
     @Column(name = "armed_at", nullable = false, updatable = false)
     private LocalDateTime armedAt;
 
+    @Column(name = "reverted_at")
+    private LocalDateTime revertedAt;
+
+    @Column(name = "reverted_by")
+    private UUID revertedBy;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -99,5 +105,26 @@ public class EventArm {
         this.status = EventArmStatus.EXPIRED;
         this.outcome = EventArmOutcome.DNF;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * A club owner hands the driver's shot back after a DNF that wasn't racing (crashed game, dead
+     * agent, an arm armed by mistake). The outcome stays {@code DNF} — the run really didn't finish
+     * — but every one-shot check skips a reverted arm, so the driver can arm the stage again.
+     */
+    public void revert(UUID byUserId) {
+        // Deliberately leaves updatedAt alone: it marks when the run resolved as a DNF, which the
+        // owner's panel shows. The revert has its own stamp.
+        this.revertedAt = LocalDateTime.now();
+        this.revertedBy = byUserId;
+    }
+
+    public boolean isReverted() {
+        return revertedAt != null;
+    }
+
+    /** When this arm resolved — the moment the DNF happened, for the owner's panel. */
+    public LocalDateTime resolvedAt() {
+        return updatedAt != null ? updatedAt : armedAt;
     }
 }

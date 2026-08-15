@@ -55,10 +55,91 @@
                 <span class="ev-tab__ss">SS{{ si + 1 }}</span>{{ v.stageName || v.label }}
               </button>
             }
+            <!-- Owners get one more tab: the DNFs, where a shot lost to a technical mishap
+                 can be handed back. Members never see it. -->
+            @if (detail().owner) {
+              <button
+                class="ev-tab ev-tab--dnf"
+                role="tab"
+                type="button"
+                [class.ev-tab--on]="tab(event) === 'dnfs'"
+                [attr.aria-selected]="tab(event) === 'dnfs'"
+                (click)="setTab(event.id, 'dnfs')">
+                DNFs
+                @if (openDnfCount(event.id) > 0) {
+                  <span class="ev-tab__badge">{{ openDnfCount(event.id) }}</span>
+                }
+              </button>
+            }
           </div>
 
           <div class="ev__board">
-            @if (isBoardLoading(event.id)) {
+            @if (tab(event) === 'dnfs') {
+              <p class="ev__caption">
+                DNFs <span class="ev__caption-note">— a DNF spends the driver's one shot at that
+                stage; revert it if the cause was technical</span>
+              </p>
+              @if (isDnfLoading(event.id)) {
+                <p class="ev-empty">Loading DNFs…</p>
+              } @else if (dnfList(event.id).length === 0) {
+                <p class="ev-empty">No DNFs on this event.</p>
+              } @else {
+                @if (phase(event) === 'closed') {
+                  <p class="ev-dnf__note">
+                    This event has closed — reverting clears the DNF, but nobody can run the stage
+                    again until the window reopens.
+                  </p>
+                }
+                @if (dnfError()) {
+                  <p class="ev-dnf__error">{{ dnfError() }}</p>
+                }
+                <table class="ev-board">
+                  <thead>
+                    <tr>
+                      <th>Driver</th>
+                      <th>Stage</th>
+                      <th class="ev-board__wide">Cause</th>
+                      <th class="ev-board__wide">When</th>
+                      <th class="ev-board__num"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (d of dnfList(event.id); track d.armId) {
+                      <tr [class.ev-dnf__row--done]="!!d.revertedAt">
+                        <td class="ev-board__driver">{{ d.driver }}</td>
+                        <td class="ev-board__faint">{{ d.stageLabel }}</td>
+                        <td class="ev-board__wide ev-board__faint">{{ causeLabel(d) }}</td>
+                        <td class="ev-board__wide ev-board__faint">
+                          {{ d.occurredAt | date: 'MMM d, HH:mm' }}
+                        </td>
+                        <td class="ev-board__num">
+                          @if (d.revertedAt) {
+                            <span class="ev-dnf__done">
+                              @if (d.hasTimeSince) {
+                                re-run
+                              } @else {
+                                reverted
+                              }
+                              @if (d.revertedBy) {
+                                <span class="ev-board__faint">· {{ d.revertedBy }}</span>
+                              }
+                            </span>
+                          } @else {
+                            <button
+                              class="ev-dnf__revert"
+                              type="button"
+                              [disabled]="isReverting(d.armId)"
+                              (click)="revert(event.id, d)">
+                              {{ isReverting(d.armId) ? 'Reverting…' : 'Revert' }}
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            } @else if (isBoardLoading(event.id)) {
               <p class="ev-empty">Loading times…</p>
             } @else if (board(event.id); as b) {
               @if (tab(event) === 'overall') {

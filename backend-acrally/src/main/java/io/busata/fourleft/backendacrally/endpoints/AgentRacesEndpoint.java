@@ -140,9 +140,11 @@ public class AgentRacesEndpoint {
         Map<UUID, Integer> myBest = entryRepository.findByEventIdAndUserId(event.getId(), userId).stream()
                 .collect(Collectors.toMap(EventEntry::getVariantId, EventEntry::getTotalMs, Math::min));
         // One shot per stage: a recorded time or a DNF spends it (see EventArmService#arm) —
-        // whether the arm expired idle or its bound run was abandoned (restart/quit/crash).
+        // whether the arm expired idle or its bound run was abandoned (restart/quit/crash). A DNF
+        // the club owner reverted doesn't, so the stage shows as runnable again.
         Set<UUID> dnfVariantIds = armRepository
-                .findAllByUserIdAndEventIdAndOutcome(userId, event.getId(), EventArmOutcome.DNF).stream()
+                .findAllByUserIdAndEventIdAndOutcomeAndRevertedAtIsNull(
+                        userId, event.getId(), EventArmOutcome.DNF).stream()
                 .map(EventArm::getVariantId)
                 .collect(Collectors.toSet());
 
