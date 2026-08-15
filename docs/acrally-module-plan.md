@@ -176,12 +176,14 @@ mistake — so the club owner arbitrates.
   `existsByUserIdAndEventIdAndVariantIdAndOutcomeAndRevertedAtIsNull` (arming) and
   `findAllByUserIdAndEventIdAndOutcomeAndRevertedAtIsNull` (the agent's races list, which marks
   used-up stages). A reverted DNF simply stops counting, so the stage opens back up.
-- `EventDnfService` is the owner-scoped counterpart to the driver-scoped `EventArmService`:
+- `EventDnfService` is the moderation-scoped counterpart to the driver-scoped `EventArmService`:
   `GET /events/{eventId}/dnfs` + `POST /events/{eventId}/dnfs/{armId}/revert`, both gated by
-  `ChampionshipService#requireOwnedEvent` (now public for exactly this). Revert is idempotent and
-  refuses anything that isn't a DNF, or an arm from another event.
-- Frontend: the championship view's event card gets a "DNFs" tab, rendered only when
-  `detail().owner` — driver, stage, cause ("quit / restart / crash" vs "armed, never ran"), when,
+  `ChampionshipService#requireModeratableEvent` — the club owner, or a `ROLE_ADMIN` in any club
+  (admins run the instance and have to be able to act when a club owner is unreachable; the acting
+  user lands in `reverted_by` either way). Revert is idempotent and refuses anything that isn't a
+  DNF, or an arm from another event.
+- Frontend: the championship view's event card gets a "DNFs" tab, rendered when
+  `detail().owner || auth.isAdmin()` — driver, stage, cause ("quit / restart / crash" vs "armed, never ran"), when,
   and a Revert button. Reverted rows stay listed, dimmed, marked with who reverted them and whether
   the driver has since set a time. The panel warns when the event has already closed: reverting
   clears the DNF, but nobody can re-run a stage outside the event window.

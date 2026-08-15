@@ -28,8 +28,8 @@ import java.util.stream.Stream;
  * from a crashed game, a killed agent, or an arm someone pressed by accident, so the club owner
  * gets the final say: reverting hands the shot back without erasing the record of what happened.
  *
- * <p>Unlike {@link EventArmService} (personal, driver-scoped), every method here is owner-scoped —
- * the caller must own the club the event's championship belongs to.
+ * <p>Unlike {@link EventArmService} (personal, driver-scoped), every method here is moderation-
+ * scoped: the caller must own the club the event's championship belongs to, or be a platform admin.
  */
 @Service
 @RequiredArgsConstructor
@@ -60,8 +60,8 @@ public class EventDnfService {
     }
 
     /** Every DNF on an event, freshest first — reverted ones included, marked as handled. */
-    public List<DnfRow> list(UUID eventId, UUID ownerId) {
-        championshipService.requireOwnedEvent(eventId, ownerId);
+    public List<DnfRow> list(UUID eventId, UUID actorId, boolean admin) {
+        championshipService.requireModeratableEvent(eventId, actorId, admin);
         List<EventArm> dnfs =
                 armRepository.findAllByEventIdAndOutcomeOrderByUpdatedAtDesc(eventId, EventArmOutcome.DNF);
         if (dnfs.isEmpty()) {
@@ -84,10 +84,12 @@ public class EventDnfService {
      * Hand the driver's shot at that stage back. The arm keeps its DNF outcome (and shows in the
      * panel as reverted, by whom); it simply stops counting against them, so they can arm the stage
      * again while the event's window is still open. Idempotent — reverting twice changes nothing.
+     * {@code actorId} is stamped on the arm, so the panel names whoever granted the retry —
+     * club owner or admin.
      */
     @Transactional
-    public void revert(UUID eventId, UUID armId, UUID ownerId) {
-        championshipService.requireOwnedEvent(eventId, ownerId);
+    public void revert(UUID eventId, UUID armId, UUID actorId, boolean admin) {
+        championshipService.requireModeratableEvent(eventId, actorId, admin);
         EventArm arm = armRepository.findById(armId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such DNF."));
         if (!arm.getEventId().equals(eventId)) {
@@ -99,7 +101,7 @@ public class EventDnfService {
         if (arm.isReverted()) {
             return;
         }
-        arm.revert(ownerId);
+        arm.revert(actorId);
     }
 
     private DnfRow toRow(EventArm arm, Map<UUID, String> names,

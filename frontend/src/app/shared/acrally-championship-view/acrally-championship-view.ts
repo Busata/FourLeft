@@ -1,6 +1,8 @@
-import { Component, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+
+import { AuthService } from '../../services/auth';
 
 import type {
   CarTo,
@@ -27,8 +29,15 @@ import type {
 })
 export class AcrallyChampionshipView {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
 
   readonly detail = input.required<ChampionshipDetailTo>();
+
+  /**
+   * Who may see and act on the DNF panel: the club owner, or a platform admin in any club —
+   * the same rule the endpoint enforces. Ordinary members never see it.
+   */
+  readonly canModerate = computed(() => this.detail().owner || this.auth.isAdmin());
 
   readonly expanded = signal<Set<string>>(new Set());
   private readonly boards = signal<Map<string, EventLeaderboardTo>>(new Map());
@@ -196,10 +205,11 @@ export class AcrallyChampionshipView {
     });
   }
 
-  // --- DNFs (owner only) ---
+  // --- DNFs (club owner / admin only) ---
   /**
    * A DNF spends a driver's one shot at a stage, and the server can't tell a bail-out from a
-   * crashed game or a dead agent. The owner sees them all here and can hand a shot back.
+   * crashed game or a dead agent. The club owner — or an admin — sees them all here and can hand
+   * a shot back.
    */
   dnfList(eventId: string): EventDnfTo[] {
     return this.dnfs().get(eventId) ?? [];
@@ -241,9 +251,9 @@ export class AcrallyChampionshipView {
       });
   }
 
-  /** Owner-only fetch; the endpoint 403s for everyone else, so don't even ask. */
+  /** Moderator-only fetch; the endpoint 403s for everyone else, so don't even ask. */
   private fetchDnfs(eventId: string): void {
-    if (!this.detail().owner) return;
+    if (!this.canModerate()) return;
     if (this.dnfs().has(eventId) || this.loadingDnfs().has(eventId)) return;
     this.loadingDnfs.update((s) => new Set(s).add(eventId));
     this.http.get<EventDnfTo[]>(`/acrally-api/events/${eventId}/dnfs`).subscribe({

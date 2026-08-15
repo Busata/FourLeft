@@ -75,9 +75,11 @@ submitting results. `linked_identity` has unique `(provider, provider_user_id)` 
 - `clubs/` — list, `mine`, create, `{id}/join`, `{id}/leave`.
 - championships — `clubs/{clubId}/championships`, `championships/{id}` (+ `events`, `events/order`),
   `events/{eventId}` (+ `variants`, `cars`), `events/{eventId}/leaderboard`.
-- `events/{eventId}/dnfs` — club-owner-only: the event's DNFs and
-  `{armId}/revert`, which hands a driver's spent shot back (`EventDnfService`). The arm keeps
-  `outcome = DNF` and gains `reverted_at`/`reverted_by`; every one-shot check ignores reverted arms.
+- `events/{eventId}/dnfs` — club owner **or** `ROLE_ADMIN` (the only moderation surface outside
+  `/admin/**` that the role opens): the event's DNFs and `{armId}/revert`, which hands a driver's
+  spent shot back (`EventDnfService`, gated by `ChampionshipService#requireModeratableEvent`). The
+  arm keeps `outcome = DNF` and gains `reverted_at`/`reverted_by` (the acting user, owner or admin);
+  every one-shot check ignores reverted arms.
 - `cars`, `variants` — read-only catalogue (`CatalogueEndpoint`).
 - `agent/issues` — POST (API-key authed): "Report issue" from the companion; description + base64
   save game + agent log in the JSON body (`IssuePayloads`, size/rate limits in `IssueReportService`).

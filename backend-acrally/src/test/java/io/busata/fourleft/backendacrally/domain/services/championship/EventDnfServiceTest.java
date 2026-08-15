@@ -25,8 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * The owner's escape hatch from the one-shot rule. What matters is that it stays owner-only, that
- * it only ever touches an actual DNF, and that the row survives as the audit trail. Pure Mockito.
+ * The moderator's escape hatch from the one-shot rule. What matters is that it stays gated (the
+ * guard itself is covered by {@link ChampionshipServiceGuardTest}), that it only ever touches an
+ * actual DNF, and that the row survives as the audit trail. Pure Mockito.
  */
 @ExtendWith(MockitoExtension.class)
 class EventDnfServiceTest {
@@ -55,7 +56,7 @@ class EventDnfServiceTest {
         EventArm arm = dnfArm();
         when(armRepository.findById(arm.getId())).thenReturn(Optional.of(arm));
 
-        service.revert(eventId, arm.getId(), ownerId);
+        service.revert(eventId, arm.getId(), ownerId, false);
 
         assertThat(arm.isReverted()).isTrue();
         assertThat(arm.getRevertedBy()).isEqualTo(ownerId);
@@ -71,19 +72,19 @@ class EventDnfServiceTest {
         UUID otherOwner = UUID.randomUUID();
         when(armRepository.findById(arm.getId())).thenReturn(Optional.of(arm));
 
-        service.revert(eventId, arm.getId(), otherOwner);
+        service.revert(eventId, arm.getId(), otherOwner, false);
 
         assertThat(arm.getRevertedAt()).isEqualTo(first);
         assertThat(arm.getRevertedBy()).isEqualTo(ownerId);
     }
 
     @Test
-    void onlyTheClubOwnerCanRevert() {
+    void aRefusedGuardStopsTheRevertBeforeItTouchesTheArm() {
         UUID stranger = UUID.randomUUID();
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN))
-                .when(championshipService).requireOwnedEvent(eventId, stranger);
+                .when(championshipService).requireModeratableEvent(eventId, stranger, false);
 
-        assertThatThrownBy(() -> service.revert(eventId, UUID.randomUUID(), stranger))
+        assertThatThrownBy(() -> service.revert(eventId, UUID.randomUUID(), stranger, false))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.FORBIDDEN);
@@ -97,7 +98,7 @@ class EventDnfServiceTest {
         EventArm arm = new EventArm(driverId, UUID.randomUUID(), UUID.randomUUID());
         when(armRepository.findById(arm.getId())).thenReturn(Optional.of(arm));
 
-        assertThatThrownBy(() -> service.revert(eventId, arm.getId(), ownerId))
+        assertThatThrownBy(() -> service.revert(eventId, arm.getId(), ownerId, false))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);
@@ -110,7 +111,7 @@ class EventDnfServiceTest {
         arm.consume(EventArmOutcome.RECORDED, UUID.randomUUID());
         when(armRepository.findById(arm.getId())).thenReturn(Optional.of(arm));
 
-        assertThatThrownBy(() -> service.revert(eventId, arm.getId(), ownerId))
+        assertThatThrownBy(() -> service.revert(eventId, arm.getId(), ownerId, false))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.CONFLICT);
@@ -121,7 +122,7 @@ class EventDnfServiceTest {
         when(armRepository.findAllByEventIdAndOutcomeOrderByUpdatedAtDesc(eventId, EventArmOutcome.DNF))
                 .thenReturn(List.of());
 
-        assertThat(service.list(eventId, ownerId)).isEmpty();
-        verify(championshipService).requireOwnedEvent(eventId, ownerId);
+        assertThat(service.list(eventId, ownerId, false)).isEmpty();
+        verify(championshipService).requireModeratableEvent(eventId, ownerId, false);
     }
 }

@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The club owner's DNF panel for an event: who lost their shot at a stage, and the revert that
- * hands it back after a technical mishap. Owner-gated in {@link EventDnfService} (403 for anyone
- * else); the revert returns the refreshed list so the panel rebinds without a second round-trip.
+ * The DNF panel for an event: who lost their shot at a stage, and the revert that hands it back
+ * after a technical mishap. Gated in {@link EventDnfService} to the club owner or a platform admin
+ * (403 for anyone else); the revert returns the refreshed list so the panel rebinds without a
+ * second round-trip.
  */
 @RestController
 @RequestMapping("/acrally-api/events/{eventId}/dnfs")
@@ -31,15 +32,16 @@ public class EventDnfEndpoint {
     @GetMapping
     public List<EventDnfTo> list(@PathVariable UUID eventId,
                                  @AuthenticationPrincipal AppUserDetails principal) {
-        return toTos(dnfService.list(eventId, requireLogin(principal)));
+        return toTos(dnfService.list(eventId, requireLogin(principal), principal.isAdmin()));
     }
 
     @PostMapping("/{armId}/revert")
     public List<EventDnfTo> revert(@PathVariable UUID eventId, @PathVariable UUID armId,
                                    @AuthenticationPrincipal AppUserDetails principal) {
         UUID userId = requireLogin(principal);
-        dnfService.revert(eventId, armId, userId);
-        return toTos(dnfService.list(eventId, userId));
+        boolean admin = principal.isAdmin();
+        dnfService.revert(eventId, armId, userId, admin);
+        return toTos(dnfService.list(eventId, userId, admin));
     }
 
     private List<EventDnfTo> toTos(List<EventDnfService.DnfRow> rows) {

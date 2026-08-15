@@ -55,9 +55,9 @@
                 <span class="ev-tab__ss">SS{{ si + 1 }}</span>{{ v.stageName || v.label }}
               </button>
             }
-            <!-- Owners get one more tab: the DNFs, where a shot lost to a technical mishap
-                 can be handed back. Members never see it. -->
-            @if (detail().owner) {
+            <!-- Club owners (and platform admins) get one more tab: the DNFs, where a shot lost
+                 to a technical mishap can be handed back. Members never see it. -->
+            @if (canModerate()) {
               <button
                 class="ev-tab ev-tab--dnf"
                 role="tab"

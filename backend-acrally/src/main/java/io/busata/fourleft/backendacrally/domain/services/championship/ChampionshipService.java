@@ -288,10 +288,25 @@ public class ChampionshipService {
 
     /** The event, or 404/403 — the guard every owner-only action on an event goes through. */
     public ChampionshipEvent requireOwnedEvent(UUID eventId, UUID userId) {
-        ChampionshipEvent event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such event."));
+        ChampionshipEvent event = requireEvent(eventId);
         requireOwnedChampionship(event.getChampionshipId(), userId);
         return event;
+    }
+
+    /**
+     * The guard for moderation that a platform admin may perform in any club: the club owner is
+     * the normal path, an admin passes on the role alone. Admins run the instance, so they answer
+     * for clubs whose owner is unreachable — but the acting user is still recorded by the caller,
+     * so the audit trail says who actually did it.
+     */
+    public ChampionshipEvent requireModeratableEvent(UUID eventId, UUID userId, boolean admin) {
+        return admin ? requireEvent(eventId) : requireOwnedEvent(eventId, userId);
+    }
+
+    /** The event, or 404. No ownership opinion. */
+    public ChampionshipEvent requireEvent(UUID eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such event."));
     }
 
     private String requireName(String rawName) {
