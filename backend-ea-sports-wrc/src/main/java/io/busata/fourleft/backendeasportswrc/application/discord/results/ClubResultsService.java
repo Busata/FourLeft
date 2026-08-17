@@ -164,25 +164,26 @@ public class ClubResultsService {
         for(Event event: events) {
             var points = calculateEventPoints(event, playerData, configuration);
 
-            points.entrySet().forEach(entrySet -> {
-                if(entrySet.getKey() == null) {
+            points.keySet().forEach(entrantSsid -> {
+                if(entrantSsid == null) {
                     return;
                 }
 
-                standings.computeIfPresent(entrySet.getKey(), (ssid, standing) -> {
-                    var actualPoints = points.get(ssid);
-                    standing.updatePoints(actualPoints + standing.getPointsAccumulated());;
-                    return standing;
-                });
-
-                standings.computeIfAbsent(entrySet.getKey(), (ssid) -> {
+                // Seeded on zero rather than on this event's points, so the update below reads as the
+                // driver's first gain instead of a (+0) delta on their debut event.
+                standings.computeIfAbsent(entrantSsid, (ssid) -> {
                     var player = playerData.get(ssid);
-                    var actualPoints = points.get(ssid);
                     var profile = profileService.getProfileById(ssid).orElse(null);
-                    ChampionshipStanding championshipStanding = new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), actualPoints, 0, player.nationalityId());
+                    ChampionshipStanding championshipStanding = new ChampionshipStanding(UUID.randomUUID(), player.ssid(), player.displayName(), 0, 0, player.nationalityId());
                     championshipStanding.setProfile(profile);
                     return championshipStanding;
                 });
+            });
+
+            // Every standing is updated, not just this event's entrants — a driver who sat the event
+            // out scores nothing, and skipping them here would leave the delta from their last start.
+            standings.forEach((ssid, standing) -> {
+                standing.updatePoints(standing.getPointsAccumulated() + points.getOrDefault(ssid, 0));
             });
 
             var ranks = calculateRanks(standings);

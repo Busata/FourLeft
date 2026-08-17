@@ -82,6 +82,15 @@ public class ChampionshipStanding {
         return this.previousRank - this.rank;
     }
 
+    /**
+     * True while the standing has never held a rank before — the driver's first scored event of the
+     * championship. Custom standings are built from a 0 placeholder, so the first {@link #updateRank}
+     * leaves that 0 behind as the previous rank; racenet's own standings are always ranked from 1.
+     */
+    public boolean isNewEntry() {
+        return this.previousRank != null && this.previousRank == 0;
+    }
+
     public boolean isTracked() {
         return Optional.ofNullable(profile).map(Profile::isTrackDiscord).orElse(false);
     }

@@ -76,6 +76,9 @@ public class ClubStandingsMessageFactory {
     }
 
     private String createDeltaRank(ChampionshipStanding entry) {
+        if(entry.isNewEntry()) {
+            return " **(new)**";
+        }
         if(Objects.equals(entry.getRank(), entry.getPreviousRank())){
             return " **(+0)**";
         }
