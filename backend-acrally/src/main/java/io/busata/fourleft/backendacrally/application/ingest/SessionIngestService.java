@@ -101,10 +101,14 @@ public class SessionIngestService {
     public void abort(UUID userId, String rawSessionId, String reason) {
         AgentSession session = ownedSession(userId, rawSessionId);
         session.abort(reason);
-        // A restarted/quit run spends the arm as a DNF — an armed run is final. Anything else makes
-        // "restart at the results screen" a free retry: a discarded run never writes a save record,
-        // so its time can never be judged.
-        recordingService.dnfSession(session.getId());
+        // A restarted/superseded run spends the arm as a DNF — an armed run is final, and anything
+        // else makes "restart at the results screen" a free retry. A "no-result" abort is NOT that:
+        // it only says the agent's save-wait lapsed without a record, while its watcher keeps
+        // looking. The arm stays BOUND so a late record still scores it (the agent posts one to
+        // this same session), and the driver's next run rebinds it.
+        if (session.provesAbandonedRun()) {
+            recordingService.dnfSession(session.getId());
+        }
     }
 
     /**

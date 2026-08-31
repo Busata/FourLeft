@@ -12,6 +12,7 @@ import io.busata.fourleft.backendacrally.domain.models.stage.TrackAlias;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
 import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
+import io.busata.fourleft.backendacrally.domain.services.session.AgentSessionRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.TrackAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,7 @@ class EventRecordingServiceTest {
     @Mock TrackAliasRepository trackAliasRepository;
     @Mock CarRepository carRepository;
     @Mock CarAliasRepository carAliasRepository;
+    @Mock AgentSessionRepository sessionRepository;
     @Mock ChampionshipService championshipService;
 
     @InjectMocks EventRecordingService service;
@@ -156,20 +158,90 @@ class EventRecordingServiceTest {
 
     @Test
     void abandonedBoundRunResolvesAsDnfWhenTheNextSessionOpens() {
-        // Restart-at-results-screen: the old session's abort lags behind the next session's open.
-        // A new run while one is bound proves the bound run was abandoned — the shot is spent.
+        // Restart-at-results-screen: the agent aborts the old session as restarted/superseded
+        // before opening the next one, which proves the bound run was thrown away — shot spent.
         EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
         UUID abandonedSessionId = UUID.randomUUID();
         arm.bind(abandonedSessionId);
         when(armRepository.findFirstByUserIdAndStatusIn(
                 userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
                 .thenReturn(Optional.of(arm));
+        AgentSession abandoned = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+        abandoned.abort(AgentSession.ABORT_RESTART);
+        when(sessionRepository.findById(abandonedSessionId)).thenReturn(Optional.of(abandoned));
 
         service.bindToSession(userId, sessionOn("Wales Afon Bidno", "Mini Cooper S 1275"));
 
         assertThat(arm.getStatus()).isEqualTo(EventArmStatus.CONSUMED);
         assertThat(arm.getOutcome()).isEqualTo(EventArmOutcome.DNF);
         assertThat(arm.getSessionId()).isEqualTo(abandonedSessionId); // the new run never binds
+    }
+
+    @Test
+    void boundRunThatNeverProducedARecordRebindsToTheNextSession() {
+        // 2026-08-16: a finish misdetected 34s into a 4:18 run lapsed the agent's save-wait, which
+        // aborted the session "no-result". That says nothing about the driver — so the next run
+        // takes the arm over instead of the driver losing the stage to a DNF.
+        EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
+        UUID recordlessSessionId = UUID.randomUUID();
+        arm.bind(recordlessSessionId);
+        when(armRepository.findFirstByUserIdAndStatusIn(
+                userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
+                .thenReturn(Optional.of(arm));
+        AgentSession recordless = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+        recordless.abort(AgentSession.ABORT_NO_RESULT);
+        when(sessionRepository.findById(recordlessSessionId)).thenReturn(Optional.of(recordless));
+
+        AgentSession next = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+        service.bindToSession(userId, next);
+
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(arm.getOutcome()).isNull();
+        assertThat(arm.getSessionId()).isEqualTo(next.getId());
+    }
+
+    @Test
+    void aRunStillInProgressKeepsItsArmWhenAnotherSessionOpens() {
+        // The old session is still OPEN — no abort, no record. Nothing proves it was thrown away,
+        // so the arm follows the newer run; the stale sweep resolves a silent one at 30 minutes.
+        EventArm arm = new EventArm(userId, eventId, UUID.randomUUID());
+        UUID openSessionId = UUID.randomUUID();
+        arm.bind(openSessionId);
+        when(armRepository.findFirstByUserIdAndStatusIn(
+                userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
+                .thenReturn(Optional.of(arm));
+        when(sessionRepository.findById(openSessionId))
+                .thenReturn(Optional.of(sessionOn("Wales Afon Bidno", "Mini Cooper S 1275")));
+
+        AgentSession next = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+        service.bindToSession(userId, next);
+
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(arm.getSessionId()).isEqualTo(next.getId());
+    }
+
+    @Test
+    void aRebindSkipsARunThatProvablyIsNotTheArmedStage() {
+        // The driver gave up on the armed stage and drove something else. The arm neither follows
+        // that run nor dies for it — it stays put, waiting for a run that could be the right one.
+        UUID variantId = UUID.randomUUID();
+        EventArm arm = new EventArm(userId, eventId, variantId);
+        UUID recordlessSessionId = UUID.randomUUID();
+        arm.bind(recordlessSessionId);
+        when(armRepository.findFirstByUserIdAndStatusIn(
+                userId, List.of(EventArmStatus.ARMED, EventArmStatus.BOUND)))
+                .thenReturn(Optional.of(arm));
+        AgentSession recordless = sessionOn("Wales Afon Bidno", "Mini Cooper S 1275");
+        recordless.abort(AgentSession.ABORT_NO_RESULT);
+        when(sessionRepository.findById(recordlessSessionId)).thenReturn(Optional.of(recordless));
+        TrackAlias elsewhere = new TrackAlias("Alsace Sommet");
+        elsewhere.assign(UUID.randomUUID()); // provably a different variant than the armed one
+        when(trackAliasRepository.findByRawName("Alsace Sommet")).thenReturn(Optional.of(elsewhere));
+
+        service.bindToSession(userId, sessionOn("Alsace Sommet", "Mini Cooper S 1275"));
+
+        assertThat(arm.getStatus()).isEqualTo(EventArmStatus.BOUND);
+        assertThat(arm.getSessionId()).isEqualTo(recordlessSessionId);
     }
 
     @Test

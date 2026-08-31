@@ -12,6 +12,7 @@ import io.busata.fourleft.backendacrally.domain.models.stage.TrackAlias;
 import io.busata.fourleft.backendacrally.domain.models.stage.Variant;
 import io.busata.fourleft.backendacrally.domain.services.car.CarAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.car.CarRepository;
+import io.busata.fourleft.backendacrally.domain.services.session.AgentSessionRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.TrackAliasRepository;
 import io.busata.fourleft.backendacrally.domain.services.stage.VariantRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class EventRecordingService {
     private final TrackAliasRepository trackAliasRepository;
     private final CarRepository carRepository;
     private final CarAliasRepository carAliasRepository;
+    private final AgentSessionRepository sessionRepository;
     private final ChampionshipService championshipService;
 
     /**
@@ -51,9 +53,13 @@ public class EventRecordingService {
      * if unlearned names skipped binding, a run on new content could be discarded at the results
      * screen for a free retry.
      *
-     * <p>A session opening while the arm is still BOUND to an earlier session means that run was
-     * abandoned (a driver runs one stage at a time; the old session's abort only arrives once the
-     * agent's save-record wait window lapses) — the shot is spent, so the arm resolves as DNF.
+     * <p>A session opening while the arm is still BOUND to an earlier session ends that earlier run
+     * one way or the other: it resolves as DNF when that session proves the run was thrown away (a
+     * restart, or a new run superseding it — both of which the agent reports before opening this
+     * session), and otherwise rebinds to this one. Rebinding is the honest reading: a session that
+     * ended without a save record produced no time to judge, so DNF-ing it punished drivers for the
+     * agent's own misdetections rather than for anything they did (see
+     * {@link AgentSession#provesAbandonedRun()}).
      */
     public void bindToSession(UUID userId, AgentSession session) {
         EventArm arm = armRepository.findFirstByUserIdAndStatusIn(userId,
@@ -63,10 +69,16 @@ public class EventRecordingService {
             return;
         }
         if (arm.getStatus() == EventArmStatus.BOUND) {
-            if (!session.getId().equals(arm.getSessionId())) {
-                arm.consume(EventArmOutcome.DNF, null);
+            if (session.getId().equals(arm.getSessionId())) {
+                return;
             }
-            return;
+            if (previousRunWasThrownAway(arm)) {
+                arm.consume(EventArmOutcome.DNF, null);
+                return;
+            }
+            // Otherwise fall through to the same guard a waiting arm gets: a rebind onto a stage
+            // that provably isn't the armed one leaves the arm where it is, so a consolation lap
+            // elsewhere neither captures the arm nor throws it away.
         }
         if (couldBeArmedStage(arm, session.getTrack()) && couldBePermittedCar(arm.getEventId(), session.getCar())) {
             arm.bind(session.getId());
@@ -82,6 +94,17 @@ public class EventRecordingService {
     public void dnfSession(UUID sessionId) {
         armRepository.findFirstBySessionIdAndStatus(sessionId, EventArmStatus.BOUND)
                 .ifPresent(arm -> arm.consume(EventArmOutcome.DNF, null));
+    }
+
+    /**
+     * Whether the run the arm is currently bound to was demonstrably thrown away. An arm bound to a
+     * session that has vanished is treated as thrown away — the conservative reading, and the FK
+     * makes it unreachable in practice.
+     */
+    private boolean previousRunWasThrownAway(EventArm arm) {
+        return sessionRepository.findById(arm.getSessionId())
+                .map(AgentSession::provesAbandonedRun)
+                .orElse(true);
     }
 
     /** Whether the telemetry track could be the armed variant: yes, unless an assigned alias points elsewhere. */

@@ -93,9 +93,10 @@ pub struct ArmState {
     pub active: bool,
     #[serde(default)]
     pub status: Option<String>,
-    // The armed event id — carried for completeness; the UI keys off variant_id.
+    /// The armed event id. Matters as much as the variant: the same stage can be open in two
+    /// events at once (two clubs, or two concurrent championships), and the arm belongs to one
+    /// of them — see [`ArmState::is_armed_for`].
     #[serde(default)]
-    #[allow(dead_code)]
     pub event_id: Option<String>,
     #[serde(default)]
     pub variant_id: Option<String>,
@@ -117,6 +118,22 @@ pub struct ArmState {
     pub last_stage_label: Option<String>,
     #[serde(default)]
     pub last_total_ms: Option<i64>,
+}
+
+impl ArmState {
+    /// Whether this arm is *that* event's stage. Both halves are checked: one variant can appear
+    /// in two simultaneously open events (different clubs, or two concurrent championships in one
+    /// club), and matching on the variant alone marks the other event's row as armed too. A
+    /// backend that sends no event id falls back to the variant match rather than showing nothing
+    /// armed.
+    pub fn is_armed_for(&self, event_id: &str, variant_id: &str) -> bool {
+        self.active
+            && self.variant_id.as_deref() == Some(variant_id)
+            && self
+                .event_id
+                .as_deref()
+                .is_none_or(|armed| armed == event_id)
+    }
 }
 
 /// Shared state the UI reads and the poller/actions write.
@@ -363,9 +380,7 @@ pub fn run_list(cfg: &Config) -> Result<()> {
                 .my_best_ms
                 .map(|ms| format!("  best {}", fmt_ms(ms as i32)))
                 .unwrap_or_default();
-            let armed = if view.arm.active
-                && view.arm.variant_id.as_deref() == Some(stage.variant_id.as_str())
-            {
+            let armed = if view.arm.is_armed_for(&event.event_id, &stage.variant_id) {
                 "  [ARMED]"
             } else if stage.completed && stage.my_best_ms.is_none() {
                 "  [DNF]"
@@ -385,6 +400,55 @@ pub fn run_list(cfg: &Config) -> Result<()> {
     Ok(())
 }
 
+/// Resolve an `arm` selector against the flattened stage list: an `arm-list` number, or a variant
+/// id for scripting.
+///
+/// A variant id is not unique across the open events — two clubs (or two concurrent championships)
+/// can run the same stage, and the arm is per event — so an id matching more than one event is
+/// refused with the numbers to pick from rather than silently arming the first, which could be the
+/// wrong club's stage.
+fn pick_stage<'a>(
+    flat: &'a [(&'a RaceEvent, &'a RaceStage)],
+    selector: &str,
+) -> Result<&'a (&'a RaceEvent, &'a RaceStage)> {
+    if let Ok(n) = selector.parse::<usize>() {
+        return n
+            .checked_sub(1)
+            .and_then(|i| flat.get(i))
+            .ok_or_else(|| no_such_stage(selector));
+    }
+    let matches: Vec<(usize, &(&RaceEvent, &RaceStage))> = flat
+        .iter()
+        .enumerate()
+        .filter(|(_, (_, stage))| stage.variant_id == selector)
+        .collect();
+    if matches.len() > 1 {
+        let mut lines = String::new();
+        for (i, (event, stage)) in &matches {
+            lines.push_str(&format!(
+                "\n  [{}] {} — {} · {}",
+                *i + 1,
+                stage.label,
+                event.label,
+                event.club_name
+            ));
+        }
+        bail!(
+            "stage '{selector}' is open in {} events — arm it by its `arm-list` number:{lines}",
+            matches.len()
+        );
+    }
+    matches
+        .into_iter()
+        .next()
+        .map(|(_, pair)| pair)
+        .ok_or_else(|| no_such_stage(selector))
+}
+
+fn no_such_stage(selector: &str) -> anyhow::Error {
+    anyhow!("no stage '{selector}' — run `acrally-agent arm-list` to see the numbers.")
+}
+
 /// `acrally-agent arm <selector>`: arm a stage by its `arm-list` number, or by
 /// variant id for scripting.
 pub fn run_arm(cfg: &Config, selector: &str) -> Result<()> {
@@ -397,13 +461,7 @@ pub fn run_arm(cfg: &Config, selector: &str) -> Result<()> {
         .iter()
         .flat_map(|e| e.stages.iter().map(move |s| (e, s)))
         .collect();
-    let picked = match selector.parse::<usize>() {
-        Ok(n) => n.checked_sub(1).and_then(|i| flat.get(i)),
-        Err(_) => flat.iter().find(|(_, s)| s.variant_id == selector),
-    };
-    let Some((event, stage)) = picked else {
-        bail!("no stage '{selector}' — run `acrally-agent arm-list` to see the numbers.");
-    };
+    let (event, stage) = pick_stage(&flat, selector)?;
     if stage.completed {
         bail!("that stage is already done — one shot per stage.");
     }
@@ -474,5 +532,90 @@ fn print_arm(arm: &ArmState) {
             println!("not armed. last entry on {stage} expired without a run — recorded as DNF.")
         }
         Some(other) => println!("not armed. last run: {other}."),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Two open events (different clubs) that both run the same stage — the shape that makes
+    /// variant-only matching go wrong.
+    fn shared_stage_view() -> RacesView {
+        serde_json::from_str(
+            r#"{
+              "events": [
+                {"event_id": "ev-a", "championship_id": "ch-a", "championship_name": "A Cup",
+                 "club_name": "Club A", "label": "Rally A", "opens_at": "", "closes_at": "",
+                 "stages": [{"variant_id": "v-shared", "label": "Kaunas — Stage 1"}]},
+                {"event_id": "ev-b", "championship_id": "ch-b", "championship_name": "B Cup",
+                 "club_name": "Club B", "label": "Rally B", "opens_at": "", "closes_at": "",
+                 "stages": [{"variant_id": "v-shared", "label": "Kaunas — Stage 1"},
+                            {"variant_id": "v-only-b", "label": "Kaunas — Stage 2"}]}
+              ],
+              "arm": {"active": true, "status": "ARMED", "event_id": "ev-b",
+                      "variant_id": "v-shared", "stage_label": "Kaunas — Stage 1"}
+            }"#,
+        )
+        .expect("fixture parses")
+    }
+
+    fn flatten(view: &RacesView) -> Vec<(&RaceEvent, &RaceStage)> {
+        view.events
+            .iter()
+            .flat_map(|e| e.stages.iter().map(move |s| (e, s)))
+            .collect()
+    }
+
+    #[test]
+    fn arm_marks_only_the_event_it_was_armed_on() {
+        let view = shared_stage_view();
+        assert!(!view.arm.is_armed_for("ev-a", "v-shared"));
+        assert!(view.arm.is_armed_for("ev-b", "v-shared"));
+        assert!(!view.arm.is_armed_for("ev-b", "v-only-b"));
+    }
+
+    /// An older backend that sends no event id keeps the previous variant-only behaviour, so the
+    /// driver still sees something armed.
+    #[test]
+    fn arm_without_an_event_id_falls_back_to_the_variant() {
+        let arm: ArmState =
+            serde_json::from_str(r#"{"active": true, "variant_id": "v-shared"}"#).unwrap();
+        assert!(arm.is_armed_for("ev-a", "v-shared"));
+        assert!(!arm.is_armed_for("ev-a", "v-only-b"));
+    }
+
+    #[test]
+    fn a_variant_id_in_two_events_is_refused_rather_than_guessed() {
+        let view = shared_stage_view();
+        let flat = flatten(&view);
+        let err = pick_stage(&flat, "v-shared").unwrap_err().to_string();
+        assert!(err.contains("open in 2 events"), "{err}");
+        // The numbers it offers are the `arm-list` ones.
+        assert!(
+            err.contains("[1] Kaunas — Stage 1 — Rally A · Club A"),
+            "{err}"
+        );
+        assert!(
+            err.contains("[2] Kaunas — Stage 1 — Rally B · Club B"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn a_number_picks_that_events_stage_and_a_unique_variant_id_still_works() {
+        let view = shared_stage_view();
+        let flat = flatten(&view);
+        let (event, stage) = pick_stage(&flat, "2").unwrap();
+        assert_eq!(event.event_id, "ev-b");
+        assert_eq!(stage.variant_id, "v-shared");
+
+        let (event, stage) = pick_stage(&flat, "v-only-b").unwrap();
+        assert_eq!(event.event_id, "ev-b");
+        assert_eq!(stage.variant_id, "v-only-b");
+
+        assert!(pick_stage(&flat, "0").is_err());
+        assert!(pick_stage(&flat, "9").is_err());
+        assert!(pick_stage(&flat, "v-nope").is_err());
     }
 }

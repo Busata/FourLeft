@@ -91,6 +91,28 @@ public class AgentSession {
         this.abortReason = reason;
     }
 
+    /** The agent restarted the run mid-stage — the run was thrown away. */
+    public static final String ABORT_RESTART = "restart";
+    /** A new run began while this session was still live — the old run was thrown away. */
+    public static final String ABORT_SUPERSEDED = "superseded";
+    /** No save record turned up inside the agent's wait window. Says nothing about the run. */
+    public static final String ABORT_NO_RESULT = "no-result";
+
+    /**
+     * Whether this session's end proves the driver threw the run away, which is what spends an
+     * armed stage's one shot. Only a restart or a superseding run prove it.
+     *
+     * <p>{@link #ABORT_NO_RESULT} does not: it is the agent reporting that it never saw a save
+     * record, and its watcher keeps looking afterwards. Treating it as an abandoned run cost real
+     * drivers completed stages — 2026-08-16, a finish misdetected 34s into a 4:18 run started the
+     * agent's 3-minute save-wait early, the wait lapsed, the arm was DNF'd, and the genuine record
+     * arrived 86 seconds later on this very session with nothing left to score.
+     */
+    public boolean provesAbandonedRun() {
+        return status == SessionStatus.ABORTED
+                && (ABORT_RESTART.equals(abortReason) || ABORT_SUPERSEDED.equals(abortReason));
+    }
+
     /** Swept by the janitor: still OPEN long after the agent stopped reporting. */
     public void markStale() {
         this.status = SessionStatus.STALE;

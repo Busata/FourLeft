@@ -100,15 +100,19 @@ public class EventArmService {
     }
 
     /**
-     * Janitor: expire ARMED arms with no activity since the cutoff, resolving them as DNF. An arm
+     * Janitor: expire live arms with no activity since the cutoff, resolving them as DNF. An arm
      * binds to the driver's NEXT session, so one left waiting would otherwise capture whatever run
-     * they happen to start days later. Only ARMED arms qualify: a BOUND arm belongs to a run in
-     * progress, and if that run dies silently the stale-session sweep resolves it as a DNF.
+     * they happen to start days later. ARMED arms qualify, and so do BOUND arms whose session has
+     * ended without ever producing a record — those are waiting for a late result that is never
+     * coming, and nothing else would ever resolve them: the stale-session sweep only looks at OPEN
+     * sessions, and a BOUND arm can be neither disarmed nor superseded. A BOUND arm on a session
+     * that is still OPEN is a run in progress and is left alone; if that run dies silently the
+     * stale-session sweep resolves it.
      * Returns how many were expired (for the schedule's log).
      */
     @Transactional
     public int expireIdleArms(java.time.LocalDateTime cutoff) {
-        List<EventArm> idle = armRepository.findArmedAndIdleSince(cutoff);
+        List<EventArm> idle = armRepository.findIdleSince(cutoff);
         idle.forEach(EventArm::expire);
         return idle.size();
     }

@@ -123,6 +123,27 @@ class SessionIngestServiceTest {
     }
 
     @Test
+    void restartAbortResolvesTheBoundArmAsDnf() {
+        AgentSession session = ownedSession();
+
+        service.abort(userId, sessionId.toString(), AgentSession.ABORT_RESTART);
+
+        verify(recordingService).dnfSession(session.getId());
+    }
+
+    @Test
+    void noResultAbortLeavesTheArmBound() {
+        // "no-result" means the agent's save-wait lapsed, not that the run was thrown away — the
+        // watcher keeps looking and posts a late record to this same session (2026-08-16: the
+        // record arrived 86 seconds after this abort had already DNF'd a completed run).
+        ownedSession();
+
+        service.abort(userId, sessionId.toString(), AgentSession.ABORT_NO_RESULT);
+
+        verify(recordingService, never()).dnfSession(any());
+    }
+
+    @Test
     void acceptsResultWithPlausibleTimestamp() {
         ownedSession();
         long ticksJuly2026 = 639_191_141_860_160_000L;

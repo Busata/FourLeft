@@ -15,9 +15,19 @@
 //! game writes the completed stage time there at the finish line, at which point
 //! the live timer resets and keeps ticking behind the result screen — exactly
 //! the shape the drop-detector would misread as a `Restart` (aborting the run
-//! that just earned a result). After a `Finish`, a new `Start` additionally
-//! requires a blank gap first, so the result screen's ticking timer can't open
-//! a phantom session.
+//! that just earned a result). It only counts while the live timer is NOT still
+//! climbing, though: the field is also populated late, with the *previous* run's
+//! time, when telemetry was still settling as this run began, and a run whose
+//! timer is happily advancing has plainly not finished (2026-08-16: a finish
+//! called 34s into a 4:18 run cost a driver the stage). After a `Finish`, a new
+//! `Start` additionally requires a blank gap first, so the result screen's
+//! ticking timer can't open a phantom session.
+//!
+//! A `Finish` is a guess, so it is reversible: if the timer climbs past the
+//! run's peak with no gap in between, the run was never over (a mid-stage pause
+//! freezes the timer, which reads exactly like a finish) and `Resume` puts the
+//! session back to work. A genuine finish can't be confused with this — there
+//! the timer restarts from ~0, well below the peak.
 //!
 //! `Restart` is emitted at the moment a new run begins after a reset, so the
 //! caller should abort the old session and open a fresh one.
@@ -46,6 +56,8 @@ pub enum SessionEvent {
     Restart,
     /// The run ended (timer froze or cleared) — go find the result in the save.
     Finish,
+    /// A `Finish` was wrong: the run is still going. Put its session back to work.
+    Resume,
 }
 
 pub struct SessionMachine {
@@ -121,9 +133,16 @@ impl SessionMachine {
                     && f.last_laptime != self.baseline_last
                     && self.peak_ms >= MIN_FINISH_MS
                 {
-                    self.phase = Phase::Finished;
-                    self.saw_gap = false;
-                    return Some(SessionEvent::Finish);
+                    // ...but only when the live timer has stopped climbing. At the line it resets
+                    // to ~0 (or freezes/blanks); a timer still counting up means the game merely
+                    // filled the field in late — with the previous run's time — and this run is
+                    // still on the road. Re-baseline so the same stale value can't keep firing.
+                    if cur.is_none_or(|ms| ms <= self.last_ms) {
+                        self.phase = Phase::Finished;
+                        self.saw_gap = false;
+                        return Some(SessionEvent::Finish);
+                    }
+                    self.baseline_last = f.last_laptime.clone();
                 }
                 match cur {
                     // Timer read blank. A single blank frame is a glitch, not a finish;
@@ -180,6 +199,18 @@ impl SessionMachine {
                 Some(ms) if ms < FRESH_RUN_MS && self.saw_gap => {
                     self.enter_running(f, ms);
                     Some(SessionEvent::Start)
+                }
+                // The timer climbed past where the run supposedly ended, with no gap since: it
+                // never ended. A real finish sends the timer back to ~0 behind the result screen,
+                // so it can never come back higher than the peak — but a mid-stage pause freezes
+                // it, which is indistinguishable from a finish until the driver unpauses.
+                Some(ms) if !self.saw_gap && ms > self.peak_ms => {
+                    self.phase = Phase::Running;
+                    self.last_ms = ms;
+                    self.peak_ms = ms;
+                    self.stable_frames = 0;
+                    self.blank_frames = 0;
+                    Some(SessionEvent::Resume)
                 }
                 _ => None,
             },
@@ -328,6 +359,64 @@ mod tests {
             m.observe(&frame_with_last("0:31.000", "2:00.128")),
             Some(SessionEvent::Progress)
         );
+    }
+
+    // 2026-08-16, from a driver's agent log: 34 seconds into a 4:18 run the game populated
+    // `last_laptime` with the PREVIOUS run's time (telemetry was still settling when the run
+    // began, so the baseline was blank). The run was called finished, its session aborted
+    // "no-result" three minutes later, and the driver lost the stage — while still driving it.
+    #[test]
+    fn a_late_last_time_update_does_not_finish_a_climbing_run() {
+        let mut m = SessionMachine::new(3);
+        assert_eq!(m.observe(&frame_with_last("0:01.000", "-")), Some(SessionEvent::Start));
+        assert_eq!(m.observe(&frame_with_last("0:20.000", "-")), Some(SessionEvent::Progress));
+        // The field fills in with a stale time while the stage timer keeps climbing.
+        assert_eq!(
+            m.observe(&frame_with_last("0:34.000", "4:18.252")),
+            Some(SessionEvent::Progress)
+        );
+        assert_eq!(
+            m.observe(&frame_with_last("0:35.000", "4:18.252")),
+            Some(SessionEvent::Progress)
+        );
+        // The real finish, four minutes later, still registers on its own new time.
+        assert_eq!(
+            m.observe(&frame_with_last("0:00.100", "4:12.100")),
+            Some(SessionEvent::Finish)
+        );
+    }
+
+    #[test]
+    fn a_paused_run_resumes_instead_of_staying_finished() {
+        let mut m = SessionMachine::new(3);
+        assert_eq!(m.observe(&frame("0:01.000")), Some(SessionEvent::Start));
+        assert_eq!(m.observe(&frame("0:34.000")), Some(SessionEvent::Progress));
+        // Paused mid-stage: the timer freezes, which is exactly the finish shape.
+        assert_eq!(m.observe(&frame("0:34.000")), Some(SessionEvent::Progress));
+        assert_eq!(m.observe(&frame("0:34.000")), Some(SessionEvent::Progress));
+        assert_eq!(m.observe(&frame("0:34.000")), Some(SessionEvent::Finish));
+        // Unpaused: the timer climbs past the peak, which a real finish can never do.
+        assert_eq!(m.observe(&frame("0:35.000")), Some(SessionEvent::Resume));
+        assert_eq!(m.observe(&frame("0:36.000")), Some(SessionEvent::Progress));
+        assert_eq!(
+            m.observe(&frame_with_last("0:00.050", "4:20.000")),
+            Some(SessionEvent::Finish)
+        );
+    }
+
+    #[test]
+    fn a_finished_run_does_not_resume_after_a_gap() {
+        let mut m = SessionMachine::new(3);
+        m.observe(&frame("0:01.000")); // Start
+        m.observe(&frame("2:00.000")); // Progress
+        assert_eq!(
+            m.observe(&frame_with_last("0:00.100", "2:00.128")),
+            Some(SessionEvent::Finish)
+        );
+        // Menus, then the next stage loads with a high timer for a frame: the gap means the
+        // finished run is over for good, so this can only ever open a fresh run (near zero).
+        assert_eq!(m.observe(&frame_with_last("-", "2:00.128")), None);
+        assert_eq!(m.observe(&frame_with_last("9:00.000", "2:00.128")), None);
     }
 
     #[test]

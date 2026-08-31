@@ -792,8 +792,10 @@ fn stage_row(
     // is no start button" (as a bug report memorably proved).
     ui.horizontal(|ui| {
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let armed_here =
-                arm.active && arm.variant_id.as_deref() == Some(stage.variant_id.as_str());
+            // Both halves of the arm are checked, not just the variant: the same stage can be
+            // open in two events at once (two clubs, or two concurrent championships), and only
+            // the event the driver actually armed should read as armed.
+            let armed_here = arm.is_armed_for(&event.event_id, &stage.variant_id);
             if armed_here {
                 ui.label(egui::RichText::new("armed").color(GREEN).strong());
             } else if stage.completed {

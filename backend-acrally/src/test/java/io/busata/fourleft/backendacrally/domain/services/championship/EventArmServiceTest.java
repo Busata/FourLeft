@@ -92,7 +92,7 @@ class EventArmServiceTest {
     @Test
     void idleArmedArmsExpireAsDnf() {
         EventArm arm = liveArm(false);
-        when(armRepository.findArmedAndIdleSince(any())).thenReturn(List.of(arm));
+        when(armRepository.findIdleSince(any())).thenReturn(List.of(arm));
 
         int expired = service.expireIdleArms(java.time.LocalDateTime.now().minusHours(6));
 

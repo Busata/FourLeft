@@ -271,6 +271,7 @@ impl Runner {
                 self.start(f);
             }
             Some(SessionEvent::Finish) => self.finish(),
+            Some(SessionEvent::Resume) => self.resume(f),
             None => {}
         }
     }
@@ -306,6 +307,33 @@ impl Runner {
             resolved: false,
         });
         self.last_heartbeat = None;
+    }
+
+    /// The run the machine called finished is still going (a mid-stage pause reads as a finish).
+    /// Take its session back out of the waiting queue and keep reporting on it — heartbeats resume,
+    /// so the server stops counting it towards a stale sweep. If the wait already lapsed (its
+    /// session aborted "no-result") or its record already landed, there is nothing to take back:
+    /// open a fresh session so the rest of the run is still covered.
+    fn resume(&mut self, f: &Frame) {
+        if self.active.is_some() {
+            return;
+        }
+        match self.awaiting.pop_back() {
+            Some(a) => {
+                agent_log!("run resumed — session {} had not finished after all", a.id);
+                self.set_status(|s| s.session_id = Some(a.id.clone()));
+                self.active = Some(Active {
+                    id: a.id,
+                    driver: a.driver,
+                    resolved: false,
+                });
+                self.last_heartbeat = None;
+            }
+            None => {
+                agent_log!("run resumed after its session was already resolved — opening a new one");
+                self.start(f);
+            }
+        }
     }
 
     fn heartbeat(&mut self, f: &Frame) {

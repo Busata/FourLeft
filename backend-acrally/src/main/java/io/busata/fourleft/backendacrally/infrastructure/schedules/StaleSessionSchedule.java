@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class StaleSessionSchedule {
 
     /** Longest plausible silence for a live run: heartbeats tick ~1/s while driving, and a
-     *  finished run resolves (result or abort) within the agent's 60s save-wait. Half an hour
+     *  finished run resolves (result or abort) within the agent's 3-minute save-wait. Half an hour
      *  comfortably covers long stages and mid-run pauses. */
     private static final Duration STALE_AFTER = Duration.ofMinutes(30);
 

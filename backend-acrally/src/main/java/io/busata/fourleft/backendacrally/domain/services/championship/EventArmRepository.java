@@ -38,11 +38,20 @@ public interface EventArmRepository extends JpaRepository<EventArm, UUID> {
      *  Reverted arms are included; the panel shows them as already handled. */
     List<EventArm> findAllByEventIdAndOutcomeOrderByUpdatedAtDesc(UUID eventId, EventArmOutcome outcome);
 
-    /** ARMED arms with no activity (bind/unbind or the arming itself) since the cutoff. */
+    /**
+     * Live arms with no activity (bind/unbind or the arming itself) since the cutoff: ARMED ones
+     * whose run never came, plus BOUND ones whose session has since ended without ever producing a
+     * record. The latter would otherwise sit forever — the stale-session sweep only looks at OPEN
+     * sessions, and a BOUND arm can be neither disarmed nor superseded.
+     */
     @Query("""
             select a from EventArm a
-            where a.status = io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus.ARMED
-              and coalesce(a.updatedAt, a.armedAt) < :cutoff
+            where coalesce(a.updatedAt, a.armedAt) < :cutoff
+              and (a.status = io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus.ARMED
+                   or (a.status = io.busata.fourleft.backendacrally.domain.models.championship.EventArmStatus.BOUND
+                       and exists (select 1 from AgentSession s
+                                   where s.id = a.sessionId
+                                     and s.status <> io.busata.fourleft.backendacrally.domain.models.session.SessionStatus.OPEN)))
             """)
-    List<EventArm> findArmedAndIdleSince(@Param("cutoff") LocalDateTime cutoff);
+    List<EventArm> findIdleSince(@Param("cutoff") LocalDateTime cutoff);
 }
