@@ -140,6 +140,8 @@ public class TimeTrialBoardEndpoint {
     }
 
     /** Driver autocomplete: distinct display names matching {@code q} (case-insensitive substring). */
+    // Public read-only data, deliberately open to third-party sites. Never combine with allowCredentials.
+    @CrossOrigin
     @GetMapping("/api_v2/time-trials/players/suggest")
     public List<String> suggest(@RequestParam String q) {
         String trimmed = q.trim();
