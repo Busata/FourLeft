@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubEventsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.services.championships.ChampionshipService;
@@ -19,6 +20,7 @@ public class EventsEndpoint {
 
     private final ClubService clubService;
     private final ClubEventsMessageFactory clubEventsMessageFactory;
+    private final ChannelResultsService channelResultsService;
     private final ChampionshipService championshipService;
 
     @GetMapping("/api_v2/events/{channelId}/summary")
@@ -28,7 +30,7 @@ public class EventsEndpoint {
         return clubService.getActiveChampionshipId(discordClubConfiguration.getPrimaryClubId())
                 .or(() -> clubService.getUpcomingChampionshipId(discordClubConfiguration.getPrimaryClubId()))
                 .flatMap(championshipService::findChampionship)
-                .map(clubEventsMessageFactory::createEventSummary)
+                .map(championship -> clubEventsMessageFactory.createEventSummary(championship, channelResultsService.summaryClasses(discordClubConfiguration, championship)))
                 .map(MessageEmbed::toData)
                 .map(DataObject::toString)
                 .orElse("");

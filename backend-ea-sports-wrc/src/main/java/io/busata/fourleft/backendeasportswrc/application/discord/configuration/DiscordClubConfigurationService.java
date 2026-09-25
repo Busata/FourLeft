@@ -21,12 +21,26 @@ import java.util.Optional;
 public class DiscordClubConfigurationService {
 
     private final ClubConfigurationService clubConfigurationService;
+    private final ChannelClubCompatibilityService compatibilityService;
     private final DiscordClubConfigurationRepository repository;
 
 
+    /** Every channel that tracks the club, whether or not it currently posts it. */
     @Transactional(readOnly = true)
     public List<DiscordClubConfiguration> findByClubId(String clubId) {
         return this.repository.findByClubId(clubId);
+    }
+
+    /**
+     * The channels that post the club's activity: those where it is the primary club, plus MIXED channels
+     * whose clubs are compatible. A secondary club of a SINGLE (or fallen-back) channel stays silent.
+     */
+    @Transactional(readOnly = true)
+    public List<DiscordClubConfiguration> findPostingForClub(String clubId) {
+        return this.repository.findByClubId(clubId).stream()
+                .filter(configuration -> clubId.equals(configuration.getPrimaryClubId())
+                        || compatibilityService.effectiveMode(configuration) == ChannelClubMode.MIXED)
+                .toList();
     }
 
     @Transactional(readOnly = true)

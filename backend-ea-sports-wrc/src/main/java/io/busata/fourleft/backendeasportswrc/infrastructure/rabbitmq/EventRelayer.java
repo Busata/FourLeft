@@ -45,7 +45,7 @@ public class EventRelayer {
 
     @EventListener
     public void handleLeaderboardUpdate(LeaderboardUpdatedEvent updated) {
-        clubConfigurationService.findByClubId(updated.clubId()).forEach(configuration -> {
+        clubConfigurationService.findPostingForClub(updated.clubId()).forEach(configuration -> {
             rabbitMQ.convertAndSend(EASportsWRCQueueNames.EA_SPORTS_WRC_CHANNEL_UPDATE, new ChannelUpdatedEvent(configuration.getChannelId()));
         });
     }

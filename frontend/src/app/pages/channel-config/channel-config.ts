@@ -4,7 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import {
+  ChannelClubMode,
   ChannelConfiguration,
+  ClubChampionship,
   EventRestriction,
   RestrictionDisplayMode,
   RestrictionScoringMode,
@@ -83,6 +85,8 @@ export class ChannelConfig implements OnInit {
   // Vehicle options per restriction target ("championshipId|eventId"), scoped by the backend to the
   // target's car class. Cached so retargeting between rows doesn't refetch.
   readonly vehiclesByTarget = signal<Record<string, string[]>>({});
+  // Mirrors the mode control so the club list shows as soon as mixed is picked, before saving.
+  readonly modeSig = signal<ChannelClubMode>('SINGLE');
   // The targets are static per club; fetch them once, not on every save round-trip.
   private pickersLoaded = false;
 
@@ -100,6 +104,13 @@ export class ChannelConfig implements OnInit {
     // Preview-only: RACENET_DEFAULT scoring depends on the event's field size, not on configuration.
     racenetFieldSize: new FormControl<number>(20, { nonNullable: true }),
     eventRestrictions: new FormArray<RestrictionRow>([]),
+    mode: new FormControl<ChannelClubMode>('SINGLE', { nonNullable: true }),
+  });
+
+  // Adding (or relabelling) a club is its own action, saved immediately — not part of the main form.
+  readonly clubForm = new FormGroup({
+    clubId: new FormControl<string>('', { nonNullable: true }),
+    label: new FormControl<string>('', { nonNullable: true }),
   });
 
   get scoringTable(): FormArray<ScoringRow> {
@@ -117,6 +128,7 @@ export class ChannelConfig implements OnInit {
   ngOnInit(): void {
     this.form.controls.customScoringEnabled.valueChanges.subscribe((on) => this.customScoringOn.set(on));
     this.form.controls.scoringStrategy.valueChanges.subscribe((s) => this.scoringStrategySig.set(s));
+    this.form.controls.mode.valueChanges.subscribe((mode) => this.modeSig.set(mode));
     this.form.valueChanges.subscribe(() => {
       this.updateAnchorPreview();
       this.updateRacenetPreview();
@@ -279,6 +291,7 @@ export class ChannelConfig implements OnInit {
         scoringTable: this.rowsToTable(),
         scoringAnchors: this.rowsToAnchors(),
         eventRestrictions: this.rowsToRestrictions(),
+        mode: this.form.controls.mode.value,
       })
       .subscribe({
         next: (config) => {
@@ -287,6 +300,42 @@ export class ChannelConfig implements OnInit {
         },
         error: () => this.flash('Could not save configuration.'),
       });
+  }
+
+  // Adds a club to the channel, or relabels it when the channel already tracks it.
+  addClub(): void {
+    const clubId = this.clubForm.controls.clubId.value.trim();
+    if (!clubId) {
+      return;
+    }
+    const label = this.clubForm.controls.label.value.trim() || null;
+    this.http.post<ChannelConfiguration>(`${this.base}/clubs`, { clubId, label }).subscribe({
+      next: (config) => {
+        this.apply(config);
+        this.clubForm.reset();
+        this.flash('Club saved.');
+      },
+      error: () => this.flash('Could not save club.'),
+    });
+  }
+
+  championshipOf(config: ChannelConfiguration, clubId: string): ClubChampionship | undefined {
+    return config.compatibility?.clubs.find((club) => club.clubId === clubId);
+  }
+
+  // Prefills the add form so a club's label can be changed.
+  editClub(clubId: string, label: string | null): void {
+    this.clubForm.setValue({ clubId, label: label ?? '' });
+  }
+
+  removeClub(clubId: string): void {
+    this.http.delete<ChannelConfiguration>(`${this.base}/clubs/${encodeURIComponent(clubId)}`).subscribe({
+      next: (config) => {
+        this.apply(config);
+        this.flash('Club removed.');
+      },
+      error: () => this.flash('Could not remove club.'),
+    });
   }
 
   remove(): void {
@@ -493,6 +542,8 @@ export class ChannelConfig implements OnInit {
     }
 
     this.form.controls.clubId.setValue(config.clubId ?? '');
+    this.form.controls.mode.setValue(config.mode === 'MIXED' ? 'MIXED' : 'SINGLE');
+    this.modeSig.set(this.form.controls.mode.value);
     this.form.controls.autopostingEnabled.setValue(config.autopostingEnabled ?? true);
     this.form.controls.requiresTracking.setValue(config.requiresTracking ?? false);
     this.form.controls.customScoringEnabled.setValue(config.customScoringEnabled ?? false);

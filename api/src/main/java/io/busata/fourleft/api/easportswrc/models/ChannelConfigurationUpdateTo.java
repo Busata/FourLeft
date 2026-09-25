@@ -1,5 +1,6 @@
 package io.busata.fourleft.api.easportswrc.models;
 
+import io.busata.fourleft.common.ChannelClubMode;
 import io.busata.fourleft.common.ScoringStrategy;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public record ChannelConfigurationUpdateTo(
         ScoringStrategy scoringStrategy,
         Map<String, Integer> scoringTable,
         ScoringAnchorsTo scoringAnchors,
-        List<EventRestrictionTo> eventRestrictions)
+        List<EventRestrictionTo> eventRestrictions,
+        // Null keeps the current mode.
+        ChannelClubMode mode)
 {
 }

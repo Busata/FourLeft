@@ -1,11 +1,13 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
 import io.busata.fourleft.api.easportswrc.events.ClubEventEnded;
+import io.busata.fourleft.backendeasportswrc.application.discord.configuration.ChannelClubCompatibilityService;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
-import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService.StandingsSection;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
+import io.busata.fourleft.backendeasportswrc.domain.models.Event;
+import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.DiscordGateway;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +17,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,8 +28,10 @@ public class ClubEventEndedMessageService {
     private final DiscordGateway discordGateway;
 
     private final DiscordClubConfigurationService discordClubConfigurationService;
-    private final ClubResultsService clubResultsService;
-    private final ClubStatsService clubStatsService;
+    private final ChannelClubCompatibilityService compatibilityService;
+    private final ChannelResultsService channelResultsService;
+    private final ChannelPostGate postGate;
+    private final ClubService clubService;
 
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory clubStandingsMessageFactory;
@@ -36,35 +40,55 @@ public class ClubEventEndedMessageService {
 
     @EventListener
     public void handleClubEvent(ClubEventEnded eventEnded) {
-        discordClubConfigurationService.findByClubId(eventEnded.clubId()).forEach(configuration -> {
+        discordClubConfigurationService.findPostingForClub(eventEnded.clubId()).forEach(configuration -> {
             try {
-                postClubEventMessages(eventEnded, configuration);
+                if (channelResultsService.isMixed(configuration) && !lastClubToFinish(configuration, eventEnded.clubId())) {
+                    return;
+                }
+                postClubEventMessages(configuration);
             } catch (Exception ex) {
                 log.error("Failed to post club event ended for configuration {}", configuration.getChannelId(), ex);
             }
         });
     }
 
-    private void postClubEventMessages(ClubEventEnded eventEnded, DiscordClubConfiguration configuration) {
+    /**
+     * A MIXED channel posts once for all its clubs: each club's event end is recorded against the primary
+     * club's matching event, and only the club completing the set goes on to post.
+     */
+    private boolean lastClubToFinish(DiscordClubConfiguration configuration, String clubId) {
+        Optional<Event> primaryEvent = clubService.findPreviousEvent(clubId).flatMap(event ->
+                clubId.equals(configuration.getPrimaryClubId())
+                        ? Optional.of(event)
+                        : compatibilityService.matchingEvent(configuration.getPrimaryClubId(), event));
+
+        if (primaryEvent.isEmpty()) {
+            log.warn("Channel {}: no primary event matches the event club {} just finished; not posting", configuration.getChannelId(), clubId);
+            return false;
+        }
+        return postGate.arrive(configuration.getChannelId(), "event-ended:" + primaryEvent.get().getId(), clubId, configuration.getClubIds());
+    }
+
+    private void postClubEventMessages(DiscordClubConfiguration configuration) {
+        boolean mixed = channelResultsService.isMixed(configuration);
         List<MessageEmbed> embeds = new ArrayList<>();
         // Post previous results
-        clubResultsService.getPreviousResults(eventEnded.clubId()).ifPresent(results -> {
+        channelResultsService.getPreviousResults(configuration).ifPresent(results -> {
             MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
             embeds.add(resultPost);
 
         });
         // Post Standings
-        List<ChampionshipStanding> standings = clubResultsService.getStandings(configuration, eventEnded.clubId()).stream()
-                .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
-        if (!standings.isEmpty()) {
-            MessageEmbed standingsPost = clubStandingsMessageFactory.createStandingsPost(standings,
+        List<StandingsSection> standings = channelResultsService.getStandings(configuration);
+        if (standings.stream().anyMatch(section -> !section.standings().isEmpty())) {
+            MessageEmbed standingsPost = clubStandingsMessageFactory.createSectionedStandingsPost(standings,
                     configuration.isRequiresTracking());
             embeds.add(standingsPost);
         }
 
         //Stats
         try {
-            clubStatsService.buildStats(eventEnded.clubId()).ifPresent(stats -> {
+            channelResultsService.getStats(configuration).ifPresent(stats -> {
                 try {
                     MessageEmbed statsPost = clubStatsMessageFactory.createPost(stats, configuration);
                     embeds.add(statsPost);
@@ -78,12 +102,13 @@ public class ClubEventEndedMessageService {
 
         // Post new results
         try {
-            clubResultsService.getCurrentResults(eventEnded.clubId()).ifPresent(results -> {
+            channelResultsService.getCurrentResults(configuration).ifPresent(results -> {
                 MessageEmbed resultPost = clubResultsMessageFactory.createResultPost(results, configuration);
                 embeds.add(resultPost);
 
-                // Show the time-trial top 10 so members know the target times to beat, when enabled.
-                if (configuration.isTimeTrialTopEnabled()) {
+                // Show the time-trial top 10 so members know the target times to beat, when enabled. Its board
+                // is per car class, so a mixed channel has none.
+                if (configuration.isTimeTrialTopEnabled() && !mixed) {
                     timeTrialTopMessageFactory.createTopPost(results, configuration.isTimeTrialTopTrackedOnly()).ifPresent(embeds::add);
                 }
             });

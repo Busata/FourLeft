@@ -14,9 +14,98 @@
     <form [formGroup]="form">
       @if (c.configured) {
         <div class="form-group">
-          <label>Synced club (remove to change)</label>
+          <label>{{ c.clubs.length > 1 ? 'Primary club' : 'Synced club' }} (remove to change)</label>
           <input formControlName="clubId" type="text" readonly />
         </div>
+
+        <div class="form-group">
+          <label>Clubs</label>
+          <select formControlName="mode">
+            <option value="SINGLE">Single club</option>
+            <option value="MIXED">Mixed classes &mdash; merge clubs running the same championship</option>
+          </select>
+          @if (modeSig() === 'MIXED') {
+            <p>
+              Track a second club that runs the exact same championship with a different car class; results,
+              standings, stats and autoposts are merged into one set of posts, each entry tagged with its class
+              (the club's label, or its car class). Only the car class may differ &mdash; when anything else doesn't
+              match, the channel falls back to posting the primary club only. Save to apply the mode.
+            </p>
+          }
+        </div>
+
+        @if (modeSig() === 'MIXED' || c.clubs.length > 1) {
+          <div class="form-group">
+            <div class="g-tablewrap">
+              <table class="dash-table club-table">
+                <thead>
+                  <tr>
+                    <th>Club</th>
+                    <th>Label</th>
+                    <th class="wide-only">Championship</th>
+                    <th>Class</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (club of c.clubs; track club.clubId; let first = $first) {
+                    <tr>
+                      <td>{{ club.clubId }}@if (first) { <span class="club-primary">primary</span> }</td>
+                      <td>{{ club.label || '—' }}</td>
+                      <td class="wide-only">{{ championshipOf(c, club.clubId)?.championshipName || '—' }}</td>
+                      <td>{{ championshipOf(c, club.clubId)?.vehicleClass || '—' }}</td>
+                      <td class="club-actions">
+                        <button class="g-button g-button-tertiary" type="button" (click)="editClub(club.clubId, club.label)">
+                          Label
+                        </button>
+                        @if (!first) {
+                          <button class="g-button g-button-tertiary" type="button" (click)="removeClub(club.clubId)">
+                            Remove
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="club-add" [formGroup]="clubForm">
+              <input formControlName="clubId" type="text" placeholder="Club id" />
+              <input formControlName="label" type="text" placeholder="Label, e.g. WRC2 (optional)" />
+              <button class="g-button g-button-secondary" type="button" (click)="addClub()">Add / update club</button>
+            </div>
+
+            @if (c.compatibility; as compat) {
+              @if (compat.compatible) {
+                <p class="club-status club-status-ok">
+                  The clubs run the same championship
+                  @if (c.effectiveMode === 'MIXED') {
+                    &mdash; results are merged.
+                  } @else {
+                    &mdash; switch to mixed and save to merge their results.
+                  }
+                </p>
+              } @else {
+                <div class="club-status club-status-error">
+                  <strong>
+                    The clubs don't run the same championship
+                    @if (c.mode === 'MIXED') {
+                      &mdash; posting falls back to the primary club only.
+                    }
+                  </strong>
+                  <ul>
+                    @for (problem of compat.problems; track problem) {
+                      <li>{{ problem }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            } @else if (modeSig() === 'MIXED') {
+              <p class="club-status club-status-error">Add a second club to merge results.</p>
+            }
+          </div>
+        }
 
         <div class="form-group">
           <label>Autoposting</label>
@@ -32,19 +121,26 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Post time trial top 10 on new events</label>
-          <div class="checkbox-group">
-            <app-slide-toggle formControlName="timeTrialTopEnabled"></app-slide-toggle>
+        @if (modeSig() === 'MIXED') {
+          <div class="form-group">
+            <label>Time trial top 10</label>
+            <p>Not posted in mixed channels &mdash; time trial boards are per car class.</p>
           </div>
-        </div>
+        } @else {
+          <div class="form-group">
+            <label>Post time trial top 10 on new events</label>
+            <div class="checkbox-group">
+              <app-slide-toggle formControlName="timeTrialTopEnabled"></app-slide-toggle>
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label>Time trial top 10: tracked players only</label>
-          <div class="checkbox-group">
-            <app-slide-toggle formControlName="timeTrialTopTrackedOnly"></app-slide-toggle>
+          <div class="form-group">
+            <label>Time trial top 10: tracked players only</label>
+            <div class="checkbox-group">
+              <app-slide-toggle formControlName="timeTrialTopTrackedOnly"></app-slide-toggle>
+            </div>
           </div>
-        </div>
+        }
 
         <div class="form-group">
           <label>Custom scoring</label>
@@ -199,6 +295,9 @@
             Violators can be flagged or hidden on results, and penalised or excluded in custom scoring.
             Scoring effects require custom scoring to be enabled &mdash; racenet's own standings can't be changed.
           </p>
+          @if (modeSig() === 'MIXED') {
+            <p>In a mixed channel, restrictions apply to the primary club's entries only.</p>
+          }
           <div formArrayName="eventRestrictions">
             @for (row of eventRestrictions.controls; track $index) {
               <div class="restriction-row" [formGroupName]="$index">

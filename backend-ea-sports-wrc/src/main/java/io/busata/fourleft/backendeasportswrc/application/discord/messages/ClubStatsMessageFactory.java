@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class ClubStatsMessageFactory {
 private String buildCarStatistics(ClubStats results) {
         CarStatistics statistics = results.carStatistics();
 
-        return statistics.carPercentages()
+        List<String> lines = statistics.carPercentages()
                 .entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
@@ -68,9 +69,27 @@ private String buildCarStatistics(ClubStats results) {
                     String topEntriesString = topEntries > 0 ? "• *%s in top 10* •".formatted(topEntries) : "•";
 
                     return String.format("**%.1f%%** • *%s entries* %s **%s**", percentage, entries, topEntriesString, entry.getKey());
+                }).toList();
 
-
-        }).collect(Collectors.joining("\n"));
+        // A mixed channel's two classes can list more cars than one field holds; keep the most used ones.
+        StringBuilder value = new StringBuilder();
+        int shown = 0;
+        for (String line : lines) {
+            int remaining = lines.size() - shown - 1;
+            int reserve = remaining > 0 ? 24 : 0;
+            if (value.length() + line.length() + 1 + reserve > MessageEmbed.VALUE_MAX_LENGTH) {
+                break;
+            }
+            if (!value.isEmpty()) {
+                value.append('\n');
+            }
+            value.append(line);
+            shown++;
+        }
+        if (shown < lines.size()) {
+            value.append('\n').append(EmbedBudget.MORE_TEMPLATE.formatted(lines.size() - shown));
+        }
+        return value.toString();
     }
 
     private void buildHeader(EmbedBuilder embedBuilder, ClubStats results) {

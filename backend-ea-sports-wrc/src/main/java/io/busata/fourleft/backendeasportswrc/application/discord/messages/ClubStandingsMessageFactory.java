@@ -1,9 +1,9 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService.StandingsSection;
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
 import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.fieldmapping.FieldMappingType;
-import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.ListHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,11 +22,34 @@ public class ClubStandingsMessageFactory {
 
     String entryTemplate = "**${rank}**${deltaRank} • *${points}*${deltaPoints} • ${flag} • **${displayName}**";
 
+    private static final int MAX_ENTRIES = 50;
+    private static final int GROUP_SIZE = 10;
+    // Footer: one "Total entries" field.
+    private static final int FOOTER_RESERVED_LENGTH = 50;
+    private static final int FOOTER_RESERVED_FIELDS = 1;
+
     public MessageEmbed createStandingsPost(List<ChampionshipStanding> standings, boolean requiresTracking) {
+        return createSectionedStandingsPost(List.of(new StandingsSection(null, standings)), requiresTracking);
+    }
+
+    /**
+     * One post for all sections; a MIXED channel has a titled section per class. The 50-entry cap is shared
+     * between sections so each class gets its top.
+     */
+    public MessageEmbed createSectionedStandingsPost(List<StandingsSection> sections, boolean requiresTracking) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         buildHeader(embedBuilder);
-        buildEntries(embedBuilder, standings, requiresTracking);
-        buildFooter(embedBuilder, standings);
+
+        int perSection = sections.isEmpty() ? MAX_ENTRIES : Math.max(GROUP_SIZE, MAX_ENTRIES / sections.size());
+        for (int i = 0; i < sections.size(); i++) {
+            StandingsSection section = sections.get(i);
+            // Later sections still need room for their title and a first block.
+            int laterSections = sections.size() - i - 1;
+            buildEntries(embedBuilder, section, requiresTracking, perSection,
+                    FOOTER_RESERVED_LENGTH + laterSections * 200, FOOTER_RESERVED_FIELDS + laterSections);
+        }
+
+        buildFooter(embedBuilder, sections.stream().mapToInt(section -> section.standings().size()).sum());
         return embedBuilder.build();
     }
 
@@ -36,21 +59,18 @@ public class ClubStandingsMessageFactory {
     }
 
 
-    private void buildEntries(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings, boolean requiresTracking) {
-        var lists = ListHelpers.partitionInGroups(standings.stream()
-                        .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 20)
-                        .filter(entry -> entry.getPointsAccumulated() > 0)
-                        .limit(50)
-                .sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList(), 10);
+    private void buildEntries(EmbedBuilder embedBuilder, StandingsSection section, boolean requiresTracking, int limit,
+                              int reservedLength, int reservedFields) {
+        List<String> lines = section.standings().stream()
+                .filter(entry -> !requiresTracking || entry.isTracked() || entry.getRank() <= 20)
+                .filter(entry -> entry.getPointsAccumulated() > 0)
+                .limit(limit)
+                .sorted(Comparator.comparing(ChampionshipStanding::getRank))
+                .map(entry -> StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry)))
+                .toList();
 
-        lists.forEach(groupOfEntries -> {
-            String values = groupOfEntries.stream().map(entry -> {
-                return StringSubstitutor.replace(entryTemplate, buildTemplateMap(entry));
-            }).collect(Collectors.joining("\n"));
-
-            embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, values, false);
-        });
-
+        String title = section.title() == null ? null : "**%s**".formatted(EmbedBudget.truncate(section.title(), MessageEmbed.TITLE_MAX_LENGTH - 4));
+        EmbedBudget.addEntryFields(embedBuilder, lines, GROUP_SIZE, title, reservedLength, reservedFields);
     }
 
 
@@ -93,10 +113,10 @@ public class ClubStandingsMessageFactory {
     }
 
 
-    private void buildFooter(EmbedBuilder embedBuilder, List<ChampionshipStanding> standings) {
+    private void buildFooter(EmbedBuilder embedBuilder, int totalEntries) {
         embedBuilder.addField(new MessageEmbed.Field(
                 "Total entries",
-                String.valueOf(standings.size()),
+                String.valueOf(totalEntries),
                 false
         ));
     }

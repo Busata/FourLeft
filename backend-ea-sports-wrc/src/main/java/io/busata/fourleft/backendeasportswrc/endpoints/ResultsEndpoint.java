@@ -5,10 +5,9 @@ import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubRe
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStandingsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubStatsMessageFactory;
 import io.busata.fourleft.backendeasportswrc.application.discord.messages.TimeTrialTopMessageFactory;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResultsService;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubStatsService;
-import io.busata.fourleft.backendeasportswrc.domain.models.ChampionshipStanding;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.infrastructure.helpers.DurationHelper;
@@ -37,7 +36,7 @@ public class ResultsEndpoint {
     private final DiscordClubConfigurationService discordClubConfigurationService;
 
     private final ClubResultsService clubResultsService;
-    private final ClubStatsService clubStatsService;
+    private final ChannelResultsService channelResultsService;
 
     private final ClubResultsMessageFactory clubResultsMessageFactory;
     private final ClubStandingsMessageFactory standingsMessageFactory;
@@ -48,7 +47,7 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/current")
     String getCurrentResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-        return clubResultsService.getCurrentResults(discordClubConfiguration.getPrimaryClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
+        return channelResultsService.getCurrentResults(discordClubConfiguration).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
                 .map(DataObject::toString)
                 .orElse("");
     }
@@ -56,11 +55,15 @@ public class ResultsEndpoint {
 
     /**
      * Time-trial top 10 (target times) for the channel's current event. Served regardless of the
-     * auto-post toggle — the slash command is on demand — but honors the tracked-only setting.
+     * auto-post toggle — the slash command is on demand — but honors the tracked-only setting. A mixed
+     * channel has none: time trial boards are per car class.
      */
     @GetMapping("/api_v2/results/{channelId}/timetrial")
     String getTimeTrialTop(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
+        if (channelResultsService.isMixed(discordClubConfiguration)) {
+            return "";
+        }
         return clubResultsService.getCurrentResults(discordClubConfiguration.getPrimaryClubId())
                 .flatMap(results -> timeTrialTopMessageFactory.createTopPost(results, discordClubConfiguration.isTimeTrialTopTrackedOnly()))
                 .map(MessageEmbed::toData)
@@ -110,7 +113,7 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/previous")
     String getPreviousResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-        return clubResultsService.getPreviousResults(discordClubConfiguration.getPrimaryClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
+        return channelResultsService.getPreviousResults(discordClubConfiguration).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
                .orElse("");
     }
 
@@ -118,15 +121,13 @@ public class ResultsEndpoint {
     String getStats(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        return clubStatsService.buildStats(discordClubConfiguration.getPrimaryClubId()).map(results -> clubStatsMessageFactory.createPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return channelResultsService.getStats(discordClubConfiguration).map(results -> clubStatsMessageFactory.createPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/standings")
     String getStandings(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        List<ChampionshipStanding> standings = clubResultsService.getStandings(discordClubConfiguration).stream().sorted(Comparator.comparing(ChampionshipStanding::getRank)).toList();
-
-        return standingsMessageFactory.createStandingsPost(standings, discordClubConfiguration.isRequiresTracking()).toData().toString();
+        return standingsMessageFactory.createSectionedStandingsPost(channelResultsService.getStandings(discordClubConfiguration), discordClubConfiguration.isRequiresTracking()).toData().toString();
     }
 }

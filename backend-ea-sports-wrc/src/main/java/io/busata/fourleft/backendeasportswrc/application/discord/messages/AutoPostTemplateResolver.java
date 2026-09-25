@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,24 +37,40 @@ public class AutoPostTemplateResolver implements TemplateResolver<AutoPostMessag
         Map<String, String> values = new HashMap<>();
         values.put("eventCountryFlag", fieldMapper.getDiscordField("eventFlag#" + eventSettings.getLocationID(), FieldMappingType.EMOTE, eventSettings.getLocation()));
         values.put("lastStage", stageSettings.getRoute());
-        values.put("eventVehicleClass", eventSettings.getVehicleClass());
+        values.put("eventVehicleClass", summary.vehicleClasses() != null ? summary.vehicleClasses() : eventSettings.getVehicleClass());
         values.put("totalEntries", String.valueOf(summary.totalEntries()));
 
-        values.put("entries", this.resolveEntries(messageTemplate.getReccuringTemplate("entries"), summary));
+        String entriesTemplate = messageTemplate.getReccuringTemplate("entries");
+        // A mixed channel's entries need their class; custom templates that don't place it get it appended.
+        if (summary.isMixed() && entriesTemplate != null && !entriesTemplate.contains("${class}")) {
+            entriesTemplate = entriesTemplate + ClubResultsMessageFactory.CLASS_SUFFIX;
+        }
+        values.put("entries", this.resolveEntries(entriesTemplate, summary));
 
         return StringSubstitutor.replace(messageTemplate.getNormalizedTemplate(), values);
     }
 
     private String resolveEntries(String template, AutoPostMessageSummary summary) {
-        return summary.entries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).map(entry -> {
+        Comparator<ClubLeaderboardEntry> order = summary.isMixed()
+                ? Comparator.comparing(entry -> summary.mixed().get(entry).rank())
+                : Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated);
+
+        return summary.entries().stream().sorted(order).map(entry -> {
             Map<String, String> values = new HashMap<>();
 
-            values.put("badgeRank", BadgeMapper.createBadge(entry.getRankAccumulated(), summary.totalEntries(), entry.isDnf()));
-            values.put("rank", String.valueOf(entry.getRankAccumulated()));
+            // A mixed channel ranks and gaps entries overall; a single board keeps racenet's.
+            AutoPostMessageSummary.MixedEntry mixed = summary.mixed().get(entry);
+            long rank = mixed != null ? mixed.rank() : entry.getRankAccumulated();
+            Duration delta = mixed != null ? mixed.delta() : entry.getDifferenceAccumulated();
+
+            values.put("badgeRank", BadgeMapper.createBadge(rank, summary.totalEntries(), entry.isDnf()));
+            values.put("rank", String.valueOf(rank));
+            values.put("class", mixed != null ? mixed.tag() : "");
+            values.put("classRank", String.valueOf(entry.getRankAccumulated()));
             values.put("flag", fieldMapper.getDiscordField("nationalityFlag#" + entry.getNationalityID(), FieldMappingType.EMOTE, entry.getAlias()));
             values.put("displayName", entry.getAlias());
             values.put("totalTime", DurationHelper.formatTime(entry.getTimeAccumulated()));
-            values.put("deltaTime", "(%s)".formatted(DurationHelper.formatDelta(entry.getDifferenceAccumulated())));
+            values.put("deltaTime", "(%s)".formatted(DurationHelper.formatDelta(delta)));
             values.put("vehicle", entry.getVehicle());
             
             if (entry.getDisplayName().equals("Qorsatevela")) {

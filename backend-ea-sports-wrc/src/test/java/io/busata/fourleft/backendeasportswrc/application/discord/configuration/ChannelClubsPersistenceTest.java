@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -126,6 +127,22 @@ class ChannelClubsPersistenceTest {
         Integer remaining = jdbc.queryForObject(
                 "select count(*) from discord_club_configuration_club where configuration_id = ?", Integer.class, id);
         assertThat(remaining).isZero();
+    }
+
+    @Test
+    void postGateLetsTheLastArrivalThroughOnce() {
+        io.busata.fourleft.backendeasportswrc.application.discord.messages.ChannelPostGate gate =
+                new io.busata.fourleft.backendeasportswrc.application.discord.messages.ChannelPostGate(jdbc);
+        List<String> clubs = List.of("wrc", "wrc2");
+
+        assertThat(gate.arrive(200L, "event-ended:e1", "wrc2", clubs)).isFalse();
+        assertThat(gate.arrive(200L, "event-ended:e1", "wrc", clubs)).isTrue();
+        // A repeated event (re-import) never posts twice.
+        assertThat(gate.arrive(200L, "event-ended:e1", "wrc", clubs)).isFalse();
+        assertThat(gate.arrive(200L, "event-ended:e1", "wrc2", clubs)).isFalse();
+        // Another round, or another channel, has its own gate.
+        assertThat(gate.arrive(200L, "event-ended:e2", "wrc", clubs)).isFalse();
+        assertThat(gate.arrive(201L, "event-ended:e1", "wrc", List.of("wrc"))).isTrue();
     }
 
     private String legacyClubId(UUID id) {

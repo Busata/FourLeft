@@ -1,6 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.results;
 
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
+import io.busata.fourleft.backendeasportswrc.domain.models.Event;
 import io.busata.fourleft.backendeasportswrc.domain.models.Stage;
 import io.busata.fourleft.backendeasportswrc.domain.models.StageSettings;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
@@ -30,7 +31,7 @@ public class ClubStatsService {
                 List<ClubLeaderboardEntry> entries = clubLeaderboardService.findEntries(event1.getLeaderboardId());
 
 
-                CarStatistics carStatistics = calculateCarStatistics(entries);
+                CarStatistics carStatistics = calculateCarStatistics(entries, entries.stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRank)).toList());
                 PlayerStatistics playerStatistics = calculatePlayerStatistics(entries);
 
                 return new ClubStats(
@@ -47,8 +48,31 @@ public class ClubStatsService {
 
     }
 
+    /**
+     * Stats over several clubs' boards for the same event (a MIXED channel). {@code events} is in channel
+     * order, the first one's settings head the post; the top 10 is the overall one.
+     */
+    public Optional<ClubStats> buildMergedStats(List<Event> events, String vehicleClass) {
+        if (events.isEmpty()) {
+            return Optional.empty();
+        }
+        Event primary = events.get(0);
+        List<ClubLeaderboardEntry> entries = events.stream()
+                .flatMap(event -> clubLeaderboardService.findEntries(event.getLeaderboardId()).stream())
+                .toList();
+
+        return Optional.of(new ClubStats(
+                vehicleClass,
+                primary.getEventSettings().getLocation(),
+                primary.getEventSettings().getLocationID(),
+                primary.getStages().stream().map(Stage::getStageSettings).map(StageSettings::getRoute).toList(),
+                calculateCarStatistics(entries, MergedRanking.of(entries).entries()),
+                calculatePlayerStatistics(entries)
+        ));
+    }
+
     @NotNull
-    private static CarStatistics calculateCarStatistics(List<ClubLeaderboardEntry> entries) {
+    private static CarStatistics calculateCarStatistics(List<ClubLeaderboardEntry> entries, List<ClubLeaderboardEntry> ranked) {
         int totalCount = entries.size();
         Map<String, Long> vehicleCount = entries.stream()
                 .map(ClubLeaderboardEntry::getVehicle)
@@ -60,7 +84,7 @@ public class ClubStatsService {
             percentages.put(key, percentage);
         });
 
-        Map<String, Long> topCount = entries.stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRank))
+        Map<String, Long> topCount = ranked.stream()
                 .limit(10)
                 .map(ClubLeaderboardEntry::getVehicle)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));

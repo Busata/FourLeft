@@ -28,21 +28,30 @@ public class ClubEventsMessageFactory {
 
 
     public MessageEmbed createEventSummary(Championship activeChampionship) {
+        return createEventSummary(activeChampionship, Map.of());
+    }
+
+    /** {@code carClasses} overrides an event's class by event id — a MIXED channel lists every club's class. */
+    public MessageEmbed createEventSummary(Championship activeChampionship, Map<String, String> carClasses) {
         try {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             buildHeader(embedBuilder);
-            buildEntries(embedBuilder, activeChampionship, true);
+            buildEntries(embedBuilder, activeChampionship, true, carClasses);
             return embedBuilder.build();
         } catch (IllegalStateException ex) {
             log.error("Could not create a full summary, posting minimal summary.");
-            return createEventMinimalSummary(activeChampionship);
+            return createEventMinimalSummary(activeChampionship, carClasses);
         }
     }
 
     public MessageEmbed createEventMinimalSummary(Championship activeChampionship) {
+        return createEventMinimalSummary(activeChampionship, Map.of());
+    }
+
+    private MessageEmbed createEventMinimalSummary(Championship activeChampionship, Map<String, String> carClasses) {
         EmbedBuilder builder = new EmbedBuilder();
         buildHeader(builder);
-        buildEntries(builder, activeChampionship, false);
+        buildEntries(builder, activeChampionship, false, carClasses);
 
         return builder.build();
     }
@@ -51,11 +60,11 @@ public class ClubEventsMessageFactory {
         embedBuilder.setTitle("**Championship summary**");
     }
 
-    private void buildEntries(EmbedBuilder embedBuilder, Championship activeChampionship, boolean includeStages) {
+    private void buildEntries(EmbedBuilder embedBuilder, Championship activeChampionship, boolean includeStages, Map<String, String> carClasses) {
 
         activeChampionship.getEvents().forEach(event -> {
             if(event.getStages().size() > 1) {
-                var eventHeader = StringSubstitutor.replace(multipleEventsEventFormat, buildEventMap(event));
+                var eventHeader = StringSubstitutor.replace(multipleEventsEventFormat, withCarClass(buildEventMap(event), event, carClasses));
                 String stages;
                 if(includeStages) {
                      stages = event.getStages().stream().map(stage -> {
@@ -66,11 +75,19 @@ public class ClubEventsMessageFactory {
                 }
                 embedBuilder.addField(eventHeader, stages, false);
             } else {
-                var values =  StringSubstitutor.replace(singleEventSingleStageFormat, buildTemplateMap(event));
+                var values =  StringSubstitutor.replace(singleEventSingleStageFormat, withCarClass(buildTemplateMap(event), event, carClasses));
                 embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, values, false);
             }
 
         });
+    }
+
+    private static Map<String, String> withCarClass(Map<String, String> values, Event event, Map<String, String> carClasses) {
+        String carClass = carClasses.get(event.getId());
+        if (carClass != null && !carClass.isBlank()) {
+            values.put("carClass", carClass);
+        }
+        return values;
     }
 
     private Map<String, String> buildTemplateMap(Event entry) {

@@ -754,3 +754,51 @@ form .g-button + .g-button {
     display: table-cell;
   }
 }
+
+/* Channel config: the clubs a mixed channel merges, and whether they match. */
+.club-table {
+  margin-bottom: 12px;
+
+  .club-primary {
+    margin-left: 6px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .club-actions {
+    white-space: nowrap;
+  }
+}
+
+.club-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  input {
+    flex: 1 1 180px;
+  }
+}
+
+.club-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+
+  ul {
+    margin: 6px 0 0;
+    padding-left: 20px;
+  }
+}
+
+.club-status-ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.club-status-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}

@@ -23,6 +23,10 @@ public record ChannelConfigurationTo(
         ScoringAnchorsTo scoringAnchors,
         List<EventRestrictionTo> eventRestrictions,
         ChannelClubMode mode,
-        List<ChannelClubTo> clubs)
+        List<ChannelClubTo> clubs,
+        // What posting actually uses: MIXED only while the clubs are compatible, SINGLE otherwise.
+        ChannelClubMode effectiveMode,
+        // Null for a single-club channel.
+        ChannelClubCompatibilityTo compatibility)
 {
 }

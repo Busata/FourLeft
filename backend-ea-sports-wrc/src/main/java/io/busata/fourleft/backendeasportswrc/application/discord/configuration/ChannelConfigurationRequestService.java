@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
+import io.busata.fourleft.api.easportswrc.models.ChannelClubCompatibilityTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelClubTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationTo;
@@ -39,6 +40,7 @@ public class ChannelConfigurationRequestService {
 
     private final ChannelConfigurationRequestRepository requestRepository;
     private final DiscordClubConfigurationService clubConfigurationService;
+    private final ChannelClubCompatibilityService compatibilityService;
     private final ClubService clubService;
     private final ClubLeaderboardService clubLeaderboardService;
     private final TimeTrialLeaderboardEntryRepository timeTrialLeaderboardEntryRepository;
@@ -86,6 +88,9 @@ public class ChannelConfigurationRequestService {
                     form.scoringTable(),
                     toDomain(form.scoringAnchors()),
                     toDomain(form.eventRestrictions()));
+            if (form.mode() != null) {
+                clubConfigurationService.updateMode(request.getChannelId(), form.mode());
+            }
 
             return toConfigurationTo(request);
         });
@@ -146,7 +151,9 @@ public class ChannelConfigurationRequestService {
                         toDto(config.getScoringAnchors()),
                         toDto(config.getEventRestrictionsOrEmpty()),
                         config.getMode(),
-                        config.getClubs().stream().map(club -> new ChannelClubTo(club.getClubId(), club.getLabel())).toList()
+                        config.getClubs().stream().map(club -> new ChannelClubTo(club.getClubId(), club.getLabel())).toList(),
+                        compatibilityService.effectiveMode(config),
+                        config.getClubs().size() > 1 ? toDto(compatibilityService.evaluate(config)) : null
                 ))
                 .orElseGet(() -> new ChannelConfigurationTo(
                         String.valueOf(request.getGuildId()),
@@ -164,8 +171,24 @@ public class ChannelConfigurationRequestService {
                         null,
                         null,
                         null,
-                        List.of()
+                        List.of(),
+                        null,
+                        null
                 ));
+    }
+
+    private static ChannelClubCompatibilityTo toDto(ChannelClubCompatibility compatibility) {
+        return new ChannelClubCompatibilityTo(
+                compatibility.compatible(),
+                compatibility.problems(),
+                compatibility.clubs().stream().map(club -> new ChannelClubCompatibilityTo.ClubChampionshipTo(
+                        club.clubId(),
+                        club.label(),
+                        club.championshipId(),
+                        club.championshipName(),
+                        club.location(),
+                        club.vehicleClass(),
+                        club.eventCloseDate())).toList());
     }
 
     private static ScoringAnchors toDomain(ScoringAnchorsTo dto) {
