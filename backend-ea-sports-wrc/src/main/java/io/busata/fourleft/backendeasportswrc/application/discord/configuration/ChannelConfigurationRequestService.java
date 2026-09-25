@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.configuration;
 
+import io.busata.fourleft.api.easportswrc.models.ChannelClubTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationUpdateTo;
@@ -18,6 +19,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchor
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
+import io.busata.fourleft.common.ChannelClubMode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,6 +100,32 @@ public class ChannelConfigurationRequestService {
         });
     }
 
+    /** Adds a club to the channel, or relabels it when already tracked. Empty when the channel isn't configured. */
+    @Transactional
+    public Optional<ChannelConfigurationTo> addClub(UUID requestId, ChannelClubTo club) {
+        return requestRepository.findById(requestId).flatMap(request ->
+                clubConfigurationService.addClub(request.getChannelId(), club.clubId(), club.label())
+                        .map(configuration -> toConfigurationTo(request)));
+    }
+
+    /** Removes one of the channel's clubs. The last club can't go this way — removing the configuration does that. */
+    @Transactional
+    public Optional<ChannelConfigurationTo> removeClub(UUID requestId, String clubId) {
+        return requestRepository.findById(requestId).map(request -> {
+            clubConfigurationService.findByChannelId(request.getChannelId())
+                    .filter(configuration -> configuration.getClubs().size() > 1)
+                    .ifPresent(configuration -> clubConfigurationService.removeConfiguration(request.getChannelId(), clubId));
+            return toConfigurationTo(request);
+        });
+    }
+
+    @Transactional
+    public Optional<ChannelConfigurationTo> updateMode(UUID requestId, ChannelClubMode mode) {
+        return requestRepository.findById(requestId).flatMap(request ->
+                clubConfigurationService.updateMode(request.getChannelId(), mode)
+                        .map(configuration -> toConfigurationTo(request)));
+    }
+
     private ChannelConfigurationTo toConfigurationTo(ChannelConfigurationRequest request) {
         Optional<DiscordClubConfiguration> configuration = clubConfigurationService.findByChannelId(request.getChannelId());
 
@@ -106,7 +134,7 @@ public class ChannelConfigurationRequestService {
                         String.valueOf(request.getGuildId()),
                         String.valueOf(request.getChannelId()),
                         true,
-                        config.getClubId(),
+                        config.getPrimaryClubId(),
                         config.isAutopostingEnabled(),
                         config.isRequiresTracking(),
                         config.isEnabled(),
@@ -116,7 +144,9 @@ public class ChannelConfigurationRequestService {
                         config.getScoringStrategy(),
                         config.getScoringTable(),
                         toDto(config.getScoringAnchors()),
-                        toDto(config.getEventRestrictionsOrEmpty())
+                        toDto(config.getEventRestrictionsOrEmpty()),
+                        config.getMode(),
+                        config.getClubs().stream().map(club -> new ChannelClubTo(club.getClubId(), club.getLabel())).toList()
                 ))
                 .orElseGet(() -> new ChannelConfigurationTo(
                         String.valueOf(request.getGuildId()),
@@ -132,7 +162,9 @@ public class ChannelConfigurationRequestService {
                         null,
                         null,
                         null,
-                        null
+                        null,
+                        null,
+                        List.of()
                 ));
     }
 
@@ -253,7 +285,7 @@ public class ChannelConfigurationRequestService {
     private Optional<Club> findClub(UUID requestId) {
         return requestRepository.findById(requestId)
                 .flatMap(request -> clubConfigurationService.findByChannelId(request.getChannelId()))
-                .map(DiscordClubConfiguration::getClubId)
+                .map(DiscordClubConfiguration::getPrimaryClubId)
                 .map(clubService::findById);
     }
 }

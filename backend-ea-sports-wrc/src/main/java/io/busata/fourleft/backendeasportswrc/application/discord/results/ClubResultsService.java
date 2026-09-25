@@ -131,7 +131,12 @@ public class ClubResultsService {
 
     @Transactional(readOnly = true)
     public List<ChampionshipStanding> getStandings(DiscordClubConfiguration configuration) {
-        String clubId = configuration.getClubId();
+        return getStandings(configuration, configuration.getPrimaryClubId());
+    }
+
+    /** Standings for one of the channel's clubs, scored with the channel's settings. */
+    @Transactional(readOnly = true)
+    public List<ChampionshipStanding> getStandings(DiscordClubConfiguration configuration, String clubId) {
         Club club = clubService.findById(clubId);
 
          if(configuration.isCustomScoringEnabled()) {

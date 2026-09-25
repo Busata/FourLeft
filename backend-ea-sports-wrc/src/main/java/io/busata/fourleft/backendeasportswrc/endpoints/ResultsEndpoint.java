@@ -48,7 +48,7 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/current")
     String getCurrentResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
+        return clubResultsService.getCurrentResults(discordClubConfiguration.getPrimaryClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData)
                 .map(DataObject::toString)
                 .orElse("");
     }
@@ -61,7 +61,7 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/timetrial")
     String getTimeTrialTop(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-        return clubResultsService.getCurrentResults(discordClubConfiguration.getClubId())
+        return clubResultsService.getCurrentResults(discordClubConfiguration.getPrimaryClubId())
                 .flatMap(results -> timeTrialTopMessageFactory.createTopPost(results, discordClubConfiguration.isTimeTrialTopTrackedOnly()))
                 .map(MessageEmbed::toData)
                 .map(DataObject::toString)
@@ -110,7 +110,7 @@ public class ResultsEndpoint {
     @GetMapping("/api_v2/results/{channelId}/previous")
     String getPreviousResults(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
-        return clubResultsService.getPreviousResults(discordClubConfiguration.getClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
+        return clubResultsService.getPreviousResults(discordClubConfiguration.getPrimaryClubId()).map(results -> clubResultsMessageFactory.createResultPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString)
                .orElse("");
     }
 
@@ -118,7 +118,7 @@ public class ResultsEndpoint {
     String getStats(@PathVariable Long channelId) {
         DiscordClubConfiguration discordClubConfiguration = discordClubConfigurationService.findByChannelId(channelId).orElseThrow();
 
-        return clubStatsService.buildStats(discordClubConfiguration.getClubId()).map(results -> clubStatsMessageFactory.createPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
+        return clubStatsService.buildStats(discordClubConfiguration.getPrimaryClubId()).map(results -> clubStatsMessageFactory.createPost(results, discordClubConfiguration)).map(MessageEmbed::toData).map(DataObject::toString).orElse("");
     }
 
     @GetMapping("/api_v2/results/{channelId}/standings")

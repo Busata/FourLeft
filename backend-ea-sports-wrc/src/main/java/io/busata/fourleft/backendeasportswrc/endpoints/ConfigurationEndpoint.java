@@ -1,6 +1,8 @@
 package io.busata.fourleft.backendeasportswrc.endpoints;
 
 import io.busata.fourleft.api.easportswrc.events.ConfigurationUpdatedEvent;
+import io.busata.fourleft.api.easportswrc.models.ChannelClubModeUpdateTo;
+import io.busata.fourleft.api.easportswrc.models.ChannelClubTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationCreateTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestResultTo;
 import io.busata.fourleft.api.easportswrc.models.ChannelConfigurationRequestTo;
@@ -104,5 +106,30 @@ public class ConfigurationEndpoint {
             eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
         });
         return result;
+    }
+
+    @PostMapping("/api_v2/configuration/channel/{requestId}/clubs")
+    public Optional<ChannelConfigurationTo> addChannelClub(@PathVariable UUID requestId, @RequestBody ChannelClubTo club) {
+        Optional<ChannelConfigurationTo> result = this.channelConfigurationRequestService.addClub(requestId, club);
+        result.ifPresent(config -> {
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Club (%s) added via link to channelId (%s), clubs: (%s).".formatted(club.clubId(), config.channelId(), config.clubs().size()), List.of()));
+            eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
+        });
+        return result;
+    }
+
+    @DeleteMapping("/api_v2/configuration/channel/{requestId}/clubs/{clubId}")
+    public Optional<ChannelConfigurationTo> removeChannelClub(@PathVariable UUID requestId, @PathVariable String clubId) {
+        Optional<ChannelConfigurationTo> result = this.channelConfigurationRequestService.removeClub(requestId, clubId);
+        result.ifPresent(config -> {
+            discordGateway.createMessage(1173372471207018576L, new SimpleDiscordMessageTo("Club (%s) removed via link from channelId (%s), clubs: (%s).".formatted(clubId, config.channelId(), config.clubs().size()), List.of()));
+            eventPublisher.publishEvent(new ConfigurationUpdatedEvent());
+        });
+        return result;
+    }
+
+    @PutMapping("/api_v2/configuration/channel/{requestId}/mode")
+    public Optional<ChannelConfigurationTo> updateChannelClubMode(@PathVariable UUID requestId, @RequestBody ChannelClubModeUpdateTo request) {
+        return this.channelConfigurationRequestService.updateMode(requestId, request.mode());
     }
 }

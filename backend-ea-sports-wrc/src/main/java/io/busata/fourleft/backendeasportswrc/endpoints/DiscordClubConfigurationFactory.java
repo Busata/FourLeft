@@ -10,7 +10,7 @@ public class DiscordClubConfigurationFactory {
     public DiscordClubConfigurationTo create(DiscordClubConfiguration configuration) {
         return new DiscordClubConfigurationTo(
                 configuration.getChannelId(),
-                configuration.getClubId()
+                configuration.getPrimaryClubId()
         );
     }
 }
