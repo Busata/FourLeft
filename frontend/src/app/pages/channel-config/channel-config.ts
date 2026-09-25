@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Observable, of, switchMap } from 'rxjs';
 
 import {
   ChannelClubMode,
@@ -263,19 +264,33 @@ export class ChannelConfig implements OnInit {
     return this.restrictionTargets().find((ch) => ch.id === row.controls.championshipId.value)?.events ?? [];
   }
 
+  // Creates the configuration; in mixed mode the second club (from the club form) and the mode follow.
   create(): void {
+    const mixed = this.form.controls.mode.value === 'MIXED';
+    const secondClubId = this.clubForm.controls.clubId.value.trim();
+    if (mixed && !secondClubId) {
+      this.flash('Enter the second club id for mixed mode.');
+      return;
+    }
+
     this.http
       .post<ChannelConfiguration>(this.base, {
         clubId: this.form.controls.clubId.value,
         autopostingEnabled: this.form.controls.autopostingEnabled.value,
         requiresTracking: this.form.controls.requiresTracking.value,
       })
+      .pipe(switchMap((config) => (mixed ? this.makeMixed(secondClubId) : of(config))))
       .subscribe({
         next: (config) => {
+          this.clubForm.reset();
           this.apply(config);
           this.flash('Configuration created.');
         },
-        error: () => this.flash('Could not create configuration.'),
+        // The configuration may exist already when a mixed-mode step failed; show what was saved.
+        error: () => {
+          this.http.get<ChannelConfiguration>(this.base).subscribe({ next: (config) => this.apply(config) });
+          this.flash(mixed ? 'Could not fully set up mixed mode — check the clubs below.' : 'Could not create configuration.');
+        },
       });
   }
 
@@ -300,6 +315,14 @@ export class ChannelConfig implements OnInit {
         },
         error: () => this.flash('Could not save configuration.'),
       });
+  }
+
+  private makeMixed(secondClubId: string): Observable<ChannelConfiguration> {
+    const label = this.clubForm.controls.label.value.trim() || null;
+    return this.http.post<ChannelConfiguration>(`${this.base}/clubs`, { clubId: secondClubId, label }).pipe(
+      switchMap(() => this.http.put<ChannelConfiguration>(`${this.base}/mode`, { mode: 'MIXED' })),
+      switchMap(() => this.http.get<ChannelConfiguration>(this.base)),
+    );
   }
 
   // Adds a club to the channel, or relabels it when the channel already tracks it.

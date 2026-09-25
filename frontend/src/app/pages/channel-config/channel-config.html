@@ -389,9 +389,33 @@
         <p>No club is synced to this channel yet. Enter a club id to start syncing it here.</p>
 
         <div class="form-group">
-          <label>Club id</label>
+          <label>Clubs</label>
+          <select formControlName="mode">
+            <option value="SINGLE">Single club</option>
+            <option value="MIXED">Mixed classes &mdash; merge clubs running the same championship</option>
+          </select>
+          @if (modeSig() === 'MIXED') {
+            <p>
+              Two clubs running the exact same championship with a different car class; their results are merged
+              into one set of posts, each entry tagged with its class. Only the car class may differ.
+            </p>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>{{ modeSig() === 'MIXED' ? 'Primary club id' : 'Club id' }}</label>
           <input formControlName="clubId" type="text" placeholder="Found in the racenet url for your club" />
         </div>
+
+        @if (modeSig() === 'MIXED') {
+          <div class="form-group" [formGroup]="clubForm">
+            <label>Second club id</label>
+            <div class="club-add">
+              <input formControlName="clubId" type="text" placeholder="Club id" />
+              <input formControlName="label" type="text" placeholder="Label, e.g. WRC2 (optional)" />
+            </div>
+          </div>
+        }
 
         <div class="form-group">
           <label>Autoposting</label>
