@@ -158,14 +158,15 @@ public class ChannelResultsService {
         }
 
         ClubResults primary = parts.get(0);
-        List<ClubLeaderboardEntry> entries = new ArrayList<>();
+        List<ClubLeaderboardEntry> allEntries = new ArrayList<>();
         Map<ClubLeaderboardEntry, String> entryClubs = new IdentityHashMap<>();
         for (ClubResults part : parts) {
             part.entries().forEach(entry -> {
-                entries.add(entry);
+                allEntries.add(entry);
                 entryClubs.put(entry, part.clubId());
             });
         }
+        List<ClubLeaderboardEntry> entries = FirstRuns.of(allEntries);
 
         // The oldest update: the merged board is only as fresh as its stalest club.
         LocalDateTime lastUpdated = parts.stream().map(ClubResults::lastUpdated).filter(Objects::nonNull)

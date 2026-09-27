@@ -6,8 +6,10 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +46,10 @@ public class ClubLeaderboardEntry {
     Duration differenceAccumulated;
     Duration timeAccumulated;
     Duration timePenalty;
+
+    // When a sync first saw this entry; null for entries from before V035.
+    @Setter
+    LocalDateTime firstSeenAt;
 
     @Builder
     public ClubLeaderboardEntry(String displayName, String wrcPlayerId, String ssid, Long rank, Long rankAccumulated, Long nationalityID, Long platform, String vehicle, Duration time, Duration differenceToFirst, Duration differenceAccumulated, Duration timeAccumulated, Duration timePenalty) {

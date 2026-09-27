@@ -5,6 +5,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.pro
 import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.projections.AutoPostMessageSummary.MixedEntry;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService.ClassEvent;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.FirstRuns;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.MergedRanking;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
@@ -101,18 +102,19 @@ public class DiscordAutoPostingService {
     /** All clubs' boards for the primary club's active event as one, ranked overall. */
     private Optional<Board> mixedBoard(DiscordClubConfiguration configuration) {
         return this.clubService.getActiveEvent(configuration.getPrimaryClubId()).map(primaryEvent -> {
-            List<ClubLeaderboardEntry> entries = new ArrayList<>();
+            List<ClubLeaderboardEntry> allEntries = new ArrayList<>();
             List<AutopostEntry> posted = new ArrayList<>();
             Map<ClubLeaderboardEntry, ClassEvent> classEvents = new IdentityHashMap<>();
 
             List<ClassEvent> matched = channelResultsService.matchedClassEvents(configuration, primaryEvent);
             for (ClassEvent classEvent : matched) {
                 clubLeaderboardService.findEntries(classEvent.event().getLeaderboardId()).forEach(entry -> {
-                    entries.add(entry);
+                    allEntries.add(entry);
                     classEvents.put(entry, classEvent);
                 });
                 posted.addAll(autopostingEntryService.findPostedEntries(classEvent.event().getId(), configuration.getChannelId()));
             }
+            List<ClubLeaderboardEntry> entries = FirstRuns.of(allEntries);
 
             MergedRanking ranking = MergedRanking.of(entries);
             Map<ClubLeaderboardEntry, MixedEntry> mixed = new IdentityHashMap<>();
@@ -141,7 +143,8 @@ public class DiscordAutoPostingService {
             return;
         }
 
-        if (board.entries().size() == board.posted().size()) {
+        Set<String> postedKeys = board.posted().stream().map(Board::keyOf).collect(Collectors.toSet());
+        if (board.entries().stream().allMatch(entry -> postedKeys.contains(board.keyOf(entry)))) {
             return;
         }
 
@@ -158,8 +161,9 @@ public class DiscordAutoPostingService {
         List<ClubLeaderboardEntry> unpostedEntries = board.entries().stream().filter(entry -> !requiresTracking || entry.isTracked()).filter(newEntry -> !postedKeys.contains(board.keyOf(newEntry))).toList();
 
         List<AutopostEntry> postedLastTime = board.posted().stream().filter(postedEntry -> postedEntry.getMessageId().equals(messageId)).toList();
-        List<ClubLeaderboardEntry> toBeRepostedEntries = postedLastTime.stream().map(postedEntry -> {
-           return board.entries().stream().filter(newEntry -> board.keyOf(newEntry).equals(Board.keyOf(postedEntry))).findFirst().orElseThrow();
+        // A posted entry can leave the board: in a MIXED channel a driver's later run in another class is dropped.
+        List<ClubLeaderboardEntry> toBeRepostedEntries = postedLastTime.stream().flatMap(postedEntry -> {
+           return board.entries().stream().filter(newEntry -> board.keyOf(newEntry).equals(Board.keyOf(postedEntry))).findFirst().stream();
 
         }).collect(Collectors.toList());
 

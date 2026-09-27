@@ -12,9 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.busata.fourleft.backendeasportswrc.infrastructure.time.ApplicationClock;
+
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +51,14 @@ public class ClubLeaderboardService {
 
         List<ClubLeaderboardEntryTo> uniqueEntriesSortedByAccumulatedTime = list.getEntries().stream().collect(Collectors.toMap(ClubLeaderboardEntryTo::displayName, e -> e, (e, v) -> e)).values().stream().sorted(Comparator.comparing(entry -> parseDuration(entry.timeAccumulated()).toNanos())).collect(Collectors.toList());
 
-        clubLeaderboard.updateEntries(calculateCumulativeProperties(uniqueEntriesSortedByAccumulatedTime));
+        // Racenet has no run timestamp; carry over when we first saw each entry.
+        Map<String, LocalDateTime> firstSeen = new HashMap<>();
+        clubLeaderboard.getEntries().forEach(entry -> firstSeen.put(entry.getPlayerKey(), entry.getFirstSeenAt()));
+        LocalDateTime now = ApplicationClock.now();
+
+        List<ClubLeaderboardEntry> entries = calculateCumulativeProperties(uniqueEntriesSortedByAccumulatedTime);
+        entries.forEach(entry -> entry.setFirstSeenAt(firstSeen.containsKey(entry.getPlayerKey()) ? firstSeen.get(entry.getPlayerKey()) : now));
+        clubLeaderboard.updateEntries(entries);
 
         clubLeaderboard.setTotalEntries(uniqueEntriesSortedByAccumulatedTime.size());
 

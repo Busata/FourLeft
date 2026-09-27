@@ -57,6 +57,11 @@ instead of failing on the unique `channel_id` constraint.
 - Standings: one post, a titled section per class (racenet keeps one points table per club); the 50-entry
   cap is shared.
 - Stats: all clubs' entries together; top 10 is the overall one.
+- One run per driver: a driver entering several classes counts only with their first run (`FirstRuns`),
+  in results, stats and autoposts. Racenet has no run timestamp, so "first" = the sync that first saw the
+  entry (`club_leaderboard_entry.first_seen_at`, V035, carried over across syncs; precision = sync
+  interval). Pre-V035 rows are NULL = earliest; ties go to channel order. Standings are racenet's per-club
+  points tables and still include the later run.
 - Autoposts: one stream across clubs; posted entries are keyed event + player (a driver can enter both
   classes); a per-channel lock serialises the clubs' parallel syncs.
 - Event ended / championship started: posted once, by the club completing the set — arrivals are

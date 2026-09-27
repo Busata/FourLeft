@@ -57,9 +57,9 @@ public class ClubStatsService {
             return Optional.empty();
         }
         Event primary = events.get(0);
-        List<ClubLeaderboardEntry> entries = events.stream()
+        List<ClubLeaderboardEntry> entries = FirstRuns.of(events.stream()
                 .flatMap(event -> clubLeaderboardService.findEntries(event.getLeaderboardId()).stream())
-                .toList();
+                .toList());
 
         return Optional.of(new ClubStats(
                 vehicleClass,
