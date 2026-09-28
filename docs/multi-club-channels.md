@@ -75,7 +75,7 @@ instead of failing on the unique `channel_id` constraint.
 **Per-club restrictions: done (no migration).** A rule targets a championship/event id, and those ids
 belong to one club — so a rule on the WRC2 club's championship only ever applies to WRC2 entries.
 
-- Config UI: `/restriction-targets` lists every tracked club's open championships in channel order, tagged
+- Config UI: `/restriction-targets` lists every tracked club's open and upcoming championships in channel order, tagged
   with `clubId` + `clubTag` (label, else car class); the picker shows "WRC2 · Championship" when there is
   more than one club. `/vehicles` resolves the target in whichever club owns it. Clubs not imported yet are
   skipped. Targets reload when the channel's clubs change.
@@ -84,6 +84,27 @@ belong to one club — so a rule on the WRC2 club's championship only ever appli
   per rule (one class can WARN, another EXCLUDE). "Permitted cars" lists one line per restricted class.
 - Custom-scoring standings and the web overview already scored per club by event id — unchanged.
 - A driver in several classes: `FirstRuns` picks the run first, then that run's class rule applies.
+
+**Class lock (V036): done.** Without it, a driver entering WRC in one event and WRC2 in the next has their
+points split over both classes' standings (and a same-event double entry scores in both).
+
+- `discord_club_configuration.class_lock_mode` — `OFF` / `WARN` (default) / `EXCLUDE`, MIXED only.
+- Home class = the club of a driver's first run in the championship: earliest event, within it the run
+  `FirstRuns` keeps. Computed over the primary's championship, each event matched across clubs
+  (`ChannelResultsService.homeClasses` → `HomeClasses`). Homes from events whose every class has finished
+  are cached per channel (keyed on the set of finished event ids); running events are re-read per call,
+  since autoposting asks on every sync.
+- Which run counts in an event (`HomeClasses.select`, replacing plain `FirstRuns` in results, stats and
+  autoposts): the home-class run when there is one; otherwise WARN keeps the first run, marked
+  ` ⚠️ *(home: WRC)*` on results, and EXCLUDE drops it. OFF = plain `FirstRuns`, as before.
+- Standings: a driver only appears in their home class's section. Custom scoring drops their runs from
+  other classes' boards (field shrinks, the rest move up, locked-out finishers aren't mistaken for dropouts);
+  racenet's own tables can't be rescored, so their rows are just hidden and racenet's ranks keep their gaps.
+- Autoposts don't carry the WARN marker; an off-class run is posted with its class tag like any other.
+
+Scoring in MIXED: one channel-wide scoring config, applied per class — points by the driver's rank within
+their own club's board, field size = that board. Every class winner scores the same; there is no overall
+table, so no per-class handicap is needed.
 
 **Next (not built):** rendering for `TIERED`.
 
@@ -96,6 +117,9 @@ primary are invisible to it.
 Full revert (after rolling the build back):
 
 ```sql
+ALTER TABLE discord_club_configuration DROP COLUMN class_lock_mode;
+DELETE FROM flyway_schema_history WHERE version = '036';
+
 DROP TABLE discord_channel_post_gate;
 DELETE FROM flyway_schema_history WHERE version = '034';
 

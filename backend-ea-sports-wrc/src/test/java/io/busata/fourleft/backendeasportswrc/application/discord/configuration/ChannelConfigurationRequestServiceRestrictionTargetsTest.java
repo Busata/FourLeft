@@ -73,6 +73,19 @@ class ChannelConfigurationRequestServiceRestrictionTargetsTest {
     }
 
     @Test
+    void upcomingChampionshipsAreTargetsFinishedOnesAreNot() {
+        Club club = givenClub("wrc", "WRC");
+        club.updateChampionship(championship("champ-next", NOW.plusDays(31), NOW.plusDays(60), 0L));
+        club.updateChampionship(championship("champ-old", NOW.minusDays(60), NOW.minusDays(31), 2L));
+
+        List<RestrictionTargetChampionshipTo> championships = service.getRestrictionTargets(REQUEST_ID)
+                .map(RestrictionTargetsTo::championships).orElseThrow();
+
+        assertThat(championships).extracting(RestrictionTargetChampionshipTo::id).containsExactly("champ-wrc", "champ-next");
+        assertThat(championships.get(1).events()).isNotEmpty();
+    }
+
+    @Test
     void aClubThatHasNotBeenImportedYetIsSkipped() {
         configuration.addClub("wrc2", null);
         givenClub("wrc", "WRC");
@@ -83,7 +96,7 @@ class ChannelConfigurationRequestServiceRestrictionTargetsTest {
         assertThat(championships).extracting(RestrictionTargetChampionshipTo::clubId).containsExactly("wrc");
     }
 
-    private void givenClub(String clubId, String vehicleClass) {
+    private Club givenClub(String clubId, String vehicleClass) {
         Event event = new Event("event-" + clubId, "board-" + clubId, NOW.minusDays(1), NOW.plusDays(1), 1L,
                 new EventSettings(1L, vehicleClass, 1L, "Summer", 1L, "Finland", ""));
         Championship championship = new Championship("champ-" + clubId, new ChampionshipSettings(), NOW.minusDays(1), NOW.plusDays(30));
@@ -92,5 +105,14 @@ class ChannelConfigurationRequestServiceRestrictionTargetsTest {
         club.updateChampionship(championship);
         when(clubService.exists(clubId)).thenReturn(true);
         when(clubService.findById(clubId)).thenReturn(club);
+        return club;
+    }
+
+    private static Championship championship(String id, ZonedDateTime open, ZonedDateTime close, long eventStatus) {
+        Event event = new Event("event-" + id, "board-" + id, open, close, eventStatus,
+                new EventSettings(1L, "WRC", 1L, "Summer", 1L, "Finland", ""));
+        Championship championship = new Championship(id, new ChampionshipSettings(), open, close);
+        championship.updateEvents(new ArrayList<>(List.of(event)));
+        return championship;
     }
 }

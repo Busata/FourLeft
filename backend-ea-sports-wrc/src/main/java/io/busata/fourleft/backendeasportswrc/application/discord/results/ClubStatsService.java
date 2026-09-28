@@ -50,16 +50,14 @@ public class ClubStatsService {
 
     /**
      * Stats over several clubs' boards for the same event (a MIXED channel). {@code events} is in channel
-     * order, the first one's settings head the post; the top 10 is the overall one.
+     * order, the first one's settings head the post; {@code entries} are the runs that count, one per driver;
+     * the top 10 is the overall one.
      */
-    public Optional<ClubStats> buildMergedStats(List<Event> events, String vehicleClass) {
+    public Optional<ClubStats> buildMergedStats(List<Event> events, List<ClubLeaderboardEntry> entries, String vehicleClass) {
         if (events.isEmpty()) {
             return Optional.empty();
         }
         Event primary = events.get(0);
-        List<ClubLeaderboardEntry> entries = FirstRuns.of(events.stream()
-                .flatMap(event -> clubLeaderboardService.findEntries(event.getLeaderboardId()).stream())
-                .toList());
 
         return Optional.of(new ClubStats(
                 vehicleClass,

@@ -54,6 +54,10 @@ export interface RestrictionTargets {
 // classes. TIERED is reserved for divisions and not offered yet.
 export type ChannelClubMode = 'SINGLE' | 'MIXED' | 'TIERED';
 
+// MIXED only: whether drivers are locked to the class of their first run in the championship. Off-class runs
+// never score custom points; WARN flags them on results, EXCLUDE hides them.
+export type ClassLockMode = 'OFF' | 'WARN' | 'EXCLUDE';
+
 // A club tracked by the channel; the first one is the primary club. The label names its class ("WRC2").
 export interface ChannelClub {
   clubId: string;
@@ -94,6 +98,7 @@ export interface ChannelConfiguration {
   scoringAnchors: ScoringAnchors | null;
   eventRestrictions: EventRestriction[] | null;
   mode: ChannelClubMode | null;
+  classLockMode: ClassLockMode | null;
   clubs: ChannelClub[];
   // What posting actually uses: MIXED falls back to SINGLE while the clubs don't match.
   effectiveMode: ChannelClubMode | null;

@@ -142,28 +142,44 @@ public class ClubResultsService {
     /** Standings for one of the channel's clubs, scored with the channel's settings. */
     @Transactional(readOnly = true)
     public List<ChampionshipStanding> getStandings(DiscordClubConfiguration configuration, String clubId) {
+        return getStandings(configuration, clubId, Set.of());
+    }
+
+    /**
+     * As above, leaving out the drivers in {@code lockedOut} (player keys locked to another class of a MIXED
+     * channel): custom scoring drops their runs so the rest move up; racenet's own table can't be rescored,
+     * so their rows are only hidden and the remaining ranks stay racenet's.
+     */
+    @Transactional(readOnly = true)
+    public List<ChampionshipStanding> getStandings(DiscordClubConfiguration configuration, String clubId, Set<String> lockedOut) {
         Club club = clubService.findById(clubId);
 
          if(configuration.isCustomScoringEnabled()) {
              log.info("Calculating custom points for club {}", clubId);
 
-             return club.getActiveChampionshipSnapshot()
-             .filter(Championship::hasFinishedEvent)
-             .or(() -> clubService.getPreviousChampionship(club))
-             .map(championship -> createCustomStandings(championship, configuration))
+             return standingsChampionship(club)
+             .map(championship -> createCustomStandings(championship, configuration, lockedOut))
                      .orElse(List.of());
          }
 
-        return club.getActiveChampionshipSnapshot()
-                .filter(Championship::hasFinishedEvent)
-                .or(() -> clubService.getPreviousChampionship(club))
+        return standingsChampionship(club)
                 .map(Championship::getStandings)
                 .stream()
-                .flatMap(Collection::stream).toList();
+                .flatMap(Collection::stream)
+                .filter(standing -> !lockedOut.contains(standing.getSsid()))
+                .toList();
+    }
+
+    /** The championship standings are shown for: the running one once an event finished, else the previous one. */
+    @Transactional(readOnly = true)
+    public Optional<Championship> standingsChampionship(Club club) {
+        return club.getActiveChampionshipSnapshot()
+                .filter(Championship::hasFinishedEvent)
+                .or(() -> clubService.getPreviousChampionship(club));
     }
 
     @NotNull
-    private List<ChampionshipStanding> createCustomStandings(Championship championship, DiscordClubConfiguration configuration) {
+    private List<ChampionshipStanding> createCustomStandings(Championship championship, DiscordClubConfiguration configuration, Set<String> lockedOut) {
         final Map<String, PlayerEntryData> playerData = new HashMap<>();
         final Map<String, ChampionshipStanding> standings = new HashMap<>();
 
@@ -172,7 +188,7 @@ public class ClubResultsService {
         .toList();
 
         for(Event event: events) {
-            var points = calculateEventPoints(event, playerData, configuration);
+            var points = calculateEventPoints(event, playerData, configuration, lockedOut);
 
             points.keySet().forEach(entrantSsid -> {
                 if(entrantSsid == null) {
@@ -221,11 +237,20 @@ public class ClubResultsService {
         return ranks;
     }
 
-    private Map<String, Integer> calculateEventPoints(Event event, Map<String, PlayerEntryData> playerData, DiscordClubConfiguration configuration) {
+    private Map<String, Integer> calculateEventPoints(Event event, Map<String, PlayerEntryData> playerData, DiscordClubConfiguration configuration, Set<String> lockedOut) {
         Map<String, Integer> points = new HashMap<>();
 
             String leaderboardId = event.getLastStage().getLeaderboardId();
             var board = clubLeaderboardService.findById(leaderboardId);
+
+            // Drivers locked to another class don't take part here at all: the field shrinks and everyone
+            // behind them moves up.
+            List<ClubLeaderboardEntry> entries = board.getEntries().stream()
+                    .filter(entry -> !lockedOut.contains(entry.getPlayerKey()))
+                    .toList();
+            Map<ClubLeaderboardEntry, Long> lockedPositions = entries.size() < board.getEntries().size()
+                    ? positions(entries)
+                    : null;
 
             boolean racenetDefault = configuration.getScoringStrategy() == ScoringStrategy.RACENET_DEFAULT;
 
@@ -233,17 +258,20 @@ public class ClubResultsService {
             // mid-event dropouts the tail of the curve — both live only on the earlier stage boards,
             // so those are only pulled in for that strategy. DNFs on the final board are ranked and
             // scored by racenet too (the curve bottoms out at 0 anyway), so they aren't skipped there.
-            List<ClubLeaderboardEntry> dropouts = racenetDefault ? findDropouts(event, board.getEntries()) : List.of();
-            int fieldSize = board.getEntries().size() + dropouts.size();
+            // Every finisher is passed, so a locked-out finisher isn't mistaken for a dropout.
+            List<ClubLeaderboardEntry> dropouts = racenetDefault
+                    ? findDropouts(event, board.getEntries()).stream().filter(entry -> !lockedOut.contains(entry.getPlayerKey())).toList()
+                    : List.of();
+            int fieldSize = entries.size() + dropouts.size();
 
             Optional<EventRestriction> restriction = restrictionService.resolveRestriction(configuration, event.getChampionshipID(), event.getId());
 
             Map<ClubLeaderboardEntry, Long> excludedScoringPositions = restriction
                     .filter(rule -> rule.scoringMode() == RestrictionScoringMode.EXCLUDE)
-                    .map(rule -> restrictionService.scoringPositions(rule, board.getEntries()))
+                    .map(rule -> restrictionService.scoringPositions(rule, entries))
                     .orElse(null);
 
-            board.getEntries().stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
+            entries.stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).forEach(entry -> {
 
                 playerData.computeIfAbsent(entry.getSsid(), (ssid) -> {
                     return new PlayerEntryData(entry.getSsid(), entry.getDisplayName(), entry.getNationalityID().intValue());
@@ -264,7 +292,7 @@ public class ClubResultsService {
 
                     long position = excludedScoringPositions != null
                             ? excludedScoringPositions.get(entry)
-                            : entry.getRankAccumulated();
+                            : lockedPositions != null ? lockedPositions.get(entry) : entry.getRankAccumulated();
 
                     int entryPoints = scoringService.getPoints(configuration, (int) position, fieldSize);
 
@@ -277,7 +305,7 @@ public class ClubResultsService {
 
             });
 
-            long dropoutPosition = board.getEntries().size();
+            long dropoutPosition = entries.size();
             for (ClubLeaderboardEntry entry : dropouts) {
                 dropoutPosition++;
 
@@ -301,6 +329,16 @@ public class ClubResultsService {
             }
 
             return points;
+    }
+
+    // 1..n in accumulated rank order (DNFs included, as racenet ranks them).
+    private static Map<ClubLeaderboardEntry, Long> positions(List<ClubLeaderboardEntry> entries) {
+        List<ClubLeaderboardEntry> ranked = entries.stream().sorted(Comparator.comparing(ClubLeaderboardEntry::getRankAccumulated)).toList();
+        Map<ClubLeaderboardEntry, Long> positions = new HashMap<>();
+        for (int i = 0; i < ranked.size(); i++) {
+            positions.put(ranked.get(i), (long) i + 1);
+        }
+        return positions;
     }
 
     /**

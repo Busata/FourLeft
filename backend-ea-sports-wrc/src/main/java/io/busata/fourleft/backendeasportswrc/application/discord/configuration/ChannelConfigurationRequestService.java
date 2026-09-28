@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -92,6 +93,9 @@ public class ChannelConfigurationRequestService {
             if (form.mode() != null) {
                 clubConfigurationService.updateMode(request.getChannelId(), form.mode());
             }
+            if (form.classLockMode() != null) {
+                clubConfigurationService.updateClassLockMode(request.getChannelId(), form.classLockMode());
+            }
 
             return toConfigurationTo(request);
         });
@@ -152,6 +156,7 @@ public class ChannelConfigurationRequestService {
                         toDto(config.getScoringAnchors()),
                         toDto(config.getEventRestrictionsOrEmpty()),
                         config.getMode(),
+                        config.getClassLockMode(),
                         config.getClubs().stream().map(club -> new ChannelClubTo(club.getClubId(), club.getLabel())).toList(),
                         compatibilityService.effectiveMode(config),
                         config.getClubs().size() > 1 ? toDto(compatibilityService.evaluate(config)) : null
@@ -160,6 +165,7 @@ public class ChannelConfigurationRequestService {
                         String.valueOf(request.getGuildId()),
                         String.valueOf(request.getChannelId()),
                         false,
+                        null,
                         null,
                         null,
                         null,
@@ -239,15 +245,16 @@ public class ChannelConfigurationRequestService {
 
     /**
      * The championships/events of the channel's clubs that a restriction rule can target, in channel order
-     * (primary first). Only open championships and their open/upcoming events qualify — there's no point
-     * restricting something that has already finished — so this usually offers one championship per club.
+     * (primary first). Only open and upcoming championships and their open/upcoming events qualify — there's
+     * no point restricting something that has already finished — so this offers one or two per club.
      * Championship/event ids are per club, which is what makes a rule apply to one club only.
      */
     @Transactional(readOnly = true)
     public Optional<RestrictionTargetsTo> getRestrictionTargets(UUID requestId) {
         return findClubs(requestId).map(clubs -> new RestrictionTargetsTo(clubs.stream()
                 .flatMap(tracked -> tracked.club().getChampionships().stream()
-                        .filter(Championship::isActiveSnapshot)
+                        .filter(championship -> championship.isActiveSnapshot() || championship.isUpcomingSnapshot())
+                        .sorted(Comparator.comparing(Championship::getAbsoluteOpenDate))
                         .map(championship -> new RestrictionTargetsTo.RestrictionTargetChampionshipTo(
                                 tracked.club().getId(),
                                 ChannelClass.of(tracked.club().getId(), tracked.label(), vehicleClassOf(championship)).tag(),

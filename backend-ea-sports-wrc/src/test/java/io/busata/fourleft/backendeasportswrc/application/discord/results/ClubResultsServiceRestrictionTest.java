@@ -136,6 +136,20 @@ class ClubResultsServiceRestrictionTest {
     }
 
     @Test
+    void driversLockedToAnotherClassDontScoreAndOthersMoveUp() {
+        givenBoard(
+                entry("visitor", 1, "Car", false),
+                entry("second", 2, "Car", false),
+                entry("third", 3, "Car", false));
+
+        List<ChampionshipStanding> standings = clubResultsService.getStandings(configuration, CLUB_ID, java.util.Set.of("visitor"));
+
+        assertThat(standings).extracting(ChampionshipStanding::getSsid).containsExactly("second", "third");
+        assertThat(pointsOf(standings, "second")).isEqualTo(10);
+        assertThat(pointsOf(standings, "third")).isEqualTo(8);
+    }
+
+    @Test
     void penaltyModeDeductsFlatPointsKeepingPositions() {
         givenBoard(
                 entry("violator", 1, "Lancia Delta S4", false),

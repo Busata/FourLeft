@@ -164,6 +164,23 @@ class MixedChannelPostsTest {
     }
 
     @Test
+    void aRunOutsideTheHomeClassIsFlaggedWithTheHome() {
+        ClubLeaderboardEntry visitor = entry("visitor", 1, 90, false);
+        ClubResults base = mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(visitor));
+        Map<ClubLeaderboardEntry, String> offClass = new IdentityHashMap<>();
+        offClass.put(visitor, "WRC");
+        ClubResults results = new ClubResults(base.clubId(), base.championshipId(), base.eventId(), base.championshipName(),
+                base.location(), base.locationID(), base.lastStageRouteID(), base.vehicleClass(), base.vehicleClassID(),
+                base.weatherSeason(), base.weatherSeasonID(), base.lastStageWeatherAndSurface(), base.lastStageWeatherAndSurfaceId(),
+                base.lastUpdated(), base.eventCloseDate(), base.stages(), base.entries(), base.classes(), base.entryClubs(), offClass);
+
+        List<String> lines = entryLines(resultsFactory.createResultPost(results, configuration));
+
+        assertThat(lines.get(0)).contains("visitor", "⚠️ *(home: WRC)*");
+        assertThat(lines.get(1)).contains("wrcDriver").doesNotContain("⚠️");
+    }
+
+    @Test
     void longEntriesStayWithinDiscordLimits() {
         List<ClubLeaderboardEntry> wrc = new ArrayList<>();
         List<ClubLeaderboardEntry> wrc2 = new ArrayList<>();

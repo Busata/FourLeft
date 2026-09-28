@@ -6,6 +6,7 @@ import { Observable, of, switchMap } from 'rxjs';
 
 import {
   ChannelClubMode,
+  ClassLockMode,
   ChannelConfiguration,
   ClubChampionship,
   EventRestriction,
@@ -106,6 +107,7 @@ export class ChannelConfig implements OnInit {
     racenetFieldSize: new FormControl<number>(20, { nonNullable: true }),
     eventRestrictions: new FormArray<RestrictionRow>([]),
     mode: new FormControl<ChannelClubMode>('SINGLE', { nonNullable: true }),
+    classLockMode: new FormControl<ClassLockMode>('WARN', { nonNullable: true }),
   });
 
   // Adding (or relabelling) a club is its own action, saved immediately — not part of the main form.
@@ -181,7 +183,7 @@ export class ChannelConfig implements OnInit {
   }
 
   addRestriction(rule: EventRestriction | null = null): void {
-    // Only open championships are offered, so there's usually exactly one — preselect it.
+    // Only open and upcoming championships are offered; when there's exactly one, preselect it.
     const targets = this.restrictionTargets();
     const defaultChampionshipId = targets.length === 1 ? targets[0].id : '';
     const row: RestrictionRow = new FormGroup({
@@ -313,6 +315,7 @@ export class ChannelConfig implements OnInit {
         scoringAnchors: this.rowsToAnchors(),
         eventRestrictions: this.rowsToRestrictions(),
         mode: this.form.controls.mode.value,
+        classLockMode: this.form.controls.classLockMode.value,
       })
       .subscribe({
         next: (config) => {
@@ -368,6 +371,9 @@ export class ChannelConfig implements OnInit {
   }
 
   remove(): void {
+    if (!confirm('Remove this channel\'s configuration? Syncing, posts and all settings for this channel stop.')) {
+      return;
+    }
     this.http.delete<ChannelConfiguration>(this.base).subscribe({
       next: (config) => {
         this.apply(config);
@@ -574,6 +580,7 @@ export class ChannelConfig implements OnInit {
     this.form.controls.clubId.setValue(config.clubId ?? '');
     this.form.controls.mode.setValue(config.mode === 'MIXED' ? 'MIXED' : 'SINGLE');
     this.modeSig.set(this.form.controls.mode.value);
+    this.form.controls.classLockMode.setValue(config.classLockMode ?? 'WARN');
     this.form.controls.autopostingEnabled.setValue(config.autopostingEnabled ?? true);
     this.form.controls.requiresTracking.setValue(config.requiresTracking ?? false);
     this.form.controls.customScoringEnabled.setValue(config.customScoringEnabled ?? false);

@@ -11,7 +11,8 @@ import java.util.Map;
 /**
  * One event's results. For a MIXED channel the entries of every club are merged: {@code classes} lists the
  * clubs in channel order and {@code entryClubs} (identity-keyed — the same driver can enter two classes)
- * tells which club each entry came from. The ids and event settings are the primary club's.
+ * tells which club each entry came from. The ids and event settings are the primary club's. With the class
+ * lock on, each driver's run is the one in their home class ({@link HomeClasses}).
  */
 public record ClubResults(
         String clubId,
@@ -32,8 +33,21 @@ public record ClubResults(
         List<String> stages,
         List<ClubLeaderboardEntry> entries,
         List<ChannelClass> classes,
-        Map<ClubLeaderboardEntry, String> entryClubs
+        Map<ClubLeaderboardEntry, String> entryClubs,
+        // Entries run outside their driver's home class, with that home's tag (class lock WARN).
+        Map<ClubLeaderboardEntry, String> offClassHomes
 ) {
+
+    public ClubResults(String clubId, String championshipId, String eventId, String championshipName, String location,
+                       Long locationID, Long lastStageRouteID, String vehicleClass, Long vehicleClassID,
+                       String weatherSeason, Long weatherSeasonID, String lastStageWeatherAndSurface,
+                       Long lastStageWeatherAndSurfaceId, LocalDateTime lastUpdated, ZonedDateTime eventCloseDate,
+                       List<String> stages, List<ClubLeaderboardEntry> entries, List<ChannelClass> classes,
+                       Map<ClubLeaderboardEntry, String> entryClubs) {
+        this(clubId, championshipId, eventId, championshipName, location, locationID, lastStageRouteID, vehicleClass,
+                vehicleClassID, weatherSeason, weatherSeasonID, lastStageWeatherAndSurface, lastStageWeatherAndSurfaceId,
+                lastUpdated, eventCloseDate, stages, entries, classes, entryClubs, new IdentityHashMap<>());
+    }
 
     public ClubResults(String clubId, String championshipId, String eventId, String championshipName, String location,
                        Long locationID, Long lastStageRouteID, String vehicleClass, Long vehicleClassID,

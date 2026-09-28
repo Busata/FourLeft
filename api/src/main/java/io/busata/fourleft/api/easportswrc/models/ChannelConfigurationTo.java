@@ -1,6 +1,7 @@
 package io.busata.fourleft.api.easportswrc.models;
 
 import io.busata.fourleft.common.ChannelClubMode;
+import io.busata.fourleft.common.ClassLockMode;
 import io.busata.fourleft.common.ScoringStrategy;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public record ChannelConfigurationTo(
         ScoringAnchorsTo scoringAnchors,
         List<EventRestrictionTo> eventRestrictions,
         ChannelClubMode mode,
+        ClassLockMode classLockMode,
         List<ChannelClubTo> clubs,
         // What posting actually uses: MIXED only while the clubs are compatible, SINGLE otherwise.
         ChannelClubMode effectiveMode,

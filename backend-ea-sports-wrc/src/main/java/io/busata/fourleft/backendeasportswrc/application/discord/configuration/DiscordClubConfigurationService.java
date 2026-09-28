@@ -5,6 +5,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRes
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.backendeasportswrc.domain.services.clubConfiguration.ClubConfigurationService;
 import io.busata.fourleft.common.ChannelClubMode;
+import io.busata.fourleft.common.ClassLockMode;
 import io.busata.fourleft.common.ScoringStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -118,6 +119,14 @@ public class DiscordClubConfigurationService {
     public Optional<DiscordClubConfiguration> updateMode(Long channelId, ChannelClubMode mode) {
         return this.repository.findByChannelId(channelId).map(configuration -> {
             configuration.setMode(mode);
+            return this.repository.save(configuration);
+        });
+    }
+
+    @Transactional
+    public Optional<DiscordClubConfiguration> updateClassLockMode(Long channelId, ClassLockMode classLockMode) {
+        return this.repository.findByChannelId(channelId).map(configuration -> {
+            configuration.setClassLockMode(classLockMode);
             return this.repository.save(configuration);
         });
     }

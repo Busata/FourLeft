@@ -5,7 +5,6 @@ import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.pro
 import io.busata.fourleft.backendeasportswrc.application.discord.autoposting.projections.AutoPostMessageSummary.MixedEntry;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService.ClassEvent;
-import io.busata.fourleft.backendeasportswrc.application.discord.results.FirstRuns;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.MergedRanking;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
@@ -114,7 +113,8 @@ public class DiscordAutoPostingService {
                 });
                 posted.addAll(autopostingEntryService.findPostedEntries(classEvent.event().getId(), configuration.getChannelId()));
             }
-            List<ClubLeaderboardEntry> entries = FirstRuns.of(allEntries);
+            List<ClubLeaderboardEntry> entries = channelResultsService.homeClasses(configuration, primaryEvent)
+                    .select(allEntries, entry -> classEvents.get(entry).channelClass().clubId());
 
             MergedRanking ranking = MergedRanking.of(entries);
             Map<ClubLeaderboardEntry, MixedEntry> mixed = new IdentityHashMap<>();

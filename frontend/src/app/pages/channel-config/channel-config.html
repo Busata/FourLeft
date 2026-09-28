@@ -107,6 +107,22 @@
           </div>
         }
 
+        @if (modeSig() === 'MIXED') {
+          <div class="form-group">
+            <label>Class lock</label>
+            <select formControlName="classLockMode">
+              <option value="WARN">Lock to home class &mdash; flag runs in another class</option>
+              <option value="EXCLUDE">Lock to home class &mdash; hide runs in another class</option>
+              <option value="OFF">Off &mdash; drivers may switch class between events</option>
+            </select>
+            <p>
+              A driver's home class is the class of their first run in the championship. When locked, runs in another
+              class never score custom points and are left out of that class's standings (racenet's own ranks stay
+              as they are).
+            </p>
+          </div>
+        }
+
         <div class="form-group">
           <label>Autoposting</label>
           <div class="checkbox-group">

@@ -5,6 +5,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.messages.ClubRe
 import io.busata.fourleft.backendeasportswrc.domain.models.restrictions.EventRestriction;
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.common.ChannelClubMode;
+import io.busata.fourleft.common.ClassLockMode;
 import io.busata.fourleft.common.ScoringStrategy;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -52,6 +53,10 @@ public class DiscordClubConfiguration {
 
     @Enumerated(EnumType.STRING)
     ChannelClubMode mode;
+
+    // MIXED only: whether drivers are locked to the class of their first run in the championship.
+    @Enumerated(EnumType.STRING)
+    ClassLockMode classLockMode;
 
     Long guildId;
     Long channelId;
@@ -134,6 +139,14 @@ public class DiscordClubConfiguration {
         this.mode = mode;
     }
 
+    public void setClassLockMode(ClassLockMode classLockMode) {
+        this.classLockMode = classLockMode;
+    }
+
+    public ClassLockMode getClassLockMode() {
+        return classLockMode == null ? ClassLockMode.WARN : classLockMode;
+    }
+
     /** The club every channel-scoped view reads while only {@link ChannelClubMode#SINGLE} has rendering. */
     public String getPrimaryClubId() {
         return clubs.isEmpty() ? null : clubs.get(0).getClubId();
@@ -176,6 +189,7 @@ public class DiscordClubConfiguration {
         this.guildId = guildId;
         this.channelId = channelId;
         this.mode = ChannelClubMode.SINGLE;
+        this.classLockMode = ClassLockMode.WARN;
         addClub(clubId, null);
         this.enabled = true;
         this.autopostingEnabled = autopostingEnabled;

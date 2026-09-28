@@ -211,8 +211,12 @@ public class ClubResultsMessageFactory {
                     values.put("classRank", String.valueOf(entry.getRankAccumulated()));
                     String rendered = StringSubstitutor.replace(template, values);
                     // Appended after template substitution so custom entry templates keep working.
-                    if (violates(results, restrictions, entry, RestrictionDisplayMode.WARN)) {
+                    String home = results.offClassHomes().get(entry);
+                    if (violates(results, restrictions, entry, RestrictionDisplayMode.WARN) || home != null) {
                         rendered += " ⚠️";
+                    }
+                    if (home != null) {
+                        rendered += " *(home: %s)*".formatted(home);
                     }
                     return rendered;
                 })

@@ -7,8 +7,11 @@ import io.busata.fourleft.backendeasportswrc.domain.models.ChannelClub;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.Event;
+import io.busata.fourleft.backendeasportswrc.domain.models.EventStatus;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
+import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
 import io.busata.fourleft.common.ChannelClubMode;
+import io.busata.fourleft.common.ClassLockMode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +45,13 @@ public class ChannelResultsService {
     private final ClubService clubService;
     private final ClubResultsService clubResultsService;
     private final ClubStatsService clubStatsService;
+    private final ClubLeaderboardService clubLeaderboardService;
+
+    /** Homes from a channel's finished events, which no longer change; reused while that set is the same. */
+    private record CachedHomes(String signature, HomeClasses homes) {
+    }
+
+    private final Map<Long, CachedHomes> finishedHomes = new ConcurrentHashMap<>();
 
     /** A block of standings; {@code title} is the class tag in a MIXED channel, null otherwise. */
     public record StandingsSection(String title, List<ChampionshipStanding> standings) {
@@ -71,15 +83,90 @@ public class ChannelResultsService {
     @Transactional(readOnly = true)
     public List<StandingsSection> getStandings(DiscordClubConfiguration configuration) {
         if (!isMixed(configuration)) {
-            return List.of(new StandingsSection(null, sortedStandings(configuration, configuration.getPrimaryClubId())));
+            return List.of(new StandingsSection(null, sortedStandings(configuration, configuration.getPrimaryClubId(), Set.of())));
         }
 
-        // Racenet keeps one points table per club, so each class stays its own block within the post.
+        // Racenet keeps one points table per club, so each class stays its own block within the post. A
+        // driver only appears in their home class's block.
+        HomeClasses homes = clubResultsService.standingsChampionship(clubService.findById(configuration.getPrimaryClubId()))
+                .map(championship -> homeClasses(configuration, championship))
+                .orElse(HomeClasses.none());
         Map<String, String> tags = currentTags(configuration);
         return configuration.getClubs().stream()
-                .map(club -> new StandingsSection(tags.get(club.getClubId()), sortedStandings(configuration, club.getClubId())))
+                .map(club -> new StandingsSection(tags.get(club.getClubId()),
+                        sortedStandings(configuration, club.getClubId(), homes.lockedOut(club.getClubId()))))
                 .filter(section -> !section.standings().isEmpty())
                 .toList();
+    }
+
+    /** The home classes for the championship of one of the primary club's events. */
+    @Transactional(readOnly = true)
+    public HomeClasses homeClasses(DiscordClubConfiguration configuration, Event primaryEvent) {
+        if (configuration.getClassLockMode() == ClassLockMode.OFF) {
+            return HomeClasses.none();
+        }
+        return clubService.findById(configuration.getPrimaryClubId()).getChampionships().stream()
+                .filter(championship -> championship.getId().equals(primaryEvent.getChampionshipID()))
+                .findFirst()
+                .map(championship -> homeClasses(configuration, championship))
+                .orElse(HomeClasses.none());
+    }
+
+    /**
+     * Every driver's home class in a MIXED channel's championship (the primary's), from all clubs' boards of
+     * its events so far. Events whose every class has finished are cached per channel; only the running ones
+     * are read on each call (autoposting asks on every sync).
+     */
+    @Transactional(readOnly = true)
+    public HomeClasses homeClasses(DiscordClubConfiguration configuration, Championship primaryChampionship) {
+        if (configuration.getClassLockMode() == ClassLockMode.OFF || !isMixed(configuration)) {
+            return HomeClasses.none();
+        }
+
+        List<List<ClassEvent>> events = primaryChampionship.getEvents().stream()
+                .filter(event -> event.getStatus() != EventStatus.NOT_STARTED)
+                .sorted(Comparator.comparing(Event::getAbsoluteOpenDate))
+                .map(event -> matchedClassEvents(configuration, event))
+                .toList();
+
+        // Finished events come first in running order; the cache covers that prefix.
+        int finishedCount = 0;
+        while (finishedCount < events.size() && events.get(finishedCount).stream().allMatch(classEvent -> classEvent.event().isFinished())) {
+            finishedCount++;
+        }
+        List<List<ClassEvent>> finished = events.subList(0, finishedCount);
+        List<List<ClassEvent>> running = events.subList(finishedCount, events.size());
+
+        String signature = configuration.getClassLockMode() + "|" + finished.stream()
+                .map(event -> event.stream().map(classEvent -> classEvent.channelClass().clubId() + ":" + classEvent.event().getId())
+                        .collect(Collectors.joining(",")))
+                .collect(Collectors.joining(";"));
+
+        CachedHomes cached = finishedHomes.get(configuration.getChannelId());
+        if (cached == null || !cached.signature().equals(signature)) {
+            cached = new CachedHomes(signature, HomeClasses.of(configuration.getClassLockMode(), eventEntries(finished)));
+            finishedHomes.put(configuration.getChannelId(), cached);
+        }
+        return cached.homes().then(eventEntries(running));
+    }
+
+    private List<HomeClasses.EventEntries> eventEntries(List<List<ClassEvent>> events) {
+        Map<String, List<ClubLeaderboardEntry>> boards = clubLeaderboardService.findEntriesByLeaderboardIds(events.stream()
+                .flatMap(List::stream)
+                .map(classEvent -> classEvent.event().getLeaderboardId())
+                .toList());
+
+        return events.stream().map(event -> {
+            List<ClubLeaderboardEntry> entries = new ArrayList<>();
+            Map<ClubLeaderboardEntry, String> clubs = new IdentityHashMap<>();
+            for (ClassEvent classEvent : event) {
+                boards.getOrDefault(classEvent.event().getLeaderboardId(), List.of()).forEach(entry -> {
+                    entries.add(entry);
+                    clubs.put(entry, classEvent.channelClass().clubId());
+                });
+            }
+            return new HomeClasses.EventEntries(entries, clubs);
+        }).toList();
     }
 
     @Transactional(readOnly = true)
@@ -89,8 +176,19 @@ public class ChannelResultsService {
             return clubStatsService.buildStats(primaryClubId);
         }
         return clubService.findPreviousEvent(primaryClubId).flatMap(primaryEvent -> {
-            List<Event> events = matchedEvents(configuration, primaryEvent);
-            return clubStatsService.buildMergedStats(events, joinedClasses(events));
+            List<ClassEvent> classEvents = matchedClassEvents(configuration, primaryEvent);
+            List<Event> events = classEvents.stream().map(ClassEvent::event).toList();
+
+            List<ClubLeaderboardEntry> allEntries = new ArrayList<>();
+            Map<ClubLeaderboardEntry, String> entryClubs = new IdentityHashMap<>();
+            for (ClassEvent classEvent : classEvents) {
+                clubLeaderboardService.findEntries(classEvent.event().getLeaderboardId()).forEach(entry -> {
+                    allEntries.add(entry);
+                    entryClubs.put(entry, classEvent.channelClass().clubId());
+                });
+            }
+            List<ClubLeaderboardEntry> entries = homeClasses(configuration, primaryEvent).select(allEntries, entryClubs::get);
+            return clubStatsService.buildMergedStats(events, entries, joinedClasses(events));
         });
     }
 
@@ -167,7 +265,19 @@ public class ChannelResultsService {
                 entryClubs.put(entry, part.clubId());
             });
         }
-        List<ClubLeaderboardEntry> entries = FirstRuns.of(allEntries);
+        HomeClasses homes = homeClasses(configuration, primaryEvent);
+        List<ClubLeaderboardEntry> entries = homes.select(allEntries, entryClubs::get);
+
+        // Under WARN a run outside the driver's home class stays on the board, flagged with that home.
+        Map<ClubLeaderboardEntry, String> offClassHomes = new IdentityHashMap<>();
+        for (ClubLeaderboardEntry entry : entries) {
+            if (homes.isOffClass(entryClubs.get(entry), entry)) {
+                String home = homes.homeOf(entry);
+                offClassHomes.put(entry, classes.stream().filter(c -> c.clubId().equals(home)).map(ChannelClass::tag).findFirst()
+                        .orElseGet(() -> configuration.getClubs().stream().filter(club -> club.getClubId().equals(home))
+                                .map(club -> ChannelClass.of(home, club.getLabel(), null).tag()).findFirst().orElse(home)));
+            }
+        }
 
         // The oldest update: the merged board is only as fresh as its stalest club.
         LocalDateTime lastUpdated = parts.stream().map(ClubResults::lastUpdated).filter(Objects::nonNull)
@@ -195,12 +305,13 @@ public class ChannelResultsService {
                 primary.stages(),
                 entries,
                 classes,
-                entryClubs
+                entryClubs,
+                offClassHomes
         ));
     }
 
-    private List<ChampionshipStanding> sortedStandings(DiscordClubConfiguration configuration, String clubId) {
-        return clubResultsService.getStandings(configuration, clubId).stream()
+    private List<ChampionshipStanding> sortedStandings(DiscordClubConfiguration configuration, String clubId, Set<String> lockedOut) {
+        return clubResultsService.getStandings(configuration, clubId, lockedOut).stream()
                 .sorted(Comparator.comparing(ChampionshipStanding::getRank))
                 .toList();
     }
