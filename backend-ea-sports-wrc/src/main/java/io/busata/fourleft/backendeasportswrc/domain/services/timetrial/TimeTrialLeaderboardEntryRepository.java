@@ -154,4 +154,11 @@ public interface TimeTrialLeaderboardEntryRepository extends JpaRepository<TimeT
             order by e.vehicle
             """)
     List<String> findDistinctVehiclesByClassIds(@Param("classIds") Set<Long> classIds);
+
+    /** Every (vehicle class, car) pair across all stored time-trial boards — the whole catalog in one pass. */
+    @Query("""
+            select distinct c.vehicleClassId, e.vehicle from TimeTrialLeaderboardEntry e, TimeTrialCombination c
+            where e.combinationId = c.id and e.vehicle is not null
+            """)
+    List<Object[]> findDistinctVehiclesPerClass();
 }

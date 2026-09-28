@@ -20,7 +20,7 @@ import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchor
 import io.busata.fourleft.backendeasportswrc.domain.models.scoring.ScoringAnchors;
 import io.busata.fourleft.backendeasportswrc.domain.services.club.ClubService;
 import io.busata.fourleft.backendeasportswrc.domain.services.leaderboards.ClubLeaderboardService;
-import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialLeaderboardEntryRepository;
+import io.busata.fourleft.backendeasportswrc.domain.services.timetrial.TimeTrialVehicleCatalog;
 import io.busata.fourleft.common.ChannelClubMode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,7 @@ public class ChannelConfigurationRequestService {
     private final ChannelClubCompatibilityService compatibilityService;
     private final ClubService clubService;
     private final ClubLeaderboardService clubLeaderboardService;
-    private final TimeTrialLeaderboardEntryRepository timeTrialLeaderboardEntryRepository;
+    private final TimeTrialVehicleCatalog timeTrialVehicleCatalog;
 
     @Transactional
     public UUID requestConfiguration(Long guildId, Long channelId, String discordId) {
@@ -325,7 +325,7 @@ public class ChannelConfigurationRequestService {
                 return clubVehicles;
             }
 
-            List<String> catalogVehicles = timeTrialLeaderboardEntryRepository.findDistinctVehiclesByClassIds(targetClassIds);
+            List<String> catalogVehicles = timeTrialVehicleCatalog.findVehicles(targetClassIds);
             return Stream.concat(catalogVehicles.stream(), clubVehicles.stream())
                     .distinct()
                     .sorted()
