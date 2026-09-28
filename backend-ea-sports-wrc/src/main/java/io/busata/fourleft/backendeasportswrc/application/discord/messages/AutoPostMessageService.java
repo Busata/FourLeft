@@ -13,7 +13,6 @@ import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.mode
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ public class AutoPostMessageService {
     // Discord's message content limit.
     static final int MAX_MESSAGE_LENGTH = 2000;
 
-    @EventListener
     public void handleNewMessage(AutoPostNewMessageEvent event) {
         String template = discordClubConfigurationService.findByChannelId(event.channelId()).map(DiscordClubConfiguration::getAutoPostTemplate).orElse(defaultTemplate);
         AutoPostMessageSummary summary = fit(template, event.summary());
@@ -62,7 +60,6 @@ public class AutoPostMessageService {
         }
     }
 
-    @EventListener
     public void editExistingMessage(AutoPostEditMessageEvent event) {
         String template = discordClubConfigurationService.findByChannelId(event.channelId()).map(DiscordClubConfiguration::getAutoPostTemplate).orElse(defaultTemplate);
 

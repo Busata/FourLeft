@@ -13,7 +13,8 @@ CLUB_EXPORT="Club export actions"
 RELEASE_AGENT="Release AC Rally agent"
 ACRALLY_ADMIN="AC Rally - manage admins"
 TIERS="Tier sets"
-TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT" "$RELEASE_AGENT" "$ACRALLY_ADMIN" "$TIERS")
+DELETE_MESSAGE="Delete a bot message"
+TYPES=("$DEPLOY" "$RESTORE_DATA" "$FOLLOW_LOGS" "$LOCAL_DOCKER" "$TIME_TRIALS" "$CHANNEL" "$CLUB_EXPORT" "$RELEASE_AGENT" "$ACRALLY_ADMIN" "$TIERS" "$DELETE_MESSAGE")
 
 selected_option_index=$(selectMenu "$TITLE" "${TYPES[@]}")
 
@@ -48,6 +49,9 @@ if [ -n "$selected_option_index" ]; then
             ;;
         10)
           . "$FOURLEFT_DEVOPS_ROOT"/cli/tiers.sh
+            ;;
+        11)
+          . "$FOURLEFT_DEVOPS_ROOT"/cli/messages.sh
             ;;
         *)
             echo "Invalid selection or cancelled."

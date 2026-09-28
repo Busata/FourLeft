@@ -7,6 +7,7 @@ import io.busata.fourleft.backendeasportswrc.application.discord.results.Channel
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelResultsService.ClassEvent;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.MergedRanking;
 import io.busata.fourleft.backendeasportswrc.application.discord.configuration.DiscordClubConfigurationService;
+import io.busata.fourleft.backendeasportswrc.application.discord.messages.AutoPostMessageService;
 import io.busata.fourleft.backendeasportswrc.domain.models.ClubLeaderboardEntry;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
 import io.busata.fourleft.backendeasportswrc.domain.models.Event;
@@ -19,7 +20,6 @@ import io.busata.fourleft.backendeasportswrc.domain.events.AutoPostEditMessageEv
 import io.busata.fourleft.backendeasportswrc.domain.events.AutoPostNewMessageEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -47,10 +47,11 @@ public class DiscordAutoPostingService {
 
     private final ChannelResultsService channelResultsService;
 
-    private final ApplicationEventPublisher publisher;
+    private final AutoPostMessageService autoPostMessageService;
 
     // A MIXED channel is synced from each of its clubs' import threads; one sync per channel at a time, or
-    // two threads could both post the same new entries.
+    // two threads could both post the same new entries. Posting (and recording what was posted) happens
+    // inside the lock: it is called directly, as application events are delivered asynchronously.
     private final Map<Long, Object> channelLocks = new ConcurrentHashMap<>();
 
     /**
@@ -187,12 +188,12 @@ public class DiscordAutoPostingService {
         Set<String> postedKeys = board.posted().stream().map(Board::keyOf).collect(Collectors.toSet());
         List<ClubLeaderboardEntry> toBePosted = board.entries().stream().filter(entry -> !configuration.isRequiresTracking() || entry.isTracked()).filter(newEntry -> !postedKeys.contains(board.keyOf(newEntry))).limit(ENTRIES_LIMIT).sorted(board.order()).toList();
 
-        publisher.publishEvent(new AutoPostNewMessageEvent(configuration.getChannelId(), board.summary().apply(toBePosted)));
+        autoPostMessageService.handleNewMessage(new AutoPostNewMessageEvent(configuration.getChannelId(), board.summary().apply(toBePosted)));
     }
 
     private void editMessage(DiscordClubConfiguration configuration, Long messageId, Board board) {
         List<ClubLeaderboardEntry> toBePosted = findToBePosted(messageId, board, configuration.isRequiresTracking());
-        publisher.publishEvent(new AutoPostEditMessageEvent(configuration.getChannelId(), messageId, board.summary().apply(toBePosted)));
+        autoPostMessageService.editExistingMessage(new AutoPostEditMessageEvent(configuration.getChannelId(), messageId, board.summary().apply(toBePosted)));
 
     }
 }
