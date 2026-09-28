@@ -47,8 +47,15 @@
           <ul class="ts-players">
             @for (player of tier.players; track player.playerId) {
               <li>
-                {{ player.displayName }}
-                <button type="button" (click)="unassign(player)" [attr.aria-label]="'Remove ' + player.displayName">&times;</button>
+                <span class="ts-player-name">{{ player.displayName }}</span>
+                <span class="ts-player-actions">
+                  <button type="button" [disabled]="first" (click)="shift(player, i, -1)"
+                          [attr.aria-label]="'Move ' + player.displayName + ' up a tier'" title="Move up a tier">&uarr;</button>
+                  <button type="button" [disabled]="last" (click)="shift(player, i, 1)"
+                          [attr.aria-label]="'Move ' + player.displayName + ' down a tier'" title="Move down a tier">&darr;</button>
+                  <button type="button" class="ts-remove" (click)="unassign(player)"
+                          [attr.aria-label]="'Remove ' + player.displayName" title="Remove">&times;</button>
+                </span>
               </li>
             }
           </ul>

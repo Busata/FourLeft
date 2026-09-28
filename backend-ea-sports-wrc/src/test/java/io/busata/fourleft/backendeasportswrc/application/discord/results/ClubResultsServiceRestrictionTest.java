@@ -93,7 +93,7 @@ class ClubResultsServiceRestrictionTest {
     private void givenRestriction(RestrictionScoringMode scoringMode, Integer penaltyPoints, String... allowedVehicles) {
         configuration.setEventRestrictions(List.of(new EventRestriction(
                 RestrictionType.VEHICLE_ALLOWLIST, null, EVENT_ID,
-                RestrictionDisplayMode.WARN, scoringMode, penaltyPoints, List.of(allowedVehicles))));
+                RestrictionDisplayMode.WARN, scoringMode, penaltyPoints, List.of(allowedVehicles), null)));
     }
 
     private static ClubLeaderboardEntry entry(String name, long rankAccumulated, String vehicle, boolean dnf) {

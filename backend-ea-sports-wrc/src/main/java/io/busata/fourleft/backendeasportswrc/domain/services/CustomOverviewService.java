@@ -210,7 +210,8 @@ public class CustomOverviewService {
                 restriction.displayMode(),
                 restriction.scoringMode(),
                 restriction.penaltyPoints(),
-                restriction.allowedVehicles()
+                restriction.allowedVehicles(),
+                restriction.bannedVehicles()
         );
     }
 }

@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,16 +99,22 @@ public class ClubResultsMessageFactory {
                 ));
 
         if (!restrictions.isEmpty()) {
-            // A MIXED channel lists each restricted class on its own line.
-            String permitted = results.isMixed()
-                    ? results.classes().stream()
-                            .filter(c -> restrictions.containsKey(c.clubId()))
-                            .map(c -> "*%s*: %s".formatted(c.tag(), permittedCars(restrictions.get(c.clubId()))))
+            // Each rule names whichever list is shorter: the permitted cars or the banned ones. A MIXED channel
+            // lists each restricted class on its own line; when those lines disagree, each says which it is.
+            List<ChannelClass> restrictedClasses = results.isMixed()
+                    ? results.classes().stream().filter(c -> restrictions.containsKey(c.clubId())).toList()
+                    : List.of();
+            Set<Boolean> kinds = restrictions.values().stream().map(EventRestriction::isShownAsBanned).collect(Collectors.toSet());
+            boolean sameKind = kinds.size() == 1;
+            String title = !sameKind ? "**Car restrictions**" : kinds.contains(true) ? "**Banned cars**" : "**Permitted cars**";
+            String value = results.isMixed()
+                    ? restrictedClasses.stream()
+                            .map(c -> "*%s*: %s".formatted(c.tag(), restrictedCars(restrictions.get(c.clubId()), !sameKind)))
                             .collect(Collectors.joining("\n"))
-                    : permittedCars(restrictions.get(results.clubId()));
+                    : restrictedCars(restrictions.get(results.clubId()), false);
             embedBuilder.addField(new MessageEmbed.Field(
-                    "**Permitted cars**",
-                    EmbedBudget.truncate(permitted, MessageEmbed.VALUE_MAX_LENGTH),
+                    title,
+                    EmbedBudget.truncate(value, MessageEmbed.VALUE_MAX_LENGTH),
                     false
             ));
         }
@@ -140,9 +147,12 @@ public class ClubResultsMessageFactory {
         }
     }
 
-    private static String permittedCars(EventRestriction rule) {
+    private static String restrictedCars(EventRestriction rule, boolean labelled) {
+        boolean banned = rule.isShownAsBanned();
+        List<String> cars = Optional.ofNullable(banned ? rule.bannedVehicles() : rule.allowedVehicles()).orElse(List.of());
+        String prefix = labelled ? (banned ? "banned: " : "permitted: ") : "";
         String suffix = rule.displayMode() == RestrictionDisplayMode.EXCLUDE ? " *(violators hidden)*" : "";
-        return String.join(", ", Optional.ofNullable(rule.allowedVehicles()).orElse(List.of())) + suffix;
+        return prefix + String.join(", ", cars) + suffix;
     }
 
     private String buildRacenetLink(String clubId) {

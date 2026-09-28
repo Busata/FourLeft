@@ -9,6 +9,7 @@ import {
   ClubOverview,
   ClubReference,
   ClubResultEntry,
+  EventRestriction,
 } from '../../models/club';
 import { CompareRow, compareDurationRow, parseDuration } from '../../common/time-format';
 import { SearchSelect, SearchSelectOption } from '../../shared/search-select/search-select';
@@ -228,7 +229,7 @@ export class ClubCompare implements OnInit {
       eventId: event.id,
       location: settings?.location ?? 'Event',
       meta,
-      restrictionNote: restriction ? `Restricted: ${restriction.allowedVehicles.join(', ')}` : '',
+      restrictionNote: restriction ? restrictionNote(restriction) : '',
       aRank: a.rank,
       bRank: b.rank,
       aViolated: a.restrictionViolated === true,
@@ -292,4 +293,12 @@ export class ClubCompare implements OnInit {
     if (rank === 3) return 'bronze';
     return '';
   }
+}
+
+/** Names whichever list is shorter: the permitted cars, or the few that are banned. */
+function restrictionNote(restriction: EventRestriction): string {
+  const banned = restriction.bannedVehicles ?? [];
+  return banned.length > 0 && banned.length < restriction.allowedVehicles.length
+    ? `Banned: ${banned.join(', ')}`
+    : `Restricted: ${restriction.allowedVehicles.join(', ')}`;
 }

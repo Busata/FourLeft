@@ -371,14 +371,23 @@
                 }
 
                 <div class="form-group">
-                  <label>Allowed vehicles (matching the target's car class)</label>
+                  <label>Vehicles</label>
+                  <select [value]="row.controls.vehicleMode.value"
+                          (change)="setVehicleMode(row, $any($event.target).value)">
+                    <option value="PERMIT">Permit only the ticked cars</option>
+                    <option value="BAN">Ban the ticked cars</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>{{ row.controls.vehicleMode.value === 'BAN' ? 'Banned' : 'Permitted' }} vehicles (matching the target's car class)</label>
                   @if (vehiclesFor(row).length > 0) {
                     <div class="vehicle-list">
                       @for (vehicle of vehiclesFor(row); track vehicle) {
                         <label class="vehicle-option">
                           <input
                             type="checkbox"
-                            [checked]="row.controls.allowedVehicles.value.includes(vehicle)"
+                            [checked]="row.controls.selectedVehicles.value.includes(vehicle)"
                             (change)="toggleVehicle(row, vehicle)"
                           />
                           {{ vehicle }}

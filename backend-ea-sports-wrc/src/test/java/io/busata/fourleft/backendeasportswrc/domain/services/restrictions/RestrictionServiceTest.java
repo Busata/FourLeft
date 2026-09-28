@@ -20,12 +20,12 @@ class RestrictionServiceTest {
 
     private static EventRestriction championshipRule(String championshipId, List<String> vehicles) {
         return new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, championshipId, null,
-                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, vehicles);
+                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, vehicles, null);
     }
 
     private static EventRestriction eventRule(String eventId, List<String> vehicles) {
         return new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, eventId,
-                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, vehicles);
+                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, vehicles, null);
     }
 
     private static ClubLeaderboardEntry entry(String name, long rankAccumulated, String vehicle, boolean dnf) {

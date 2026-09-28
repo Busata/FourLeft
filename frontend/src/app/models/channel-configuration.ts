@@ -25,6 +25,9 @@ export interface EventRestriction {
   scoringMode: RestrictionScoringMode;
   penaltyPoints?: number | null;
   allowedVehicles: string[];
+  // Display-only complement of allowedVehicles within the car class at save time (null on older rules);
+  // shown instead of the permitted list when it's shorter. Enforcement only uses allowedVehicles.
+  bannedVehicles?: string[] | null;
 }
 
 export interface RestrictionTargetEvent {

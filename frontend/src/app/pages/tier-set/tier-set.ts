@@ -147,6 +147,14 @@ export class TierSetPage implements OnInit {
     );
   }
 
+  /** Moves a player to the tier above (-1) or below (+1) the one at tierIndex. */
+  shift(player: TierPlayer, tierIndex: number, delta: number): void {
+    const target = this.tierSet()?.tiers[tierIndex + delta];
+    if (target) {
+      this.assign(target, player);
+    }
+  }
+
   unassign(player: TierPlayer): void {
     this.save(
       this.http.delete<TierSet>(`${this.base}/players/${encodeURIComponent(player.playerId)}`),

@@ -229,7 +229,7 @@ public class ChannelConfigurationRequestService {
         return restrictions.stream()
                 .filter(r -> seenTargets.add(r.eventId() != null ? "event:" + r.eventId() : "championship:" + r.championshipId()))
                 .map(r -> new EventRestriction(r.type(), r.championshipId(), r.eventId(), r.displayMode(),
-                        r.scoringMode(), r.penaltyPoints(), r.allowedVehicles()))
+                        r.scoringMode(), r.penaltyPoints(), r.allowedVehicles(), r.bannedVehicles()))
                 .toList();
     }
 
@@ -239,7 +239,7 @@ public class ChannelConfigurationRequestService {
         }
         return restrictions.stream()
                 .map(r -> new EventRestrictionTo(r.type(), r.championshipId(), r.eventId(), r.displayMode(),
-                        r.scoringMode(), r.penaltyPoints(), r.allowedVehicles()))
+                        r.scoringMode(), r.penaltyPoints(), r.allowedVehicles(), r.bannedVehicles()))
                 .toList();
     }
 

@@ -121,7 +121,7 @@ class MixedChannelPostsTest {
     void aRuleOnThePrimaryEventOnlyAppliesToThePrimaryClubsEntries() {
         configuration.setEventRestrictions(List.of(new EventRestriction(
                 RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc",
-                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"))));
+                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"), null)));
 
         MessageEmbed embed = resultsFactory.createResultPost(
                 mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(entry("wrc2Driver", 1, 90, false))), configuration);
@@ -135,7 +135,7 @@ class MixedChannelPostsTest {
     void aRuleOnASecondaryClubsEventOnlyAppliesToThatClubsEntries() {
         configuration.setEventRestrictions(List.of(new EventRestriction(
                 RestrictionType.VEHICLE_ALLOWLIST, "champ-wrc2", null,
-                RestrictionDisplayMode.EXCLUDE, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"))));
+                RestrictionDisplayMode.EXCLUDE, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"), null)));
 
         MessageEmbed embed = resultsFactory.createResultPost(
                 mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(entry("wrc2Driver", 1, 90, false))), configuration);
@@ -150,9 +150,9 @@ class MixedChannelPostsTest {
     void eachClassFollowsItsOwnRule() {
         configuration.setEventRestrictions(List.of(
                 new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc",
-                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Car")),
+                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Car"), null),
                 new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc2",
-                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Other car"))));
+                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Other car"), null)));
 
         MessageEmbed embed = resultsFactory.createResultPost(
                 mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(entry("wrc2Driver", 1, 90, false))), configuration);

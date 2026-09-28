@@ -56,7 +56,7 @@ class ClubResultsMessageFactoryRestrictionTest {
     private void givenRestriction(RestrictionDisplayMode displayMode) {
         configuration.setEventRestrictions(List.of(new EventRestriction(
                 RestrictionType.VEHICLE_ALLOWLIST, null, EVENT_ID,
-                displayMode, RestrictionScoringMode.EXCLUDE, null, List.of("Audi Sport quattro S1 E2"))));
+                displayMode, RestrictionScoringMode.EXCLUDE, null, List.of("Audi Sport quattro S1 E2"), null)));
     }
 
     private static ClubResults results(ClubLeaderboardEntry... entries) {
@@ -134,6 +134,25 @@ class ClubResultsMessageFactoryRestrictionTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(restrictionField.getValue()).contains("Audi Sport quattro S1 E2", "violators hidden");
+    }
+
+    @Test
+    void aShorterBannedListIsShownInsteadOfThePermittedOne() {
+        configuration.setEventRestrictions(List.of(new EventRestriction(
+                RestrictionType.VEHICLE_ALLOWLIST, null, EVENT_ID,
+                RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null,
+                List.of("Audi Sport quattro S1 E2", "Ford RS200", "MG Metro 6R4"), List.of("Lancia Delta S4"))));
+        MessageEmbed embed = factory.createResultPost(results(
+                entry("second", 2, "Audi Sport quattro S1 E2")), configuration);
+
+        assertThat(embed.getFields().stream().map(MessageEmbed.Field::getName))
+                .contains("**Banned cars**")
+                .doesNotContain("**Permitted cars**");
+        MessageEmbed.Field field = embed.getFields().stream()
+                .filter(f -> Objects.equals(f.getName(), "**Banned cars**"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(field.getValue()).isEqualTo("Lancia Delta S4");
     }
 
     @Test

@@ -34,15 +34,20 @@ type AnchorRow = FormGroup<{
   decrease: FormControl<number | null>;
 }>;
 
+// Whether a rule's ticked vehicles are the permitted ones or the banned ones. Only an input convenience:
+// both save as an allowlist (plus its banned complement for display).
+type VehicleMode = 'PERMIT' | 'BAN';
+
 // One restriction rule: a target (championship, or one of its events), the two violation modes and
-// the allowed-vehicle set. An empty eventId means the whole championship.
+// the ticked vehicles, read through vehicleMode. An empty eventId means the whole championship.
 type RestrictionRow = FormGroup<{
   championshipId: FormControl<string>;
   eventId: FormControl<string>;
   displayMode: FormControl<RestrictionDisplayMode>;
   scoringMode: FormControl<RestrictionScoringMode>;
   penaltyPoints: FormControl<number | null>;
-  allowedVehicles: FormControl<string[]>;
+  vehicleMode: FormControl<VehicleMode>;
+  selectedVehicles: FormControl<string[]>;
 }>;
 
 const DEFAULT_FLOOR = 1;
@@ -87,6 +92,8 @@ export class ChannelConfig implements OnInit {
   // Vehicle options per restriction target ("championshipId|eventId"), scoped by the backend to the
   // target's car class. Cached so retargeting between rows doesn't refetch.
   readonly vehiclesByTarget = signal<Record<string, string[]>>({});
+  // The rule each loaded row came from, so a ban can still be saved before its catalog has loaded.
+  private readonly savedRules = new WeakMap<RestrictionRow, EventRestriction>();
   // Mirrors the mode control so the club list shows as soon as mixed is picked, before saving.
   readonly modeSig = signal<ChannelClubMode>('SINGLE');
   // The targets are static per club; fetch them when the channel's clubs change, not on every save round-trip.
@@ -186,23 +193,32 @@ export class ChannelConfig implements OnInit {
     // Only open and upcoming championships are offered; when there's exactly one, preselect it.
     const targets = this.restrictionTargets();
     const defaultChampionshipId = targets.length === 1 ? targets[0].id : '';
+    const banned = rule?.bannedVehicles ?? [];
+    const showBanned = banned.length > 0 && banned.length < (rule?.allowedVehicles.length ?? 0);
     const row: RestrictionRow = new FormGroup({
       championshipId: new FormControl<string>(rule?.championshipId ?? defaultChampionshipId, { nonNullable: true }),
       eventId: new FormControl<string>(rule?.eventId ?? '', { nonNullable: true }),
       displayMode: new FormControl<RestrictionDisplayMode>(rule?.displayMode ?? 'WARN', { nonNullable: true }),
       scoringMode: new FormControl<RestrictionScoringMode>(rule?.scoringMode ?? 'EXCLUDE', { nonNullable: true }),
       penaltyPoints: new FormControl<number | null>(rule?.penaltyPoints ?? null),
-      allowedVehicles: new FormControl<string[]>(rule?.allowedVehicles ?? [], { nonNullable: true }),
+      // A saved rule opens on whichever list is shorter, like the result posts show it.
+      vehicleMode: new FormControl<VehicleMode>(showBanned ? 'BAN' : 'PERMIT', { nonNullable: true }),
+      selectedVehicles: new FormControl<string[]>((showBanned ? rule?.bannedVehicles : rule?.allowedVehicles) ?? [], {
+        nonNullable: true,
+      }),
     });
+    if (rule) {
+      this.savedRules.set(row, rule);
+    }
     // A rule targets one championship's scope; picking another one invalidates the event choice.
     // Retargeting also clears the vehicle picks — they were scoped to the previous target's car class.
     row.controls.championshipId.valueChanges.subscribe(() => {
       row.controls.eventId.setValue('');
-      row.controls.allowedVehicles.setValue([]);
+      row.controls.selectedVehicles.setValue([]);
       this.loadVehicles(row);
     });
     row.controls.eventId.valueChanges.subscribe(() => {
-      row.controls.allowedVehicles.setValue([]);
+      row.controls.selectedVehicles.setValue([]);
       this.loadVehicles(row);
     });
     this.eventRestrictions.push(row);
@@ -256,10 +272,21 @@ export class ChannelConfig implements OnInit {
   }
 
   toggleVehicle(row: RestrictionRow, vehicle: string): void {
-    const current = row.controls.allowedVehicles.value;
-    row.controls.allowedVehicles.setValue(
+    const current = row.controls.selectedVehicles.value;
+    row.controls.selectedVehicles.setValue(
       current.includes(vehicle) ? current.filter((v) => v !== vehicle) : [...current, vehicle],
     );
+  }
+
+  // Flipping permit ⇄ ban keeps the rule's meaning: the ticks flip to the other side of the class.
+  setVehicleMode(row: RestrictionRow, mode: VehicleMode): void {
+    if (row.controls.vehicleMode.value === mode) {
+      return;
+    }
+    const selected = row.controls.selectedVehicles.value;
+    const catalog = this.vehiclesFor(row);
+    row.controls.vehicleMode.setValue(mode);
+    row.controls.selectedVehicles.setValue(selected.length ? catalog.filter((v) => !selected.includes(v)) : []);
   }
 
   // Multi-club channels name the club in front of each championship; ids are per club.
@@ -404,8 +431,8 @@ export class ChannelConfig implements OnInit {
     for (const row of this.eventRestrictions.controls) {
       const championshipId = row.controls.championshipId.value;
       const eventId = row.controls.eventId.value;
-      const allowedVehicles = row.controls.allowedVehicles.value;
-      if (!championshipId || allowedVehicles.length === 0) {
+      const vehicles = this.ruleVehicles(row);
+      if (!championshipId || !vehicles || vehicles.allowedVehicles.length === 0) {
         continue;
       }
       const target = eventId ? `event:${eventId}` : `championship:${championshipId}`;
@@ -421,10 +448,29 @@ export class ChannelConfig implements OnInit {
         displayMode: row.controls.displayMode.value,
         scoringMode,
         penaltyPoints: scoringMode === 'PENALTY' ? (row.controls.penaltyPoints.value ?? 0) : null,
-        allowedVehicles,
+        ...vehicles,
       });
     }
     return rules;
+  }
+
+  /**
+   * The allowlist the backend enforces plus its complement within the class catalog (display only), from
+   * the row's ticks read as permitted or banned. Null when a ban can't be resolved: nothing ticked, or no
+   * catalog to take the complement of — an unchanged saved rule is then kept as it was.
+   */
+  private ruleVehicles(row: RestrictionRow): Pick<EventRestriction, 'allowedVehicles' | 'bannedVehicles'> | null {
+    const selected = row.controls.selectedVehicles.value;
+    const catalog = this.vehiclesFor(row);
+    const rest = catalog.filter((v) => !selected.includes(v));
+    if (row.controls.vehicleMode.value === 'PERMIT') {
+      return { allowedVehicles: selected, bannedVehicles: catalog.length ? rest : null };
+    }
+    if (selected.length && catalog.length) {
+      return { allowedVehicles: rest, bannedVehicles: selected };
+    }
+    const saved = this.savedRules.get(row);
+    return saved && !catalog.length ? { allowedVehicles: saved.allowedVehicles, bannedVehicles: saved.bannedVehicles ?? null } : null;
   }
 
   // Build the anchor definition the backend expects, dropping incomplete rows and sorting by position.

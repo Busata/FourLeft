@@ -68,29 +68,31 @@
 }
 
 .ts-players {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   margin: 0 0 10px;
   padding: 0;
   list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
 
   li {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 2px;
-    padding: 3px 4px 3px 10px;
-    border-radius: 999px;
-    background: var(--surface-alt);
-    border: 1px solid var(--border);
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 6px 4px 12px;
     font-size: 14px;
+
+    & + li {
+      border-top: 1px solid var(--border);
+    }
   }
 
   button {
     display: inline-grid;
     place-items: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border: none;
     border-radius: 999px;
     background: transparent;
@@ -98,11 +100,34 @@
     font-size: 16px;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not(:disabled) {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    &.ts-remove:hover {
       background: var(--danger-soft);
       color: var(--danger);
     }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
   }
+}
+
+.ts-player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-player-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
 }
 
 .ts-empty {

@@ -114,10 +114,10 @@ class CustomScoringPersistenceTest {
         config.setEventRestrictions(List.of(
                 new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, "champ-1", null,
                         RestrictionDisplayMode.WARN, RestrictionScoringMode.PENALTY, 25,
-                        List.of("Audi Sport quattro S1 E2")),
+                        List.of("Audi Sport quattro S1 E2"), null),
                 new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-9",
                         RestrictionDisplayMode.EXCLUDE, RestrictionScoringMode.EXCLUDE, null,
-                        List.of("Lancia Delta S4", "MG Metro 6R4"))));
+                        List.of("Lancia Delta S4", "MG Metro 6R4"), List.of("Ford RS200"))));
 
         UUID id = (UUID) em.persistAndGetId(config);
         em.flush();
