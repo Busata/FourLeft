@@ -6,6 +6,7 @@ import { Terms } from './pages/terms/terms';
 import { ProfileInfo } from './pages/profile-info/profile-info';
 import { ProfileEditor } from './pages/profile-editor/profile-editor';
 import { ChannelConfig } from './pages/channel-config/channel-config';
+import { TierSetPage } from './pages/tier-set/tier-set';
 import { Status } from './pages/status/status';
 import { WorkQueue } from './pages/work-queue/work-queue';
 import { TimeTrials } from './pages/time-trials/time-trials';
@@ -44,6 +45,7 @@ export const routes: Routes = [
       { path: 'easportswrc/profile', component: ProfileInfo, title: 'EA Sports WRC Profile' },
       { path: 'easportswrc/profile/:requestId', component: ProfileEditor, title: 'EA Sports WRC Profile' },
       { path: 'easportswrc/channel/:requestId', component: ChannelConfig, title: 'Channel Configuration' },
+      { path: 'easportswrc/tiers/:linkId', component: TierSetPage, title: 'Tier Set' },
       {
         path: 'easportswrc/status',
         component: Status,

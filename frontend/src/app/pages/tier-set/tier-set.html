@@ -1,0 +1,99 @@
+<div class="g-card">
+  @if (error()) {
+    <p>{{ error() }}</p>
+  } @else if (!loaded()) {
+    <p>Loading tier set&hellip;</p>
+  } @else if (tierSet(); as set) {
+    <h2>Tier set</h2>
+
+    <form class="form-group" (submit)="$event.preventDefault(); rename()">
+      <label for="tier-set-name">Name</label>
+      <div class="ts-row">
+        <input id="tier-set-name" type="text" maxlength="100" [value]="name()" (input)="name.set($any($event.target).value)" />
+        <button class="g-button g-button-secondary" type="submit" [disabled]="name().trim() === set.name">Save name</button>
+      </div>
+    </form>
+
+    <p class="ts-summary">
+      {{ set.tiers.length }} tier{{ set.tiers.length === 1 ? '' : 's' }} &middot; {{ playerCount() }}
+      player{{ playerCount() === 1 ? '' : 's' }}. A player sits in one tier at a time; adding them to another tier moves them.
+    </p>
+
+    @for (tier of set.tiers; track tier.id; let i = $index, first = $first, last = $last) {
+      <section class="ts-tier">
+        <header class="ts-tier-head">
+          @if (editingTierId() === tier.id) {
+            <form class="ts-row" (submit)="$event.preventDefault(); relabel(tier)">
+              <input type="text" maxlength="100" [value]="editingLabel()" (input)="editingLabel.set($any($event.target).value)" />
+              <button class="g-button g-button-secondary" type="submit">Save</button>
+              <button class="g-button g-button-tertiary" type="button" (click)="editingTierId.set(null)">Cancel</button>
+            </form>
+          } @else {
+            <h3>
+              <span class="ts-position">{{ i + 1 }}</span>
+              {{ tier.label }}
+              <span class="ts-count">{{ tier.players.length }}</span>
+            </h3>
+            <div class="ts-actions">
+              <button class="g-button g-button-tertiary" type="button" [disabled]="first" (click)="move(i, -1)" aria-label="Move up">&uarr;</button>
+              <button class="g-button g-button-tertiary" type="button" [disabled]="last" (click)="move(i, 1)" aria-label="Move down">&darr;</button>
+              <button class="g-button g-button-tertiary" type="button" (click)="startRelabel(tier)">Rename</button>
+              <button class="g-button g-button-tertiary" type="button" (click)="removeTier(tier)">Remove</button>
+            </div>
+          }
+        </header>
+
+        @if (tier.players.length) {
+          <ul class="ts-players">
+            @for (player of tier.players; track player.playerId) {
+              <li>
+                {{ player.displayName }}
+                <button type="button" (click)="unassign(player)" [attr.aria-label]="'Remove ' + player.displayName">&times;</button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ts-empty">No players yet.</p>
+        }
+
+        <div class="ts-suggest-wrap">
+          <input
+            type="search"
+            autocomplete="off"
+            placeholder="Add a player &mdash; type a racenet name"
+            [value]="playerQueries()[tier.id] ?? ''"
+            (input)="onPlayerInput(tier.id, $any($event.target).value)"
+            (focus)="onPlayerInput(tier.id, $any($event.target).value)"
+            (blur)="closeSuggestions(tier.id)" />
+          @if (suggestTierId() === tier.id && suggestions().length) {
+            <ul class="ts-suggest">
+              @for (s of suggestions(); track s.playerId + s.displayName) {
+                <li>
+                  <button type="button" (mousedown)="$event.preventDefault(); assign(tier, s)">
+                    {{ s.displayName }}
+                    @if (tierOf(s.playerId); as current) {
+                      <span class="ts-suggest-note">{{ current.id === tier.id ? 'already here' : 'in ' + current.label }}</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    }
+
+    <form class="form-group ts-add" (submit)="$event.preventDefault(); addTier()">
+      <label for="new-tier">Add a tier</label>
+      <div class="ts-row">
+        <input id="new-tier" type="text" maxlength="100" placeholder="Label, e.g. JRC {{ set.tiers.length + 1 }}"
+               [value]="newTierLabel()" (input)="newTierLabel.set($any($event.target).value)" />
+        <button class="g-button g-button-primary" type="submit" [disabled]="!newTierLabel().trim()">Add tier</button>
+      </div>
+    </form>
+  }
+</div>
+
+@if (notice()) {
+  <div class="snackbar">{{ notice() }}</div>
+}

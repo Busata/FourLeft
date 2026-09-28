@@ -1,0 +1,163 @@
+.ts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  input {
+    flex: 1 1 200px;
+  }
+}
+
+.ts-summary {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.ts-tier {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.ts-tier-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  form {
+    flex: 1 1 100%;
+  }
+}
+
+.ts-position {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.ts-count {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.ts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ts-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 4px 3px 10px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  button {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+  }
+}
+
+.ts-empty {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--faint);
+}
+
+.ts-suggest-wrap {
+  position: relative;
+  max-width: 420px;
+}
+
+.ts-suggest {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+
+  button {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+  }
+}
+
+.ts-suggest-note {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.ts-add {
+  margin-top: 16px;
+}

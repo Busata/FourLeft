@@ -59,6 +59,13 @@ public class CommandCreator {
                                         new SubcommandData("untrack", "Track a club in this channel")
                                                 .addOption(OptionType.STRING, "clubid", "The club id (found in the racenet url when navigating to your club)", true),
                                         new SubcommandData("edit", "Generate a private link to view and edit this channel's configuration")
+                                ),
+                        new SubcommandGroupData("tiers", "Tier sets: ordered tiers with players assigned to them")
+                                .addSubcommands(
+                                        new SubcommandData("create", "Create a tier set and get a private link to manage it")
+                                                .addOption(OptionType.STRING, "name", "Name of the tier set, e.g. JRC", true),
+                                        new SubcommandData("edit", "Generate a private link to manage a tier set")
+                                                .addOption(OptionType.STRING, "name", "The tier set", true, true)
                                 )
                 );
 

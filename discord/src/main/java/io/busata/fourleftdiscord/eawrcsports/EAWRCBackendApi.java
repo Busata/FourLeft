@@ -44,6 +44,15 @@ public interface EAWRCBackendApi {
     @PostMapping("/api_v2/configuration/channel/request")
     ChannelConfigurationRequestResultTo requestChannelConfiguration(@RequestBody ChannelConfigurationRequestTo request);
 
+    @PostMapping("/api_v2/tier-sets")
+    TierSetLinkTo createTierSet(@RequestBody TierSetCreateTo request);
+
+    @GetMapping("/api_v2/tier-sets/guild/{guildId}/names")
+    List<String> getTierSetNames(@PathVariable Long guildId);
+
+    @PostMapping("/api_v2/tier-sets/link-request")
+    TierSetLinkTo requestTierSetLink(@RequestBody TierSetLinkRequestTo request);
+
     @PostMapping("/api_v2/media-archive/posts")
     void ingestMediaArchivePost(@RequestBody CreateMediaArchivePostTo post);
 
