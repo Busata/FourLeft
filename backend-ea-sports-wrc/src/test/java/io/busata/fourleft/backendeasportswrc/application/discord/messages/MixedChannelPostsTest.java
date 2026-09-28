@@ -50,8 +50,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * A MIXED channel's merged posts: one overall classification with class tags, restrictions only on the
- * primary club's entries, no time trial link, standings per class in one post, and every post staying
+ * A MIXED channel's merged posts: one overall classification with class tags, restrictions per club (each
+ * rule targets one club's own event), no time trial link, standings per class in one post, and every post staying
  * inside Discord's size limits once the tags make entries longer.
  */
 @ExtendWith(MockitoExtension.class)
@@ -118,7 +118,7 @@ class MixedChannelPostsTest {
     }
 
     @Test
-    void restrictionsOnlyApplyToThePrimaryClubsEntries() {
+    void aRuleOnThePrimaryEventOnlyAppliesToThePrimaryClubsEntries() {
         configuration.setEventRestrictions(List.of(new EventRestriction(
                 RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc",
                 RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"))));
@@ -129,6 +129,38 @@ class MixedChannelPostsTest {
         List<String> lines = entryLines(embed);
         assertThat(lines.stream().filter(line -> line.contains("wrcDriver")).findFirst().orElseThrow()).contains("⚠️");
         assertThat(lines.stream().filter(line -> line.contains("wrc2Driver")).findFirst().orElseThrow()).doesNotContain("⚠️");
+    }
+
+    @Test
+    void aRuleOnASecondaryClubsEventOnlyAppliesToThatClubsEntries() {
+        configuration.setEventRestrictions(List.of(new EventRestriction(
+                RestrictionType.VEHICLE_ALLOWLIST, "champ-wrc2", null,
+                RestrictionDisplayMode.EXCLUDE, RestrictionScoringMode.EXCLUDE, null, List.of("Allowed car"))));
+
+        MessageEmbed embed = resultsFactory.createResultPost(
+                mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(entry("wrc2Driver", 1, 90, false))), configuration);
+
+        // The WRC2 driver drives "Car", not the allowed one, and is hidden; the WRC driver is untouched and
+        // moves up to the overall lead.
+        assertThat(entryLines(embed)).singleElement().asString().startsWith("**1**").contains("wrcDriver").doesNotContain("⚠️");
+        assertThat(field(embed, "**Permitted cars**")).isEqualTo("*WRC2*: Allowed car *(violators hidden)*");
+    }
+
+    @Test
+    void eachClassFollowsItsOwnRule() {
+        configuration.setEventRestrictions(List.of(
+                new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc",
+                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Car")),
+                new EventRestriction(RestrictionType.VEHICLE_ALLOWLIST, null, "event-wrc2",
+                        RestrictionDisplayMode.WARN, RestrictionScoringMode.EXCLUDE, null, List.of("Other car"))));
+
+        MessageEmbed embed = resultsFactory.createResultPost(
+                mixedResults(List.of(entry("wrcDriver", 1, 100, false)), List.of(entry("wrc2Driver", 1, 90, false))), configuration);
+
+        List<String> lines = entryLines(embed);
+        assertThat(lines.stream().filter(line -> line.contains("wrcDriver")).findFirst().orElseThrow()).doesNotContain("⚠️");
+        assertThat(lines.stream().filter(line -> line.contains("wrc2Driver")).findFirst().orElseThrow()).contains("⚠️");
+        assertThat(field(embed, "**Permitted cars**")).isEqualTo("*WRC*: Car\n*WRC2*: Other car");
     }
 
     @Test
@@ -225,7 +257,8 @@ class MixedChannelPostsTest {
         return new ClubResults("wrc", "champ-wrc", "event-wrc", "Championship", "Finland", 1L, 1L,
                 "WRC / WRC2", 1L, "Summer", 1L, "Dry", 1L, LocalDateTime.now(), ZonedDateTime.now(),
                 List.of("Stage 1", "Stage 2"), entries,
-                List.of(ChannelClass.of("wrc", null, "WRC"), ChannelClass.of("wrc2", "WRC2", "WRC2")), entryClubs);
+                List.of(ChannelClass.of("wrc", null, "WRC", "champ-wrc", "event-wrc"),
+                        ChannelClass.of("wrc2", "WRC2", "WRC2", "champ-wrc2", "event-wrc2")), entryClubs);
     }
 
     private ClubResults singleResults(List<ClubLeaderboardEntry> entries) {

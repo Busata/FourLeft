@@ -34,7 +34,11 @@ export interface RestrictionTargetEvent {
   absoluteCloseDate: string;
 }
 
+// Ids are per club, so a rule on a championship only applies to the club that owns it. clubTag is the
+// club's label, else its car class.
 export interface RestrictionTargetChampionship {
+  clubId: string;
+  clubTag: string;
   id: string;
   name: string;
   absoluteOpenDate: string;

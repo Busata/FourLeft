@@ -296,7 +296,10 @@
             Scoring effects require custom scoring to be enabled &mdash; racenet's own standings can't be changed.
           </p>
           @if (modeSig() === 'MIXED') {
-            <p>In a mixed channel, restrictions apply to the primary club's entries only.</p>
+            <p>
+              In a mixed channel each rule applies to one club: pick that club's championship. Add a rule per
+              class to restrict several.
+            </p>
           }
           <div formArrayName="eventRestrictions">
             @for (row of eventRestrictions.controls; track $index) {
@@ -306,7 +309,7 @@
                   <select formControlName="championshipId">
                     <option value="">Pick a championship&hellip;</option>
                     @for (championship of restrictionTargets(); track championship.id) {
-                      <option [value]="championship.id">{{ championship.name }}</option>
+                      <option [value]="championship.id">{{ championshipLabel(championship) }}</option>
                     }
                   </select>
                 </div>

@@ -149,7 +149,8 @@ public class ChannelResultsService {
             event.flatMap(e -> clubResultsService.getEventResults(club.getClubId(), e.getChampionshipID(), e.getId()))
                     .ifPresent(results -> {
                         parts.add(results);
-                        classes.add(ChannelClass.of(club.getClubId(), club.getLabel(), results.vehicleClass()));
+                        classes.add(ChannelClass.of(club.getClubId(), club.getLabel(), results.vehicleClass(),
+                                results.championshipId(), results.eventId()));
                     });
         }
 

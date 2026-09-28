@@ -9,6 +9,7 @@ import io.busata.fourleft.api.easportswrc.models.EventRestrictionTo;
 import io.busata.fourleft.api.easportswrc.models.RestrictionTargetsTo;
 import io.busata.fourleft.api.easportswrc.models.ScoringAnchorEntryTo;
 import io.busata.fourleft.api.easportswrc.models.ScoringAnchorsTo;
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelClass;
 import io.busata.fourleft.backendeasportswrc.domain.models.Championship;
 import io.busata.fourleft.backendeasportswrc.domain.models.Club;
 import io.busata.fourleft.backendeasportswrc.domain.models.DiscordClubConfiguration;
@@ -237,16 +238,19 @@ public class ChannelConfigurationRequestService {
     }
 
     /**
-     * The championships/events of the channel's club that a restriction rule can target. Only open
-     * championships and their open/upcoming events qualify — there's no point restricting something
-     * that has already finished — so this usually offers one championship, or none.
+     * The championships/events of the channel's clubs that a restriction rule can target, in channel order
+     * (primary first). Only open championships and their open/upcoming events qualify — there's no point
+     * restricting something that has already finished — so this usually offers one championship per club.
+     * Championship/event ids are per club, which is what makes a rule apply to one club only.
      */
     @Transactional(readOnly = true)
     public Optional<RestrictionTargetsTo> getRestrictionTargets(UUID requestId) {
-        return findClub(requestId).map(club -> new RestrictionTargetsTo(
-                club.getChampionships().stream()
+        return findClubs(requestId).map(clubs -> new RestrictionTargetsTo(clubs.stream()
+                .flatMap(tracked -> tracked.club().getChampionships().stream()
                         .filter(Championship::isActiveSnapshot)
                         .map(championship -> new RestrictionTargetsTo.RestrictionTargetChampionshipTo(
+                                tracked.club().getId(),
+                                ChannelClass.of(tracked.club().getId(), tracked.label(), vehicleClassOf(championship)).tag(),
                                 championship.getId(),
                                 championship.getSettings().getName(),
                                 championship.getAbsoluteOpenDate(),
@@ -258,8 +262,16 @@ public class ChannelConfigurationRequestService {
                                                 event.getEventSettings().getLocation(),
                                                 event.getEventSettings().getVehicleClass(),
                                                 event.getAbsoluteCloseDate()))
-                                        .toList()))
-                        .toList()));
+                                        .toList())))
+                .toList()));
+    }
+
+    private static String vehicleClassOf(Championship championship) {
+        return championship.getEvents().stream()
+                .map(event -> event.getEventSettings().getVehicleClass())
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -267,11 +279,20 @@ public class ChannelConfigurationRequestService {
      * The per-class car list comes from the global time-trial boards (the closest thing to a catalog —
      * every player, every car), supplemented by the club's own boards of the same class in case a car
      * shows up there that the TT snapshots miss. Without class info it falls back to everything ever
-     * seen on the club's boards.
+     * seen on the club's boards. The club is whichever of the channel's clubs owns the target (else the
+     * primary).
      */
     @Transactional(readOnly = true)
     public Optional<List<String>> getVehicles(UUID requestId, String championshipId, String eventId) {
-        return findClub(requestId).map(club -> {
+        return findClubs(requestId).map(clubs -> {
+            Club club = clubs.stream()
+                    .map(TrackedClub::club)
+                    .filter(candidate -> candidate.getChampionships().stream().anyMatch(championship ->
+                            Objects.equals(championship.getId(), championshipId)
+                                    || championship.getEvents().stream().anyMatch(event -> Objects.equals(event.getId(), eventId))))
+                    .findFirst()
+                    .orElse(clubs.get(0).club());
+
             List<Event> allEvents = club.getChampionships().stream()
                     .flatMap(championship -> championship.getEvents().stream())
                     .toList();
@@ -305,10 +326,20 @@ public class ChannelConfigurationRequestService {
         });
     }
 
-    private Optional<Club> findClub(UUID requestId) {
+    private record TrackedClub(Club club, String label) {
+    }
+
+    /**
+     * The channel's clubs in channel order, primary first; never empty when present. A just-added club that
+     * hasn't been imported yet is skipped — it has nothing to target until its first sync.
+     */
+    private Optional<List<TrackedClub>> findClubs(UUID requestId) {
         return requestRepository.findById(requestId)
                 .flatMap(request -> clubConfigurationService.findByChannelId(request.getChannelId()))
-                .map(DiscordClubConfiguration::getPrimaryClubId)
-                .map(clubService::findById);
+                .map(configuration -> configuration.getClubs().stream()
+                        .filter(club -> clubService.exists(club.getClubId()))
+                        .map(club -> new TrackedClub(clubService.findById(club.getClubId()), club.getLabel()))
+                        .toList())
+                .filter(clubs -> !clubs.isEmpty());
     }
 }

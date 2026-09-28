@@ -1,5 +1,6 @@
 package io.busata.fourleft.backendeasportswrc.application.discord.messages;
 
+import io.busata.fourleft.backendeasportswrc.application.discord.results.ChannelClass;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.ClubResults;
 import io.busata.fourleft.backendeasportswrc.application.discord.results.MergedRanking;
 import io.busata.fourleft.backendeasportswrc.application.fieldmapping.EAWRCFieldMapper;
@@ -23,6 +24,7 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,17 +47,39 @@ public class ClubResultsMessageFactory {
     private static final int FOOTER_RESERVED_FIELDS = 3;
 
     public MessageEmbed createResultPost(ClubResults results, DiscordClubConfiguration configuration) {
-        Optional<EventRestriction> restriction = restrictionService.resolveRestriction(configuration, results.championshipId(), results.eventId());
+        Map<String, EventRestriction> restrictions = resolveRestrictions(results, configuration);
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        buildHeader(embedBuilder, results, restriction);
-        buildEntries(embedBuilder, results, configuration.getResultsEntryTemplate(), configuration.isRequiresTracking(), restriction);
+        buildHeader(embedBuilder, results, restrictions);
+        buildEntries(embedBuilder, results, configuration.getResultsEntryTemplate(), configuration.isRequiresTracking(), restrictions);
         buildFooter(embedBuilder, results);
         return embedBuilder.build();
     }
 
+    /**
+     * The rule for each club on the board, keyed by club id; clubs without one are absent. Rules target a
+     * club's own championship/event ids, so in a MIXED channel every class is resolved against its own
+     * matched event.
+     */
+    private Map<String, EventRestriction> resolveRestrictions(ClubResults results, DiscordClubConfiguration configuration) {
+        Map<String, EventRestriction> restrictions = new LinkedHashMap<>();
+        if (!results.isMixed()) {
+            restrictionService.resolveRestriction(configuration, results.championshipId(), results.eventId())
+                    .ifPresent(rule -> restrictions.put(results.clubId(), rule));
+            return restrictions;
+        }
+        for (ChannelClass channelClass : results.classes()) {
+            boolean primary = channelClass.clubId().equals(results.clubId());
+            String championshipId = channelClass.championshipId() != null || !primary ? channelClass.championshipId() : results.championshipId();
+            String eventId = channelClass.eventId() != null || !primary ? channelClass.eventId() : results.eventId();
+            restrictionService.resolveRestriction(configuration, championshipId, eventId)
+                    .ifPresent(rule -> restrictions.put(channelClass.clubId(), rule));
+        }
+        return restrictions;
+    }
 
-    private void buildHeader(EmbedBuilder embedBuilder, ClubResults results, Optional<EventRestriction> restriction) {
+
+    private void buildHeader(EmbedBuilder embedBuilder, ClubResults results, Map<String, EventRestriction> restrictions) {
         embedBuilder.setTitle("**Results**")
                 .addField(new MessageEmbed.Field(
                         "**Country**",
@@ -73,14 +97,20 @@ public class ClubResultsMessageFactory {
                         true
                 ));
 
-        restriction.ifPresent(rule -> {
-            String suffix = rule.displayMode() == RestrictionDisplayMode.EXCLUDE ? " *(violators hidden)*" : "";
+        if (!restrictions.isEmpty()) {
+            // A MIXED channel lists each restricted class on its own line.
+            String permitted = results.isMixed()
+                    ? results.classes().stream()
+                            .filter(c -> restrictions.containsKey(c.clubId()))
+                            .map(c -> "*%s*: %s".formatted(c.tag(), permittedCars(restrictions.get(c.clubId()))))
+                            .collect(Collectors.joining("\n"))
+                    : permittedCars(restrictions.get(results.clubId()));
             embedBuilder.addField(new MessageEmbed.Field(
                     "**Permitted cars**",
-                    String.join(", ", rule.allowedVehicles()) + suffix,
+                    EmbedBudget.truncate(permitted, MessageEmbed.VALUE_MAX_LENGTH),
                     false
             ));
-        });
+        }
 
         boolean singleStageEvent = results.stages().size() == 1;
 
@@ -110,6 +140,11 @@ public class ClubResultsMessageFactory {
         }
     }
 
+    private static String permittedCars(EventRestriction rule) {
+        String suffix = rule.displayMode() == RestrictionDisplayMode.EXCLUDE ? " *(violators hidden)*" : "";
+        return String.join(", ", Optional.ofNullable(rule.allowedVehicles()).orElse(List.of())) + suffix;
+    }
+
     private String buildRacenetLink(String clubId) {
         return "https://racenet.com/ea_sports_wrc/clubs/%s".formatted(clubId);
     }
@@ -133,15 +168,15 @@ public class ClubResultsMessageFactory {
 
     private static final int DESIRED_GROUP_SIZE = 10;
 
-    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking, Optional<EventRestriction> restriction) {
+    private void buildEntries(EmbedBuilder embedBuilder, ClubResults results, String entryTemplate, boolean requiresTracking, Map<String, EventRestriction> restrictions) {
         // Footer/badge totals stay at the racenet board size, also under display-EXCLUDE.
         int totalEntries = results.entries().size();
 
-        boolean excludeViolators = restriction.map(rule -> rule.displayMode() == RestrictionDisplayMode.EXCLUDE).orElse(false);
-        boolean warnViolators = restriction.map(rule -> rule.displayMode() == RestrictionDisplayMode.WARN).orElse(false);
+        // Display modes are per rule, so in a MIXED channel one class can hide violators while another warns.
+        boolean excludeViolators = restrictions.values().stream().anyMatch(rule -> rule.displayMode() == RestrictionDisplayMode.EXCLUDE);
 
         List<ClubLeaderboardEntry> visibleEntries = results.entries().stream()
-                .filter(entry -> !excludeViolators || !violates(results, restriction, entry))
+                .filter(entry -> !violates(results, restrictions, entry, RestrictionDisplayMode.EXCLUDE))
                 .toList();
 
         // A single club's board keeps racenet's rank and gap; merged boards are re-ranked overall. Under
@@ -176,7 +211,7 @@ public class ClubResultsMessageFactory {
                     values.put("classRank", String.valueOf(entry.getRankAccumulated()));
                     String rendered = StringSubstitutor.replace(template, values);
                     // Appended after template substitution so custom entry templates keep working.
-                    if (warnViolators && violates(results, restriction, entry)) {
+                    if (violates(results, restrictions, entry, RestrictionDisplayMode.WARN)) {
                         rendered += " ⚠️";
                     }
                     return rendered;
@@ -186,8 +221,10 @@ public class ClubResultsMessageFactory {
         EmbedBudget.addEntryFields(embedBuilder, renderedEntries, DESIRED_GROUP_SIZE, null, FOOTER_RESERVED_LENGTH, FOOTER_RESERVED_FIELDS);
     }
 
-    private boolean violates(ClubResults results, Optional<EventRestriction> restriction, ClubLeaderboardEntry entry) {
-        return restriction.isPresent() && results.isPrimaryEntry(entry) && restrictionService.violates(restriction.get(), entry);
+    /** Whether the entry breaks its own club's rule, and that rule uses the given display mode. */
+    private boolean violates(ClubResults results, Map<String, EventRestriction> restrictions, ClubLeaderboardEntry entry, RestrictionDisplayMode displayMode) {
+        EventRestriction rule = restrictions.get(results.clubOf(entry));
+        return rule != null && rule.displayMode() == displayMode && restrictionService.violates(rule, entry);
     }
 
     private Map<String, String> buildTemplateMap(ClubLeaderboardEntry entry, Long displayRank, Duration delta, int totalEntries) {

@@ -55,8 +55,8 @@ public record ClubResults(
         return classes.stream().filter(c -> c.clubId().equals(entryClub)).map(ChannelClass::tag).findFirst().orElse(null);
     }
 
-    /** Event restrictions target the primary club's championship, so only its entries can violate one. */
-    public boolean isPrimaryEntry(ClubLeaderboardEntry entry) {
-        return !isMixed() || clubId.equals(entryClubs.get(entry));
+    /** The club the entry came from: the primary for single-club results. */
+    public String clubOf(ClubLeaderboardEntry entry) {
+        return isMixed() ? entryClubs.get(entry) : clubId;
     }
 }

@@ -14,9 +14,9 @@ clubs, one per car class) and multi-tier ones ("JRC 1", "JRC 2", ...).
 - Club-driven fan-out (`findByClubId`: autoposting, event ended, championship started, leaderboard
   relay, custom overview restrictions) matches **any** of a channel's clubs, and uses the club from the
   triggering event (event-ended standings included).
-- Channel-driven views (`/api_v2/results/{channelId}/*`, `/api_v2/events/{channelId}/summary`,
-  restriction targets/vehicles in the config UI) read the **primary** club — identical to before.
-- Settings (scoring, restrictions, templates, tracking, TT top) stay channel-wide.
+- Channel-driven views (`/api_v2/results/{channelId}/*`, `/api_v2/events/{channelId}/summary`) read the
+  **primary** club — identical to before.
+- Settings (scoring, templates, tracking, TT top) stay channel-wide. Restrictions are per club (see below).
 
 Managing clubs (request-link scoped, like the rest of the config UI):
 
@@ -53,7 +53,7 @@ instead of failing on the unique `channel_id` constraint.
   checked against 300 real boards: rank never disagrees with time, DNFs included), gaps to the overall
   leader. Each entry gets `${class}` (club label, else its car class, max 20 chars); templates without it
   get ` • *${class}*` appended. `${classRank}` = the club's own rank. Header: "WRC2 / Rally4", one board
-  link per class, no TT link. Event restrictions only apply to the primary club's entries.
+  link per class, no TT link. Event restrictions are per club (below).
 - Standings: one post, a titled section per class (racenet keeps one points table per club); the 50-entry
   cap is shared.
 - Stats: all clubs' entries together; top 10 is the overall one.
@@ -71,6 +71,19 @@ instead of failing on the unique `channel_id` constraint.
 - Limits: entry lists go through `EmbedBudget` (1024/field, 6000/embed, 25 fields, "…and N more");
   car statistics are capped to one field; autoposts drop their lowest ranks until under 2000 chars (the
   dropped ones post on the next sync).
+
+**Per-club restrictions: done (no migration).** A rule targets a championship/event id, and those ids
+belong to one club — so a rule on the WRC2 club's championship only ever applies to WRC2 entries.
+
+- Config UI: `/restriction-targets` lists every tracked club's open championships in channel order, tagged
+  with `clubId` + `clubTag` (label, else car class); the picker shows "WRC2 · Championship" when there is
+  more than one club. `/vehicles` resolves the target in whichever club owns it. Clubs not imported yet are
+  skipped. Targets reload when the channel's clubs change.
+- Results post: each class resolves its own rule against its matched event (`ChannelClass` carries the
+  club's championship/event ids) and every entry is checked against its own club's rule; display mode is
+  per rule (one class can WARN, another EXCLUDE). "Permitted cars" lists one line per restricted class.
+- Custom-scoring standings and the web overview already scored per club by event id — unchanged.
+- A driver in several classes: `FirstRuns` picks the run first, then that run's class rule applies.
 
 **Next (not built):** rendering for `TIERED`.
 

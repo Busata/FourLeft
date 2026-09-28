@@ -88,8 +88,8 @@ export class ChannelConfig implements OnInit {
   readonly vehiclesByTarget = signal<Record<string, string[]>>({});
   // Mirrors the mode control so the club list shows as soon as mixed is picked, before saving.
   readonly modeSig = signal<ChannelClubMode>('SINGLE');
-  // The targets are static per club; fetch them once, not on every save round-trip.
-  private pickersLoaded = false;
+  // The targets are static per club; fetch them when the channel's clubs change, not on every save round-trip.
+  private pickersClubs: string | null = null;
 
   readonly form = new FormGroup({
     clubId: new FormControl<string>('', { nonNullable: true }),
@@ -258,6 +258,12 @@ export class ChannelConfig implements OnInit {
     row.controls.allowedVehicles.setValue(
       current.includes(vehicle) ? current.filter((v) => v !== vehicle) : [...current, vehicle],
     );
+  }
+
+  // Multi-club channels name the club in front of each championship; ids are per club.
+  championshipLabel(championship: RestrictionTargetChampionship): string {
+    const multiClub = new Set(this.restrictionTargets().map((ch) => ch.clubId)).size > 1;
+    return multiClub ? `${championship.clubTag} · ${championship.name}` : championship.name;
   }
 
   eventsFor(row: RestrictionRow): RestrictionTargetEvent[] {
@@ -556,8 +562,9 @@ export class ChannelConfig implements OnInit {
     for (const rule of config.eventRestrictions ?? []) {
       this.addRestriction(rule);
     }
-    if (config.configured && !this.pickersLoaded) {
-      this.pickersLoaded = true;
+    const clubKey = (config.clubs ?? []).map((club) => club.clubId).join(',');
+    if (config.configured && this.pickersClubs !== clubKey) {
+      this.pickersClubs = clubKey;
       this.http.get<RestrictionTargets>(`${this.base}/restriction-targets`).subscribe({
         next: (targets) => this.restrictionTargets.set(targets?.championships ?? []),
         error: () => this.restrictionTargets.set([]),
