@@ -1,0 +1,91 @@
+.pd-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.pd-dispute {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.pd-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+}
+
+.pd-faint {
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.pd-users {
+  display: grid;
+  gap: 10px;
+
+  @media (min-width: 720px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pd-role {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.pd-person {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pd-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.pd-avatar-empty {
+  background: var(--surface-alt);
+}
+
+.pd-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pd-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.pd-link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}

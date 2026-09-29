@@ -1,5 +1,7 @@
 package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models;
 
-public record DiscordUserTo(String id) {
-    
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record DiscordUserTo(String id, String username, @JsonProperty("global_name") String globalName, String avatar) {
+
 }

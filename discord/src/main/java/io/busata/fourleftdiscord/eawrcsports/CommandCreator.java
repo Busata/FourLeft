@@ -42,8 +42,11 @@ public class CommandCreator {
                                 )
                 )
                 .addSubcommands(
-                        new SubcommandData("track", "Track your name.")
-                                .addOption(OptionType.STRING, "racenet", "EA Racenet account name, case sensitive", true),
+                        new SubcommandData("profile", "Link your Racenet account and edit your profile.")
+                                .addOption(OptionType.STRING, "racenet", "EA Racenet account name, case sensitive (leave empty to open your own profile)", false),
+                        // Old name of /wrc profile, kept so people who know it don't find it gone.
+                        new SubcommandData("track", "Link your Racenet account and edit your profile (same as /wrc profile).")
+                                .addOption(OptionType.STRING, "racenet", "EA Racenet account name, case sensitive (leave empty to open your own profile)", false),
                         new SubcommandData("setup", "Find the perfect tune in the EA SPORTS WRC setup channel")
                                 .addOption(OptionType.STRING, "country", "Country", true)
                 );

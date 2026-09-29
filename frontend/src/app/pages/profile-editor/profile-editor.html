@@ -1,9 +1,70 @@
 <div class="g-card">
+  @if (loaded() && disputing(); as d) {
+    <div class="pe-disputing">
+      <p>
+        You're disputing <strong>{{ d.racenet }}</strong> (since {{ d.disputedAt | date: 'mediumDate' }}). The current
+        holder keeps it until the dispute is resolved. While it's open you can't dispute another account.
+      </p>
+      <button class="g-button g-button-tertiary" type="button" (click)="withdrawDispute()">Withdraw dispute</button>
+    </div>
+  }
+
   @if (error()) {
     <p>{{ error() }}</p>
   } @else if (!loaded()) {
     <p>Loading profile&hellip;</p>
+  } @else if (picking()) {
+    <h2>Link your Racenet account</h2>
+    <p>Search for the name you race under. It shows up once you've driven an event in a club we track.</p>
+
+    <div class="pe-suggest-wrap">
+      <input
+        type="search"
+        autocomplete="off"
+        placeholder="Type your racenet name"
+        [value]="query()"
+        (input)="onQuery($any($event.target).value)"
+        (focus)="onQuery($any($event.target).value)"
+        (blur)="showSuggestions.set(false)" />
+      @if (showSuggestions() && suggestions().length) {
+        <ul class="pe-suggest">
+          @for (s of suggestions(); track s.playerId + s.displayName) {
+            <li>
+              <button type="button" (mousedown)="$event.preventDefault(); claim(s)">{{ s.displayName }}</button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (disputeCandidate(); as candidate) {
+      <div class="pe-dispute">
+        <p>
+          <strong>{{ candidate.racenet }}</strong> is already claimed by someone else. If it's your account, you can
+          dispute the claim. They keep it until the dispute is resolved, and you can only have one open dispute at a
+          time.
+        </p>
+        <button class="g-button g-button-primary" type="button" (click)="confirmDispute()">Dispute claim</button>
+        <button class="g-button g-button-tertiary" type="button" (click)="cancelDispute()">Cancel</button>
+      </div>
+    }
+
+    @if (claimMessage()) {
+      <p class="pe-claim-message">{{ claimMessage() }}</p>
+    }
   } @else {
+    @switch (claimState()) {
+      @case ('VERIFIED') {
+        <p class="pe-state pe-state-verified">Verified</p>
+      }
+      @case ('DISPUTED') {
+        <p class="pe-state pe-state-disputed">Disputed &mdash; someone else has claimed this Racenet account too.</p>
+      }
+      @default {
+        <p class="pe-state">Claimed</p>
+      }
+    }
+
     <form [formGroup]="form">
       <div class="form-group">
         <label>Display name</label>

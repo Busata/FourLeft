@@ -20,6 +20,7 @@ public class ProfileUpdateRequest {
 
     private String discordId;
 
+    /** The profile this link edits; null until the user picks their racenet name on the page. */
     private String requestedSSID;
 
     private LocalDateTime requestedUpdateTime;
@@ -29,5 +30,9 @@ public class ProfileUpdateRequest {
         this.discordId = discordId;
         this.requestedSSID = requestedSSID;
         this.requestedUpdateTime = LocalDateTime.now();
+    }
+
+    public void bindTo(String ssid) {
+        this.requestedSSID = ssid;
     }
 }

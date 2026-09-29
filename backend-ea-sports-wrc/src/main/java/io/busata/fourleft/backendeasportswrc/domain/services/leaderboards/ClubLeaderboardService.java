@@ -45,6 +45,13 @@ public class ClubLeaderboardService {
         });
     }
 
+    @Transactional(readOnly = true)
+    public Optional<RacenetInfo> findRacenetBySsid(String ssid) {
+        return this.clubLeaderboardEntryRepository.findFirstBySsid(ssid).map(clubLeaderboardEntry -> {
+            return new RacenetInfo(clubLeaderboardEntry.getSsid(), clubLeaderboardEntry.getDisplayName(), clubLeaderboardEntry.getPlatform());
+        });
+    }
+
     @Transactional
     public void updateLeaderboards(LeaderboardUpdatedResult list) {
         ClubLeaderboard clubLeaderboard = clubLeaderboardRepository.findById(list.getLeaderboardId()).orElse(new ClubLeaderboard(list.getLeaderboardId(), list.getEntries().size()));

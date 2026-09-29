@@ -1,0 +1,94 @@
+.pe-suggest-wrap {
+  position: relative;
+  max-width: 420px;
+
+  input {
+    width: 100%;
+  }
+}
+
+.pe-suggest {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+
+  button {
+    width: 100%;
+    text-align: left;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+  }
+}
+
+.pe-disputing {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--warn-soft);
+  color: var(--warn);
+
+  p {
+    margin: 0 0 10px;
+  }
+}
+
+.pe-dispute {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+
+  p {
+    margin: 0 0 10px;
+  }
+}
+
+.pe-claim-message {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.pe-state {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: var(--surface-alt);
+  color: var(--muted);
+}
+
+.pe-state-verified {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.pe-state-disputed {
+  background: var(--warn-soft);
+  color: var(--warn);
+}

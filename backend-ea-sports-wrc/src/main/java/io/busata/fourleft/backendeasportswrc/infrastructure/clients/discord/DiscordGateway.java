@@ -3,6 +3,7 @@ package io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordActiveThreadsTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordArchivedThreadsTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordMessageTo;
+import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.DiscordUserTo;
 import io.busata.fourleft.backendeasportswrc.infrastructure.clients.discord.models.SimpleDiscordMessageTo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,10 @@ public interface DiscordGateway {
 
     @DeleteMapping("/channels/{channelId}/messages/{messageId}")
     void deleteMessage(@PathVariable Long channelId, @PathVariable Long messageId);
+
+    /** Any user by id; works for users the bot shares no server with too. */
+    @GetMapping("/users/{userId}")
+    DiscordUserTo getUser(@PathVariable String userId);
 
     @GetMapping("/guilds/{guildId}/threads/active")
     DiscordActiveThreadsTo getThreads(@PathVariable Long guildId);

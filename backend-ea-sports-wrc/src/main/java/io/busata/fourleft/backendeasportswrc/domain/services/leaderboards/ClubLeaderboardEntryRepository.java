@@ -15,4 +15,6 @@ interface ClubLeaderboardEntryRepository extends JpaRepository<ClubLeaderboardEn
     @Query("select cle from ClubLeaderboardEntry cle where cle.displayName=:racenet")
     Stream<ClubLeaderboardEntry> findRacenet(@Param("racenet") String racenet);
 
+    Optional<ClubLeaderboardEntry> findFirstBySsid(String ssid);
+
 }

@@ -1,0 +1,72 @@
+<div class="g-card">
+  <h2>Profile disputes</h2>
+
+  @if (error()) {
+    <p>{{ error() }}</p>
+  } @else if (!loaded()) {
+    <p>Loading disputes&hellip;</p>
+  } @else if (!disputes().length) {
+    <p>No open disputes.</p>
+  } @else {
+    <ul class="pd-list">
+      @for (d of disputes(); track d.playerId) {
+        <li class="pd-dispute">
+          <div class="pd-head">
+            <strong>{{ d.racenet }}</strong>
+            @if (d.displayName !== d.racenet) {
+              <span class="pd-faint">shown as {{ d.displayName }}</span>
+            }
+            <span class="pd-faint">disputed {{ d.disputedAt | date: 'medium' }}</span>
+          </div>
+
+          <div class="pd-users">
+            <div class="pd-user">
+              <span class="pd-role">Holder</span>
+              <ng-container *ngTemplateOutlet="user; context: { $implicit: d.holder }" />
+            </div>
+            <div class="pd-user">
+              <span class="pd-role">Disputer</span>
+              <ng-container *ngTemplateOutlet="user; context: { $implicit: d.disputer }" />
+            </div>
+          </div>
+
+          <div class="pd-actions">
+            <button class="g-button g-button-tertiary" type="button" (click)="dismiss(d)">Dismiss (holder keeps it)</button>
+            <button class="g-button g-button-primary" type="button" (click)="transfer(d)">Give to disputer</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<ng-template #user let-u>
+  @if (u) {
+    <div class="pd-person">
+      @if (u.avatarUrl) {
+        <img class="pd-avatar" [src]="u.avatarUrl" alt="" />
+      } @else {
+        <span class="pd-avatar pd-avatar-empty"></span>
+      }
+      <div class="pd-names">
+        <span>{{ u.globalName ?? u.username ?? 'Unknown user' }}</span>
+        <span class="pd-faint">
+          @if (u.username) {
+            &#64;{{ u.username }} &middot;
+          }
+          {{ u.id }}
+        </span>
+        <span class="pd-links">
+          <a [href]="'https://discord.com/users/' + u.id" target="_blank" rel="noopener">Open in Discord</a>
+          <button type="button" class="pd-link-button" (click)="copyMention(u)">Copy mention</button>
+        </span>
+      </div>
+    </div>
+  } @else {
+    <span class="pd-faint">nobody</span>
+  }
+</ng-template>
+
+@if (notice()) {
+  <div class="snackbar">{{ notice() }}</div>
+}

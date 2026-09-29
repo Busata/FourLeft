@@ -11,5 +11,6 @@ public record ProfileTo(
         Platform platform,
         PeripheralType peripheral,
         String racenet,
-        boolean trackDiscord) {
+        boolean trackDiscord,
+        ProfileClaimState claimState) {
 }

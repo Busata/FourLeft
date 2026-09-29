@@ -4,6 +4,7 @@ import io.busata.fourleft.api.easportswrc.models.TierPlayerTo;
 import io.busata.fourleft.api.easportswrc.models.TierSetLinkTo;
 import io.busata.fourleft.api.easportswrc.models.TierSetTo;
 import io.busata.fourleft.api.easportswrc.models.TierTo;
+import io.busata.fourleft.backendeasportswrc.application.players.PlayerSuggestions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
